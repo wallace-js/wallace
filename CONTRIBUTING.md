@@ -83,13 +83,13 @@ npm install tap --workspace package-b --save-dev
 npm run test --workspace=a
 ```
 
-Alternatively just `cd` to that directory.
+Alternatively just `cd` to that directory. Having said that, most scripts live in the top level directory.
 
-### Branches
+### Branching
 
-* The main branch is **develop**, and that's where we prepare the next release. 
-* Test must always pass in **develop**.
-* Branch off develop for features.
+1. Branch off `master`  (there is no `develop` branch)
+2. If there are no functionality changes, just raise a PR to get it merged back into master.
+3. If there are functionality changes then we create a release. See [publishing](#Publishing)
 
 ### Dependencies
 
@@ -797,14 +797,18 @@ A stub is just a component definition assigned to a prototype field.
 
 ## Publishing
 
-We use [lerna](https://lerna.js.org/) to version and publish with the following command:
+We use [lerna](https://lerna.js.org/docs/features/version-and-publish) to publish, which involves the following workflow:
 
-```
-lerna publish --no-private --force-publish
-```
+1. Create a release candidate branch (e.g `rc-0.0.2`) off master.
+2. Add the changes in as few commits as possible (`merge --squash feature/branch`).
+3. Run `npm run publish` which:
+   1. creates a new commit
+   2. creates a tag for it
+   3. pushes the tag to github
+   4. publishes it to npm
 
-From the docs:
+Our script also runs `npm whoami` first to ensure we are logged into npm, otherwise publishing fails and the project is left in a messy state. This is why we don't publish from master branch.
 
-> Lerna detects the current packages, identifies the current version and proposes the next one to choose. Once a given version is chosen, Lerna updates the `package.json` with the version number, commits the change, adds a corresponding version tag (e.g. `v1.0.0`) and pushes the commit and the tag to the remote repository.
+The tag keeps that commit and all previous commits from being garbage collected, which is why we ideally put all the changes in one commit.
 
 The  `--force-publish` flag will force Lerna to always version all packages, regardless of if they have changed since the previous release.
