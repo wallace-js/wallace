@@ -1,10 +1,66 @@
 # Wallace
 
-*The framework that brings you freedom.*
+*The tiny framework that brings you FREEDOM!*
 
 ## Overview
 
-Wallace is a JavaScript framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Elm](https://elm-lang.org/), [Svelte](https://svelte.dev/), [SolidJS](https://www.solidjs.com/), [Lit](https://lit.dev/), etc... 
+Wallace is a JavaScript framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Elm](https://elm-lang.org/), [Svelte](https://svelte.dev/), [SolidJS](https://www.solidjs.com/), [Lit](https://lit.dev/), etc...
+
+It's so tiny that:
+
+1. You can learn everything in under 10 minutes.
+2. It loads faster than any other usable framework.
+3. You have the freedom in how you structure your app.
+4. You have the freedom to manipulate the DOM alongside the framework.
+
+These last two points are crucial. They guarantee that you will be able to maintain team velocity and application performance as your project grows. This is a nuanced subject that we'll explore in the tutorial (which takes more than 10 minutes).
+
+It is also where Wallace gets its name.
+
+-------------
+
+
+
+
+
+always be able to structure your code in the way which works best for your team and project, and maintain velocity 
+
+ 
+
+Having said that, Wallace has very little framework, which means:
+
+1. There's not much to learn, so you can hit the ground running.
+2. It is incredibly fast (perhaps *the* fastest in terms of page loading).
+3. Code flexibility
+4. Freedom
+
+Essentially Wallace lets you develop better performing apps in less time with less risk than other frameworks.
+
+
+
+It has two main advantages:
+
+##### Productivity
+
+Wallace is so simple you can learn everything in 20 minutes, yet extremely powerful - which lets you develop faster. It also results in far more readable and reusable code, so you maintain that velocity as your project grows.
+
+##### Performance
+
+Wallace is one of the smallest and fastest loading frameworks around.
+
+##### Freedom
+
+Wallace is unique
+
+
+
+
+
+ in that it doesn't use a closed engine to update the DOM.
+
+
+
+
 
 Here are three reasons to try it:
 
