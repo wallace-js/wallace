@@ -1,82 +1,23 @@
 # Wallace
 
-*The tiny framework that brings you FREEDOM!*
+*The tiny framework that brings you freedom.*
 
 ## Overview
 
-Wallace is a JavaScript framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Elm](https://elm-lang.org/), [Svelte](https://svelte.dev/), [SolidJS](https://www.solidjs.com/), [Lit](https://lit.dev/), etc...
+Wallace is a front-end web framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Elm](https://elm-lang.org/), [Svelte](https://svelte.dev/), [SolidJS](https://www.solidjs.com/), [Lit](https://lit.dev/) etc. Compared to those, Wallace:
 
-It's so tiny that:
+* Is **easier** to use, and can be taught in around ten minutes.
+* Produces **smaller** bundles, resulting in faster page loading.
+* Makes you more **productive**, thanks to cleaner code and more powerful reuse and abstraction capabilities.
+* Guarantees **performance** as it gives you all the freedom of native JavaScript.
 
-1. You can learn everything in under 10 minutes.
-2. It loads faster than any other usable framework.
-3. You have the freedom in how you structure your app.
-4. You have the freedom to manipulate the DOM alongside the framework.
+Understanding how Wallace beats other frameworks on performance and productivity takes some explaining as there is some nuance to this. This is covered in the tutorial, which walks you through creating a TODO list app, and should take around 30 minutes (or 10 if skimming).
 
-These last two points are crucial. They guarantee that you will be able to maintain team velocity and application performance as your project grows. This is a nuanced subject that we'll explore in the tutorial (which takes more than 10 minutes).
+## Tutorial
 
-It is also where Wallace gets its name.
+We will build a TODO list, adding features and covering topics as we go. You will need a degree of familiarity with modern JavaScript practices (npm & webpack).
 
--------------
-
-
-
-
-
-always be able to structure your code in the way which works best for your team and project, and maintain velocity 
-
- 
-
-Having said that, Wallace has very little framework, which means:
-
-1. There's not much to learn, so you can hit the ground running.
-2. It is incredibly fast (perhaps *the* fastest in terms of page loading).
-3. Code flexibility
-4. Freedom
-
-Essentially Wallace lets you develop better performing apps in less time with less risk than other frameworks.
-
-
-
-It has two main advantages:
-
-##### Productivity
-
-Wallace is so simple you can learn everything in 20 minutes, yet extremely powerful - which lets you develop faster. It also results in far more readable and reusable code, so you maintain that velocity as your project grows.
-
-##### Performance
-
-Wallace is one of the smallest and fastest loading frameworks around.
-
-##### Freedom
-
-Wallace is unique
-
-
-
-
-
- in that it doesn't use a closed engine to update the DOM.
-
-
-
-
-
-Here are three reasons to try it:
-
-1. **Easy**: learn everything in about 25 minutes.
-2. **Productive**: work faster with more readable and reusable code than other frameworks.
-3. **Performant**: never get caught short on performance, thanks to full run-time freedom.
-
-##### Run time freedom
-
-Virtually every framework uses a closed engine to update the DOM, which you have no control over, and typically cannot bypass either. If your project hits a performance issue (which can happen with any framework) there is often very little you can do about it.
-
-Wallace gives you granular control over its operations. If you can do something in vanilla, you can do it in Wallace, often more easily. You will always be able to reach vanilla-like performance where needed, without leaving the clean structure of a framework.
-
-## Tour
-
-This is a tour more than a tutorial, but should leave you able to fully use Wallace. Do can code along if you can:
+### Code along
 
 ##### In the browser:
 
@@ -90,9 +31,44 @@ The following command will prompt for options and set up a project:
 npx create-wallace-app
 ```
 
-### Compiled JSX components
+### Refresher
 
-Wallace controls the DOM with components which you define as functions that return JSX:
+Browsers read HTML and build a Document Object Model (DOM) which is a tree of nodes which initially corresponds to the tags in HTML. The DOM, along with style sheets, tells the browser what to draw on screen. JavaScript can interact with the DOM by adding, deleting, editing or removing nodes, resulting in dynamic behaviour.
+
+A framework typically offer a way to declare *what* the DOM should look like using an HTML-like format, while hiding *how* it makes that happen. Though well meaning, this creates an array of new problems, from unexpected behaviour to performance issues.
+
+That's where Wallace comes in.
+
+### Components
+
+Wallace works by creating a tree of components which mirrors the tree of nodes in the DOM - except that one component may include multiple DOM nodes.
+
+For example we may have a component definition for the `<ul>` element, and another definition for the `<li>` element plus its nested `<input>` and `<span>`:
+
+```html
+<ul>
+  <li>
+    <input type="checkbox" />
+    <span>Learn Wallace</span>
+  </li>
+  <li>
+    <input type="checkbox" />
+    <span>Build an amazing app</span>
+  </li>
+</ul>
+```
+
+There is one *instance* of the  `<ul>` definition, and two instances of the `<li>` definition.
+
+ 
+
+Compiled JSX c
+
+controls the DOM (a tree of nodes) using a tree of components.
+
+
+
+which you define as functions that return JSX:
 
 ```jsx
 import { mount } from "wallace";
@@ -398,3 +374,8 @@ const Greeting = ({ message, color }) => (
 mount("main", Greeting, { message: "Hello", color: "red" });
 ```
 
+##### Run time freedom
+
+Virtually every framework uses a closed engine to update the DOM, which you have no control over, and typically cannot bypass either. If your project hits a performance issue (which can happen with any framework) there is often very little you can do about it.
+
+Wallace gives you granular control over its operations. If you can do something in vanilla, you can do it in Wallace, often more easily. You will always be able to reach vanilla-like performance where needed, without leaving the clean structure of a framework.
