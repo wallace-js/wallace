@@ -1,68 +1,660 @@
 # Wallace
 
-*The tiny framework that brings you freedom.*
+*The tiny framework that brings you...*
 
-## Overview
+![](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
-Wallace is a front-end web framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Elm](https://elm-lang.org/), [Svelte](https://svelte.dev/), [SolidJS](https://www.solidjs.com/), [Lit](https://lit.dev/) etc. Compared to those, Wallace:
+## About
 
-* Is **easier** to use, and can be taught in around ten minutes.
-* Produces **smaller** bundles, resulting in faster page loading.
-* Makes you more **productive**, thanks to cleaner code and more powerful reuse and abstraction capabilities.
-* Guarantees **performance** as it gives you all the freedom of native JavaScript.
+Wallace is a front-end framework you can use to build dynamic web pages and mobile apps, much like [React](https://react.dev/), [Angular](https://angular.dev/), [Svelte](https://svelte.dev/) and co.
 
-Understanding how Wallace beats other frameworks on performance and productivity takes some explaining as there is some nuance to this. This is covered in the tutorial, which walks you through creating a TODO list app, and should take around 30 minutes (or 10 if skimming).
+It offers better **performance** and **productivity**, in part because it gives you a lot more **freedom** than other frameworks. The tutorial explains this in more detail.
+
+It is named after William Wallace - or rather his fictional portrayal in the movie [Braveheart](https://www.imdb.com/title/tt0112573/) - who seems to enjoy shouting FREEDOM!! before a battle.
 
 ## Tutorial
 
-We will build a TODO list, adding features and covering topics as we go. You will need a degree of familiarity with modern JavaScript practices (npm & webpack).
-
-### Code along
-
-##### In the browser:
-
-Choose between [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
-
-##### On your machine:
-
-The following command will prompt for options and set up a project:
+Code along in the browser in [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or plain [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx), or create a project on your machine with:
 
 ```
 npx create-wallace-app
 ```
 
-### Refresher
+### First glance
 
-Browsers read HTML and build a Document Object Model (DOM) which is a tree of nodes which initially corresponds to the tags in HTML. The DOM, along with style sheets, tells the browser what to draw on screen. JavaScript can interact with the DOM by adding, deleting, editing or removing nodes, resulting in dynamic behaviour.
+Let's jump right in with a TODO list which greys out and counts completed tasks:
 
-A framework typically offer a way to declare *what* the DOM should look like using an HTML-like format, while hiding *how* it makes that happen. Though well meaning, this creates an array of new problems, from unexpected behaviour to performance issues.
+<div style="margin-left: 20px">
+  <span>Done: 1</span>
+  <div>
+    <input type="checkbox" checked="true"/>
+    <label style="color: grey">Learn Wallace</label>
+  </div>
+  <div>
+    <input type="checkbox"/>
+    <label>Star Wallace on github</label>
+  </div>
+</div>
 
-That's where Wallace comes in.
+Here's the source code:
 
-### Components
+```jsx
+import { mount } from "wallace";
 
-Wallace works by creating a tree of components which mirrors the tree of nodes in the DOM - except that one component may include multiple DOM nodes.
+const Todo = ({ text, done }) => (
+  <div>
+    <input type="checkbox" bind={done}/>
+    <label style:color={done ? "grey" : "black"}>{text}</label>
+  </div>
+);
 
-For example we may have a component definition for the `<ul>` element, and another definition for the `<li>` element plus its nested `<input>` and `<span>`:
+const TodoList = ( todos ) => (
+  <div reactive>
+    <span>Done: {todos.filter(t => t.done).length}</span>
+    <div>
+      <Todo.repeat props={todos} />
+    </div>
+  </div>
+);
 
-```html
-<ul>
-  <li>
-    <input type="checkbox" />
-    <span>Learn Wallace</span>
-  </li>
-  <li>
-    <input type="checkbox" />
-    <span>Build an amazing app</span>
-  </li>
-</ul>
+mount("main", TodoList, [
+  { text: "Learn Wallace", done: false },
+  { text: "Star Wallace on github", done: false },
+]);
 ```
 
-There is one *instance* of the  `<ul>` definition, and two instances of the `<li>` definition.
+Let's go through what we can see in there.
+
+#### Strange JSX
+
+The JSX has some unusual bits in it like `bind`, `style:color`, `reactive` and `<Todo.repeat ...>` and you might worry you need to learn this, but you don't.
+
+All you need to learn is the `help` attribute, which displays the helper widget in your browser with the syntax rules:
+
+```jsx
+<div help>
+   ...
+</div>
+```
+
+One thing worth pointing out is that you end up with far more compact and readable JSX than React, which is full of clutter like this:
+
+```jsx
+<div>
+  {todos.map({text, checked} => (
+    <Todo text={text} done={done} />
+  ))}
+</div>
+```
+
+That makes a big difference to productivity.
+
+#### Component definitions
+
+The two arrow functions which return JSX are component *definitions*. This looks a lot like React but how Wallace uses these functions, and what you can do inside them, is very different. We'll cover this very soon.
+
+#### Mounting
+
+The `mount` function creates a component *instance* and links it to an element on the page, so that it now controls the DOM underneath it. 
+
+You can:
+
+- mount multiple root components to the page so long as their trees don't overlap.
+- specify an element, or an element id.
+- pass props at the point of mounting, or later.
+
+To illustrate this, replace the call to `mount(...)` with the following code:
+
+```jsx
+const todos = [
+  { text: "Learn Wallace", done: false },
+  { text: "Star Wallace on github", done: false },
+];
+const todoList = mount(document.getElementById("main"), TodoList);
+todoList.render(todos);
+```
+
+#### Reactivity
+
+Notice the `reactive` attribute in the `TodoList` component definition. This tells us that components are not reactive by default (the UI does not automatically update in response to the data changing) but enabling this behaviour is easy.
+
+The reason for this is that 
+
+Reactivity (when the UI automatically updates every time the data changes) is very cool, but also causes a lot of bugs and performance issues. Most components don't need that
+
+Reactive frameworks (like Angular and Svelte) suffer two issues:
+
+- The DOM updates when you don't want it to.
+- You're open to circular update bugs.
+
+Both of these can sap a lot of dev time. Other frameworks like React are not reactive (go figure) which eliminates these problems, but makes things like forms a total pain.
+
+Wallace gives you the best of both: it is only reactive where you want it to be. 
+
+If you move the `reactive` attribute from **TodoList** to **Todo**.
+
+### How it works
+
+React and similar frameworks use an *engine* to call functions that return virtual DOM, compare that to a cached copy, and update the real DOM to match.
+
+While it is a good idea, it has downsides:
+
+- s extremely restrictive
+- , forces you to use ugly patterns like hooks.
+- reparenting
+
+Wallace works very differently. Components are ordinary objects.
+
+```jsx
+todoList.render(todos);
+```
+
+It is simply calling the `render` function on the prototype.
+
+
+
+### How it all works
+
+Wallace uses a Babel plugin to find arrow functions which return JSX and *replaces the whole function* with generated code. So the function never makes it into the bundle, and hence is never called. Its only purpose is to hold JSX with scoped variables.
+
+The generated code creates a prototype.
+
+```jsx
+//show override update with style.color
+```
+
+
+
+
+
+Simple objects.
+
+What this means.
+
+------------
+
+
+
+
+
+
+
+##### Structure
+
+Tree of objects. Each one has a prototype. There's no engine.
+
+
+
+- Wallace controls the DOM via trees of components.
+- It looks like React, but you're not allowed two things.
+- 
+
+
+
+
+Its a very normal object.
+
+Wallace looks like React in that you define components as functions which return JSX:
+
+```jsx
+const Todo = ({text, checked}) => (
+  <div>
+    <input type="checkbox" checked={checked}/>
+    <label>{text}</label>
+  </div>
+);
+```
+
+However, you do many things differently. This is how you nest repeated components for example:
+
+```jsx
+const TodoList = ( todos ) => (
+  <div>
+    <Todo.repeat props={todos} />
+  </div>
+);
+```
+
+Whereas in React it would look like this:
+
+```jsx
+const TodoList = ( todos ) => (
+  <div>
+    {todos.map({text, checked} => (
+      <Todo text={text} checked={checked} />
+    ))}
+  </div>
+);
+```
+
+That's not allowed in Wallace, and neither are some other 
+
+
+
+
+
+we'll go over why in the next section. For now lets add the bits to make our example work:
+
+```jsx
+import { mount } from "wallace";
+
+const Todo = ({text, checked}) => (
+  <div>
+    <input type="checkbox" checked={checked}/>
+    <label>{text}</label>
+  </div>
+);
+
+const TodoList = ( todos ) => (
+  <div>
+    <Todo.repeat props={todos} />
+  </div>
+);
+
+const todos = [{ text: "Learn Wallace" }];
+const root = mount("main", TodoList, todos);
+```
+
+This will attach a **TodoList** component to the element with id **main** (which must already exist on the page) and replace its DOM, resulting in this:
+
+<div>
+    <input type="checkbox"/>
+    <label>Learn Wallace</label>
+</div>
+
+
+By default Wallace is non-reactive like React (go figure) meaning components do not automatically render when data has changed.
+
+```jsx
+todos.push({ text: "Star Wallace on github" });
+setTimeout(() => root.update(), 2000);
+```
+
+<div>
+    <input type="checkbox"/>
+    <label>Learn Wallace</label>
+</div>
+<div>
+    <input type="checkbox"/>
+    <label>Star Wallace on github</label>
+</div>
+​	
+
+
+
+Learn
+
+
+In fact you can't put any code before or around JSX elements. This may feel extremely restrictive at first, but it will actually make you more productive in several ways. 
+
+We'll get to those soon, but first let's go over the rules so you don't shoot yourself in the foot.
+
+### Rules
+
+
+
+
+
+1. JSX is only allowed in component definitions.
+2. Component definitions must be arrow functions with a single JSX statement assigned to a variable.
+3. 
+
+You can't put any code before or around JSX elements.
+
+
+
+
+
+ it quickly pays off and you'll become more productive than you were with React.
+
+
+
+
+
+```jsx
+// NOT ALLOWED IN WALLACE
+const TodoList = ( todos ) => (
+  const sortedTodos = todos.sort( compareFn );
+  <div>
+    <Todo.repeat props={todos} />
+  </div>
+);
+```
+
+But you can do this:
+
+```jsx
+const TodoList = ( todos ) => (
+  <div>
+    <Todo.repeat props={todos.sort( compareFn )} />
+  </div>
+);
+```
+
+
+
+These differences will sometimes feel like an inconvenience, however there are advantages:
+
+##### Readability
+
+Wallace code 
+
+
+
+
+
+
+
+However it is not as it seems! Wallace uses a Babel plugin to find arrow functions which return JSX and replaces them with a generated component definition. The function never gets called. Its only purpose is to contain a single JSX statement.
+
+
+
+with the juicy bits disabled.
+
+### Basics
+
+Wallace initially looks like React, and you might assume it works the same way, but it really doesn't.
+
+
+
+ when you realise it doesn't, you might get very annoyed.
+
+
+
+and people assume you do things the same way, get an error telling them they can't, and wonder what you're supposed to do instead.
+
+If you run into trouble.
+
+```jsx
+import { HELP } from "wallace";
+```
+
+
+
+
+
+## Try it out
+
+#### On your machine
+
+Run this to create a minimal project:
+
+```
+npx create-wallace-app
+```
+
+#### In the browser
+
+There is a stackblitz for [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) and [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
+
+
+
+
+
+### Walk through
+
+Wallace initially looks so similar to React (they got some things right) that people assume it can be used the same way, and get frustrated 
+
+- think its broken
+- fail to grasp the genius
+
+### Basics
+
+Wallace is similar to React in that:
+
+- You define a nested trees of *components* which control a section of the DOM.
+- The root component is attached to an element on the page.
+- Updates cascade down the tree.
+- You can attached multiple trees on your page, which are totally separate.
+
+But differs:
+
+- How it uses JSX.
+- Internal operations.
+
+```jsx
+import { mount } from "wallace";
+
+const TaskItem = ( task ) => (
+  <div>
+    <input type="checkbox"/>
+    <label>{task.text}</label>
+  </div>
+);
+
+const TaskList = ( tasks ) => (
+  <div>
+    <TaskItem.repeat props={tasks} />
+  </div>
+);
+
+const tasks = [{ text: "Learn Wallace" }];
+const root = mount("main", TaskItem, tasks);
+```
+
+You mount the root component to an existing element on the page, either by passing the id as a string (in this case "main") or an element. You can mount as many root components to the page as you like, they are all separate.
+
+To update the UI, tell the root component to `update()` which cascades the call all its nested components:
+
+```jsx
+const otherRoot = mount(document.getElementById('foo'), TaskItem, tasks);
+tasks.push({ text: "Star Wallace on github" });
+root.update();
+```
+
+This will only update the items under **root** and not **otherRoot**.
+
+It is all very simple, mechanical and predictable. We'll see how to make components reactive a bit later.
+
+You can update any element in the tree, not just the root.
+
+### Wallace JSX
+
+So far Wallace looks similar to React, except for how we nest elements. In React you would do this:
+
+```jsx
+// THIS WON'T WORK IN WALLACE...
+const TaskList = (tasks) => (
+  <div>
+    {tasks.map(task => (
+      <TaskItem text={task.text} />
+    ))}
+  </div>
+);
+```
+
+But with Wallace you do this:
+
+```jsx
+const TaskList = ( tasks ) => (
+  <ul>
+    <TaskItem.repeat props={tasks} />
+  </ul>
+);
+```
+
+Or to nest a single item:
+
+```jsx
+const TaskList = (tasks) => (
+  <div>
+    <TaskItem.nest props={tasks[0]} />
+  </div>
+);
+```
+
+This is because Wallace treats JSX differently. Instead of converting it to code that returns virtual DOM, Wallace replaces the entire function with generated code during compilation.
+
+This means the function never gets called, because it never appears in the bundle. Its only purpose is to define a component.
+
+
+
+
+
+
+
+
+This will replace the contents of element with id **main** with a checkbox and label:
+
+<div>
+    <input type="checkbox"/>
+    <label>Learn Wallace</label>
+</div>
+
+Although components 
+
+which you define as arrow functions which return JSX:
+
+ to control the DOM,
+
+and though it looks like React, it works very differently.
+
+
+
+
+
+-----------
+
+
+
+## 
+
+> Lead straight in with nested items, and explain that the root is mounted.
+>
+> 
+>
+> With React you would do this (...)
+>
+> That's not allowed in Wallace, in fact you can't put any logic before or around JSX elements. You can put it in placeholders.
+>
+> **Why**
+>
+> It's not real JSX and not a real function. 
+>
+> Wallace has a completely different design, and though you loose the power of JSX, you get many better things in return.
+>
+> The first is cleaner and more compact code.
+>
+> **Power/directives**
+>
+> visibility
+>
+> events
+>
+> help
+>
+> toggles
+>
+> ClassDirective
+>
+> styles
+>
+> custom
+>
+> **reactivity**
+>
+> done right
+>
+> **Patterns**
+>
+> Prototypes and stubs
+>
+> **Full override**
+>
+> refs and what update and render do.
+>
+> **Reparenting**
+
+**Pool control**
+
+
+
+
+>
+>
+>Loose the power of JSX, but in exchange you get:
+>
+>- Much cleaner code.
+>- Better performance.
+
+Changes
+
+- How you write code
+- How fast it runs
+- What you can do
+- What you can't do
+
+
+
+
+
+Let's define a component **TaskItem** and mount an instance of it to the element with id **main**:
+
+
+
+So far this looks like React. But if you try to nest TaskItem inside another component you'll find it doesn't work:
+
+
+But instead you do this:
+
+```jsx
+const TaskList = ( tasks ) => (
+  <ul>
+    <TaskItem.repeat props={tasks} />
+  </ul>
+);
+```
+
+This removes a lot of the clutter from your JSX
+
+
+
+Although components are *defined* as arrow functions which return JSX.
+
+If you've used React you might think Wallace *runs* this function to obtain virtual DOM, but it doesn't.
+
+**During compilation a Babel plugin find arrow functions that return JSX and replaces them with generated code.**
+
+So that function is never executed and doesn't even appear in the browser.
 
  
 
-Compiled JSX c
+The key thing to understand is that Wallace never executes that function. It *replaces* it with generated code during compilation.
+
+
+
+The function is *read* not *run* which means 
+
+These functions will never be *executed*, their only purpose is to hold JSX which will be *read* during compilation. As such you can't do lots of things:
+
+##### Declare variables
+
+```jsx
+const Greeting = ({ message, color }) => (
+  const msgCaps = message.toUpperCase();
+  <h1 style:color={color}>
+    {msgCaps}
+  </h1>
+);
+```
+
+
+
+
+
+This looks like React but it works **VERY DIFFERENTLY**, so pay attention.
+
+
+
+However that is **not a real function**, it is **not real JSX** and there is **no virtual DOM**.
+
+
+
+
+
+1.  returns JSX. You just declare it that way because it looks clean.
+
+
 
 controls the DOM (a tree of nodes) using a tree of components.
 
@@ -379,3 +971,39 @@ mount("main", Greeting, { message: "Hello", color: "red" });
 Virtually every framework uses a closed engine to update the DOM, which you have no control over, and typically cannot bypass either. If your project hits a performance issue (which can happen with any framework) there is often very little you can do about it.
 
 Wallace gives you granular control over its operations. If you can do something in vanilla, you can do it in Wallace, often more easily. You will always be able to reach vanilla-like performance where needed, without leaving the clean structure of a framework.
+
+
+
+
+
+
+
+##### 1. Simplicity
+
+I don't want to learn about hooks, portals, virtual DOM, controllers and other noise. Wallace uses components, which are plain objects and that's it. There is no engine and no magic. If I need to do something complex or unusual, the answer is just plain JavaScript, not framework-specific lore.
+
+##### 2. Size
+
+Wallace produces absolutely tiny bundles, on par with Svelte, giving you insanely fast page loads.
+
+##### 3. Performance
+
+Benchmarks lie. Real world pages slow down because of complexities you can't capture in benchmarks, and it's invariably your framework stopping you from doing something that would be child's play in jQuery. Wallace doesn't have this problem:
+
+1. You can interact with the DOM through the component tree more easily there's no need for jQuery.
+2. There's no framework engine to get in your way.
+
+Performance issues that end up consuming days or weeks of dev time in other frameworks are solved in minutes.
+
+##### 4. Productivity
+
+Wallace ends up making you more productive than other frameworks for several reasons:
+
+- Far cleaner, compact and readable JSX. You will never be able to look at React code again.
+- All your logic is outside of components
+- You waste fare less time battling with the framework over performance issues or reactivity glitches.
+
+
+
+You can learn Wallace in around 10 minutes, after which the built in help system is all you need.
+
