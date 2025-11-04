@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.spec.ts"]
+}

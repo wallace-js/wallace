@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "name": "wallace-playground",
+  "version": "1.0.0",
+  "description": "Playground for experimenting with Wallace",
+  "main": "src/index.js",
+  "scripts": {
+    "build-prod": "NODE_ENV=production webpack",
+    "build-dev": "NODE_ENV=development webpack",
+    "check": "babel $@",
+    "start": "webpack serve",
+    "size": "gzip -fk dist/index.js && du -b dist/index.js.gz",
+    "rebuild-plugin": "cd ../packages/babel-plugin-wallace && npx tsc"
+  },
+  "author": "Andrew Buchan",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.25.9",
+    "@babel/preset-env": "^7.22.14",
+    "@babel/preset-typescript": "^7.25.7",
+    "babel-loader": "^9.1.3",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}
