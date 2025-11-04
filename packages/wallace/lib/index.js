@@ -1,4 +1,4 @@
-import { createComponent, createProxy, mount } from "./utils";
+import { createComponent, watch, mount } from "./utils";
 import { Component } from "./component";
 import { KeyedPool, SequentialPool } from "./pool";
 import {
@@ -18,7 +18,7 @@ export {
   extendComponent,
   Component,
   createComponent,
-  createProxy,
+  watch,
   defineComponent,
   extendPrototype,
   findElement,
