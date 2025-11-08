@@ -11,7 +11,7 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { codeToNode } from "../utils";
-import { Component, ConditionalDisplay, ExtractedNode } from "../models";
+import { Component, VisibilityToggle, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
@@ -54,11 +54,11 @@ function addBindInstruction(node: ExtractedNode) {
 function addShieldInfo(
   componentDefinition: ComponentDefinitionData,
   componentWatch: ComponentWatch,
-  shieldInfo: ConditionalDisplay,
+  shieldInfo: VisibilityToggle,
 ) {
   const shieldLookupKey = componentDefinition.addLookup(shieldInfo.expression);
   componentWatch.shieldInfo = {
-    count: 0,
+    skipCount: 0,
     key: shieldLookupKey,
     reverse: shieldInfo.reverse,
   };

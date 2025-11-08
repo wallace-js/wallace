@@ -21,8 +21,8 @@ export const ERROR_MESSAGES = {
     "JSX elements are not allowed in expressions.",
   UNSUPPORTED_ATTRIBUTE_VALUE:
     "Attribute value must be a string or expression.",
-  CONDITIONAL_DISPLAY_ALREADY_DEFINED:
-    "Conditional display already defined on element.",
+  VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
+    "Can only define one visibility toggle on element.",
   REF_ALREADY_DEFINED: "Ref already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
   PROPS_ALREADY_DEFINED: "Props already defined on element.",

@@ -14,6 +14,8 @@ import { ComponentWatch, NodeAddress } from "./types";
  * It returns an array with the count of nested items, like so:
  *
  *  [2, 0, 0, 0]
+ *
+ * Which indicates how many watches to skip if that element is hidden.
  */
 function calculateShieldCounts(addresses: Array<NodeAddress>): NodeAddress {
   const processedAddresses = [];
@@ -33,10 +35,10 @@ function calculateShieldCounts(addresses: Array<NodeAddress>): NodeAddress {
  */
 export function processShields(watches: Array<ComponentWatch>) {
   const addresses = watches.map((watch) => watch.address.slice(1));
-  const shieldCounts = calculateShieldCounts(addresses);
+  const skipCounts = calculateShieldCounts(addresses);
   watches.forEach((watch, index) => {
     if (watch.shieldInfo) {
-      watch.shieldInfo.count = shieldCounts[index];
+      watch.shieldInfo.skipCount = skipCounts[index];
     }
   });
 }

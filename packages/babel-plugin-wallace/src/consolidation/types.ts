@@ -5,7 +5,7 @@ export type NodeAddress = Array<number>;
 export interface ShieldInfo {
   key: string;
   reverse: boolean;
-  count: number;
+  skipCount: number;
 }
 
 export interface ComponentWatch {

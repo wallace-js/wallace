@@ -37,7 +37,7 @@ interface BindInstruction {
   expression: Expression;
 }
 
-export interface ConditionalDisplay {
+export interface VisibilityToggle {
   expression: Expression;
   reverse: boolean;
 }
@@ -78,7 +78,7 @@ export class ExtractedNode {
    */
   toggleTriggers: ToggleTrigger[] = [];
   #stubName: string | undefined;
-  #conditionalDisplay: ConditionalDisplay | undefined;
+  #visibilityToggle: VisibilityToggle | undefined;
   #ref: string | undefined;
   #props: Expression | undefined;
   #forExpression: Expression | undefined;
@@ -144,14 +144,17 @@ export class ExtractedNode {
   getProps(): Expression | undefined {
     return this.#props;
   }
-  setConditionalDisplay(expression: Expression, reverse: boolean) {
-    if (this.#conditionalDisplay) {
-      error(this.path, ERROR_MESSAGES.CONDITIONAL_DISPLAY_ALREADY_DEFINED);
+  setVisibilityToggle(expression: Expression, reverse: boolean) {
+    if (this.#visibilityToggle) {
+      error(
+        this.path,
+        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED,
+      );
     }
-    this.#conditionalDisplay = { expression, reverse };
+    this.#visibilityToggle = { expression, reverse };
   }
-  getShieldInfo(): ConditionalDisplay | undefined {
-    return this.#conditionalDisplay;
+  getShieldInfo(): VisibilityToggle | undefined {
+    return this.#visibilityToggle;
   }
   setRef(name: string) {
     if (this.#ref) {

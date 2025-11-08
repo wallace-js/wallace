@@ -42,6 +42,38 @@ describe("Visibility controlled by `show` directive", () => {
   });
 });
 
+describe("Elements under hidden parents", () => {
+  test("do not update when parent element is hidden", () => {
+    let hidden = false;
+    let name = "Walrus";
+    const MyComponent = () => (
+      <div>
+        <div hide={hidden}>
+          <span>{name}</span>
+        </div>
+      </div>
+    );
+    const component = testMount(MyComponent);
+    expect(component).toRender(`
+      <div>
+        <div>
+          <span>Walrus</span>
+        </div>
+      </div>
+    `);
+    hidden = true;
+    name = "fox";
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div hidden="">
+          <span>Walrus</span>
+        </div>
+      </div>
+    `);
+  });
+});
+
 describe("Nested components", () => {
   test("show and hide their root element", () => {
     let showWalrus = true;
@@ -104,5 +136,33 @@ describe("Nested components", () => {
     component.update();
     expect(targetSpan.textContent).toBe("3");
     expect(otherSpan.textContent).toBe("5");
+  });
+});
+
+describe("Repeated components", () => {
+  test.only("do not update when hidden", () => {
+    let showAnimals = false;
+    const walrus = { name: "Mr Walrus" };
+    const fox = { name: "Ms Fox" };
+    const getAnimals = () => [walrus, fox];
+    const Animal = (animal) => <div>Hello {animal.name}</div>;
+    const AnimalList = () => (
+      <div show={showAnimals}>
+        <Animal.repeat props={getAnimals()} />
+      </div>
+    );
+    const component = testMount(AnimalList);
+    expect(component).toRender(`
+      <div hidden="">
+      </div>
+    `);
+    showAnimals = true;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div>Hello <span>Mr Walrus</span></div>
+        <div>Hello <span>Ms Fox</span></div>
+      </div>
+    `);
   });
 });

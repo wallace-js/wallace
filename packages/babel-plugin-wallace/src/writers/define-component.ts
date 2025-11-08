@@ -70,7 +70,7 @@ function buildWatchesArg(
         ? t.stringLiteral(watch.shieldInfo.key)
         : t.numericLiteral(0),
       t.numericLiteral(watch.shieldInfo?.reverse ? 1 : 0),
-      t.numericLiteral(watch.shieldInfo?.count || 0),
+      t.numericLiteral(watch.shieldInfo?.skipCount || 0),
       t.objectExpression(callbacks),
     ]);
   });
