@@ -34,7 +34,7 @@ class TaskListController extends Controller {
     this.tasks = watch(tasks, this.root);
   }
   completed() {
-    return this.tasks.filter((t) => t.done).length;
+    return this.tasks ? this.tasks.filter((t) => t.done).length : 0;
   }
   addTask(_event: any) {
     if (_event.key === "Enter") {
@@ -52,10 +52,12 @@ const Task: Accepts<iTask> = ({ text, done }) => (
 );
 
 const TaskList: Accepts<TaskListController> = (ctrl, _event) => (
-  <div hide={ctrl.loading}>
+  <div>
     <span>Done: {ctrl.completed()}</span>
-    <div>
-      <Task.repeat props={ctrl.tasks || []} />
+    <div hide={ctrl.loading}>
+      <div>
+        <Task.repeat props={ctrl.tasks} />
+      </div>
     </div>
     <input type="text" onKeyUp={ctrl.addTask(_event)} />
   </div>
@@ -63,6 +65,7 @@ const TaskList: Accepts<TaskListController> = (ctrl, _event) => (
 
 TaskList.prototype.render = function () {
   this.props = new TaskListController(this);
+  console.log(this.props.loading);
   this.update();
   this.props.init();
 };
