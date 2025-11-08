@@ -3,7 +3,7 @@
   "name": "wallace-playground",
   "version": "1.0.0",
   "description": "Playground for experimenting with Wallace",
-  "main": "src/index.js",
+  "main": "src/index.tsx",
   "scripts": {
     "build-prod": "NODE_ENV=production webpack",
     "build-dev": "NODE_ENV=development webpack",

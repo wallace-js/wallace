@@ -1,7 +1,7 @@
 const path = require("path");
 
 const config = {
-  entry: "./src/index.jsx",
+  entry: "./src/index.tsx",
   devServer: {
     static: "./",
     hot: true,
