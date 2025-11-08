@@ -52,12 +52,10 @@ const Task: Accepts<iTask> = ({ text, done }) => (
 );
 
 const TaskList: Accepts<TaskListController> = (ctrl, _event) => (
-  <div>
+  <div hide={ctrl.loading}>
     <span>Done: {ctrl.completed()}</span>
-    <div hide={ctrl.loading}>
-      <div>
-        <Task.repeat props={ctrl.tasks} />
-      </div>
+    <div>
+      <Task.repeat props={ctrl.tasks} />
     </div>
     <input type="text" onKeyUp={ctrl.addTask(_event)} />
   </div>
