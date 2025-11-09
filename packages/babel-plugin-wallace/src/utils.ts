@@ -47,7 +47,7 @@ export function stripHtml(htmlString: string): string {
 }
 
 export function arrayStartsWith(origin: Array<any>, test: Array<any>): boolean {
-  if (test.length <= origin.length) {
+  if (origin.length >= test.length) {
     return false;
   }
   for (const [i, v] of origin.entries()) {

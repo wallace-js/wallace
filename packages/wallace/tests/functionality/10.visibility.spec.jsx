@@ -47,10 +47,11 @@ describe("Elements under hidden parents", () => {
     let hidden = false;
     let name = "Walrus";
     const MyComponent = () => (
-      <div>
-        <div hide={hidden}>
+      <div hide={hidden}>
+        <div>
           <span>{name}</span>
         </div>
+        <span>{name}</span>
       </div>
     );
     const component = testMount(MyComponent);
@@ -59,16 +60,18 @@ describe("Elements under hidden parents", () => {
         <div>
           <span>Walrus</span>
         </div>
+        <span>Walrus</span>
       </div>
     `);
     hidden = true;
     name = "fox";
     component.update();
     expect(component).toRender(`
-      <div>
-        <div hidden="">
+      <div hidden="">
+        <div>
           <span>Walrus</span>
         </div>
+          <span>Walrus</span>
       </div>
     `);
   });
@@ -140,7 +143,7 @@ describe("Nested components", () => {
 });
 
 describe("Repeated components", () => {
-  test.only("do not update when hidden", () => {
+  test("do not update when hidden", () => {
     let showAnimals = false;
     const walrus = { name: "Mr Walrus" };
     const fox = { name: "Ms Fox" };
@@ -148,20 +151,25 @@ describe("Repeated components", () => {
     const Animal = (animal) => <div>Hello {animal.name}</div>;
     const AnimalList = () => (
       <div show={showAnimals}>
-        <Animal.repeat props={getAnimals()} />
+        <div class="list">
+          <Animal.repeat props={getAnimals()} />
+        </div>
       </div>
     );
     const component = testMount(AnimalList);
     expect(component).toRender(`
       <div hidden="">
+        <div class="list"></div>
       </div>
     `);
     showAnimals = true;
     component.update();
     expect(component).toRender(`
       <div>
-        <div>Hello <span>Mr Walrus</span></div>
-        <div>Hello <span>Ms Fox</span></div>
+        <div class="list">
+          <div>Hello <span>Mr Walrus</span></div>
+          <div>Hello <span>Ms Fox</span></div>
+        </div>
       </div>
     `);
   });

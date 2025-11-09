@@ -1,5 +1,5 @@
 import { Component, DynamicTextNode } from "../models";
-import { processShields } from "./visibility";
+import { setSkipCounts } from "./visibility";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
 import { processNodes } from "./processNodes";
 import { getSiblings } from "./utils";
@@ -34,7 +34,7 @@ export function consolidateComponent(
   const componentDefinition = new ComponentDefinitionData(component);
   hoistTextNodes(component);
   processNodes(component, componentDefinition);
-  processShields(componentDefinition.watches);
+  setSkipCounts(componentDefinition.watches);
   // This must be done after all the processing, as DOM may have changed.
   componentDefinition.html = component.rootElement.outerHTML;
   return componentDefinition;
