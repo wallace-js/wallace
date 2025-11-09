@@ -32,22 +32,29 @@ function buildTemplateArg(
   );
 }
 
-function buildObjectExpression(
-  object: { [key: string]: any },
-  fn: (n: any) => any,
-): ObjectExpression {
+/**
+ * Creates an ObjectExpression from an object.
+ */
+function buildObjectExpression(object: {
+  [key: string]: any;
+}): ObjectExpression {
   const properties: Array<ObjectProperty> = [];
-
   for (const [key, value] of Object.entries(object)) {
     properties.push({
       type: "ObjectProperty",
       key: identifier(key),
-      value: fn(value),
+      value: value,
       computed: false,
       shorthand: false,
     });
   }
   return objectExpression(properties);
+}
+
+interface watchArgs {
+  e: StringLiteral;
+  c: ObjectExpression;
+  d?: ObjectExpression;
 }
 
 function buildWatchesArg(
@@ -64,15 +71,29 @@ function buildWatchesArg(
         shorthand: false,
       });
     }
-    return t.arrayExpression([
-      t.stringLiteral(watch.stashRef),
-      watch.shieldInfo
-        ? t.stringLiteral(watch.shieldInfo.key)
-        : t.numericLiteral(0),
-      t.numericLiteral(watch.shieldInfo?.reverse ? 1 : 0),
-      t.numericLiteral(watch.shieldInfo?.skipCount || 0),
-      t.objectExpression(callbacks),
-    ]);
+    const watchObject: watchArgs = {
+      e: t.stringLiteral(watch.stashRef),
+      c: t.objectExpression(callbacks),
+    };
+    console.log(watchObject);
+    if (watch.shieldInfo) {
+      watchObject.d = buildObjectExpression({
+        q: t.stringLiteral(watch.shieldInfo.key),
+        s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
+        r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
+      });
+    }
+    return buildObjectExpression(watchObject);
+
+    // return t.arrayExpression([
+    //   t.stringLiteral(watch.stashRef),
+    //   watch.shieldInfo
+    //     ? t.stringLiteral(watch.shieldInfo.key)
+    //     : t.numericLiteral(0),
+    //   t.numericLiteral(watch.shieldInfo?.reverse ? 1 : 0),
+    //   t.numericLiteral(watch.shieldInfo?.skipCount || 0),
+    //   t.objectExpression(callbacks),
+    // ]);
   });
   return t.arrayExpression([...watchDeclarations]);
 }
@@ -80,7 +101,7 @@ function buildWatchesArg(
 function buildLookupsArg(
   componentDefinition: ComponentDefinitionData,
 ): ObjectExpression {
-  return buildObjectExpression(componentDefinition.lookups, (fnExpx) => fnExpx);
+  return buildObjectExpression(componentDefinition.lookups);
 }
 
 /**
@@ -93,10 +114,7 @@ function buildLookupsArg(
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData,
 ): FunctionExpression {
-  const stashValueObject = buildObjectExpression(
-    componentDefinition.stash,
-    (stashEntry) => stashEntry,
-  );
+  const stashValueObject = buildObjectExpression(componentDefinition.stash);
 
   const stashAssignment = t.assignmentExpression(
     "=",

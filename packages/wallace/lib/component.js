@@ -36,7 +36,7 @@ proto.update = function () {
   let i = 0,
     watch,
     element,
-    shieldQuery,
+    displayToggle,
     shieldQueryResult,
     shouldBeVisible;
 
@@ -47,18 +47,20 @@ proto.update = function () {
   const il = watches.length;
   while (i < il) {
     watch = watches[i];
-    element = this._e[watch.wk];
-    shieldQuery = watch.sq;
+    element = this._e[watch.e];
+    displayToggle = watch.d;
     i++;
     shouldBeVisible = true;
-    if (shieldQuery) {
-      shieldQueryResult = !!lookup.get(this, props, shieldQuery).n;
-      shouldBeVisible = watch.rv ? shieldQueryResult : !shieldQueryResult;
+    if (displayToggle) {
+      shieldQueryResult = !!lookup.get(this, props, displayToggle.q).n;
+      shouldBeVisible = displayToggle.r
+        ? shieldQueryResult
+        : !shieldQueryResult;
       element.hidden = !shouldBeVisible;
-      i += shouldBeVisible ? 0 : watch.sc;
+      i += shouldBeVisible ? 0 : displayToggle.s;
     }
     if (shouldBeVisible) {
-      lookup.applyCallbacks(this, props, element, watch.cb);
+      lookup.applyCallbacks(this, props, element, watch.c);
     }
   }
 };
