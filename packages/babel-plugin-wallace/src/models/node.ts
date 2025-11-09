@@ -153,6 +153,9 @@ export class ExtractedNode {
     }
     this.#visibilityToggle = { expression, reverse };
   }
+  setConditonalDisplay(expression: Expression, reverse: boolean) {
+    // check it's not already set.
+  }
   getShieldInfo(): VisibilityToggle | undefined {
     return this.#visibilityToggle;
   }

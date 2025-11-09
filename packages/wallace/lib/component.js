@@ -40,7 +40,7 @@ proto.update = function () {
     shieldQueryResult,
     shouldBeVisible;
 
-  const watches = this.__wc;
+  const watches = this._w;
   const lookup = this._l;
   const props = this.props;
   lookup.reset();

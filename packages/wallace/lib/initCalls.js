@@ -82,10 +82,13 @@ export function extendComponent(
   lookups,
   buildFunction,
 ) {
-  prototype.__wc = watches.map((arr) => ({
+  /* Ensure these do not clash with fields on the component itself.
+   * Note watch array positions have specific meanings.
+   */
+  prototype._w = watches.map((arr) => ({
     wk: arr[0], // The key of the corresponding element.
-    sq: arr[1], // The shield query key
-    rv: arr[2], // whether shieldQuery should be flipped
+    sq: arr[1], // The shield query key index, or 0.
+    rv: arr[2], // whether shieldQuery should be flipped.
     sc: arr[3], // The number of items to shield
     cb: arr[4], // The callbacks - object
   }));

@@ -75,13 +75,26 @@ class HelpDirective extends Directive {
 class HideDirective extends Directive {
   static attributeName = "hide";
   static help = `
-    Conditionally hides an element and all nested elements.
+    Hides an element by toggling its hidden attribute.
 
     /h <div hide={}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     // this.ensureValueType();
     node.setVisibilityToggle(value.expression, false);
+  }
+}
+
+class IfDirective extends Directive {
+  static attributeName = "if";
+  static help = `
+    Conditionally exludes an element from the DOM.
+
+    /h <div if={}></div>
+    `;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    // this.ensureValueType();
+    node.setConditonalDisplay(value.expression, false);
   }
 }
 
@@ -120,7 +133,7 @@ class PropsDirective extends Directive {
 class RefDirective extends Directive {
   static attributeName = "ref";
   static help = `
-    Saves a reference to an element:
+    Saves a reference to an element or nested component:
 
     /h <div ref:title></div>
     `;
@@ -132,7 +145,7 @@ class RefDirective extends Directive {
 class ShowDirective extends Directive {
   static attributeName = "show";
   static help = `
-    Conditionally shows an element and all nested elements.
+    Shows an element by toggling its hidden attribute.
 
     /h <div show={}></div>
     `;
@@ -200,6 +213,7 @@ export const builtinDirectives = [
   ClassDirective,
   HelpDirective,
   HideDirective,
+  IfDirective,
   OnEventDirective,
   PropsDirective,
   RefDirective,
