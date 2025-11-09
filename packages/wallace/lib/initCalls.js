@@ -82,27 +82,8 @@ export function extendComponent(
   lookups,
   buildFunction,
 ) {
-  /* 
-  Watches is an array of objects with keys:
-    e: the element reference (string)
-    c: the callbacks (object)
-    d: [optional] display toggle (object)
-
-  The display toggle has keys:
-    q: the query key in lookup
-    s: skipCount
-    r: reversed
-    
-  Ensure these do not clash with fields on the component itself.
-  */
+  //Ensure these do not clash with fields on the component itself.
   prototype._w = watches;
-  // .map((arr) => ({
-  //   wk: arr[0], // The key of the corresponding element.
-  //   sq: arr[1], // The shield query key index, or 0.
-  //   rv: arr[2], // whether shieldQuery should be flipped.
-  //   sc: arr[3], // The number of items to shield
-  //   cb: arr[4], // The callbacks - object
-  // }));
   prototype._l = new Lookup(lookups);
   prototype._b = buildFunction;
   prototype._n = makeEl(html);

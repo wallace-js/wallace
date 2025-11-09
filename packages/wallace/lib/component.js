@@ -45,6 +45,17 @@ proto.update = function () {
   const props = this.props;
   lookup.reset();
   const il = watches.length;
+  /* 
+  Watches is an array of objects with keys:
+    e: the element reference (string)
+    c: the callbacks (object)
+    d: [optional] display toggle (object)
+
+  The display toggle has keys:
+    q: the query key in lookup
+    s: skipCount
+    r: reversed
+  */
   while (i < il) {
     watch = watches[i];
     element = this._e[watch.e];

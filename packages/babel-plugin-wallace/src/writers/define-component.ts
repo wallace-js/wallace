@@ -61,21 +61,10 @@ function buildWatchesArg(
   componentDefinition: ComponentDefinitionData,
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
-    const callbacks: Array<ObjectProperty> = [];
-    for (const [key, fnExpr] of Object.entries(watch.callbacks)) {
-      callbacks.push({
-        type: "ObjectProperty",
-        key: t.identifier(key),
-        value: fnExpr,
-        computed: false,
-        shorthand: false,
-      });
-    }
     const watchObject: watchArgs = {
       e: t.stringLiteral(watch.stashRef),
-      c: t.objectExpression(callbacks),
+      c: buildObjectExpression(watch.callbacks),
     };
-    console.log(watchObject);
     if (watch.shieldInfo) {
       watchObject.d = buildObjectExpression({
         q: t.stringLiteral(watch.shieldInfo.key),
@@ -84,16 +73,6 @@ function buildWatchesArg(
       });
     }
     return buildObjectExpression(watchObject);
-
-    // return t.arrayExpression([
-    //   t.stringLiteral(watch.stashRef),
-    //   watch.shieldInfo
-    //     ? t.stringLiteral(watch.shieldInfo.key)
-    //     : t.numericLiteral(0),
-    //   t.numericLiteral(watch.shieldInfo?.reverse ? 1 : 0),
-    //   t.numericLiteral(watch.shieldInfo?.skipCount || 0),
-    //   t.objectExpression(callbacks),
-    // ]);
   });
   return t.arrayExpression([...watchDeclarations]);
 }
