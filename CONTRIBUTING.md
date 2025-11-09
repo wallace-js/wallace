@@ -112,7 +112,25 @@ Where `@babel/cli` is installed you can run a file through babel with npx:
 npx babel src/index.jsx 
 ```
 
-This will read from **babel.config.cjs** and print the transpiled code. Note that you must have `@babel/preset-env` in there, or else you will get different output. 
+This will read from **babel.config.cjs** and print the transpiled code. Note that you must have `@babel/preset-env` in there, or else you will get different output.
+
+And you should also set it to `modules: false` :
+
+```
+[["@babel/preset-env", { modules: false }]]
+```
+
+To avoid your code looking like this:
+
+```
+"2": (0, _wallace.findElement)(root, [1])
+```
+
+Instead of this:
+
+```
+"2": _wallace.findElement(root, [1])
+```
 
 #### In the browser
 
