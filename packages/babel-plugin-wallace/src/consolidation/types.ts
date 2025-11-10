@@ -9,7 +9,7 @@ export interface ShieldInfo {
 }
 
 export interface ComponentWatch {
-  stashRef: string;
+  dynamicElementRef: string;
   shieldInfo?: ShieldInfo | undefined;
   callbacks: { [key: string]: FunctionExpression };
   address: NodeAddress;

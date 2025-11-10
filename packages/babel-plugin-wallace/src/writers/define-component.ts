@@ -51,7 +51,7 @@ function buildObjectExpression(object: {
   return objectExpression(properties);
 }
 
-interface watchArgs {
+interface iWatchArgs {
   e: StringLiteral;
   c: ObjectExpression;
   d?: ObjectExpression;
@@ -61,18 +61,18 @@ function buildWatchesArg(
   componentDefinition: ComponentDefinitionData,
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
-    const watchObject: watchArgs = {
-      e: t.stringLiteral(watch.stashRef),
+    const watchArg: iWatchArgs = {
+      e: t.stringLiteral(watch.dynamicElementRef),
       c: buildObjectExpression(watch.callbacks),
     };
     if (watch.shieldInfo) {
-      watchObject.d = buildObjectExpression({
+      watchArg.d = buildObjectExpression({
         q: t.stringLiteral(watch.shieldInfo.key),
         s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
         r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
       });
     }
-    return buildObjectExpression(watchObject);
+    return buildObjectExpression(watchArg);
   });
   return t.arrayExpression([...watchDeclarations]);
 }
@@ -93,14 +93,16 @@ function buildLookupsArg(
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData,
 ): FunctionExpression {
-  const stashValueObject = buildObjectExpression(componentDefinition.stash);
+  const dynamicElementsValueObject = buildObjectExpression(
+    componentDefinition.dynamicElements,
+  );
 
-  const stashAssignment = t.assignmentExpression(
+  const dynamicElementsAssignment = t.assignmentExpression(
     "=",
     t.memberExpression(t.identifier("component"), t.identifier("_e")),
-    stashValueObject,
+    dynamicElementsValueObject,
   );
-  const statements = [t.expressionStatement(stashAssignment)];
+  const statements = [t.expressionStatement(dynamicElementsAssignment)];
   return t.functionExpression(
     null,
     [

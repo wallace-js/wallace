@@ -2,14 +2,14 @@
  * The base component.
  */
 export function Component(parent) {
-  this.parent = parent; // The parent component
+  this.parent = parent; // The parent component. TODO: is this needed?
   this.props = undefined; // The props passed to the component. May be changed.
-  this.el = null; // the element - will be set during build
-  this.ref = {}; // user set references to elements or components
+  this.el = null; // the element - will be set during build.
+  this.ref = {}; // user set references to elements or components.
   // Internal state objects
-  this._o = []; // stashed objects like pools.
-  this._e = {}; // stashed elements.
-  this._p = {}; // The previous values for watches to compare against
+  this._e = {}; // The dynamic elements in the DOM.
+  this._p = {}; // The previous values for watches to compare against.
+  this._s = []; // A stash for misc objects.
 }
 
 var proto = Component.prototype;
@@ -53,8 +53,9 @@ proto.update = function () {
 
   The display toggle has keys:
     q: the query key in lookup
-    s: skipCount
+    s: the number of watches to skip as their node is underneath
     r: reversed
+    m: mode (1: hide, 2: hide-reversed, 3: dettach-normal, 4: dettach-reversed)
   */
   while (i < il) {
     watch = watches[i];

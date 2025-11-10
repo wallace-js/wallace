@@ -28,7 +28,7 @@ export const nestComponent = (rootElement, path, cls, parent) => {
 };
 
 /**
- * Saves a reference to element or nested component. Can be used to wrap a stash call.
+ * Saves a reference to element or nested component. Returns the element.
  */
 export const saveRef = (element, component, name) => {
   component.ref[name] = element;
@@ -36,10 +36,11 @@ export const saveRef = (element, component, name) => {
 };
 
 /**
- * Saves a misc object (anything that's not an element). Can be used to wrap a stash call.
+ * Stash something on the component. Returns the element.
+ * The generated code is expected to keep track of the position.
  */
-export const saveMiscObject = (element, component, object) => {
-  component._o.push(object);
+export const stashMisc = (element, component, object) => {
+  component._s.push(object);
   return element;
 };
 

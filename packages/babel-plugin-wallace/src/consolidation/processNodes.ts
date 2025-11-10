@@ -164,20 +164,23 @@ export function processNodes(
       node.isNestedClass ||
       stubName ||
       repeatInstruction;
-    const shouldStash = createWatch || ref || node.eventListeners.length > 0;
+
+    // TODO: should ref really save the element?
+    const shouldSaveElement =
+      createWatch || ref || node.eventListeners.length > 0;
 
     ensureToggleTargetsHaveTriggers(node);
 
-    if (shouldStash) {
+    if (shouldSaveElement) {
       const nestedComponentCls = node.isNestedClass
         ? t.identifier(node.tagName)
         : stubComponentName;
-      const stashRef = nestedComponentCls
-        ? componentDefinition.saveNestedClassToStash(
+      const dynamicElementRef = nestedComponentCls
+        ? componentDefinition.saveNestedAsDynamicElement(
             node.address,
             nestedComponentCls,
           )
-        : componentDefinition.saveElementToStash(node.address);
+        : componentDefinition.saveDynamicElement(node.address);
 
       if (node.bindInstructions.length) {
         addBindInstruction(node);
@@ -193,7 +196,7 @@ export function processNodes(
         };
 
         const componentWatch: ComponentWatch = {
-          stashRef,
+          dynamicElementRef: dynamicElementRef,
           callbacks: {},
           address: node.address,
         };
@@ -248,7 +251,7 @@ export function processNodes(
         }
 
         if (repeatInstruction) {
-          const miscObjectKey = componentDefinition.getNextMiscObjectKey();
+          const miscStashKey = componentDefinition.getNextmiscStashKey();
           componentDefinition.component.module.requireImport(
             IMPORTABLES.getSequentialPool,
           );
@@ -257,9 +260,9 @@ export function processNodes(
             callExpression(identifier(IMPORTABLES.getSequentialPool), [
               identifier(repeatInstruction.componentCls),
             ]);
-          componentDefinition.wrapStashCall(
-            stashRef,
-            IMPORTABLES.saveMiscObject,
+          componentDefinition.wrapDynamicElementCall(
+            dynamicElementRef,
+            IMPORTABLES.stashMisc,
             [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance],
           );
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
@@ -271,7 +274,7 @@ export function processNodes(
                       component.componentIdentifier,
                       identifier(SPECIAL_SYMBOLS.objectStash),
                     ),
-                    numericLiteral(miscObjectKey),
+                    numericLiteral(miscStashKey),
                     true,
                   ),
                   identifier(SPECIAL_SYMBOLS.patch),
@@ -311,10 +314,11 @@ export function processNodes(
           );
         }
         componentDefinition.collectedRefs.push(ref);
-        componentDefinition.wrapStashCall(stashRef, IMPORTABLES.saveRef, [
-          identifier(COMPONENT_BUILD_PARAMS.component),
-          stringLiteral(ref),
-        ]);
+        componentDefinition.wrapDynamicElementCall(
+          dynamicElementRef,
+          IMPORTABLES.saveRef,
+          [identifier(COMPONENT_BUILD_PARAMS.component), stringLiteral(ref)],
+        );
       }
 
       // Note that some things will already have been renamed, but here we are renaming
@@ -331,14 +335,18 @@ export function processNodes(
           eventVariableMapping,
         );
 
-        componentDefinition.wrapStashCall(stashRef, IMPORTABLES.onEvent, [
-          stringLiteral(listener.eventName),
-          functionExpression(
-            null,
-            [identifier(EVENT_CALLBACK_VARIABLES.event)],
-            blockStatement([expressionStatement(updatedExpression)]),
-          ),
-        ]);
+        componentDefinition.wrapDynamicElementCall(
+          dynamicElementRef,
+          IMPORTABLES.onEvent,
+          [
+            stringLiteral(listener.eventName),
+            functionExpression(
+              null,
+              [identifier(EVENT_CALLBACK_VARIABLES.event)],
+              blockStatement([expressionStatement(updatedExpression)]),
+            ),
+          ],
+        );
       });
     }
   });

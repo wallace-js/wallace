@@ -17,7 +17,7 @@ export enum IMPORTABLES {
   findElement = "findElement",
   nestComponent = "nestComponent",
   saveRef = "saveRef",
-  saveMiscObject = "saveMiscObject",
+  stashMisc = "stashMisc",
   onEvent = "onEvent",
   getSequentialPool = "getSequentialPool",
 }
@@ -29,7 +29,7 @@ export enum EVENT_CALLBACK_VARIABLES {
 }
 
 export enum SPECIAL_SYMBOLS {
-  objectStash = "_o",
+  objectStash = "_s",
   alwaysUpdate = "__",
   patch = "patch",
 }
