@@ -160,6 +160,9 @@ export class ExtractedNode {
     }
     this.#visibilityToggle = { expression, reverse, detach };
     if (detach) {
+      if (!this.parent) {
+        error(this.path, ERROR_MESSAGES.CANNOT_USE_IF_ON_ROOT_ELEMENT);
+      }
       this.parent.hasConditionalChildren = true;
     }
   }

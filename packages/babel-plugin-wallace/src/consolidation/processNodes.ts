@@ -252,15 +252,14 @@ export function processNodes(
           const shieldLookupKey = componentDefinition.addLookup(
             visibilityToggle.expression,
           );
-          // The values get set later once we've processed all the nodes.
           componentWatch.shieldInfo = {
-            skipCount: 0,
+            skipCount: 0, // gets set later once we've processed all the nodes.
             key: shieldLookupKey,
             reverse: visibilityToggle.reverse,
           };
           if (visibilityToggle.detach) {
             componentWatch.shieldInfo.detacher = {
-              index: 0,
+              index: node.address[node.address.length - 1],
               stashKey: node.parent.detacherStashKey,
               parentKey: node.parent.elementKey,
             };

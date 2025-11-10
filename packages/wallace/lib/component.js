@@ -83,14 +83,18 @@ proto.update = function () {
       visibilityChanged = lookupTrue != !!lookupReturn.o;
       detacher = displayToggle.d;
       if (detacher) {
+        // console.log("------------");
         index = detacher.i;
         parent = this._e[detacher.e];
         detachedElements = this._s[detacher.s];
         detachedElement = detachedElements[index];
         if (shouldBeVisible && detachedElement) {
-          // TODO: move to correct position based on existing detached elements
-          // t.insertBefore(newElement, parentElement.childNodes[2]);
-          parent.appendChild(detachedElement);
+          // console.log("start", index, detachedElements);
+          index -= Object.keys(detachedElements).filter(function (k) {
+            return (k < index) & detachedElements[k];
+          }).length;
+          // console.log("adjustes", index);
+          parent.insertBefore(detachedElement, parent.childNodes[index]);
           detachedElements[index] = null;
         } else if (!shouldBeVisible && !detachedElement) {
           thisElement = this._e[watch.e];
