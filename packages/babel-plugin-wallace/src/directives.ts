@@ -81,20 +81,20 @@ class HideDirective extends Directive {
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     // this.ensureValueType();
-    node.setVisibilityToggle(value.expression, false);
+    node.setVisibilityToggle(value.expression, false, false);
   }
 }
 
 class IfDirective extends Directive {
   static attributeName = "if";
   static help = `
-    Conditionally exludes an element from the DOM.
+    Conditionally includes/exludes an element from the DOM.
 
     /h <div if={}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     // this.ensureValueType();
-    node.setConditonalDisplay(value.expression, false);
+    node.setVisibilityToggle(value.expression, true, true);
   }
 }
 
@@ -151,7 +151,7 @@ class ShowDirective extends Directive {
     `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     // this.ensureValueType();
-    node.setVisibilityToggle(value.expression, true);
+    node.setVisibilityToggle(value.expression, true, false);
   }
 }
 

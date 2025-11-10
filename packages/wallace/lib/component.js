@@ -36,9 +36,17 @@ proto.update = function () {
   let i = 0,
     watch,
     element,
+    parent,
     displayToggle,
-    shieldQueryResult,
-    shouldBeVisible;
+    detacher,
+    lookupReturn,
+    lookupTrue,
+    shouldBeVisible,
+    visibilityChanged,
+    detachedElements,
+    detachedElement,
+    index,
+    thisElement;
 
   const watches = this._w;
   const lookup = this._l;
@@ -49,27 +57,52 @@ proto.update = function () {
   Watches is an array of objects with keys:
     e: the element reference (string)
     c: the callbacks (object)
-    d: [optional] display toggle (object)
+    ?v: visibility toggle (object)
 
   The display toggle has keys:
     q: the query key in lookup
     s: the number of watches to skip as their node is underneath
     r: reversed
-    m: mode (1: hide, 2: hide-reversed, 3: dettach-normal, 4: dettach-reversed)
+    ?d: detacher 
+
+  The detacher has keys:
+    i: the element index
+    s: the stash key of the detacher (plain object)
+    e: the parent element key
   */
   while (i < il) {
     watch = watches[i];
     element = this._e[watch.e];
-    displayToggle = watch.d;
+    displayToggle = watch.v;
     i++;
     shouldBeVisible = true;
     if (displayToggle) {
-      shieldQueryResult = !!lookup.get(this, props, displayToggle.q).n;
-      shouldBeVisible = displayToggle.r
-        ? shieldQueryResult
-        : !shieldQueryResult;
-      element.hidden = !shouldBeVisible;
-      i += shouldBeVisible ? 0 : displayToggle.s;
+      lookupReturn = lookup.get(this, props, displayToggle.q);
+      lookupTrue = !!lookupReturn.n;
+      shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
+      visibilityChanged = lookupTrue != !!lookupReturn.o;
+      detacher = displayToggle.d;
+      if (detacher) {
+        index = detacher.i;
+        parent = this._e[detacher.e];
+        detachedElements = this._s[detacher.s];
+        detachedElement = detachedElements[index];
+        if (shouldBeVisible && detachedElement) {
+          // TODO: move to correct position based on existing detached elements
+          // t.insertBefore(newElement, parentElement.childNodes[2]);
+          parent.appendChild(detachedElement);
+          detachedElements[index] = null;
+        } else if (!shouldBeVisible && !detachedElement) {
+          thisElement = this._e[watch.e];
+          parent.removeChild(thisElement);
+          detachedElements[index] = thisElement;
+        }
+      } else {
+        element.hidden = !shouldBeVisible;
+      }
+      if (!shouldBeVisible) {
+        i += displayToggle.s;
+      }
     }
     if (shouldBeVisible) {
       lookup.applyCallbacks(this, props, element, watch.c);

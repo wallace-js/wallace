@@ -51,19 +51,6 @@ function addBindInstruction(node: ExtractedNode) {
   }
 }
 
-function addShieldInfo(
-  componentDefinition: ComponentDefinitionData,
-  componentWatch: ComponentWatch,
-  shieldInfo: VisibilityToggle,
-) {
-  const shieldLookupKey = componentDefinition.addLookup(shieldInfo.expression);
-  componentWatch.shieldInfo = {
-    skipCount: 0,
-    key: shieldLookupKey,
-    reverse: shieldInfo.reverse,
-  };
-}
-
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
   node.toggleTargets.forEach((target) => {
     const match = node.toggleTriggers.find(
@@ -153,21 +140,24 @@ export function processNodes(
           t.identifier(stubName),
         )
       : undefined;
-    const shieldInfo = node.getShieldInfo();
+    const visibilityToggle = node.getVisibilityToggle();
     const ref = node.getRef();
     const repeatInstruction = node.getRepeatInstruction();
     const createWatch =
       node.watches.length > 0 ||
       node.bindInstructions.length > 0 ||
       node.toggleTriggers.length > 0 ||
-      shieldInfo ||
+      visibilityToggle ||
       node.isNestedClass ||
       stubName ||
       repeatInstruction;
 
     // TODO: should ref really save the element?
     const shouldSaveElement =
-      createWatch || ref || node.eventListeners.length > 0;
+      createWatch ||
+      ref ||
+      node.eventListeners.length > 0 ||
+      node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
 
@@ -175,7 +165,7 @@ export function processNodes(
       const nestedComponentCls = node.isNestedClass
         ? t.identifier(node.tagName)
         : stubComponentName;
-      const dynamicElementRef = nestedComponentCls
+      node.elementKey = nestedComponentCls
         ? componentDefinition.saveNestedAsDynamicElement(
             node.address,
             nestedComponentCls,
@@ -196,7 +186,7 @@ export function processNodes(
         };
 
         const componentWatch: ComponentWatch = {
-          dynamicElementRef: dynamicElementRef,
+          elementKey: node.elementKey,
           callbacks: {},
           address: node.address,
         };
@@ -246,12 +236,38 @@ export function processNodes(
           ]);
         }
 
-        if (shieldInfo) {
-          addShieldInfo(componentDefinition, componentWatch, shieldInfo);
+        if (node.hasConditionalChildren) {
+          node.detacherStashKey = componentDefinition.getNextmiscStashKey();
+          componentDefinition.wrapDynamicElementCall(
+            node.elementKey,
+            IMPORTABLES.stashMisc,
+            [
+              identifier(COMPONENT_BUILD_PARAMS.component),
+              t.objectExpression([]),
+            ],
+          );
+        }
+
+        if (visibilityToggle) {
+          const shieldLookupKey = componentDefinition.addLookup(
+            visibilityToggle.expression,
+          );
+          // The values get set later once we've processed all the nodes.
+          componentWatch.shieldInfo = {
+            skipCount: 0,
+            key: shieldLookupKey,
+            reverse: visibilityToggle.reverse,
+          };
+          if (visibilityToggle.detach) {
+            componentWatch.shieldInfo.detacher = {
+              index: 0,
+              stashKey: node.parent.detacherStashKey,
+              parentKey: node.parent.elementKey,
+            };
+          }
         }
 
         if (repeatInstruction) {
-          const miscStashKey = componentDefinition.getNextmiscStashKey();
           componentDefinition.component.module.requireImport(
             IMPORTABLES.getSequentialPool,
           );
@@ -260,8 +276,12 @@ export function processNodes(
             callExpression(identifier(IMPORTABLES.getSequentialPool), [
               identifier(repeatInstruction.componentCls),
             ]);
+
+          // TODO: couple the stash index with the call to save - if possible?
+          // Or make it an object and pass the key when saving.
+          const miscStashKey = componentDefinition.getNextmiscStashKey();
           componentDefinition.wrapDynamicElementCall(
-            dynamicElementRef,
+            node.elementKey,
             IMPORTABLES.stashMisc,
             [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance],
           );
@@ -315,7 +335,7 @@ export function processNodes(
         }
         componentDefinition.collectedRefs.push(ref);
         componentDefinition.wrapDynamicElementCall(
-          dynamicElementRef,
+          node.elementKey,
           IMPORTABLES.saveRef,
           [identifier(COMPONENT_BUILD_PARAMS.component), stringLiteral(ref)],
         );
@@ -336,7 +356,7 @@ export function processNodes(
         );
 
         componentDefinition.wrapDynamicElementCall(
-          dynamicElementRef,
+          node.elementKey,
           IMPORTABLES.onEvent,
           [
             stringLiteral(listener.eventName),

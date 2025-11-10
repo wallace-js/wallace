@@ -18,7 +18,6 @@ interface Watch {
   expression: Expression;
   // TODO: change to proper expr
   callback: string;
-  // shieldInfo?: ShieldInfo | undefined;
 }
 
 interface RepeatInstruction {
@@ -40,6 +39,7 @@ interface BindInstruction {
 export interface VisibilityToggle {
   expression: Expression;
   reverse: boolean;
+  detach: boolean;
 }
 
 interface ToggleTrigger {
@@ -58,6 +58,8 @@ export class ExtractedNode {
   component: any;
   tagName: string;
   element: HTMLElement | Text | undefined;
+  elementKey: string | undefined;
+  detacherStashKey: number | undefined;
   isRepeatedNode: boolean = false;
   repeatNode: ExtractedNode | undefined;
   address: Array<number>;
@@ -67,6 +69,7 @@ export class ExtractedNode {
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
   isNestedClass: boolean = false;
+  hasConditionalChildren: boolean = false;
   repeatExpression: Expression | undefined;
   poolExpression: Expression | undefined;
   /**
@@ -144,19 +147,23 @@ export class ExtractedNode {
   getProps(): Expression | undefined {
     return this.#props;
   }
-  setVisibilityToggle(expression: Expression, reverse: boolean) {
+  setVisibilityToggle(
+    expression: Expression,
+    reverse: boolean,
+    detach: boolean,
+  ) {
     if (this.#visibilityToggle) {
       error(
         this.path,
         ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED,
       );
     }
-    this.#visibilityToggle = { expression, reverse };
+    this.#visibilityToggle = { expression, reverse, detach };
+    if (detach) {
+      this.parent.hasConditionalChildren = true;
+    }
   }
-  setConditonalDisplay(expression: Expression, reverse: boolean) {
-    // check it's not already set.
-  }
-  getShieldInfo(): VisibilityToggle | undefined {
+  getVisibilityToggle(): VisibilityToggle | undefined {
     return this.#visibilityToggle;
   }
   setRef(name: string) {

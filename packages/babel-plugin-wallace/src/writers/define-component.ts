@@ -51,26 +51,29 @@ function buildObjectExpression(object: {
   return objectExpression(properties);
 }
 
-interface iWatchArgs {
-  e: StringLiteral;
-  c: ObjectExpression;
-  d?: ObjectExpression;
-}
-
 function buildWatchesArg(
   componentDefinition: ComponentDefinitionData,
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
-    const watchArg: iWatchArgs = {
-      e: t.stringLiteral(watch.dynamicElementRef),
+    const watchArg = {
+      e: t.stringLiteral(watch.elementKey),
       c: buildObjectExpression(watch.callbacks),
     };
     if (watch.shieldInfo) {
-      watchArg.d = buildObjectExpression({
+      const visibilityToggle = {
         q: t.stringLiteral(watch.shieldInfo.key),
         s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
         r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
-      });
+      };
+      if (watch.shieldInfo.detacher) {
+        const detacher = watch.shieldInfo.detacher;
+        visibilityToggle["d"] = buildObjectExpression({
+          i: t.numericLiteral(detacher.index),
+          s: t.numericLiteral(detacher.stashKey),
+          e: t.stringLiteral(detacher.parentKey),
+        });
+      }
+      watchArg["v"] = buildObjectExpression(visibilityToggle);
     }
     return buildObjectExpression(watchArg);
   });

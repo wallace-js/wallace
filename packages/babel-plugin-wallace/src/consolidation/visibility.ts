@@ -6,12 +6,20 @@ import { ComponentWatch } from "./types";
  * This indicates how many watches to skip if that element is hidden.
  * Must be done after processing watches as we need to know how many watches to skip.
  */
-export function setSkipCounts(watches: Array<ComponentWatch>) {
+function setSkipCounts(
+  watch: ComponentWatch,
+  index: number,
+  watches: Array<ComponentWatch>,
+) {
+  watch.shieldInfo.skipCount = watches
+    .slice(index)
+    .filter((w) => arrayStartsWith(watch.address, w.address)).length;
+}
+
+export function processeVisibilityToggles(watches: Array<ComponentWatch>) {
   watches.forEach((watch, index) => {
     if (watch.shieldInfo) {
-      watch.shieldInfo.skipCount = watches
-        .slice(index)
-        .filter((w) => arrayStartsWith(watch.address, w.address)).length;
+      setSkipCounts(watch, index, watches);
     }
   });
 }
