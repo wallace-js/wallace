@@ -46,6 +46,7 @@ proto.update = function () {
     detachedElements,
     detachedElement,
     index,
+    adjustedIndex,
     thisElement;
 
   const watches = this._w;
@@ -66,10 +67,11 @@ proto.update = function () {
     ?d: detacher 
 
   The detacher has keys:
-    i: the element index
+    i: the initial element index
     s: the stash key of the detacher (plain object)
     e: the parent element key
   */
+  console.log("------------");
   while (i < il) {
     watch = watches[i];
     element = this._e[watch.e];
@@ -83,18 +85,20 @@ proto.update = function () {
       visibilityChanged = lookupTrue != !!lookupReturn.o;
       detacher = displayToggle.d;
       if (detacher) {
-        // console.log("------------");
         index = detacher.i;
         parent = this._e[detacher.e];
         detachedElements = this._s[detacher.s];
         detachedElement = detachedElements[index];
         if (shouldBeVisible && detachedElement) {
-          // console.log("start", index, detachedElements);
-          index -= Object.keys(detachedElements).filter(function (k) {
-            return (k < index) & detachedElements[k];
-          }).length;
-          // console.log("adjustes", index);
-          parent.insertBefore(detachedElement, parent.childNodes[index]);
+          adjustedIndex =
+            index -
+            Object.keys(detachedElements).filter(function (k) {
+              return k < index && detachedElements[k];
+            }).length;
+          parent.insertBefore(
+            detachedElement,
+            parent.childNodes[adjustedIndex],
+          );
           detachedElements[index] = null;
         } else if (!shouldBeVisible && !detachedElement) {
           thisElement = this._e[watch.e];

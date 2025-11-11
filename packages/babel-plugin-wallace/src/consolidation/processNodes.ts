@@ -160,7 +160,6 @@ export function processNodes(
       node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
-
     if (shouldSaveElement) {
       const nestedComponentCls = node.isNestedClass
         ? t.identifier(node.tagName)
@@ -174,6 +173,18 @@ export function processNodes(
 
       if (node.bindInstructions.length) {
         addBindInstruction(node);
+      }
+
+      if (node.hasConditionalChildren) {
+        node.detacherStashKey = componentDefinition.getNextmiscStashKey();
+        componentDefinition.wrapDynamicElementCall(
+          node.elementKey,
+          IMPORTABLES.stashMisc,
+          [
+            identifier(COMPONENT_BUILD_PARAMS.component),
+            t.objectExpression([]),
+          ],
+        );
       }
 
       if (createWatch) {
@@ -236,18 +247,6 @@ export function processNodes(
           ]);
         }
 
-        if (node.hasConditionalChildren) {
-          node.detacherStashKey = componentDefinition.getNextmiscStashKey();
-          componentDefinition.wrapDynamicElementCall(
-            node.elementKey,
-            IMPORTABLES.stashMisc,
-            [
-              identifier(COMPONENT_BUILD_PARAMS.component),
-              t.objectExpression([]),
-            ],
-          );
-        }
-
         if (visibilityToggle) {
           const shieldLookupKey = componentDefinition.addLookup(
             visibilityToggle.expression,
@@ -258,6 +257,9 @@ export function processNodes(
             reverse: visibilityToggle.reverse,
           };
           if (visibilityToggle.detach) {
+            if (node.parent.detacherStashKey === undefined) {
+              throw new Error("Parent node was not given a stash key");
+            }
             componentWatch.shieldInfo.detacher = {
               index: node.address[node.address.length - 1],
               stashKey: node.parent.detacherStashKey,
