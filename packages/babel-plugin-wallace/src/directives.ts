@@ -1,5 +1,6 @@
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_PARAMS } from "./constants";
+import { ERROR_MESSAGES, error } from "./errors";
 
 class BaseDirective extends Directive {
   static attributeName = "base";
@@ -94,6 +95,12 @@ class IfDirective extends Directive {
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     // this.ensureValueType();
+    if (node.isRepeatedNode || node.isNestedClass) {
+      error(
+        node.path,
+        ERROR_MESSAGES.CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT,
+      );
+    }
     node.setVisibilityToggle(value.expression, true, true);
   }
 }

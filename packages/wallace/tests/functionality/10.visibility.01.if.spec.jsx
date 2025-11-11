@@ -1,5 +1,50 @@
 import { testMount } from "../utils";
 
+describe("Conditional directive not allowed", () => {
+  test("on root element", () => {
+    const code = `
+      const Foo = () => (
+        <div if={showElement}>
+          <span>Hello</span>
+        </div>
+      );
+    `;
+    expect(code).toCompileWithError("Cannot use 'if' on root element.");
+  });
+
+  test("on nested element", () => {
+    const code = `
+      const Bar = () => (
+        <span>Hello</span>
+      )
+      const Foo = () => (
+        <div>
+          <Bar.nest if={true} />
+        </div>
+      );
+    `;
+    expect(code).toCompileWithError(
+      "Cannot use 'if' on nested or repeated element.",
+    );
+  });
+
+  test("on repeated element", () => {
+    const code = `
+      const Bar = () => (
+        <span>Hello</span>
+      )
+      const Foo = () => (
+        <div>
+          <Bar.repeat if={true} />
+        </div>
+      );
+    `;
+    expect(code).toCompileWithError(
+      "Cannot use 'if' on nested or repeated element.",
+    );
+  });
+});
+
 describe("Conditional directive on element", () => {
   test.each([true, false])("when initalValue = %s", (showElement) => {
     const Foo = () => (
@@ -32,17 +77,6 @@ describe("Conditional directive on element", () => {
         <div></div>
       `);
     }
-  });
-
-  test("not allowed on root element", () => {
-    const code = `
-      const Foo = () => (
-        <div if={showElement}>
-          <span>Hello</span>
-        </div>
-      );
-    `;
-    expect(code).toCompileWithError("Cannot use 'if' on root element.");
   });
 });
 
@@ -144,7 +178,7 @@ describe("Multiple conditional elements under same element", () => {
   });
 });
 
-describe.only("Multiple conditional elements under different elements", () => {
+describe("Multiple conditional elements under different elements", () => {
   let showA = true;
   let showB = false;
   let showC = true;
@@ -193,9 +227,3 @@ describe.only("Multiple conditional elements under different elements", () => {
     `);
   });
 });
-
-/*
-
-TODO: think of use on nested/repeat...
-
-*/

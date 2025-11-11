@@ -7,6 +7,8 @@ export const ERROR_MESSAGES = {
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
+  CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT:
+    "Cannot use 'if' on nested or repeated element.",
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT:
     "Nest components using <Name.nest /> or <Name.repeat />.",
