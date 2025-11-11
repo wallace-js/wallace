@@ -173,13 +173,15 @@ export class Component {
   ) {
     this.#enterLevel(tracker.childIndex);
     const expression = getPlaceholderExpression(path, path.node.expression);
-    const extractedNode = new DynamicTextNode(
-      path,
-      this.#getCurrentAddress(),
-      tracker.parent,
-      expression,
-    );
-    this.#addNode(extractedNode, path, tracker);
+    if (expression) {
+      const extractedNode = new DynamicTextNode(
+        path,
+        this.#getCurrentAddress(),
+        tracker.parent,
+        expression,
+      );
+      this.#addNode(extractedNode, path, tracker);
+    }
     this.#exitLevel();
   }
 }

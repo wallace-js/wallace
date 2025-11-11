@@ -22,8 +22,6 @@ describe("Defining functions in equivalent ways compiles to same output", () => 
   });
 });
 
-// Add similar for classes here
-
 test("JSX not allowed in expressions", () => {
   const code = `
     const Foo = () => (
@@ -37,6 +35,17 @@ test("JSX not allowed in expressions", () => {
   expect(code).toCompileWithError(
     "JSX elements are not allowed in expressions.",
   );
+});
+
+test("JSX ignores comments and empty expressiosn", () => {
+  const code = `
+    const Foo = () => (
+      <div>
+        {/* comment */}
+      </div>
+    );
+  `;
+  expect(code).toCompileWithoutError();
 });
 
 describe("Additional arguments", () => {

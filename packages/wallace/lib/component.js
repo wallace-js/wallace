@@ -71,7 +71,6 @@ proto.update = function () {
     s: the stash key of the detacher (plain object)
     e: the parent element key
   */
-  console.log("------------");
   while (i < il) {
     watch = watches[i];
     element = this._e[watch.e];

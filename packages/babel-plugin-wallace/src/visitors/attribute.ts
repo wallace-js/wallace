@@ -38,13 +38,15 @@ function extractName(path: NodePath<JSXAttribute>): {
  *   foo="bar"
  *   foo={bar}
  */
-function extractValue(path: NodePath<JSXAttribute>): NodeValue {
+function extractValue(path: NodePath<JSXAttribute>): NodeValue | undefined {
   const { value } = path.node;
   if (t.isStringLiteral(value)) {
     return { type: "string", value: value.value };
   } else if (t.isJSXExpressionContainer(value)) {
     const expression = getPlaceholderExpression(path, value.expression);
-    return { type: "expression", expression: expression };
+    if (expression) {
+      return { type: "expression", expression: expression };
+    }
   } else if (value === null) {
     return { type: "null" };
   } else {
@@ -60,6 +62,9 @@ export const attributeVisitors = {
     }
     const { base, qualifier } = extractName(path);
     const extractedValue = extractValue(path);
+    if (!extractedValue) {
+      return;
+    }
     const isEventHandler =
       extractedValue.type === "expression" && base.startsWith("on");
     const directiveClass = isEventHandler
