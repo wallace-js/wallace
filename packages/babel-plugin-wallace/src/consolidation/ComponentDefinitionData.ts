@@ -27,27 +27,30 @@ export class ComponentDefinitionData {
   component: Component;
   html: string;
   watches: Array<ComponentWatch> = [];
-  stash: { [key: string]: CallExpression } = {};
+  dynamicElements: { [key: string]: CallExpression } = {};
   baseComponent: Expression | undefined;
   lookups: { [key: string]: FunctionExpression } = {};
   collectedRefs: Array<string> = [];
-  #stashKey: number = 0;
-  #miscObjectKey: number = 0;
+  #dynamicElementKey: number = 0;
+  #miscStashKey: number = 0;
   #lookupKeys: Array<String> = [];
   constructor(component: Component) {
     this.component = component;
     this.baseComponent = component.baseComponent;
   }
-  saveElementToStash(address: NodeAddress) {
-    this.#stashKey++;
-    const key = String(this.#stashKey);
-    this.stash[key] = buildFindElementCall(this.component.module, address);
+  saveDynamicElement(address: NodeAddress) {
+    this.#dynamicElementKey++;
+    const key = String(this.#dynamicElementKey);
+    this.dynamicElements[key] = buildFindElementCall(
+      this.component.module,
+      address,
+    );
     return key;
   }
-  saveNestedClassToStash(address: NodeAddress, componentCls: Expression) {
-    this.#stashKey++;
-    const key = String(this.#stashKey);
-    this.stash[key] = buildNestedClassCall(
+  saveNestedAsDynamicElement(address: NodeAddress, componentCls: Expression) {
+    this.#dynamicElementKey++;
+    const key = String(this.#dynamicElementKey);
+    this.dynamicElements[key] = buildNestedClassCall(
       this.component.module,
       address,
       componentCls,
@@ -79,18 +82,18 @@ export class ComponentDefinitionData {
   getLookupCallBackParams(): Array<Identifier> {
     return [this.component.propsIdentifier, this.component.componentIdentifier];
   }
-  wrapStashCall(
+  wrapDynamicElementCall(
     key: string,
     functionName: IMPORTABLES,
     remainingArgs: Expression[],
   ) {
-    this.stash[key] = callExpression(this.getFunctionIdentifier(functionName), [
-      this.stash[key],
-      ...remainingArgs,
-    ]);
+    this.dynamicElements[key] = callExpression(
+      this.getFunctionIdentifier(functionName),
+      [this.dynamicElements[key], ...remainingArgs],
+    );
   }
-  getNextMiscObjectKey() {
-    this.#miscObjectKey++;
-    return this.#miscObjectKey - 1;
+  getNextmiscStashKey() {
+    this.#miscStashKey++;
+    return this.#miscStashKey - 1;
   }
 }

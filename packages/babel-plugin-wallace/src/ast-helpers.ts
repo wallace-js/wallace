@@ -31,21 +31,13 @@ export function getJSXElementName(
 export function getPlaceholderExpression(
   path: NodePath,
   expression: Expression | JSXEmptyExpression,
-): Expression {
-  // if (
-  //   // TODO: I probably need to expand this...
-  //   t.isIdentifier(expression) ||
-  //   t.isMemberExpression(expression) ||
-  //   t.isCallExpression(expression)
-  // ) {
-  //   return expression;
-  // } else
+): Expression | undefined {
   if (t.isJSXEmptyExpression(expression)) {
-    error(path, ERROR_MESSAGES.PLACEHOLDER_MAY_NOT_BE_EMPTY);
+    // This is really to handle comments
+    return undefined;
   } else if (t.isObjectExpression(expression)) {
     // The code is copied, so the object would be created afresh each time.
     error(path, ERROR_MESSAGES.PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT);
   }
-  //error(path, ERROR_MESSAGES.INVALID_PLACEHOLDER_EXPRESSION);
   return expression as Expression;
 }

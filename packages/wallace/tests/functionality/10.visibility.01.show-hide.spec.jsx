@@ -42,6 +42,41 @@ describe("Visibility controlled by `show` directive", () => {
   });
 });
 
+describe("Elements under hidden parents", () => {
+  test("do not update when parent element is hidden", () => {
+    let hidden = false;
+    let name = "Walrus";
+    const MyComponent = () => (
+      <div hide={hidden}>
+        <div>
+          <span>{name}</span>
+        </div>
+        <span>{name}</span>
+      </div>
+    );
+    const component = testMount(MyComponent);
+    expect(component).toRender(`
+      <div>
+        <div>
+          <span>Walrus</span>
+        </div>
+        <span>Walrus</span>
+      </div>
+    `);
+    hidden = true;
+    name = "fox";
+    component.update();
+    expect(component).toRender(`
+      <div hidden="">
+        <div>
+          <span>Walrus</span>
+        </div>
+          <span>Walrus</span>
+      </div>
+    `);
+  });
+});
+
 describe("Nested components", () => {
   test("show and hide their root element", () => {
     let showWalrus = true;
@@ -104,5 +139,38 @@ describe("Nested components", () => {
     component.update();
     expect(targetSpan.textContent).toBe("3");
     expect(otherSpan.textContent).toBe("5");
+  });
+});
+
+describe("Repeated components", () => {
+  test("do not update when hidden", () => {
+    let showAnimals = false;
+    const walrus = { name: "Mr Walrus" };
+    const fox = { name: "Ms Fox" };
+    const getAnimals = () => [walrus, fox];
+    const Animal = (animal) => <div>Hello {animal.name}</div>;
+    const AnimalList = () => (
+      <div show={showAnimals}>
+        <div class="list">
+          <Animal.repeat props={getAnimals()} />
+        </div>
+      </div>
+    );
+    const component = testMount(AnimalList);
+    expect(component).toRender(`
+      <div hidden="">
+        <div class="list"></div>
+      </div>
+    `);
+    showAnimals = true;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div class="list">
+          <div>Hello <span>Mr Walrus</span></div>
+          <div>Hello <span>Ms Fox</span></div>
+        </div>
+      </div>
+    `);
   });
 });

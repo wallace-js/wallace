@@ -10,7 +10,7 @@ import {
   nestComponent,
   defineComponent,
   extendPrototype,
-  saveMiscObject,
+  stashMisc,
   saveRef,
 } from "./initCalls";
 
@@ -28,7 +28,7 @@ export {
   mount,
   nestComponent,
   onEvent,
-  saveMiscObject,
+  stashMisc,
   saveRef,
   SequentialPool,
 };

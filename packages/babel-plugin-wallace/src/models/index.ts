@@ -2,25 +2,25 @@ import { Module } from "./module";
 import { Directive, NodeValue, Qualifier } from "./directive";
 import { Component, WalkTracker } from "./component";
 import {
-  ExtractedNode,
-  TagNode,
   DynamicTextNode,
+  ExtractedNode,
   PlainTextNode,
-  ConditionalDisplay,
   RepeatInstruction,
+  TagNode,
+  VisibilityToggle,
 } from "./node";
 
 export {
   Component,
-  ConditionalDisplay,
   Directive,
-  NodeValue,
   ExtractedNode,
-  TagNode,
   DynamicTextNode,
-  PlainTextNode,
   Module,
+  NodeValue,
+  PlainTextNode,
   Qualifier,
   RepeatInstruction,
+  TagNode,
+  VisibilityToggle,
   WalkTracker,
 };

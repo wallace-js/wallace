@@ -1,5 +1,6 @@
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_PARAMS } from "./constants";
+import { ERROR_MESSAGES, error } from "./errors";
 
 class BaseDirective extends Directive {
   static attributeName = "base";
@@ -75,13 +76,32 @@ class HelpDirective extends Directive {
 class HideDirective extends Directive {
   static attributeName = "hide";
   static help = `
-    Conditionally hides an element and all nested elements.
+    Hides an element by toggling its hidden attribute.
 
     /h <div hide={}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     // this.ensureValueType();
-    node.setConditionalDisplay(value.expression, false);
+    node.setVisibilityToggle(value.expression, false, false);
+  }
+}
+
+class IfDirective extends Directive {
+  static attributeName = "if";
+  static help = `
+    Conditionally includes/exludes an element from the DOM.
+
+    /h <div if={}></div>
+    `;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    // this.ensureValueType();
+    if (node.isRepeatedNode || node.isNestedClass) {
+      error(
+        node.path,
+        ERROR_MESSAGES.CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT,
+      );
+    }
+    node.setVisibilityToggle(value.expression, true, true);
   }
 }
 
@@ -152,7 +172,7 @@ class PropsDirective extends Directive {
 class RefDirective extends Directive {
   static attributeName = "ref";
   static help = `
-    Saves a reference to an element:
+    Saves a reference to an element or nested component:
 
     /h <div ref:title></div>
     `;
@@ -164,13 +184,13 @@ class RefDirective extends Directive {
 class ShowDirective extends Directive {
   static attributeName = "show";
   static help = `
-    Conditionally shows an element and all nested elements.
+    Shows an element by toggling its hidden attribute.
 
     /h <div show={}></div>
     `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     // this.ensureValueType();
-    node.setConditionalDisplay(value.expression, true);
+    node.setVisibilityToggle(value.expression, true, false);
   }
 }
 
@@ -233,6 +253,7 @@ export const builtinDirectives = [
   HelpDirective,
   HideDirective,
   KeyDirective,
+  IfDirective,
   OnEventDirective,
   PoolDirective,
   PropsDirective,

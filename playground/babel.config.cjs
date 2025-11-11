@@ -22,7 +22,7 @@ function flag(name) {
 }
 
 const toggles = {
-  NO_PRESET_ENV: "@babel/preset-env",
+  NO_PRESET_ENV: ["@babel/preset-env", { modules: false }],
   NO_PRESET_TYPESCRIPT: "@babel/preset-typescript",
 };
 const presets = [];

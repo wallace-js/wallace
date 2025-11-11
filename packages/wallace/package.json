@@ -1,8 +1,8 @@
 {
   "name": "wallace",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "author": "Andrew Buchan",
-  "description": "The framework that brings you glee.",
+  "description": "The framework that brings you FREEEDOM.",
   "license": "ISC",
   "main": "lib/index.js",
   "files": [
@@ -14,7 +14,7 @@
     "check": "babel $@"
   },
   "dependencies": {
-    "babel-plugin-wallace": "^0.0.5",
+    "babel-plugin-wallace": "^0.0.7",
     "browserify": "^17.0.1"
   },
   "gitHead": "286a00b51777c4b7fed9a778b93e9727ed905e2a"

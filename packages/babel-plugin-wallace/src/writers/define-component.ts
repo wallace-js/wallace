@@ -32,17 +32,18 @@ function buildTemplateArg(
   );
 }
 
-function buildObjectExpression(
-  object: { [key: string]: any },
-  fn: (n: any) => any,
-): ObjectExpression {
+/**
+ * Creates an ObjectExpression from an object.
+ */
+function buildObjectExpression(object: {
+  [key: string]: any;
+}): ObjectExpression {
   const properties: Array<ObjectProperty> = [];
-
   for (const [key, value] of Object.entries(object)) {
     properties.push({
       type: "ObjectProperty",
       key: identifier(key),
-      value: fn(value),
+      value: value,
       computed: false,
       shorthand: false,
     });
@@ -54,25 +55,27 @@ function buildWatchesArg(
   componentDefinition: ComponentDefinitionData,
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
-    const callbacks: Array<ObjectProperty> = [];
-    for (const [key, fnExpr] of Object.entries(watch.callbacks)) {
-      callbacks.push({
-        type: "ObjectProperty",
-        key: t.identifier(key),
-        value: fnExpr,
-        computed: false,
-        shorthand: false,
-      });
+    const watchArg = {
+      e: t.stringLiteral(watch.elementKey),
+      c: buildObjectExpression(watch.callbacks),
+    };
+    if (watch.shieldInfo) {
+      const visibilityToggle = {
+        q: t.stringLiteral(watch.shieldInfo.key),
+        s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
+        r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
+      };
+      if (watch.shieldInfo.detacher) {
+        const detacher = watch.shieldInfo.detacher;
+        visibilityToggle["d"] = buildObjectExpression({
+          i: t.numericLiteral(detacher.index),
+          s: t.numericLiteral(detacher.stashKey),
+          e: t.stringLiteral(detacher.parentKey),
+        });
+      }
+      watchArg["v"] = buildObjectExpression(visibilityToggle);
     }
-    return t.arrayExpression([
-      t.stringLiteral(watch.stashRef),
-      watch.shieldInfo
-        ? t.stringLiteral(watch.shieldInfo.key)
-        : t.numericLiteral(0),
-      t.numericLiteral(watch.shieldInfo?.reverse ? 1 : 0),
-      t.numericLiteral(watch.shieldInfo?.count || 0),
-      t.objectExpression(callbacks),
-    ]);
+    return buildObjectExpression(watchArg);
   });
   return t.arrayExpression([...watchDeclarations]);
 }
@@ -80,7 +83,7 @@ function buildWatchesArg(
 function buildLookupsArg(
   componentDefinition: ComponentDefinitionData,
 ): ObjectExpression {
-  return buildObjectExpression(componentDefinition.lookups, (fnExpx) => fnExpx);
+  return buildObjectExpression(componentDefinition.lookups);
 }
 
 /**
@@ -93,17 +96,16 @@ function buildLookupsArg(
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData,
 ): FunctionExpression {
-  const stashValueObject = buildObjectExpression(
-    componentDefinition.stash,
-    (stashEntry) => stashEntry,
+  const dynamicElementsValueObject = buildObjectExpression(
+    componentDefinition.dynamicElements,
   );
 
-  const stashAssignment = t.assignmentExpression(
+  const dynamicElementsAssignment = t.assignmentExpression(
     "=",
     t.memberExpression(t.identifier("component"), t.identifier("_e")),
-    stashValueObject,
+    dynamicElementsValueObject,
   );
-  const statements = [t.expressionStatement(stashAssignment)];
+  const statements = [t.expressionStatement(dynamicElementsAssignment)];
   return t.functionExpression(
     null,
     [

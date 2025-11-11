@@ -6,23 +6,24 @@ export const ERROR_MESSAGES = {
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
+  CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
+  CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT:
+    "Cannot use 'if' on nested or repeated element.",
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT:
     "Nest components using <Name.nest /> or <Name.repeat />.",
   ARROW_FUNCTION_NOT_ASSIGNED:
     "Component function must be assigned to a variable.",
-  PLACEHOLDER_MAY_NOT_BE_EMPTY: "Placeholder expressions may not be empty.",
   BIND_ONLY_ALLOWED_ON_INPUT:
     "The `bind` directive may only be used on `input` tags.",
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
-  INVALID_PLACEHOLDER_EXPRESSION: "Invalid expressions for a placeholder",
   JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS:
     "JSX elements are not allowed in expressions.",
   UNSUPPORTED_ATTRIBUTE_VALUE:
     "Attribute value must be a string or expression.",
-  CONDITIONAL_DISPLAY_ALREADY_DEFINED:
-    "Conditional display already defined on element.",
+  VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
+    "Can only define one visibility toggle on element.",
   REF_ALREADY_DEFINED: "Ref already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
   PROPS_ALREADY_DEFINED: "Props already defined on element.",
