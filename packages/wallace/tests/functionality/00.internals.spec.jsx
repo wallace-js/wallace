@@ -29,7 +29,7 @@ describe("Watches", () => {
         <span ref:target>woof</span>
       </div>
     );
-    expect(Dog.prototype.__wc.length).toBe(0);
+    expect(Dog.prototype._w.length).toBe(0);
   });
   test(" are not created for events", () => {
     const Dog = () => (
@@ -37,7 +37,7 @@ describe("Watches", () => {
         <span onClick={foo}>woof</span>
       </div>
     );
-    expect(Dog.prototype.__wc.length).toBe(0);
+    expect(Dog.prototype._w.length).toBe(0);
   });
 });
 

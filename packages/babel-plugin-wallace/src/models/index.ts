@@ -6,12 +6,12 @@ import {
   TagNode,
   DynamicTextNode,
   PlainTextNode,
-  ConditionalDisplay,
+  VisibilityToggle,
 } from "./node";
 
 export {
   Component,
-  ConditionalDisplay,
+  VisibilityToggle,
   Directive,
   NodeValue,
   ExtractedNode,

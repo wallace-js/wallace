@@ -28,7 +28,7 @@ export const nestComponent = (rootElement, path, cls, parent) => {
 };
 
 /**
- * Saves a reference to element or nested component. Can be used to wrap a stash call.
+ * Saves a reference to element or nested component. Returns the element.
  */
 export const saveRef = (element, component, name) => {
   component.ref[name] = element;
@@ -36,10 +36,11 @@ export const saveRef = (element, component, name) => {
 };
 
 /**
- * Saves a misc object (anything that's not an element). Can be used to wrap a stash call.
+ * Stash something on the component. Returns the element.
+ * The generated code is expected to keep track of the position.
  */
-export const saveMiscObject = (element, component, object) => {
-  component._o.push(object);
+export const stashMisc = (element, component, object) => {
+  component._s.push(object);
   return element;
 };
 
@@ -82,13 +83,8 @@ export function extendComponent(
   lookups,
   buildFunction,
 ) {
-  prototype.__wc = watches.map((arr) => ({
-    wk: arr[0], // The key of the corresponding element.
-    sq: arr[1], // The shield query key
-    rv: arr[2], // whether shieldQuery should be flipped
-    sc: arr[3], // The number of items to shield
-    cb: arr[4], // The callbacks - object
-  }));
+  //Ensure these do not clash with fields on the component itself.
+  prototype._w = watches;
   prototype._l = new Lookup(lookups);
   prototype._b = buildFunction;
   prototype._n = makeEl(html);

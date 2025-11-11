@@ -11,7 +11,7 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { codeToNode } from "../utils";
-import { Component, ConditionalDisplay, ExtractedNode } from "../models";
+import { Component, VisibilityToggle, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
@@ -49,19 +49,6 @@ function addBindInstruction(node: ExtractedNode) {
   } else {
     error(node.path, ERROR_MESSAGES.BIND_ONLY_ALLOWED_ON_INPUT);
   }
-}
-
-function addShieldInfo(
-  componentDefinition: ComponentDefinitionData,
-  componentWatch: ComponentWatch,
-  shieldInfo: ConditionalDisplay,
-) {
-  const shieldLookupKey = componentDefinition.addLookup(shieldInfo.expression);
-  componentWatch.shieldInfo = {
-    count: 0,
-    key: shieldLookupKey,
-    reverse: shieldInfo.reverse,
-  };
 }
 
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
@@ -153,34 +140,51 @@ export function processNodes(
           t.identifier(stubName),
         )
       : undefined;
-    const shieldInfo = node.getShieldInfo();
+    const visibilityToggle = node.getVisibilityToggle();
     const ref = node.getRef();
     const repeatInstruction = node.getRepeatInstruction();
     const createWatch =
       node.watches.length > 0 ||
       node.bindInstructions.length > 0 ||
       node.toggleTriggers.length > 0 ||
-      shieldInfo ||
+      visibilityToggle ||
       node.isNestedClass ||
       stubName ||
       repeatInstruction;
-    const shouldStash = createWatch || ref || node.eventListeners.length > 0;
+
+    // TODO: should ref really save the element?
+    const shouldSaveElement =
+      createWatch ||
+      ref ||
+      node.eventListeners.length > 0 ||
+      node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
-
-    if (shouldStash) {
+    if (shouldSaveElement) {
       const nestedComponentCls = node.isNestedClass
         ? t.identifier(node.tagName)
         : stubComponentName;
-      const stashRef = nestedComponentCls
-        ? componentDefinition.saveNestedClassToStash(
+      node.elementKey = nestedComponentCls
+        ? componentDefinition.saveNestedAsDynamicElement(
             node.address,
             nestedComponentCls,
           )
-        : componentDefinition.saveElementToStash(node.address);
+        : componentDefinition.saveDynamicElement(node.address);
 
       if (node.bindInstructions.length) {
         addBindInstruction(node);
+      }
+
+      if (node.hasConditionalChildren) {
+        node.detacherStashKey = componentDefinition.getNextmiscStashKey();
+        componentDefinition.wrapDynamicElementCall(
+          node.elementKey,
+          IMPORTABLES.stashMisc,
+          [
+            identifier(COMPONENT_BUILD_PARAMS.component),
+            t.objectExpression([]),
+          ],
+        );
       }
 
       if (createWatch) {
@@ -193,7 +197,7 @@ export function processNodes(
         };
 
         const componentWatch: ComponentWatch = {
-          stashRef,
+          elementKey: node.elementKey,
           callbacks: {},
           address: node.address,
         };
@@ -243,12 +247,28 @@ export function processNodes(
           ]);
         }
 
-        if (shieldInfo) {
-          addShieldInfo(componentDefinition, componentWatch, shieldInfo);
+        if (visibilityToggle) {
+          const shieldLookupKey = componentDefinition.addLookup(
+            visibilityToggle.expression,
+          );
+          componentWatch.shieldInfo = {
+            skipCount: 0, // gets set later once we've processed all the nodes.
+            key: shieldLookupKey,
+            reverse: visibilityToggle.reverse,
+          };
+          if (visibilityToggle.detach) {
+            if (node.parent.detacherStashKey === undefined) {
+              throw new Error("Parent node was not given a stash key");
+            }
+            componentWatch.shieldInfo.detacher = {
+              index: node.address[node.address.length - 1],
+              stashKey: node.parent.detacherStashKey,
+              parentKey: node.parent.elementKey,
+            };
+          }
         }
 
         if (repeatInstruction) {
-          const miscObjectKey = componentDefinition.getNextMiscObjectKey();
           componentDefinition.component.module.requireImport(
             IMPORTABLES.getSequentialPool,
           );
@@ -257,9 +277,13 @@ export function processNodes(
             callExpression(identifier(IMPORTABLES.getSequentialPool), [
               identifier(repeatInstruction.componentCls),
             ]);
-          componentDefinition.wrapStashCall(
-            stashRef,
-            IMPORTABLES.saveMiscObject,
+
+          // TODO: couple the stash index with the call to save - if possible?
+          // Or make it an object and pass the key when saving.
+          const miscStashKey = componentDefinition.getNextmiscStashKey();
+          componentDefinition.wrapDynamicElementCall(
+            node.elementKey,
+            IMPORTABLES.stashMisc,
             [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance],
           );
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
@@ -271,7 +295,7 @@ export function processNodes(
                       component.componentIdentifier,
                       identifier(SPECIAL_SYMBOLS.objectStash),
                     ),
-                    numericLiteral(miscObjectKey),
+                    numericLiteral(miscStashKey),
                     true,
                   ),
                   identifier(SPECIAL_SYMBOLS.patch),
@@ -311,10 +335,11 @@ export function processNodes(
           );
         }
         componentDefinition.collectedRefs.push(ref);
-        componentDefinition.wrapStashCall(stashRef, IMPORTABLES.saveRef, [
-          identifier(COMPONENT_BUILD_PARAMS.component),
-          stringLiteral(ref),
-        ]);
+        componentDefinition.wrapDynamicElementCall(
+          node.elementKey,
+          IMPORTABLES.saveRef,
+          [identifier(COMPONENT_BUILD_PARAMS.component), stringLiteral(ref)],
+        );
       }
 
       // Note that some things will already have been renamed, but here we are renaming
@@ -331,14 +356,18 @@ export function processNodes(
           eventVariableMapping,
         );
 
-        componentDefinition.wrapStashCall(stashRef, IMPORTABLES.onEvent, [
-          stringLiteral(listener.eventName),
-          functionExpression(
-            null,
-            [identifier(EVENT_CALLBACK_VARIABLES.event)],
-            blockStatement([expressionStatement(updatedExpression)]),
-          ),
-        ]);
+        componentDefinition.wrapDynamicElementCall(
+          node.elementKey,
+          IMPORTABLES.onEvent,
+          [
+            stringLiteral(listener.eventName),
+            functionExpression(
+              null,
+              [identifier(EVENT_CALLBACK_VARIABLES.event)],
+              blockStatement([expressionStatement(updatedExpression)]),
+            ),
+          ],
+        );
       });
     }
   });

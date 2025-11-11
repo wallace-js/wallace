@@ -1,5 +1,5 @@
 import { Component, DynamicTextNode } from "../models";
-import { processShields } from "./visibility";
+import { processeVisibilityToggles } from "./visibility";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
 import { processNodes } from "./processNodes";
 import { getSiblings } from "./utils";
@@ -26,7 +26,7 @@ function hoistTextNodes(component: Component) {
 }
 
 /**
- * Deals with shielding, setting ref keys and such.
+ * Deals with visibility toggles, setting ref keys and such.
  */
 export function consolidateComponent(
   component: Component,
@@ -34,7 +34,7 @@ export function consolidateComponent(
   const componentDefinition = new ComponentDefinitionData(component);
   hoistTextNodes(component);
   processNodes(component, componentDefinition);
-  processShields(componentDefinition.watches);
+  processeVisibilityToggles(componentDefinition.watches);
   // This must be done after all the processing, as DOM may have changed.
   componentDefinition.html = component.rootElement.outerHTML;
   return componentDefinition;

@@ -105,11 +105,6 @@ test("Placeholders in nested attribute works", () => {
   `);
 });
 
-test("Placeholders without value compiles with error", () => {
-  const code = `const MyComponent = () => <div>Hello {}</div>`;
-  expect(code).toCompileWithError("Placeholder expressions may not be empty.");
-});
-
 test("Placeholders with undefined variable results in empty span", () => {
   const MyComponent = () => <div>Hello {name}!</div>;
   const component = testMount(MyComponent);

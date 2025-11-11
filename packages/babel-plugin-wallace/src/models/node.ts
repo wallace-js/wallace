@@ -18,7 +18,6 @@ interface Watch {
   expression: Expression;
   // TODO: change to proper expr
   callback: string;
-  // shieldInfo?: ShieldInfo | undefined;
 }
 
 interface RepeatInstruction {
@@ -37,9 +36,10 @@ interface BindInstruction {
   expression: Expression;
 }
 
-export interface ConditionalDisplay {
+export interface VisibilityToggle {
   expression: Expression;
   reverse: boolean;
+  detach: boolean;
 }
 
 interface ToggleTrigger {
@@ -58,6 +58,8 @@ export class ExtractedNode {
   component: any;
   tagName: string;
   element: HTMLElement | Text | undefined;
+  elementKey: string | undefined;
+  detacherStashKey: number | undefined;
   isRepeatedNode: boolean = false;
   repeatNode: ExtractedNode | undefined;
   address: Array<number>;
@@ -67,6 +69,7 @@ export class ExtractedNode {
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
   isNestedClass: boolean = false;
+  hasConditionalChildren: boolean = false;
   repeatExpression: Expression | undefined;
   poolExpression: Expression | undefined;
   /**
@@ -78,7 +81,7 @@ export class ExtractedNode {
    */
   toggleTriggers: ToggleTrigger[] = [];
   #stubName: string | undefined;
-  #conditionalDisplay: ConditionalDisplay | undefined;
+  #visibilityToggle: VisibilityToggle | undefined;
   #ref: string | undefined;
   #props: Expression | undefined;
   #forExpression: Expression | undefined;
@@ -144,14 +147,27 @@ export class ExtractedNode {
   getProps(): Expression | undefined {
     return this.#props;
   }
-  setConditionalDisplay(expression: Expression, reverse: boolean) {
-    if (this.#conditionalDisplay) {
-      error(this.path, ERROR_MESSAGES.CONDITIONAL_DISPLAY_ALREADY_DEFINED);
+  setVisibilityToggle(
+    expression: Expression,
+    reverse: boolean,
+    detach: boolean,
+  ) {
+    if (this.#visibilityToggle) {
+      error(
+        this.path,
+        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED,
+      );
     }
-    this.#conditionalDisplay = { expression, reverse };
+    this.#visibilityToggle = { expression, reverse, detach };
+    if (detach) {
+      if (!this.parent) {
+        error(this.path, ERROR_MESSAGES.CANNOT_USE_IF_ON_ROOT_ELEMENT);
+      }
+      this.parent.hasConditionalChildren = true;
+    }
   }
-  getShieldInfo(): ConditionalDisplay | undefined {
-    return this.#conditionalDisplay;
+  getVisibilityToggle(): VisibilityToggle | undefined {
+    return this.#visibilityToggle;
   }
   setRef(name: string) {
     if (this.#ref) {
@@ -306,98 +322,3 @@ export class PlainTextNode extends ExtractedNode {
     return this.element;
   }
 }
-
-// class NodeData {
-//   constructor(path, module, component, parentNodeData, nodeTreeAddress) {
-//     this.path = path;
-//     this.module = module;
-//     this.component = component;
-//     this.parentNodeData = parentNodeData;
-//     this.nodeTreeAddress = nodeTreeAddress;
-//     this.nestedClass = undefined;
-//     this.isRepeat = false;
-//     this.props = undefined;
-//     this.shieldQuery = undefined;
-//     this.reverseShield = 0;
-//     this.buildCalls = [];
-//     this.watches = [];
-//     this.seq = 0;
-//   }
-//   isDynamic() {
-//     return (
-//       this.watches.length > 0 ||
-//       this.buildCalls.length > 0 ||
-//       this.props ||
-//       this.nestedClass ||
-//       this.shieldQuery
-//     );
-//   }
-//   /**
-//    * Creates a watch on this node.
-//    *
-//    * @param {string} watch - the field or function to watch.
-//    * @param {string} converter - the value to pass to method, or free function call if
-//    *                               property is not supplied.
-//    * @param {string} property - the method on the wrapper (Can even be dotted
-//    *                                   `style.color`).
-//    */
-//   addWatch(watch, converter, property) {
-//     this.watches.push({ watch, converter, property });
-//   }
-//   /**
-//    * Creates an event listener on this node.
-//    * Slot will be expanded.
-//    *
-//    * @param {string} event
-//    * @param {string} slot
-//    */
-//   addEventListener(event, code) {
-//     this.module.requireImport(builderCalls.onEvent);
-//     const callback = `function(${eventCallbackArgs}) {${code}}`;
-//     this.addBuildCall(builderCalls.onEvent, [
-//       componentRefInBuild,
-//       `'${event.toLowerCase()}'`,
-//       callback,
-//     ]);
-//   }
-//   addBuildCall(functionName, args) {
-//     this.buildCalls.push([functionName, ...args]);
-//   }
-//   saveAs(name) {
-//     this.module.requireImport(builderCalls.saveAs);
-//     this.addBuildCall(builderCalls.saveAs, [
-//       componentRefInBuild,
-//       literal(name),
-//     ]);
-//   }
-//   requireImport(name, source, alias) {
-//     // TODO: make it use alias
-//     this.module.requireImport(name, source, alias);
-//   }
-//   repeat(data, key) {
-//     // There is no transform here. Should we allow it?
-//     const parent = this.parentNodeData;
-//     if (parent === undefined) {
-//       // TODO: throw better error, and assert parent has no other children.
-//       throw Error("For must be used under a parent.");
-//     }
-//     let getPoolCall;
-//     if (key) {
-//       const keyFn = `function(props) {return props.${key}}`;
-//       this.requireImport(builderCalls.getKeyedPool);
-//       getPoolCall = `${builderCalls.getKeyedPool}(${this.nestedClass}, ${keyFn})`;
-//     } else {
-//       this.requireImport(builderCalls.getSequentialPool);
-//       getPoolCall = `${builderCalls.getSequentialPool}(${this.nestedClass})`;
-//     }
-
-//     this.requireImport(builderCalls.initRepeater);
-//     parent.addBuildCall(builderCalls.initRepeater, [
-//       componentRefInBuild,
-//       getPoolCall,
-//     ]);
-
-//     parent.addWatch(alwaysUpdate, `w.gkItems(${data})`);
-//     this.isRepeat = true;
-//   }
-// }
