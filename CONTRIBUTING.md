@@ -797,7 +797,16 @@ A stub is just a component definition assigned to a prototype field.
 
 ## Publishing
 
+<<<<<<< Updated upstream
 We use [lerna](https://lerna.js.org/docs/features/version-and-publish) to publish, which involves the following workflow:
+=======
+The process is:
+
+1. Merge changes to master.
+2. From master, run the `npm run publish` command (which adds another commit).
+
+We use [lerna](https://lerna.js.org/) to version and publish with the following command:
+>>>>>>> Stashed changes
 
 1. Create a release candidate branch (e.g `rc-0.0.2`) off master.
 2. Add the changes in as few commits as possible (`merge --squash feature/branch`).
