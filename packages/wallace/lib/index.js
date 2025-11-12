@@ -1,11 +1,11 @@
 import { createComponent, createProxy, mount } from "./utils";
 import { Component } from "./component";
-import { KeyedPool, SequentialPool } from "./pool";
+import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 import {
   extendComponent,
   findElement,
-  getKeyedPool,
-  getSequentialPool,
+  getKeyedRepeater,
+  getSequentialRepeater,
   onEvent,
   nestComponent,
   defineComponent,
@@ -22,13 +22,13 @@ export {
   defineComponent,
   extendPrototype,
   findElement,
-  getKeyedPool,
-  getSequentialPool,
-  KeyedPool,
+  getKeyedRepeater,
+  getSequentialRepeater,
+  KeyedRepeater,
   mount,
   nestComponent,
   onEvent,
   stashMisc,
   saveRef,
-  SequentialPool,
+  SequentialRepeater,
 };

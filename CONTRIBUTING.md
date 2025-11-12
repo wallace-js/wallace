@@ -698,7 +698,7 @@ It is far easier to retain an item in the DOM and mark it hidden than to repeate
 
 ### Repeat
 
-Repeat behaviour uses "pools" - see relevant code.
+Repeat behaviour uses "repeaters" - see lib/repeaters.
 
 ### Stubs
 

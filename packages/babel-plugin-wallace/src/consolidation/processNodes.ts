@@ -270,11 +270,11 @@ export function processNodes(
 
         if (repeatInstruction) {
           componentDefinition.component.module.requireImport(
-            IMPORTABLES.getSequentialPool,
+            IMPORTABLES.getSequentialRepeater,
           );
           const poolInstance =
             repeatInstruction.poolExpression ||
-            callExpression(identifier(IMPORTABLES.getSequentialPool), [
+            callExpression(identifier(IMPORTABLES.getSequentialRepeater), [
               identifier(repeatInstruction.componentCls),
             ]);
 

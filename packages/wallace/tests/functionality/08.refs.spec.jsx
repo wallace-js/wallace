@@ -22,7 +22,6 @@ test("Ref on nested component points to component", () => {
   );
   const component = testMount(B);
   expect(component.ref.a).not.toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.a.parent).toBe(component);
   expect(component.ref.a.el.className).toBe("danger");
 });
 

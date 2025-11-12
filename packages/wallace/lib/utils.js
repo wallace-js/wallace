@@ -4,10 +4,9 @@
  * @param {unsure} elementOrId Either a string representing an id, or an element.
  * @param {class} cls The class of Component to create
  * @param {object} props The props to pass to the component (optional)
- * @param {object} parent The parent component (optional)
  */
-export function mount(elementOrId, cls, props, parent) {
-  const component = createComponent(cls, parent, props);
+export function mount(elementOrId, cls, props) {
+  const component = createComponent(cls, props);
   replaceNode(getElement(elementOrId), component.el);
   return component;
 }
@@ -26,24 +25,23 @@ export function getElement(elementOrId) {
  * Creates a component and initialises it.
  *
  * @param {class} cls The class of Component to create
- * @param {object} parent The parent component (optional)
  * @param {object} props The props to pass to the component (optional)
  */
-export function createComponent(cls, parent, props) {
-  const component = buildComponent(cls, parent);
+export function createComponent(cls, props) {
+  const component = buildComponent(cls);
   component.render(props);
   return component;
 }
 
 /**
- * Builds a component.
+ * Builds a component's initial DOM.
  */
-export function buildComponent(cls, parent) {
-  const component = new cls(parent);
-  const prototype = cls.prototype;
-  const dom = prototype._n.cloneNode(true);
+export function buildComponent(cls) {
+  const component = new cls();
+  const proto = cls.prototype;
+  const dom = proto._n.cloneNode(true);
   component.el = dom;
-  component._b(component, dom);
+  proto._b(component, dom);
   return component;
 }
 

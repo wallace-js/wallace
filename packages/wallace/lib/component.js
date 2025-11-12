@@ -1,8 +1,7 @@
 /**
  * The base component.
  */
-export function Component(parent) {
-  this.parent = parent; // The parent component. TODO: is this needed?
+export function Component() {
   this.props = undefined; // The props passed to the component. May be changed.
   this.el = null; // the element - will be set during build.
   this.ref = {}; // user set references to elements or components.

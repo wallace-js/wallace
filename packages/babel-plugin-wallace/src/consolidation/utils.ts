@@ -54,7 +54,6 @@ export function buildNestedClassCall(
     identifier(COMPONENT_BUILD_PARAMS.rootElement),
     buildAddressArray(address),
     componentCls,
-    identifier(COMPONENT_BUILD_PARAMS.component),
   ]);
 }
 
