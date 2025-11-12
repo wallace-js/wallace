@@ -56,7 +56,7 @@ function buildWatchesArg(
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
     const watchArg = {
-      e: t.stringLiteral(watch.elementKey),
+      e: t.numericLiteral(watch.elementKey),
       c: buildObjectExpression(watch.callbacks),
     };
     if (watch.shieldInfo) {
@@ -70,7 +70,7 @@ function buildWatchesArg(
         visibilityToggle["d"] = buildObjectExpression({
           i: t.numericLiteral(detacher.index),
           s: t.numericLiteral(detacher.stashKey),
-          e: t.stringLiteral(detacher.parentKey),
+          e: t.numericLiteral(detacher.parentKey),
         });
       }
       watchArg["v"] = buildObjectExpression(visibilityToggle);
@@ -96,14 +96,20 @@ function buildLookupsArg(
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData,
 ): FunctionExpression {
-  const dynamicElementsValueObject = buildObjectExpression(
-    componentDefinition.dynamicElements,
+  // const dynamicElementsValueObject = buildObjectExpression(
+  //   componentDefinition.dynamicElements,
+  // );
+
+  // TODO: clean up temp code when original is an array too.
+  const keys = Object.keys(componentDefinition.dynamicElements).sort();
+  const values: CallExpression[] = keys.map(
+    (key) => componentDefinition.dynamicElements[key],
   );
 
   const dynamicElementsAssignment = t.assignmentExpression(
     "=",
     t.memberExpression(t.identifier("component"), t.identifier("_e")),
-    dynamicElementsValueObject,
+    t.arrayExpression(values),
   );
   const statements = [t.expressionStatement(dynamicElementsAssignment)];
   return t.functionExpression(

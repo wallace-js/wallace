@@ -639,6 +639,8 @@ We have very limited tests on the generated code as that frequently changes shap
 
 ## Performance
 
+For quick checks this is handy: https://jsben.ch/
+
 ### Benchmarks
 
 We measure performance by running [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) locally. 

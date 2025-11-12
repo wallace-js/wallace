@@ -58,7 +58,7 @@ export class ExtractedNode {
   component: any;
   tagName: string;
   element: HTMLElement | Text | undefined;
-  elementKey: string | undefined;
+  elementKey: number | undefined;
   detacherStashKey: number | undefined;
   isRepeatedNode: boolean = false;
   repeatNode: ExtractedNode | undefined;

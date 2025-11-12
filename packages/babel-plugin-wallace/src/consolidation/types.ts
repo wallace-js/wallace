@@ -5,7 +5,7 @@ export type NodeAddress = Array<number>;
 export interface Detacher {
   index: number;
   stashKey: number;
-  parentKey: string;
+  parentKey: number;
 }
 
 export interface ShieldInfo {
@@ -16,7 +16,7 @@ export interface ShieldInfo {
 }
 
 export interface ComponentWatch {
-  elementKey: string;
+  elementKey: number;
   shieldInfo?: ShieldInfo | undefined;
   callbacks: { [key: string]: FunctionExpression };
   address: NodeAddress;

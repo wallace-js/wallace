@@ -160,6 +160,7 @@ export function processNodes(
       node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
+
     if (shouldSaveElement) {
       const nestedComponentCls = node.isNestedClass
         ? t.identifier(node.tagName)
