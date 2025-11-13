@@ -65,7 +65,7 @@ export class ComponentDefinitionData {
     if (this.#lookupKeys.indexOf(hash) === -1) {
       this.#lookupKeys.push(hash);
     }
-    const key = String(this.#lookupKeys.indexOf(hash));
+    const key = this.#lookupKeys.indexOf(hash);
     this.lookups[key] = functionExpression(
       null,
       this.getLookupCallBackParams(),

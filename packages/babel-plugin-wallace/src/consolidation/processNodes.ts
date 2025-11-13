@@ -80,7 +80,10 @@ function extractCssClasses(value: string | t.Expression) {
 function addToggleCallbackStatement(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
-  addCallbackStatement: (lookupKey: string, statements: Statement[]) => void,
+  addCallbackStatement: (
+    lookupKey: string | number,
+    statements: Statement[],
+  ) => void,
 ) {
   node.toggleTriggers.forEach((trigger) => {
     const target = node.toggleTargets.find(
@@ -189,8 +192,11 @@ export function processNodes(
       }
 
       if (createWatch) {
-        const _callbacks: { [key: string]: Array<Statement> } = {};
-        const addCallbackStatement = (key: string, statements: Statement[]) => {
+        const _callbacks: { [key: string | number]: Array<Statement> } = {};
+        const addCallbackStatement = (
+          key: string | number,
+          statements: Statement[],
+        ) => {
           if (!_callbacks.hasOwnProperty(key)) {
             _callbacks[key] = [];
           }

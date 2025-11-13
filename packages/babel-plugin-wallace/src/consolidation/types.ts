@@ -9,7 +9,7 @@ export interface Detacher {
 }
 
 export interface ShieldInfo {
-  key: string;
+  key: number;
   reverse: boolean;
   skipCount: number;
   detacher?: Detacher;
@@ -18,6 +18,6 @@ export interface ShieldInfo {
 export interface ComponentWatch {
   elementKey: number;
   shieldInfo?: ShieldInfo | undefined;
-  callbacks: { [key: string]: FunctionExpression };
+  callbacks: { [key: string | number]: FunctionExpression };
   address: NodeAddress;
 }

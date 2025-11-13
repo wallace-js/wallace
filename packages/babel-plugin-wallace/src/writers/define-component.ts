@@ -36,13 +36,19 @@ function buildTemplateArg(
  * Creates an ObjectExpression from an object.
  */
 function buildObjectExpression(object: {
-  [key: string]: any;
+  [key: string | number]: any;
 }): ObjectExpression {
   const properties: Array<ObjectProperty> = [];
   for (const [key, value] of Object.entries(object)) {
+    let actualkey: t.Identifier | t.NumericLiteral;
+    if (isNaN(parseInt(key))) {
+      actualkey = identifier(key);
+    } else {
+      actualkey = t.numericLiteral(parseInt(key));
+    }
     properties.push({
       type: "ObjectProperty",
-      key: identifier(key),
+      key: actualkey,
       value: value,
       computed: false,
       shorthand: false,
@@ -61,7 +67,7 @@ function buildWatchesArg(
     };
     if (watch.shieldInfo) {
       const visibilityToggle = {
-        q: t.stringLiteral(watch.shieldInfo.key),
+        q: t.numericLiteral(watch.shieldInfo.key),
         s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
         r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
       };
@@ -82,17 +88,15 @@ function buildWatchesArg(
 
 function buildLookupsArg(
   componentDefinition: ComponentDefinitionData,
-): ObjectExpression {
-  return buildObjectExpression(componentDefinition.lookups);
+): ArrayExpression {
+  // TODO: clean up temp code when original is an array too.
+  const keys = Object.keys(componentDefinition.lookups).sort();
+  const values: FunctionExpression[] = keys.map(
+    (key) => componentDefinition.lookups[key],
+  );
+  return t.arrayExpression(values);
 }
 
-/**
- * 
-    component._e = {
-      1: findElement(rootElement, [0]),
-      2: findElement(rootElement, [1, 1]),
-    };
- */
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData,
 ): FunctionExpression {
