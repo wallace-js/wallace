@@ -5,19 +5,19 @@ export type NodeAddress = Array<number>;
 export interface Detacher {
   index: number;
   stashKey: number;
-  parentKey: string;
+  parentKey: number;
 }
 
 export interface ShieldInfo {
-  key: string;
+  key: number;
   reverse: boolean;
   skipCount: number;
   detacher?: Detacher;
 }
 
 export interface ComponentWatch {
-  elementKey: string;
+  elementKey: number;
   shieldInfo?: ShieldInfo | undefined;
-  callbacks: { [key: string]: FunctionExpression };
+  callbacks: { [key: string | number]: FunctionExpression };
   address: NodeAddress;
 }

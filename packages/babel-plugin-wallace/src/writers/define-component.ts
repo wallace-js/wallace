@@ -36,13 +36,19 @@ function buildTemplateArg(
  * Creates an ObjectExpression from an object.
  */
 function buildObjectExpression(object: {
-  [key: string]: any;
+  [key: string | number]: any;
 }): ObjectExpression {
   const properties: Array<ObjectProperty> = [];
   for (const [key, value] of Object.entries(object)) {
+    let actualkey: t.Identifier | t.NumericLiteral;
+    if (isNaN(parseInt(key))) {
+      actualkey = identifier(key);
+    } else {
+      actualkey = t.numericLiteral(parseInt(key));
+    }
     properties.push({
       type: "ObjectProperty",
-      key: identifier(key),
+      key: actualkey,
       value: value,
       computed: false,
       shorthand: false,
@@ -56,12 +62,12 @@ function buildWatchesArg(
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
     const watchArg = {
-      e: t.stringLiteral(watch.elementKey),
+      e: t.numericLiteral(watch.elementKey),
       c: buildObjectExpression(watch.callbacks),
     };
     if (watch.shieldInfo) {
       const visibilityToggle = {
-        q: t.stringLiteral(watch.shieldInfo.key),
+        q: t.numericLiteral(watch.shieldInfo.key),
         s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
         r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
       };
@@ -70,7 +76,7 @@ function buildWatchesArg(
         visibilityToggle["d"] = buildObjectExpression({
           i: t.numericLiteral(detacher.index),
           s: t.numericLiteral(detacher.stashKey),
-          e: t.stringLiteral(detacher.parentKey),
+          e: t.numericLiteral(detacher.parentKey),
         });
       }
       watchArg["v"] = buildObjectExpression(visibilityToggle);
@@ -82,28 +88,32 @@ function buildWatchesArg(
 
 function buildLookupsArg(
   componentDefinition: ComponentDefinitionData,
-): ObjectExpression {
-  return buildObjectExpression(componentDefinition.lookups);
+): ArrayExpression {
+  // TODO: clean up temp code when original is an array too.
+  const keys = Object.keys(componentDefinition.lookups).sort();
+  const values: FunctionExpression[] = keys.map(
+    (key) => componentDefinition.lookups[key],
+  );
+  return t.arrayExpression(values);
 }
 
-/**
- * 
-    component._e = {
-      1: findElement(rootElement, [0]),
-      2: findElement(rootElement, [1, 1]),
-    };
- */
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData,
 ): FunctionExpression {
-  const dynamicElementsValueObject = buildObjectExpression(
-    componentDefinition.dynamicElements,
+  // const dynamicElementsValueObject = buildObjectExpression(
+  //   componentDefinition.dynamicElements,
+  // );
+
+  // TODO: clean up temp code when original is an array too.
+  const keys = Object.keys(componentDefinition.dynamicElements).sort();
+  const values: CallExpression[] = keys.map(
+    (key) => componentDefinition.dynamicElements[key],
   );
 
   const dynamicElementsAssignment = t.assignmentExpression(
     "=",
     t.memberExpression(t.identifier("component"), t.identifier("_e")),
-    dynamicElementsValueObject,
+    t.arrayExpression(values),
   );
   const statements = [t.expressionStatement(dynamicElementsAssignment)];
   return t.functionExpression(

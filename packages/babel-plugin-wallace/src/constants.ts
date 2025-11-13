@@ -19,7 +19,7 @@ export enum IMPORTABLES {
   saveRef = "saveRef",
   stashMisc = "stashMisc",
   onEvent = "onEvent",
-  getSequentialPool = "getSequentialPool",
+  getSequentialRepeater = "getSequentialRepeater",
 }
 
 export enum EVENT_CALLBACK_VARIABLES {

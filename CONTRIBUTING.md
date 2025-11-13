@@ -578,95 +578,186 @@ test('Descriptive name', () => {
 
 Note how a `span` element is created for placeholders in text.
 
-This doesn't work for cases where we update DOM element states such as hidden or disabled, in which case you have two options:
+This doesn't work for cases where we update DOM element states such as hidden or disabled, in which case you're best inspecting the DOM element itself.
 
-TODO: do both still apply? We don't have wrappers. Maybe it should be a ref, which is the element itself.
+##### Inspect the DOM element
 
-##### 1. Inspect the DOM element
-
-You can inspect the component's root element directly.
+You can inspect an element directly by setting a ref:
 
 ```jsx
 test('Descriptive name', () => {
   let disabled = false
-  const Foo = <button disabled={disabled}>test</button>
-  const component = load(Foo)
-  
-  expect(component.e.disabled).toBe(false)
-  
-  disabled = true
-  component.update()
-  expect(component.e.disabled).toBe(true)
-})
-```
-
-##### 1. Inspect a wrapper element
-
-You can do the same using a named wrapper.
-
-```jsx
-import {load} from '../utils'
-
-test('Descriptive name', () => {
-  let disabled = false
-  const Foo = 
+  const Foo = () => (
     <div>
-       <button w:btn disabled={disabled}>test</button>
+      <button ref:btn disabled={disabled}>test</button>
     </div>
-        
-  const {component} = load(Foo)
-  const btn = component.w.btn.e
+  )
+  const component = load(Foo)
+  const btn = component.ref.btn
   expect(btn.disabled).toBe(false)
-  
   disabled = true
   component.update()
   expect(btn.disabled).toBe(true)
 })
 ```
 
-##### Inspect the transformed code
+##### Expect compilation output
 
-Use the `transform` function to transform the code.
+Assess whether the code compiled with or without an error:
 
 ```jsx
-const {transform} = require('./utils')
+describe("Additional arguments", () => {
+  test("are allowed if recognised", () => {
+    const src = `
+    const A = ({}, _event, _component, _element) => (
+      <div>
+        Test
+      </div>
+    );
+  `;
+    expect(src).toCompileWithoutError();
+  });
 
-test("JSX code out of place throws SyntaxError", () => {
-  const opts = {}
-  const code = `
-    <div>hello</div>
-  `
-  expect(() => transform(code, opts)).toThrow(SyntaxError)
+  test("must be identifiers", () => {
+    const src = `
+    const A = ({}, {}) => (
+      <div>
+        Test
+      </div>
+    );
+  `;
+    expect(src).toCompileWithError(
+      'Illegal parameters: "ObjectPattern". You are only allowed "_element", "_event" and "_component".',
+    );
+  });
 });
 ```
 
-This allows us to do things which aren't possible using any of the above methods such as:
+This allows us to ensure syntax errors are raised. 
 
-* Check the generated code.
-* Ensure syntax errors are raised.
-* Use custom directives.
-
-> Warning: the structure generated code will change, so tests should make the minimal assumptions about it, preferably restricted to checking that the out does and doesn't contain certain strings.
+We have very limited tests on the generated code as that frequently changes shape.
 
 ## Performance
+
+For quick checks this is handy: https://jsben.ch/
 
 ### Benchmarks
 
 We measure performance by running [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) locally. 
 
-Compare the performance of your changes by:
+##### Updating the tool
 
-1. Compiling the **benchmark** package.
-2. Copying the output to a new directory in **frameworks/non-keyed** with the name of your changes (e.g. **wallace-feat-xyz**) (is this necessary, can benchmark do it even if path not belong to there?)
-3. Run the benchmark for:
-   1. Your change
-   2. The latest release
-   3. The develop branch
-   4. Any other frameworks
+Update from master to get latest changes. You may need to update node version to latest too.
 
-Note that you need at least 10 runs, and that you must run them at the same time to reduce interference from other processes.
+##### The server
 
-We need a way to formalise this.
+The server lets you access all the implementation pages.
+
+```
+npm ci && npm run install-server
+npm start
+```
+
+It should run on 8080, but will fail silently if that port is in use, so check. Leave this running in a session.
+
+##### The webdriver
+
+The webdriver is a script which accesses the implementations on the server (which must be running in a separate terminal).
+
+```
+cd webdriver-ts
+npm ci
+npm run compile
+```
+
+##### Create an implementation
+
+Copy the default implementation to a new directory:
+
+```
+cd frameworks/non-keyed
+cp -r wallace wallace-xyz
+```
+
+If you're testing a released version, install that. If you're testing local changes then use npm link to create global links:
+
+```
+cd /code/wallace/packages/wallace
+npm link
+cd /code/wallace/packages/babel-plugin-wallace
+npm link
+```
+
+These will point to whatever is currently in there.
+
+Next in your implementation, run:
+
+```
+npm link wallace babel-plugin-wallace
+```
+
+For some reason you must do both at the same time, else one unlinks the other!
+
+You can now run:
+
+```
+npm run build-prod
+```
+
+Which will use whatever changes you have active, so be careful! If you have multiple branches and implementations it is easy to forget which you're pointing to.
+
+Also, bear in mind the results for an implementation get added to previous runs, so if you make code changes then you need to delete those results. See them here:
+
+```
+ls webdriver-ts/results/
+```
+
+##### Build implementations you want to test
+
+```
+cd frameworks/non-keyed/wallace-xyz
+npm ci
+npm run build-prod
+```
+
+Check by viewing http://localhost:8080/frameworks/keyed/vanillajs/index.html (note the **/index.html** is needed for some frameworks)
+
+##### Run the benchmarks
+
+Make sure the window stays visible and try not to use your machine for anything else.
+
+```
+cd webdriver-ts
+npm run bench non-keyed/vanillajs non-keyed/wallace non-keyed/vue non-keyed/svelte-classic non-keyed/lit non-keyed/inferno
+# Or just some benchmarks
+npm run bench -- --benchmark 01_ 02_ --framework keyed/vanillajs keyed/react-hooks
+# Optionally nspect results
+cat results/vanillajs-keyed_01_run1k.json
+```
+
+##### View the results
+
+The results need to be compiled into a table.
+
+```
+cd webdriver-ts-results
+npm ci
+cd ..
+npm run results
+npm run index
+```
+
+You can now see them at [http://localhost:8080/webdriver-ts-results/dist/index.html](http://localhost:8080/webdriver-ts-results/dist/index.html).
+
+##### Notes
+
+1. You need at least 10 runs. Try to run them at the same time, with as little other applications running as possible.
+2. The values are specific to your machine, so don't compare them to online results. The geometric mean is a value relative to other frameworks selected.
+3. The results are aggregated from all runs, so delete old results if changing the code or updating frameworks.
+4. The keyed implementation doesn't currently work, so stick to non-keyed.
+5. Compare any changes in wallace to:
+   1. The previous version.
+   2. Other prominent frameworks.
 
 ### Bundle size
 
@@ -698,7 +789,7 @@ It is far easier to retain an item in the DOM and mark it hidden than to repeate
 
 ### Repeat
 
-Repeat behaviour uses "pools" - see relevant code.
+Repeat behaviour uses "repeaters" - see lib/repeaters.
 
 ### Stubs
 
