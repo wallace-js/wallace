@@ -10,7 +10,7 @@ test("Can make a component reactive", () => {
     </div>
   );
   MyComponent.prototype.render = function (props) {
-    this.props = watch(props, this);
+    this.props = watch(props, () => this.update());
     this.update();
   };
   const component = testMount(MyComponent, { checked: false });

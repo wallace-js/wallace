@@ -46,13 +46,13 @@ export function buildComponent(cls) {
 }
 
 /**
- * Wraps target in a Proxy which calls component.update() whenever it is modified.
+ * Wraps target in a Proxy which calls a function whenever it is modified.
  *
  * @param {*} target - Any object, including arrays.
- * @param {*} component - A component.
- * @returns a Proxy object.
+ * @param {*} callback - A callback function.
+ * @returns a Proxy of the object.
  */
-export const watch = (target, component) => {
+export const watch = (target, callback) => {
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
@@ -65,7 +65,7 @@ export const watch = (target, component) => {
     },
     set(target, key, value) {
       target[key] = value;
-      component.update();
+      callback();
       return true;
     },
   };
