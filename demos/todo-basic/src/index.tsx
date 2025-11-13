@@ -1,6 +1,6 @@
 import { mount, Accepts } from "wallace";
 
-export interface iTask {
+interface iTask {
   text: string;
   done: boolean;
 }
