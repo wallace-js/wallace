@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "wallace-playground",
+  "name": "todo-basic",
   "version": "1.0.0",
   "description": "Playground for experimenting with Wallace",
   "main": "src/index.tsx",
@@ -9,8 +9,7 @@
     "build-dev": "NODE_ENV=development webpack",
     "check": "babel $@",
     "start": "webpack serve",
-    "size": "gzip -fk dist/index.js && du -b dist/index.js.gz",
-    "rebuild-plugin": "cd ../packages/babel-plugin-wallace && npx tsc"
+    "size": "gzip -fk dist/index.js && du -b dist/index.js.gz"
   },
   "author": "Andrew Buchan",
   "license": "ISC",
