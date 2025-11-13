@@ -1,6 +1,6 @@
 import { watch, Component } from "wallace";
 import { iTask } from "./types";
-import { fetchTasks } from "./store";
+import { fetchTasks, addTask, toggleTask } from "./store";
 
 /**
  * Base class for controllers that load with asynchronous calls.
@@ -8,14 +8,15 @@ import { fetchTasks } from "./store";
  */
 class AsyncLoadController {
   root: Component<any>;
-  ready: boolean;
+  loading: boolean;
+  saving: boolean;
   constructor(root: Component<any>) {
     this.root = root;
-    this.ready = false;
+    this.loading = true;
   }
   async init() {
     await this._load();
-    this.ready = true;
+    this.loading = false;
     this.root.update();
   }
   async _load() {
@@ -31,13 +32,35 @@ export class TaskListController extends AsyncLoadController {
   }
   async _load() {
     await fetchTasks().then((tasks) => {
-      this.tasks = watch(tasks, () => this.root.update());
+      this.tasks = tasks;
     });
   }
-  completedTasks() {
-    return this.tasks.filter((t) => t.done);
+  async _save(callback: CallableFunction) {
+    this.saving = true;
+    this.root.update();
+    await callback();
+    this.saving = false;
+    this.root.update();
   }
-  addTask(text: string) {
-    this.tasks.push({ text, done: false });
+  allTasks() {
+    return this.tasks.map((t) => ({ ...t, ctrl: this }));
+  }
+  completedTasksCount() {
+    return this.tasks.filter((t) => t.done).length;
+  }
+  async addTask(text: string) {
+    await this._save(async () => {
+      await addTask(text).then((newTask) => {
+        this.tasks.push(newTask);
+      });
+    });
+  }
+  async toggleTask({ id, done }) {
+    await this._save(async () => {
+      await toggleTask({ id, done }).then((changedTask) => {
+        const localCopy = this.tasks.find((t) => t.id === changedTask.id);
+        localCopy.done = changedTask.done;
+      });
+    });
   }
 }

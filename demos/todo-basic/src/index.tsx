@@ -38,6 +38,6 @@ const onKeyUp = (tasks: iTask[], _event: any) => {
 };
 
 mount("main", TaskList, [
-  { text: "Complete tutorial", done: false },
-  { text: "Star on github", done: false },
+  { text: "Complete Wallace tutorial", done: false },
+  { text: "Star Wallace on github", done: false },
 ]);
