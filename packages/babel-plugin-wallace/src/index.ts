@@ -4,7 +4,7 @@ import type { NodePath, PluginObj, PluginPass } from "@babel/core";
 import type { Program } from "@babel/types";
 import type { Babel } from "./babel-types";
 
-import { gleekitConfig } from "./config";
+import { wallaceConfig } from "./config";
 import { Directive, NodeValue } from "./models";
 import { Module } from "./models/module";
 import { programVisitors } from "./visitors/program";
@@ -23,7 +23,7 @@ export default function gleekitPlugin({ types: t }: Babel): PluginObj {
     visitor: {
       Program: {
         enter(path: NodePath<Program>, pluginPass: PluginPass) {
-          gleekitConfig.applyOptions(pluginPass.opts);
+          wallaceConfig.applyOptions(pluginPass.opts);
           const module = new Module(path);
           path.traverse(programVisitors, { module });
           module.addMissingImports();
@@ -36,4 +36,4 @@ export default function gleekitPlugin({ types: t }: Babel): PluginObj {
 /**
  * These exports are for custom plugin development.
  */
-export { gleekitConfig, Directive, NodeValue };
+export { wallaceConfig, Directive, NodeValue };

@@ -54,7 +54,7 @@ export function buildComponent(cls, parent) {
  * @param {*} component - A component.
  * @returns a Proxy object.
  */
-export const createProxy = (target, component) => {
+export const watch = (target, component) => {
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;

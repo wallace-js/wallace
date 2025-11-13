@@ -5,7 +5,7 @@ interface GleekitOptions {
   directives?: Array<typeof Directive>;
 }
 
-class GleekitConfig {
+class WallaceConfig {
   directives: { [key: string]: typeof Directive } = {};
   #loaded: boolean = false;
   applyOptions(options: GleekitOptions) {
@@ -35,6 +35,6 @@ class GleekitConfig {
   }
 }
 
-export const gleekitConfig = new GleekitConfig();
+export const wallaceConfig = new WallaceConfig();
 
-gleekitConfig.addDirectives(builtinDirectives);
+wallaceConfig.addDirectives(builtinDirectives);

@@ -29,7 +29,7 @@ declare module "wallace" {
     props?: T,
   ): Component<T>;
 
-  export function createProxy<T>(obj: T, component: Component<T>): T;
+  export function watch<T>(obj: T, component: Component<T>): T;
 
   export function extendPrototype<T>(
     base: Accepts<T>,
