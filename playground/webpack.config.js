@@ -11,6 +11,9 @@ const config = {
     path: path.resolve(__dirname, "dist"),
     filename: "index.js",
   },
+  resolve: {
+    extensions: [".js", ".jsx", ".tsx", ".ts"],
+  },
   module: {
     rules: [
       {
