@@ -1,4 +1,4 @@
-import { mount, Accepts } from "wallace";
+import { mount, Accepts, watch } from "wallace";
 
 interface iTask {
   text: string;
@@ -24,6 +24,11 @@ const TaskList: Accepts<iTask[]> = (tasks, _event) => (
     </div>
   </div>
 );
+
+TaskList.prototype.render = function (tasks) {
+  this.props = watch(tasks, () => this.update());
+  this.update();
+};
 
 const onKeyUp = (tasks: iTask[], _event: any) => {
   if (_event.key === "Enter") {
