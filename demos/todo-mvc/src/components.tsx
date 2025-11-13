@@ -29,12 +29,17 @@ export const TaskList: Accepts<TaskListController> = (ctrl, _event) => (
   </div>
 );
 
+TaskList.prototype.render = function () {
+  this.props = new TaskListController(this);
+  this.update(); // Ensures spinner displays while loading.
+  this.props.init();
+};
+
 const checkboxChanged = (
   ctrl: TaskListController,
   id: number,
   _element: any,
 ) => {
-  console.log("checkboxChanged", id, _element.checked);
   ctrl.toggleTask({ id, done: _element.checked });
 };
 
@@ -43,10 +48,4 @@ const onKeyUp = (ctrl: TaskListController, _event: any) => {
     ctrl.addTask(_event.target.value);
     _event.target.value = "";
   }
-};
-
-TaskList.prototype.render = function () {
-  this.props = new TaskListController(this);
-  this.update(); // Ensures loader displays while loading.
-  this.props.init();
 };

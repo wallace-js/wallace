@@ -4,7 +4,7 @@ import { fetchTasks, addTask, toggleTask } from "./store";
 
 /**
  * Base class for controllers that load with asynchronous calls.
- * Components should inspect the `loading` property
+ * Components can inspect the `loading` and `saving` properties.
  */
 class AsyncLoadController {
   root: Component<any>;
@@ -13,10 +13,18 @@ class AsyncLoadController {
   constructor(root: Component<any>) {
     this.root = root;
     this.loading = true;
+    this.saving = false;
   }
   async init() {
     await this._load();
     this.loading = false;
+    this.root.update();
+  }
+  async _save(callback: CallableFunction) {
+    this.saving = true;
+    this.root.update();
+    await callback();
+    this.saving = false;
     this.root.update();
   }
   async _load() {
@@ -34,13 +42,6 @@ export class TaskListController extends AsyncLoadController {
     await fetchTasks().then((tasks) => {
       this.tasks = tasks;
     });
-  }
-  async _save(callback: CallableFunction) {
-    this.saving = true;
-    this.root.update();
-    await callback();
-    this.saving = false;
-    this.root.update();
   }
   allTasks() {
     return this.tasks.map((t) => ({ ...t, ctrl: this }));

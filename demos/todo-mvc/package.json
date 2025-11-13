@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "todo-ctrl",
+  "name": "todo-mvc",
   "version": "1.0.0",
   "description": "Playground for experimenting with Wallace",
   "main": "src/index.tsx",
