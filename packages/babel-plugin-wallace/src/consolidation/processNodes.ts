@@ -364,10 +364,14 @@ export function processNodes(
         );
       }
 
-      // Note that some things will already have been renamed, but here we are renaming
-      // specifically inside the buildComponent scope.
+      // TODO: improve this, as we are basically renaming things specifically for the
+      // build function that have already been renamed, which can get confusing.
+      // It also needs to rename ctrl and props explicitly as it doesn't seem to
+      // rename component when it's a member expression.
       const eventVariableMapping: { [key: string]: string } = {
         [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
+        [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
+          `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
         [component.propsIdentifier.name]:
           `${COMPONENT_BUILD_PARAMS.component}.props`,
         [EXTRA_PARAMETERS.element]: `${EXTRA_PARAMETERS.event}.target`,

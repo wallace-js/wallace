@@ -120,7 +120,6 @@ function renameGeneralArgs(
   path.scope.rename(
     EXTRA_PARAMETERS.controller,
     `${componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`,
-    // t.memberExpression(componentIdentifier, t.identifier(SPECIAL_SYMBOLS.ctrl)),
   );
 }
 
