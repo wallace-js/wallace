@@ -2,50 +2,52 @@ import { Accepts } from "wallace";
 import { iTask } from "./types";
 import { TaskListController } from "./controllers";
 
-const Task: Accepts<iTask> = ({ ctrl, text, done, id }, _element) => (
+const Task: Accepts<iTask> = (
+  { text, done, id },
+  ctrl: TaskListController,
+  _element,
+) => (
   <div>
     <input
       type="checkbox"
       checked={done}
-      onChange={checkboxChanged(ctrl, id, _element)}
+      onChange={ctrl.toggleTask({ id, done: !done })}
     />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-export const TaskList: Accepts<TaskListController> = (ctrl, _event) => (
+export const TaskList: Accepts<null> = (
+  _,
+  ctrl: TaskListController,
+  _event,
+  _component,
+) => (
   <div class="tasklist">
-    <div if={ctrl.loading} class="loader"></div>
     <div if={!ctrl.loading}>
       <span>Completed: {ctrl.completedTasksCount()}</span>
       <div style="margin-top: 10px">
-        <Task.repeat props={ctrl.allTasks()} />
+        <Task.repeat props={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
-        <input type="text" onKeyUp={onKeyUp(ctrl, _event)} />
-        <span> {ctrl.saving ? "saving..." : "(hit enter to add)"}</span>
+        <input type="text" onKeyUp={_component.txtInputKeyUp(_event)} />
+        <span> (hit enter to add)</span>
       </div>
     </div>
+
+    <div if={ctrl.loading || ctrl.saving} class="loader"></div>
   </div>
 );
 
 TaskList.prototype.render = function () {
-  this.props = new TaskListController(this);
+  this.ctrl = new TaskListController(this);
   this.update(); // Ensures spinner displays while loading.
-  this.props.init();
+  this.ctrl.init();
 };
 
-const checkboxChanged = (
-  ctrl: TaskListController,
-  id: number,
-  _element: any,
-) => {
-  ctrl.toggleTask({ id, done: _element.checked });
-};
-
-const onKeyUp = (ctrl: TaskListController, _event: any) => {
+TaskList.prototype.txtInputKeyUp = function (_event: any) {
   if (_event.key === "Enter") {
-    ctrl.addTask(_event.target.value);
+    this.ctrl.addTask(_event.target.value);
     _event.target.value = "";
   }
 };

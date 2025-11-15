@@ -43,9 +43,6 @@ export class TaskListController extends AsyncLoadController {
       this.tasks = tasks;
     });
   }
-  allTasks() {
-    return this.tasks.map((t) => ({ ...t, ctrl: this }));
-  }
   completedTasksCount() {
     return this.tasks.filter((t) => t.done).length;
   }
