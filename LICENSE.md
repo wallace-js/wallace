@@ -1,16 +1,12 @@
-MIT License
+NO KINGS License
 
 Copyright (c) 2025 Andrew Buchan
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This license grants anyone to:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+a) Use this software freely for any purpose without fee or attribution, including to develop other software which may be commerically licensed by any party, with the exception of parties acting on behalf of the monarchy of any nation. Exception is given to parties which only do so in name, such as The Royal Mail etc.
+
+b) Clone this software under a different name, with a different license, so long as it is clearly stated that it is a clone of the original, as this will help users find documentation etc.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

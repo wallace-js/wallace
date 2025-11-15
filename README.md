@@ -1,329 +1,193 @@
 # Wallace
 
-*The tiny framework that brings you...*
+*The tiny framework that brings you FREEDOM!!*
 
-![](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
+```
+npm i wallace
+```
 
 ## About
 
-Wallace is a front-end framework you can use to build dynamic web pages and mobile apps, much like [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/) and co.
+Wallace is a JavaScript UI framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/) and co. Here are some reasons to try it:
 
-Here are three reason to use it:
+- **Speed** - Wallace is perhaps the smallest and fastest loading framework out there, and its DOM updates are insanely fast too.
+- **Velocity** - Write code that's easier to read, reuse and change than any other framework - with no hidden magic, or awkward patterns like hooks, just objects speaking to objects.
+- **Freedom** - Its delightfully simple architecture lets you override, interact with and supplement any operations safely and cleanly - essentially protecting you from the performance and productivity sinks that frameworks land you in.
 
-##### Performance
+It is named after William Wallace - or rather his fictional portrayal in the 1995 movie [Braveheart](https://www.imdb.com/title/tt0112573/), who really enjoys shouting FREEDOM before battle:
 
-Instant DOM updates and microscopic bundles ensure your pages load fast and run fast. But Wallace doesn't stop there, see **freedom** below.
+![](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
-##### Productivity
+That scene was immortalised in Scottish culture for its comedy value, and internationally as a symbol of resistance against oppressive monarchies. In honour of this, Wallace is released under a [NO KINGS LICENSE](./LICENCE).
 
-Several features help your team work faster:
+## Status
 
-- Simple architecture.
-- Full TypeScript support.
-- A sane approach to reactivity.
-- Far more concise and readable JSX.
-- Full inheritance and override capabilities.
+Wallace is rather new, and hasn't been fully battle tested (pun intended) but...
 
-##### Freedom
+1. You can override all behaviour at a granular level, letting you patch problems while you wait for a fix and making it pretty safe to use.
+2. It is based on previous frameworks used in production for years (such as [healthmatters.io](https://healthmatters.io))
+3. It is used in production (see [yourstreet.org](https://yourstreet.org))
 
-Frameworks essentially trade automation for freedom, and the thing about freedom is that you don't know it that until we hit a situation where it matters. That could be a perfomance bottleneck, or just a scenario where the framework's design forces a 
+## Try it out
 
-#### Name
+Please read the overview first to avoid shooting yourself in the foot!
 
-It is named after William Wallace - or rather his fictional portrayal in the movie [Braveheart](https://www.imdb.com/title/tt0112573/), who seems to enjoy shouting FREEDOM!! before battle.
+You can then try it in the browser:
 
-NO KINGS LICENSE
+- With [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx). 
+- With [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
 
-## Tutorial
-
-Code along in the browser ([TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)) or work locally with:
+Or locally with:
 
 ```
 npx create-wallace-app
 ```
 
-### At a glance
+There are also demos in this repository which show you more complete use cases.
 
-We're going to build a simple task list which reacts to the tasks being toggled. It should look something like this:
+## Overview
 
-<div style="margin-left: 20px">
-  <span>Done: 1</span>
-  <div>
-    <input type="checkbox" checked="true"/>
-    <label style="color: grey">Learn Wallace</label>
-  </div>
-  <div>
-    <input type="checkbox"/>
-    <label>Star Wallace on github</label>
-  </div>
-</div>
-
-Here is the code:
+Wallace controls the DOM with components which you define as functions which return JSX:
 
 ```jsx
 import { mount } from "wallace";
 
-const Task = ({ text, done }) => (
+const Todo = ({ text, done }) => (
   <div>
-    <input type="checkbox" bind={done}/>
-    <label style:color={done ? "grey" : "black"}>{text}</label>
+    <input type="checkbox" checked={done}/>
+    <label>{text}</label>
   </div>
 );
 
-const TaskList = ( tasks ) => (
-  <div reactive>
-    <span>Done: {tasks.filter(t => t.done).length}</span>
-    <div>
-      <Task.repeat props={tasks} />
-    </div>
+mount("root", Todo, {text: "Learn Wallace", done: false});
+```
+
+This looks like React, but there three major differences you need to understand.
+
+### Static JSX
+
+Wallace doesn't transform JSX, it replaces the entire function.
+
+ like React does. Instead it reads it like a string during compilation, and replaces the entire function.
+
+ only allows **static** JSX, which you can't weave conditional logic around JSX like you would with React:
+
+```jsx
+// React code. Won't work in Wallace!
+const TodoList = (todos) => (
+  <div>
+    {todos.map(({ text, done }) => (
+      <Todo text={text} done={done} />
+    ))}
+  </div>
+);
+```
+
+Instead Wallace provides special constructs like this:
+
+```jsx
+const TodoList = (todos) => (
+  <div>
+    <Todo.repeat props={todos} />
   </div>
 );
 
-mount("main", TaskList, [
-  { text: "Complete tutorial", done: false },
-  { text: "Star on github", done: false },
+mount("root", TodoList, [
+  {text: "Learn Wallace", done: false},
+  {text: "Build cool apps", done: false}  
 ]);
 ```
 
-Here's what the codes does:
-
-- Defines two components as functions which return JSX.
-- Mounts an instance of `TaskList` to the element with id `main`, passing an array of objects as its props.
-
-If you've used React, this will feel very familiar, except:
-
-- The UI is reactive (in React you'd have to use hooks or some other BS).
-- The JSX looks quite different.
-
-#### Special JSX
-
-Wallace uses JSX very differently to React, which results in far more compact and readable code, and lets us do clever things like:
-
-- Making a component reactive.
-- Binding data to values.
-- Toggling classes.
-
-But you don't need to remember all that. You only need to remember is this:
-
-```jsx
-<div help>
-   ...
-</div>
-```
-
-This will display the helper in your browser which lists the syntax rules and available directives (attributes that do special things) including any custom ones you define.
-
-#### TypeScript
-
-Lastly, you can make Wallace play nice with TypeScript:
-
-```tsx
-import { mount, Accepts } from "wallace";
-
-interface iTask {
-  text: string;
-  done: boolean;
-}
-
-const Task: Accepts<iTask> = ({ text, done }) => (/*...*/);
-
-const TaskList: Accepts<iTask[]> = ( tasks ) => (/*...*/);
-
-mount(/*...*/);
-```
-
-You will get an error if you pass the wrong type to `mount` or to `props` in JSX. It knows that `props` in a repeated element is an array of the component's accepted type.
+Or these:
 
 ```jsx
 <div>
-  <Task.repeat props={tasks} />
-</div>
-<div>
-  <Task.nest props={tasks[0]} />
+  <span style:color={done ? "grey" : "black"}>...</span>
+  <span if={done}>...</span>
+  <span show={!done}>...</span>
+  <span toggle:task-complete={done}>...</span>
+  <span onClick={alert('hello')}>...</span>
 </div>
 ```
 
-Now we've had a quick glance, let's look at things in more detail.
+While you lose some of the power of JSX, it also stops it from turning into the garbled mess that it so often does in React. Cleaner and more compact JSX is easier to work with, and this saves time. And controllers (below) make it even cleaner.
+
+TypeScript - full listing.
+
+
+
+But **this function will never run**. Its only purpose is to hold a single JSX statement with scoped variables. Think of it as a static string, but with code completion:
+
+```jsx
+const Todo = html`
+  <div>
+    <input type="checkbox" checked={done}/>
+    <label>{text}</label>
+  </div>
+`;
+```
+
+
 
 ### Components
 
-Component means two different things in Wallace. The code below shows a component *definition* saved as `Greeting`, and a component *instance* saved as `component`:
+Explain updates and DOM.
+
+Show override to add reactivity. Mention no magic.
+
+Full control.
+
+Todo adds itself to a register, so we can run partial updates.
+
+### Coordination
+
+React you coordinate things with hooks in the code above the JSX, an abomination which should never have been inflicted on the world. React's functional stateless approach becomes really annoying.
+
+Wallace doesn't allow code above the JSX, because it is not a real function. This may seem like a downside but again, it results in far cleaner code.
+
+So how do we do things?
+
+Components only deal with the visual representation. separate objects we c
+
+Designate an object the controller.
 
 ```jsx
-import { mount } from 'wallace';
+class TodoListController {
+  getTodos () {
+      return [];
+  }
+}
 
-const Greeting = ( msg ) => (
+const TodoList = (_, ctrl: TodoListController) => (
   <div>
-    A message from Wallace:
-    <h3>{msg}</h3>
+    <Todo.repeat props={ctrl.getTodos()} />
   </div>
 );
 
-const element = document.getElementById('main');
-const component = mount(element, Greeting);
-component.render('Hello');
-```
-
-Notice how we tell the component *instance* to render itself, rather than pass the component definition to a separate coordinating object (aka the engine) as we do in React:
-
-```jsx
-const root = ReactDOM.createRoot(element);
-root.render(<Greeting msg={'Hello'}/>)
-```
-
-Wallace doesn't have an engine. It only has component instances, each of which update its own DOM, and tells its nested component to do the same.
-
-We'll cover why this matters later (spoiler: it lets you match vanilla performance) but first let's understand components a bit better.
-
-If you want you can replace the last 3 lines with this, which does the same thing:
-
-```jsx
-mount(element, Greeting, 'Hello');
-```
-
-#### Methods
-
-So far we've seen the `render` method, which essentially does this:
-
-```jsx
-function render ( props ) {
-  this.props = props;
+TodoList.prototype.render = function () {
+  this.ctrl = new TodoListController();
   this.update();
-};
-```
-
-This might seem clunky, but it lets us do cool things later on, like controlling reactive behaviour. The difference between these two methods is basically:
-
-- `render` is called from outside the component and accepts one argument.
-- `update` is (usually) called from within and takes no arguments as it expects the `props` to be set on the instance.
-
-You can override these methods by defining your own on the component prototype, like so:
-
-```jsx
-import { mount } from 'wallace';
-
-const Greeting = ( msg ) => (
-  <div>
-    A message from Wallace:
-    <h3>{msg}</h3>
-  </div>
-);
-
-Greeting.prototype.render = function ( props ) {
-  this.props = props;
-  setTimeout(() => this.update(), 2000);
-};
-
-mount(element, Greeting, 'Hello');
-```
-
-This updates the `h3` after a 2 second delay.
-
-We'll cover where `render` and `update` come from to begin very shortly. First let's cover the final thing you need to know about components.
-
-#### Refs
-
-To explain how `update` works let's change the code as follows:
-
-```jsx
-import { mount } from 'wallace';
-
-const Greeting = ( msg ) => (
-  <div>
-    A message from Wallace:
-    <h3>{msg}</h3>
-    <h4 ref:caption>Lorem ipsum...</h4>
-  </div>
-);
-
-Greeting.prototype.render = function ( props ) {
-  this.props = props;
-  this.ref.caption.textContent = "there's no magic here";
-  setTimeout(() => this.update(), 2000);
-};
-
-mount(element, Greeting, 'Hello');
-```
-
-This populates the `h4` element instantly, whereas the `h3` only appears after 2 seconds.
-
-The objects in `ref` point to real DOM elements, so when we set its `textContent` property it repaints instantly, without the need to call `update`. We could do this from anywhere:
-
-```jsx
-const component = mount(element, Greeting, 'Hello');
-component.ref.caption.textContent = "there's no magic here";
-```
-
-When we call `update` the `h3` gets updated, and the `h4` remains as it is. The reason for this is because `update` uses internal refs. So both do the exact same thing, except `update` 
-
-Essentially a component builds its DOM once, finds the dynamic elements and saves internal references to them, then during `update` it checks whether the value has changed before applying the change.
-
-It doesn't compare virtual DOM for all the unchanged elements.
-
-it doesn't have to traverse the DOM again
-
-This explains why Wallace is so fast.
-
-It is simple and resilient, and this means you can safely dip into components and update elements.
-
-#### Freedom
-
-Grid example
-
-### Compilation
-
-
-
-Advantages of compilation.
-
-JSX restrictions.
-
-Tradeoffs.
-
-This forces you to do things differently, but in a strange turn of events, this actually makes your code cleaner and better organised, which improves your productivity.
-
-#### About prototypes
-
-With 99% of front end JavaScript involving a framework, people 
-
-
-
-```jsx
-function User ( name ) {
-  this.name = name;
 }
 
-User.prototype.sayHello = function () {
-  alert(`${this.name} says hello`);
-}
-
-const user1 = new User('Bill');
-if (user1.hasOwnProperty('name')) {
-  user1.sayHello();   
-}
+mount("main", TodoList);
 ```
 
-Now you know this, you might be wondering where `render` and `update` come from.
+Wallace sets the `ctrl` field on all nested components.
 
 
 
-```
-```
+Wallace was designed to not screw you over in the myriad ways other frameworks do, because any productivity gains are wiped out by annoyances.
 
-### How to do things
+Mention why Wallace doesn't provide a base controller class.
 
-Visibility
 
-Styles
 
-CSS and toggles
 
-Formatting
 
-Services
+---
 
-Nesting (in refs)
+A con
 
-Pool control
+## Licence
 
-Stubs
+Wallace is released under a [NO KINGS LICENSE](./LICENCE), which essentially lets you do what you like, so long as its not used commercially by a monarch.
