@@ -11,7 +11,7 @@ npm i wallace
 Wallace is a JavaScript UI framework you can use in place of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/) and co. Here are some reasons to try it:
 
 - **Speed** - Wallace is perhaps the smallest and fastest loading framework out there, and its DOM updates are insanely fast too.
-- **Velocity** - Write code that's easier to read, reuse and change than any other framework - with no hidden magic, or awkward patterns like hooks, just objects speaking to objects.
+- **Velocity** - Write code that's easier to read, reuse and change than any other framework - with no hidden magic, or abominable patterns like hooks,! Just objects speaking to objects.
 - **Freedom** - Its delightfully simple architecture lets you override, interact with and supplement any operations safely and cleanly - essentially protecting you from the performance and productivity sinks that frameworks land you in.
 
 It is named after William Wallace - or rather his fictional portrayal in the 1995 movie [Braveheart](https://www.imdb.com/title/tt0112573/), who really enjoys shouting FREEDOM before battle:
@@ -139,9 +139,65 @@ Full control.
 
 Todo adds itself to a register, so we can run partial updates.
 
+No central coordination.
+
 ### Coordination
 
-React you coordinate things with hooks in the code above the JSX, an abomination which should never have been inflicted on the world. React's functional stateless approach becomes really annoying.
+React's functional approach forces you to use clunky patterns like hooks to coordinate state and updates.
+
+Wallace uses a far simpler pattern. Specify an object to be a "controller" - typically using a class with a `component` field:
+
+```jsx
+class TodoListController {
+  constructor (component) {
+    this.component = component;
+    this.todos = [];
+  }
+  toggle (id) {
+    const todo = this.todos.find((t) => t.id === id);
+    todo.done != todo.done;
+    this.component.update();
+  }
+}
+```
+
+Then assign it to `this.ctrl` on a component, and Wallace will pass it down to all nested components:
+
+```jsx
+const Todo = ({text, done, id}, ctrl) => (
+  <div>
+    <input type="checkbox" checked={done} onChange={ctrl.toggle(id)}/>
+    <label>{text}</label>
+  </div>
+);
+
+const TodoList = (_, ctrl) => (
+  <div>
+    <Todo.repeat props={ctrl.todos} />
+  </div>
+);
+
+TodoList.prototype.render = function () {
+  this.ctrl = new TodoListController(this);
+  this.update();
+}
+
+mount("main", TodoList);
+```
+
+It's like a special prop that gets implicitly passed all the way down, so you can keep your props solely for data.
+
+This helps you do everything very cleanly. Any complexities relating to awaiting for async calls to return are handled by the controllers, which are plain JavaScript.
+
+It looks stateless, but it isn't.
+
+Tree of controllers.
+
+
+
+All Wallace does with this is pass it down to every nested component.
+
+
 
 Wallace doesn't allow code above the JSX, because it is not a real function. This may seem like a downside but again, it results in far cleaner code.
 
@@ -152,24 +208,9 @@ Components only deal with the visual representation. separate objects we c
 Designate an object the controller.
 
 ```jsx
-class TodoListController {
-  getTodos () {
-      return [];
-  }
-}
 
-const TodoList = (_, ctrl: TodoListController) => (
-  <div>
-    <Todo.repeat props={ctrl.getTodos()} />
-  </div>
-);
 
-TodoList.prototype.render = function () {
-  this.ctrl = new TodoListController();
-  this.update();
-}
 
-mount("main", TodoList);
 ```
 
 Wallace sets the `ctrl` field on all nested components.
