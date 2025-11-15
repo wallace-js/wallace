@@ -2,6 +2,7 @@
  * The base component.
  */
 export function Component() {
+  this.ctrl = undefined; // The controller.
   this.props = undefined; // The props passed to the component. May be changed.
   this.el = null; // the element - will be set during build.
   this.ref = {}; // user set references to elements or components.
@@ -20,10 +21,11 @@ Object.defineProperty(proto, "hidden", {
 });
 
 /**
- * Sets the props and updates the component.
+ * The render function that gets called by parent components.
  */
-proto.render = function (props) {
+proto.render = function (props, ctrl) {
   this.props = props;
+  this.ctrl = ctrl;
   this.update();
 };
 

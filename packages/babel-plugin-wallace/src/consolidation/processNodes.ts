@@ -15,7 +15,7 @@ import { Component, VisibilityToggle, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
-  EVENT_CALLBACK_VARIABLES,
+  EXTRA_PARAMETERS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
   WATCH_CALLBACK_PARAMS,
@@ -40,7 +40,7 @@ function addBindInstruction(node: ExtractedNode) {
         "=",
         expression as Identifier,
         t.memberExpression(
-          t.identifier(EVENT_CALLBACK_VARIABLES.element),
+          t.identifier(EXTRA_PARAMETERS.element),
           t.identifier(attribute),
         ),
       );
@@ -217,7 +217,13 @@ export function processNodes(
 
         if (node.isNestedClass) {
           const props = node.getProps();
-          const args = props ? [props] : [];
+          const ctrlArg = memberExpression(
+            component.componentIdentifier,
+            identifier(SPECIAL_SYMBOLS.ctrl),
+          );
+          const args = props
+            ? [props, ctrlArg]
+            : [identifier("undefined"), ctrlArg];
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
               callExpression(
@@ -248,7 +254,13 @@ export function processNodes(
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   identifier("render"),
                 ),
-                [component.propsIdentifier],
+                [
+                  component.propsIdentifier,
+                  memberExpression(
+                    component.componentIdentifier,
+                    identifier(SPECIAL_SYMBOLS.ctrl),
+                  ),
+                ],
               ),
             ),
           ]);
@@ -310,7 +322,10 @@ export function processNodes(
                 [
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   repeatInstruction.expression,
-                  component.componentIdentifier,
+                  memberExpression(
+                    component.componentIdentifier,
+                    identifier(SPECIAL_SYMBOLS.ctrl),
+                  ),
                 ],
               ),
             ),
@@ -355,7 +370,7 @@ export function processNodes(
         [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
         [component.propsIdentifier.name]:
           `${COMPONENT_BUILD_PARAMS.component}.props`,
-        [EVENT_CALLBACK_VARIABLES.element]: `${EVENT_CALLBACK_VARIABLES.event}.target`,
+        [EXTRA_PARAMETERS.element]: `${EXTRA_PARAMETERS.event}.target`,
       };
       node.eventListeners.forEach((listener) => {
         const updatedExpression = renameVariablesInExpression(
@@ -370,7 +385,7 @@ export function processNodes(
             stringLiteral(listener.eventName),
             functionExpression(
               null,
-              [identifier(EVENT_CALLBACK_VARIABLES.event)],
+              [identifier(EXTRA_PARAMETERS.event)],
               blockStatement([expressionStatement(updatedExpression)]),
             ),
           ],

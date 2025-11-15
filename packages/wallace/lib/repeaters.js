@@ -3,17 +3,17 @@ import { createComponent } from "./utils";
 /*
  * Gets a component from the pool.
  */
-const getComponent = (pool, componentDefinition, key, item) => {
+function getComponent(pool, componentDefinition, ctrl, key, props) {
   let component;
   if (pool.hasOwnProperty(key)) {
     component = pool[key];
-    component.render(item);
+    component.render(props, ctrl);
   } else {
-    component = createComponent(componentDefinition, item);
+    component = createComponent(componentDefinition, props, ctrl);
     pool[key] = component;
   }
   return component;
-};
+}
 
 /**
  * Trims the unwanted child elements from the end.
@@ -63,8 +63,8 @@ const proto = KeyedRepeater.prototype;
  *
  * @param {Object} item - The item which will be passed as props.
  */
-proto.getOne = function (item) {
-  return getComponent(this._p, this._v, this._f(item), item);
+proto.getOne = function (item, ctrl) {
+  return getComponent(this._p, this._v, ctrl, this._f(item), item);
 };
 
 /**
@@ -74,7 +74,7 @@ proto.getOne = function (item) {
  * @param {DOMElement} e - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
  */
-proto.patch = function (e, items) {
+proto.patch = function (e, items, ctrl) {
   // Attempt to speed up by reducing lookups. Does this even do anything?
   // Does webpack undo this/do it for for me? Does the engine?
   const pool = this._p;
@@ -91,7 +91,7 @@ proto.patch = function (e, items) {
   for (let i = 0; i < itemsLength; i++) {
     item = items[i];
     key = keyFn(item);
-    component = getComponent(pool, componentDefinition, key, item);
+    component = getComponent(pool, componentDefinition, ctrl, key, item);
     newKeys.push(key);
     if (i > childElementCount) {
       e.appendChild(component.el);
@@ -121,8 +121,9 @@ export function SequentialRepeater(componentDefinition) {
  *
  * @param {DOMElement} e - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
+ * @param {any} ctrl - The parent item's controller.
  */
-SequentialRepeater.prototype.patch = function (e, items) {
+SequentialRepeater.prototype.patch = function (e, items, ctrl) {
   const pool = this._p;
   const componentDefinition = this._v;
   const childNodes = e.childNodes;
@@ -136,9 +137,9 @@ SequentialRepeater.prototype.patch = function (e, items) {
     item = items[i];
     if (i < poolCount) {
       component = pool[i];
-      component.render(item);
+      component.render(item, ctrl);
     } else {
-      component = createComponent(componentDefinition, item);
+      component = createComponent(componentDefinition, item, ctrl);
       pool.push(component);
       poolCount++;
     }

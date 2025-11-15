@@ -22,7 +22,8 @@ export enum IMPORTABLES {
   getSequentialRepeater = "getSequentialRepeater",
 }
 
-export enum EVENT_CALLBACK_VARIABLES {
+export enum EXTRA_PARAMETERS {
+  controller = "ctrl",
   component = "_component",
   element = "_element",
   event = "_event",
@@ -32,4 +33,5 @@ export enum SPECIAL_SYMBOLS {
   objectStash = "_s",
   alwaysUpdate = "__",
   patch = "patch",
+  ctrl = "ctrl",
 }

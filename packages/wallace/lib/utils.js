@@ -5,8 +5,8 @@
  * @param {class} cls The class of Component to create
  * @param {object} props The props to pass to the component (optional)
  */
-export function mount(elementOrId, cls, props) {
-  const component = createComponent(cls, props);
+export function mount(elementOrId, cls, props, ctrl) {
+  const component = createComponent(cls, props, ctrl);
   replaceNode(getElement(elementOrId), component.el);
   return component;
 }
@@ -27,9 +27,9 @@ export function getElement(elementOrId) {
  * @param {class} cls The class of Component to create
  * @param {object} props The props to pass to the component (optional)
  */
-export function createComponent(cls, props) {
+export function createComponent(cls, props, ctrl) {
   const component = buildComponent(cls);
-  component.render(props);
+  component.render(props, ctrl);
   return component;
 }
 
@@ -52,7 +52,7 @@ export function buildComponent(cls) {
  * @param {*} callback - A callback function.
  * @returns a Proxy of the object.
  */
-export const watch = (target, callback) => {
+export function watch(target, callback) {
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
@@ -70,4 +70,4 @@ export const watch = (target, callback) => {
     },
   };
   return new Proxy(target, handler);
-};
+}
