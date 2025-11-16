@@ -24,8 +24,8 @@ function createDiv(id) {
 /**
  * Mounts a component to the JSDOM.
  */
-function testMount(cls, props) {
-  return mount(createDiv(), cls, props);
+function testMount(cls, props, ctrl) {
+  return mount(createDiv(), cls, props, ctrl);
 }
 
 /**

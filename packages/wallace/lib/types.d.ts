@@ -27,6 +27,7 @@ declare module "wallace" {
     element: string | HTMLElement,
     component: Accepts<T>,
     props?: T,
+    ctrl?: any,
   ): Component<T>;
 
   export function watch<T>(obj: T, callback: CallableFunction): T;

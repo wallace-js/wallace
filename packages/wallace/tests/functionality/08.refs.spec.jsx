@@ -54,3 +54,5 @@ test("Multiple refs with same name compiles with error", () => {
   `;
   expect(src).toCompileWithError("Refs must be unique within each component.");
 });
+
+// TODO: ensure ref syntax used correctly, and not allowed on repeat.

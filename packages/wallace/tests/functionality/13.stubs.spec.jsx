@@ -14,7 +14,7 @@ test("Can define stub and implement it on same component", () => {
 });
 
 test("Can define stub and only implement it on sub component", () => {
-  const BaseComponent = ({}, _component) => (
+  const BaseComponent = () => (
     <div>
       hello
       <stub:display />
@@ -30,7 +30,7 @@ test("Can inherit stubs from base", () => {
   const BaseComponent = () => <div></div>;
   BaseComponent.prototype.display = ({ name }) => <span>{name}</span>;
 
-  const SubComponent = ({}, _component) => (
+  const SubComponent = () => (
     <div base={BaseComponent}>
       goodbye
       <stub:display />
