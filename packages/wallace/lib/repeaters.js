@@ -3,17 +3,17 @@ import { createComponent } from "./utils";
 /*
  * Gets a component from the pool.
  */
-const getComponent = (pool, componentClass, key, item, parent) => {
+function getComponent(pool, componentDefinition, ctrl, key, props) {
   let component;
   if (pool.hasOwnProperty(key)) {
     component = pool[key];
-    component.render(item);
+    component.render(props, ctrl);
   } else {
-    component = createComponent(componentClass, parent, item);
+    component = createComponent(componentDefinition, props, ctrl);
     pool[key] = component;
   }
   return component;
-};
+}
 
 /**
  * Trims the unwanted child elements from the end.
@@ -44,29 +44,27 @@ function pull(arr, item, to) {
 }
 
 /**
- * Pools same type components, retrieving by key.
- * Must not be shared.
+ * Repeats nested components, reusing items based on key.
  *
- * @param {class} componentClass - The class of Component to create.
- * @param {function} keyFn - A function which obtains the key to pool by
+ * @param {function} componentDefinition - The ComponentDefinition to create.
+ * @param {function} keyFn - A function which obtains the key.
  */
-export function KeyedPool(componentClass, keyFn) {
-  this._v = componentClass;
+export function KeyedRepeater(componentDefinition, keyFn) {
+  this._v = componentDefinition;
   this._f = keyFn;
   this._k = []; // keys
   this._p = {}; // pool of component instances
 }
-const proto = KeyedPool.prototype;
+const proto = KeyedRepeater.prototype;
 
 /**
  * Retrieves a single component. Though not used in wallace itself, it may
  * be used elsewhere, such as in the router.
  *
  * @param {Object} item - The item which will be passed as props.
- * @param {Component} parent - The parent component.
  */
-proto.getOne = function (item, parent) {
-  return getComponent(this._p, this._v, this._f(item), item, parent);
+proto.getOne = function (item, ctrl) {
+  return getComponent(this._p, this._v, ctrl, this._f(item), item);
 };
 
 /**
@@ -75,13 +73,12 @@ proto.getOne = function (item, parent) {
  *
  * @param {DOMElement} e - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
- * @param {Component} parent - The parent component.
  */
-proto.patch = function (e, items, parent) {
+proto.patch = function (e, items, ctrl) {
   // Attempt to speed up by reducing lookups. Does this even do anything?
   // Does webpack undo this/do it for for me? Does the engine?
   const pool = this._p;
-  const componentClass = this._v;
+  const componentDefinition = this._v;
   const keyFn = this._f;
   const childNodes = e.childNodes;
   const itemsLength = items.length;
@@ -94,7 +91,7 @@ proto.patch = function (e, items, parent) {
   for (let i = 0; i < itemsLength; i++) {
     item = items[i];
     key = keyFn(item);
-    component = getComponent(pool, componentClass, key, item, parent);
+    component = getComponent(pool, componentDefinition, ctrl, key, item);
     newKeys.push(key);
     if (i > childElementCount) {
       e.appendChild(component.el);
@@ -108,12 +105,12 @@ proto.patch = function (e, items, parent) {
 };
 
 /**
- * Pools same type components, retrieving by sequence.
+ * Repeats nested components, yielding from its pool sequentially.
  *
- * @param {class} componentClass - The class of Component to create.
+ * @param {componentDefinition} componentDefinition - The class ComponentDefinition to create.
  */
-export function SequentialPool(componentClass) {
-  this._v = componentClass;
+export function SequentialRepeater(componentDefinition) {
+  this._v = componentDefinition;
   this._p = []; // pool of component instances
   this._c = 0; // Child element count
 }
@@ -124,11 +121,11 @@ export function SequentialPool(componentClass) {
  *
  * @param {DOMElement} e - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
- * @param {Component} parent - The parent component.
+ * @param {any} ctrl - The parent item's controller.
  */
-SequentialPool.prototype.patch = function (e, items, parent) {
+SequentialRepeater.prototype.patch = function (e, items, ctrl) {
   const pool = this._p;
-  const componentClass = this._v;
+  const componentDefinition = this._v;
   const childNodes = e.childNodes;
   const itemsLength = items.length;
   let item,
@@ -140,9 +137,9 @@ SequentialPool.prototype.patch = function (e, items, parent) {
     item = items[i];
     if (i < poolCount) {
       component = pool[i];
-      component.render(item);
+      component.render(item, ctrl);
     } else {
-      component = createComponent(componentClass, parent, item);
+      component = createComponent(componentDefinition, item, ctrl);
       pool.push(component);
       poolCount++;
     }

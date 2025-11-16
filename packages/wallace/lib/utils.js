@@ -4,10 +4,9 @@
  * @param {unsure} elementOrId Either a string representing an id, or an element.
  * @param {class} cls The class of Component to create
  * @param {object} props The props to pass to the component (optional)
- * @param {object} parent The parent component (optional)
  */
-export function mount(elementOrId, cls, props, parent) {
-  const component = createComponent(cls, parent, props);
+export function mount(elementOrId, cls, props, ctrl) {
+  const component = createComponent(cls, props, ctrl);
   replaceNode(getElement(elementOrId), component.el);
   return component;
 }
@@ -26,35 +25,34 @@ export function getElement(elementOrId) {
  * Creates a component and initialises it.
  *
  * @param {class} cls The class of Component to create
- * @param {object} parent The parent component (optional)
  * @param {object} props The props to pass to the component (optional)
  */
-export function createComponent(cls, parent, props) {
-  const component = buildComponent(cls, parent);
-  component.render(props);
+export function createComponent(cls, props, ctrl) {
+  const component = buildComponent(cls);
+  component.render(props, ctrl);
   return component;
 }
 
 /**
- * Builds a component.
+ * Builds a component's initial DOM.
  */
-export function buildComponent(cls, parent) {
-  const component = new cls(parent);
-  const prototype = cls.prototype;
-  const dom = prototype._n.cloneNode(true);
+export function buildComponent(cls) {
+  const component = new cls();
+  const proto = cls.prototype;
+  const dom = proto._n.cloneNode(true);
   component.el = dom;
-  component._b(component, dom);
+  proto._b(component, dom);
   return component;
 }
 
 /**
- * Wraps target in a Proxy which calls component.update() whenever it is modified.
+ * Wraps target in a Proxy which calls a function whenever it is modified.
  *
  * @param {*} target - Any object, including arrays.
- * @param {*} component - A component.
- * @returns a Proxy object.
+ * @param {*} callback - A callback function.
+ * @returns a Proxy of the object.
  */
-export const createProxy = (target, component) => {
+export function watch(target, callback) {
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
@@ -67,9 +65,9 @@ export const createProxy = (target, component) => {
     },
     set(target, key, value) {
       target[key] = value;
-      component.update();
+      callback();
       return true;
     },
   };
   return new Proxy(target, handler);
-};
+}

@@ -22,7 +22,6 @@ test("Ref on nested component points to component", () => {
   );
   const component = testMount(B);
   expect(component.ref.a).not.toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.a.parent).toBe(component);
   expect(component.ref.a.el.className).toBe("danger");
 });
 
@@ -55,3 +54,5 @@ test("Multiple refs with same name compiles with error", () => {
   `;
   expect(src).toCompileWithError("Refs must be unique within each component.");
 });
+
+// TODO: ensure ref syntax used correctly, and not allowed on repeat.

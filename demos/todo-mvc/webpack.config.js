@@ -18,18 +18,17 @@ const config = {
     rules: [
       {
         test: /\.(js|mjs|jsx|ts|tsx)$/,
-        /* 
+        /*
         Ensures we process the wallace package, but not others in node_modules.
         Note that this will not take effect if your babel config is in
-        package.json or .babelrc - it must be in here or in babel.config.cjs
+        package.json or .babelrc - it must be in here or in babel.config.cjs,
+        and the latter is better as it allos you to inspect files by running them
+        through `npx babel` in the terminal.
         */
         exclude: /node_modules\/(?!(wallace)\/).*/,
         use: [
           {
             loader: "babel-loader",
-            // options: {
-            //   presets: ["@babel/preset-env"],
-            // },
           },
         ],
       },

@@ -27,11 +27,11 @@ export class ComponentDefinitionData {
   component: Component;
   html: string;
   watches: Array<ComponentWatch> = [];
-  dynamicElements: { [key: string]: CallExpression } = {};
+  dynamicElements: { [key: number]: CallExpression } = {};
   baseComponent: Expression | undefined;
   lookups: { [key: string]: FunctionExpression } = {};
   collectedRefs: Array<string> = [];
-  #dynamicElementKey: number = 0;
+  #dynamicElementKey: number = -1;
   #miscStashKey: number = 0;
   #lookupKeys: Array<String> = [];
   constructor(component: Component) {
@@ -40,22 +40,20 @@ export class ComponentDefinitionData {
   }
   saveDynamicElement(address: NodeAddress) {
     this.#dynamicElementKey++;
-    const key = String(this.#dynamicElementKey);
-    this.dynamicElements[key] = buildFindElementCall(
+    this.dynamicElements[this.#dynamicElementKey] = buildFindElementCall(
       this.component.module,
       address,
     );
-    return key;
+    return this.#dynamicElementKey;
   }
   saveNestedAsDynamicElement(address: NodeAddress, componentCls: Expression) {
     this.#dynamicElementKey++;
-    const key = String(this.#dynamicElementKey);
-    this.dynamicElements[key] = buildNestedClassCall(
+    this.dynamicElements[this.#dynamicElementKey] = buildNestedClassCall(
       this.component.module,
       address,
       componentCls,
     );
-    return key;
+    return this.#dynamicElementKey;
   }
   addLookup(expression: Expression) {
     const hashExpression = (expr) => {
@@ -67,7 +65,7 @@ export class ComponentDefinitionData {
     if (this.#lookupKeys.indexOf(hash) === -1) {
       this.#lookupKeys.push(hash);
     }
-    const key = String(this.#lookupKeys.indexOf(hash));
+    const key = this.#lookupKeys.indexOf(hash);
     this.lookups[key] = functionExpression(
       null,
       this.getLookupCallBackParams(),
@@ -83,7 +81,7 @@ export class ComponentDefinitionData {
     return [this.component.propsIdentifier, this.component.componentIdentifier];
   }
   wrapDynamicElementCall(
-    key: string,
+    key: number,
     functionName: IMPORTABLES,
     remainingArgs: Expression[],
   ) {

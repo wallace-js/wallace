@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { Function, Identifier } from "@babel/types";
 import { Component } from "../models";
-import { EVENT_CALLBACK_VARIABLES } from "../constants";
+import { EXTRA_PARAMETERS, SPECIAL_SYMBOLS } from "../constants";
 import { error, ERROR_MESSAGES } from "../errors";
 
 interface PropsMap {
@@ -39,8 +39,8 @@ function checkForIllegalNamesInProps(
   propVariableMap: { [key: string]: string },
 ) {
   const illegalNamesFound = [];
-  for (let name in EVENT_CALLBACK_VARIABLES) {
-    const variable = EVENT_CALLBACK_VARIABLES[name];
+  for (let name in EXTRA_PARAMETERS) {
+    const variable = EXTRA_PARAMETERS[name];
     if (propVariableMap.hasOwnProperty(variable)) {
       illegalNamesFound.push(variable);
     }
@@ -55,11 +55,7 @@ function checkForIllegalNamesInRemainingParameters(path: NodePath<Function>) {
   for (const param of extraParameters) {
     if (t.isIdentifier(param)) {
       const name = param["name"];
-      if (
-        !Object.values(EVENT_CALLBACK_VARIABLES).includes(
-          name as EVENT_CALLBACK_VARIABLES,
-        )
-      ) {
+      if (!Object.values(EXTRA_PARAMETERS).includes(name as EXTRA_PARAMETERS)) {
         error(path, ERROR_MESSAGES.ILLEGAL_PARAMETERS(name));
       }
     } else {
@@ -116,11 +112,15 @@ function extractFinalPropsName(path: NodePath<Function>): PropsMap {
   return propVariableMap;
 }
 
-function renameComponentInsideFunction(
+function renameGeneralArgs(
   path: NodePath<Function>,
-  componentVar: string,
+  componentIdentifier: Identifier,
 ) {
-  path.scope.rename(EVENT_CALLBACK_VARIABLES.component, componentVar);
+  path.scope.rename(EXTRA_PARAMETERS.component, componentIdentifier.name);
+  path.scope.rename(
+    EXTRA_PARAMETERS.controller,
+    `${componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`,
+  );
 }
 
 /**
@@ -142,5 +142,5 @@ export function processFunctionParameters(
     propVariableMap,
     component.propsIdentifier.name,
   );
-  renameComponentInsideFunction(path, component.componentIdentifier.name);
+  renameGeneralArgs(path, component.componentIdentifier);
 }

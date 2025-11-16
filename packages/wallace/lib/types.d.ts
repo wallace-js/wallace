@@ -27,9 +27,10 @@ declare module "wallace" {
     element: string | HTMLElement,
     component: Accepts<T>,
     props?: T,
+    ctrl?: any,
   ): Component<T>;
 
-  export function createProxy<T>(obj: T, component: Component<T>): T;
+  export function watch<T>(obj: T, callback: CallableFunction): T;
 
   export function extendPrototype<T>(
     base: Accepts<T>,

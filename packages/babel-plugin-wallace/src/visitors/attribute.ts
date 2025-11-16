@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { JSXAttribute } from "@babel/types";
-import { gleekitConfig } from "../config";
+import { wallaceConfig } from "../config";
 import { TagNode, NodeValue } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
@@ -68,8 +68,8 @@ export const attributeVisitors = {
     const isEventHandler =
       extractedValue.type === "expression" && base.startsWith("on");
     const directiveClass = isEventHandler
-      ? gleekitConfig.directives["on*"]
-      : gleekitConfig.directives[base];
+      ? wallaceConfig.directives["on*"]
+      : wallaceConfig.directives[base];
     if (directiveClass) {
       const handler = new directiveClass();
       handler.apply(extractedNode, extractedValue, qualifier, base);

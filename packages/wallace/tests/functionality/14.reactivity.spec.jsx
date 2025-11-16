@@ -1,7 +1,7 @@
 import { testMount } from "../utils";
-import { createProxy } from "wallace";
+import { watch } from "wallace";
 
-// This tests bind, checkboxes and createProxy in one go...
+// This tests bind, checkboxes and watch in one go...
 test("Can make a component reactive", () => {
   const MyComponent = ({ checked }) => (
     <div>
@@ -10,7 +10,7 @@ test("Can make a component reactive", () => {
     </div>
   );
   MyComponent.prototype.render = function (props) {
-    this.props = createProxy(props, this);
+    this.props = watch(props, () => this.update());
     this.update();
   };
   const component = testMount(MyComponent, { checked: false });

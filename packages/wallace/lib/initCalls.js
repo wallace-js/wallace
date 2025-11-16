@@ -1,7 +1,7 @@
 import { Component } from "./component";
 import { Lookup } from "./lookup";
 import { buildComponent, replaceNode } from "./utils";
-import { KeyedPool, SequentialPool } from "./pool";
+import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 const throwAway = document.createElement("template");
 
 /**
@@ -20,9 +20,9 @@ export const findElement = (rootElement, path) => {
   return path.reduce((acc, index) => acc.childNodes[index], rootElement);
 };
 
-export const nestComponent = (rootElement, path, cls, parent) => {
+export const nestComponent = (rootElement, path, cls) => {
   const el = findElement(rootElement, path),
-    child = buildComponent(cls, parent);
+    child = buildComponent(cls);
   replaceNode(el, child.el);
   return child;
 };
@@ -49,15 +49,12 @@ export const onEvent = (element, eventName, callback) => {
   return element;
 };
 
-/**
- * Creates a pool.
- */
-export const getKeyedPool = (cls, keyFn) => {
-  return new KeyedPool(cls, keyFn);
+export const getKeyedRepeater = (cls, keyFn) => {
+  return new KeyedRepeater(cls, keyFn);
 };
 
-export const getSequentialPool = (cls) => {
-  return new SequentialPool(cls);
+export const getSequentialRepeater = (cls) => {
+  return new SequentialRepeater(cls);
 };
 
 export function defineComponent(
@@ -91,8 +88,8 @@ export function extendComponent(
 }
 
 export function extendPrototype(base, prototypeExtras) {
-  const Constructor = function (parent) {
-    base.call(this, parent);
+  const Constructor = function () {
+    base.call(this);
   };
   Constructor.prototype = Object.create(base && base.prototype, {
     constructor: {

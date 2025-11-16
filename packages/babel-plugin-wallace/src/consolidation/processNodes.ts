@@ -15,7 +15,7 @@ import { Component, VisibilityToggle, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
-  EVENT_CALLBACK_VARIABLES,
+  EXTRA_PARAMETERS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
   WATCH_CALLBACK_PARAMS,
@@ -40,7 +40,7 @@ function addBindInstruction(node: ExtractedNode) {
         "=",
         expression as Identifier,
         t.memberExpression(
-          t.identifier(EVENT_CALLBACK_VARIABLES.element),
+          t.identifier(EXTRA_PARAMETERS.element),
           t.identifier(attribute),
         ),
       );
@@ -80,7 +80,10 @@ function extractCssClasses(value: string | t.Expression) {
 function addToggleCallbackStatement(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
-  addCallbackStatement: (lookupKey: string, statements: Statement[]) => void,
+  addCallbackStatement: (
+    lookupKey: string | number,
+    statements: Statement[],
+  ) => void,
 ) {
   node.toggleTriggers.forEach((trigger) => {
     const target = node.toggleTargets.find(
@@ -160,6 +163,7 @@ export function processNodes(
       node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
+
     if (shouldSaveElement) {
       const nestedComponentCls = node.isNestedClass
         ? t.identifier(node.tagName)
@@ -188,8 +192,11 @@ export function processNodes(
       }
 
       if (createWatch) {
-        const _callbacks: { [key: string]: Array<Statement> } = {};
-        const addCallbackStatement = (key: string, statements: Statement[]) => {
+        const _callbacks: { [key: string | number]: Array<Statement> } = {};
+        const addCallbackStatement = (
+          key: string | number,
+          statements: Statement[],
+        ) => {
           if (!_callbacks.hasOwnProperty(key)) {
             _callbacks[key] = [];
           }
@@ -210,7 +217,13 @@ export function processNodes(
 
         if (node.isNestedClass) {
           const props = node.getProps();
-          const args = props ? [props] : [];
+          const ctrlArg = memberExpression(
+            component.componentIdentifier,
+            identifier(SPECIAL_SYMBOLS.ctrl),
+          );
+          const args = props
+            ? [props, ctrlArg]
+            : [identifier("undefined"), ctrlArg];
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
               callExpression(
@@ -241,7 +254,13 @@ export function processNodes(
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   identifier("render"),
                 ),
-                [component.propsIdentifier],
+                [
+                  component.propsIdentifier,
+                  memberExpression(
+                    component.componentIdentifier,
+                    identifier(SPECIAL_SYMBOLS.ctrl),
+                  ),
+                ],
               ),
             ),
           ]);
@@ -270,11 +289,11 @@ export function processNodes(
 
         if (repeatInstruction) {
           componentDefinition.component.module.requireImport(
-            IMPORTABLES.getSequentialPool,
+            IMPORTABLES.getSequentialRepeater,
           );
           const poolInstance =
             repeatInstruction.poolExpression ||
-            callExpression(identifier(IMPORTABLES.getSequentialPool), [
+            callExpression(identifier(IMPORTABLES.getSequentialRepeater), [
               identifier(repeatInstruction.componentCls),
             ]);
 
@@ -303,7 +322,10 @@ export function processNodes(
                 [
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   repeatInstruction.expression,
-                  component.componentIdentifier,
+                  memberExpression(
+                    component.componentIdentifier,
+                    identifier(SPECIAL_SYMBOLS.ctrl),
+                  ),
                 ],
               ),
             ),
@@ -342,13 +364,17 @@ export function processNodes(
         );
       }
 
-      // Note that some things will already have been renamed, but here we are renaming
-      // specifically inside the buildComponent scope.
+      // TODO: improve this, as we are basically renaming things specifically for the
+      // build function that have already been renamed, which can get confusing.
+      // It also needs to rename ctrl and props explicitly as it doesn't seem to
+      // rename component when it's a member expression.
       const eventVariableMapping: { [key: string]: string } = {
         [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
+        [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
+          `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
         [component.propsIdentifier.name]:
           `${COMPONENT_BUILD_PARAMS.component}.props`,
-        [EVENT_CALLBACK_VARIABLES.element]: `${EVENT_CALLBACK_VARIABLES.event}.target`,
+        [EXTRA_PARAMETERS.element]: `${EXTRA_PARAMETERS.event}.target`,
       };
       node.eventListeners.forEach((listener) => {
         const updatedExpression = renameVariablesInExpression(
@@ -363,7 +389,7 @@ export function processNodes(
             stringLiteral(listener.eventName),
             functionExpression(
               null,
-              [identifier(EVENT_CALLBACK_VARIABLES.event)],
+              [identifier(EXTRA_PARAMETERS.event)],
               blockStatement([expressionStatement(updatedExpression)]),
             ),
           ],

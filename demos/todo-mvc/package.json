@@ -1,16 +1,15 @@
 {
   "private": true,
-  "name": "wallace-playground",
+  "name": "todo-mvc",
   "version": "1.0.0",
   "description": "Playground for experimenting with Wallace",
-  "main": "src/index.js",
+  "main": "src/index.tsx",
   "scripts": {
     "build-prod": "NODE_ENV=production webpack",
     "build-dev": "NODE_ENV=development webpack",
     "check": "babel $@",
     "start": "webpack serve",
-    "size": "gzip -fk dist/index.js && du -b dist/index.js.gz",
-    "build": "npm run build -w babel-plugin-wallace"
+    "size": "gzip -fk dist/index.js && du -b dist/index.js.gz"
   },
   "author": "Andrew Buchan",
   "license": "ISC",
