@@ -20,26 +20,9 @@ It is named after William Wallace - or rather his fictional portrayal in the 199
 
 That scene was immortalised in Scottish culture for its comedy value, and internationally as a symbol of resistance against oppressive monarchies. In honour of this, Wallace is released under a [NO KINGS LICENSE](./LICENCE).
 
+## Tour
 
-
-## Play
-
-Please read the overview first to avoid shooting yourself in the foot!
-
-You can then try it in the browser:
-
-- With [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx). 
-- With [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
-
-Or locally with:
-
-```
-npx create-wallace-app
-```
-
-There are also demos in this repository which show you more complete use cases.
-
-## Features
+This tour shows how Wallace's design and features helps you write faster apps in less time. It assumes you have used a framework before. For a more comprehensive walk through, see the [TUTORIAL](./TUTORIAL.md).
 
 #### Overview
 
@@ -65,14 +48,15 @@ const TodoList = (todos) => (
 );
 
 mount("root", TodoList, [
-  {text: "Learn Wallace", done: false},
-  {text: "Build something cool", done: false}  
+  {text: "Learn Wallace", done: true},
+  {text: "Star Wallace on github", done: false}  
 ]);
 ```
 
-This looks very similar to React, but what Wallace does with this code is *very* different.
 
-We'll be using JavaScript for examples, but you can work in TypeScript using the `Accepts` syntax, which then warns you if you pass the wrong props type when mounting or nesting components:
+This looks very similar to React, but it works ***very differently***.
+
+We'll be using JavaScript for examples, but you can work in TypeScript using the `Accepts` syntax, which ensures you pass correct props types when mounting or nesting components:
 
 ```tsx
 import { mount, Accepts } from "wallace";
@@ -89,7 +73,7 @@ const TodoList: Accepts<iTodo[]> = (todos) => (/*...*/);
 mount("root", TodoList, [/*...*/]);
 ```
 
-You do all your work in regular JavaScript/TypeScript modules. There's no special file format (like Svelte) and no special stuff your HTML (like Angular) other than ensuring there is an element with a matching id if you are passing an id string to `mount`:
+You do all your work in regular JavaScript/TypeScript modules. All you need in your HTML is an element whose **id** matches the **id** passed to `mount`:
 
 ```html
 <div id="root"></div>
@@ -98,27 +82,40 @@ You do all your work in regular JavaScript/TypeScript modules. There's no specia
 Alternatively you can pass an element directly:
 
 ```jsx
-const element = document.getElementbyId("root");
-mount(element, TodoList, []);
+mount(document.getElementbyId("root"), TodoList, [/*...*/]);
 ```
 
 #### Compilation
 
-Wallace replace those two JSX functions with generated code during compilation. The functions you see will not exist at run time, and will never be executed. Their only purpose is to hold a single JSX expression which is used to generate the code.
-
-The generated code returns a function, so `Todo` and `TodoList` are still functions, just different ones. Wallace calls with `new` to create component objects internally:
+During compilation Wallace replaces functions that return JSX with generated code, so your compiled code will look like this:
 
 ```jsx
-const component = new Todo();
+var Todo = (/* generated code */);
+
+var TodoList = (/* generated code */);
+
+mount("root", TodoList, [/*...*/]);
 ```
 
-Note that the JSX is not transformed into `h` functions, it is removed completely, and as such you are restricted syntax.
+The functions which you wrote will not exist at run time, and are therefore never executed. They are just holding spaces for a template string written in JSX because that better IDE support, so essentially you are dealing with this:
+
+```jsx
+// For illustration only.
+const Todo = ({ text, done }) => (`
+  <div>
+    <input type="checkbox" checked=${done}/>
+    <label>${text}</label>
+  </div>
+`);
+```
+
+This means you can't place any logic before or around the JSX like you would in React, which removes some flexibility, but you get a lot more in return.
 
 #### Components
 
-Real objects. 1 & 2. No central.
+The generated code returns functions (so `Todo` and `TodoList` are still functions, just not the ones you wrote) which get called internally as constructors with `new` to create component objects when mounting and nesting.
 
-In fact the `mount` function returns a component:
+The `mount` function returns a component object:
 
 ```jsx
 const root = mount("root", TodoList, []);
@@ -128,43 +125,140 @@ root.render([
 ]);
 ```
 
-Look like React, but `root` is a *component object*. 
+Again this looks deceptively similar to React:
+
+```jsx
+// React code
+const root = ReactDOM.createRoot(element);
+root.render(<Greeting msg={'Hello'}/>)
+```
+
+The difference is that in the React example `root` is a special object which coordinates the whole DOM tree with an "engine" which calls component functions and patches the DOM. So with React:
+
+- There are no component "objects" for you to work with.
+- All components render the same way.
+- You have no control over the engine.
+
+Wallace has no special root object, only a tree of component objects, each of which updates its own DOM through its methods, which you can override. So with Wallace:
+
+- There is no central "engine".
+- You can customise how each component renders.
+
+This makes absolutely no difference in the example so far, but has massive implications later on.
 
 #### Rendering
 
-Method.
+To update the DOM you tell a component to render by calling its `render` method, which updates its own DOM and then tells nested components to render, and so on down the tree.
 
-Override.
+You can override the `render` method for any given component:
 
-Two step.
+```jsx
+Todo.prototype.render = function (props) {
+  this.props = props;
+  this.update();
+  console.log(`Rendering Todo with props ${props}`);
+}
+```
 
-#### Updates
+The normal process for `render` is to set the `props` on the component object, then call `update()` - we simply added a print out.
 
-Show ref.
+This process may seem clunky, but it has several advantages.
 
 #### Reactivity
 
-No magic. Can use watch anywhere.
+So far our example is not reactive: the total "Done" doesn't update as you toggle tasks. Let's fix that by watching the todos:
+
+```jsx
+import { mount, watch } from "wallace";
+
+TodoList.prototype.render = function (props) {
+  this.props = watch(props, () => this.update());
+  this.update();
+}
+```
+
+
+
+We can easily change that by making the following changes:
+
+```jsx
+
+
+const Todo = ({ text, done }) => (
+  <div>
+    <input type="checkbox" bind={done}/>
+    <label>{text}</label>
+  </div>
+);
+
+const TodoList = (todos) => (/*...*/);
+
+
+
+mount(/*...*/);
+```
+
+The `watch` function create a proxy around an object which calls a callback whenever it is updated. The `bind` directive in the checkbox causes the props to be updated when the UI changes. So when we toggle the checkbox, the `update()` method of the `TodoList` gets called.
+
+
+
+Like React, Wallace is not reactive, that is to say the UI doesn't update automatically when data changes. Frameworks like Angular which do reactive cause all sorts 
+
+ Reactive behaviour leads to all sorts of weird behaviour, and should never be baked into a framework.
+
+This might seem a little more verbose than reactive frameworks.
+
+Bear in mind the render method in this example will only be called once.
+
+No magic. Can use watch anywhere. Bad bad bad idea.
+
+#### Updates
+
+The `update` method clearly updates the DOM, but how?
+
+// steal from other doc
+
+Show ref.
 
 #### Performance
 
-Extremely fast. But real world performance... And this is where React's stateless model screws you over. You have no control.
+The direct DOM updates make Wallace extremely fast, and the benchmarks confirm this. But benchmarks are very different to the real world scenarios, which have far more complex structures, and frameworks which appear fast on benchmarks may struggle.
+
+And this is where React's stateless model screws you over. You have no control.
+
+Inferno and co may be faster, but if they don't allow targeted updates then Wallace wins.
 
 Show partial update.
 
 #### Controllers
 
+So far global.
+
 Don't modify props in render.
+
+Wallace helps you use controllers, but doesn't have anything to do with them. No frameworks code.
 
 #### JSX
 
-help
+help?
+
+nest - explain its necessary for TypeScript.
+
+visibility
+
+Custom directives.
+
+#### Styles
+
+Style tags, css toggles etc..
 
 #### Inheritance
 
-stubs.
+extend and stubs.
 
-Where do I put css classes?
+
+
+
 
 Further reduces the code you lug around. Less code is better for team velocity, and in JavaScript it also means smaller bundles, so faster loading. Wallace already produces smaller bundles than even Svelte, and you'd think this difference shrinks as that's just the "engine" but thanks to both component and controller inheritance, you also shrink your code as the project grows.
 
@@ -178,7 +272,22 @@ So Wallace essentially gives you:
 - The least problematic code base thanks to its transparency, simple operations and lack of magic, or obscure patterns like hooks.
 - 
 
+## Play
 
+Please read the overview first to avoid shooting yourself in the foot!
+
+You can then try it in the browser:
+
+- With [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx). 
+- With [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
+
+Or locally with:
+
+```
+npx create-wallace-app
+```
+
+There are also demos in this repository which show you more complete use cases.
 
 ## Status
 
