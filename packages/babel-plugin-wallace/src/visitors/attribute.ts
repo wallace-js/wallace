@@ -2,6 +2,7 @@ import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { JSXAttribute } from "@babel/types";
 import { wallaceConfig } from "../config";
+import { domEventNames } from "../constants";
 import { TagNode, NodeValue } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
@@ -64,8 +65,9 @@ export const attributeVisitors = {
     if (!extractedValue) {
       return;
     }
+
     const isEventHandler =
-      extractedValue.type === "expression" && base.startsWith("on");
+      extractedValue.type === "expression" && domEventNames.includes(base);
     const directiveClass = isEventHandler
       ? wallaceConfig.directives["on*"]
       : wallaceConfig.directives[base];

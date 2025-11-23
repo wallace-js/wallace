@@ -194,19 +194,28 @@ declare module "wallace" {
   ): Accepts<T>;
 }
 
+type MustBeExpression = Exclude<any, string>;
+
 /** Custom JSX directives available on any intrinsic element */
 interface DirectiveAttributes extends AllDomEvents {
+  /**
+   * Wallace uses this as a base class to inherit from.
+   *
+   * Must be an expression returning a component definition.
+   */
+  base?: MustBeExpression;
+
   /** Wallace excludes this element from the DOM if the condition is false,
    * and does not render dynamic elements underneath. */
-  if?: boolean;
+  if?: MustBeExpression;
 
   /** Wallace sets the element's `hidden` property and if false,
    * does not render dynamic elements underneath. */
-  show?: boolean;
+  show?: MustBeExpression;
 
   /** Wallace sets the element's `hidden` property and if true,
    * does not render dynamic elements underneath. */
-  hide?: boolean;
+  hide?: MustBeExpression;
 }
 
 declare namespace JSX {
@@ -221,6 +230,7 @@ declare namespace JSX {
 
 /**
  * These must be individually named to obtain the JSDoc.
+ * They allow expressions or strings, so we don't bother enforcing type here.
  */
 interface AllDomEvents {
   /** Wallace runs the expression when the event fires. Use xargs to access the event or element:

@@ -1,8 +1,10 @@
 /**
  * These are the directives, which work by matching `attributeName`, except for the
  * event directive.
+ *
  * The `help` field was supposed to be used for docs, but we're now putting this in
- * the packages/wallace/lib/types.d.ts to make it available by tool tip.
+ * the packages/wallace/lib/types.d.ts to make it available by tool tip. When making
+ * changes here be sure to update that file.
  */
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_PARAMS } from "./constants";
@@ -11,7 +13,7 @@ import { ERROR_MESSAGES, error } from "./errors";
 class BaseDirective extends Directive {
   static attributeName = "base";
   static help = `
-    Causes this componento to extend (inherit from) a base component:
+    Causes this component to extend (inherit from) a base component:
 
     /h <div base={OtherComponent}></div>
     `;
@@ -35,6 +37,7 @@ class BindDirective extends Directive {
     /h <div bind:keyup={p.count}></div>
   `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    this.assertType(node, value, "expression");
     const eventName = qualifier || "change";
     node.addBindInstruction(eventName, value.expression);
   }
@@ -65,18 +68,6 @@ class ClassDirective extends Directive {
         node.watchAttribute("class", value.expression);
       }
     }
-  }
-}
-
-class HelpDirective extends Directive {
-  static attributeName = "help";
-  static help = `
-    Displays the help system:
-
-    /h <div help></div>
-    `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    console.log(`Help launched`);
   }
 }
 
@@ -224,7 +215,6 @@ export const builtinDirectives = [
   BaseDirective,
   BindDirective,
   ClassDirective,
-  HelpDirective,
   HideDirective,
   IfDirective,
   OnEventDirective,

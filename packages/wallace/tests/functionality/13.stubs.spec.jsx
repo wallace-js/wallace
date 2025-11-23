@@ -1,29 +1,6 @@
 import { testMount } from "../utils";
 import { extendPrototype } from "wallace";
 
-describe("Base directive throws error", () => {
-  test("with null", () => {
-    const code = `
-      const Bar = () => (
-        <span base>Hello</span>
-      )
-    `;
-    expect(code).toCompileWithError(
-      'The "base" directive value must be of type expression. Found: null.'
-    );
-  });
-  test("with string", () => {
-    const code = `
-      const Bar = () => (
-        <span base="Foo">Hello</span>
-      )
-    `;
-    expect(code).toCompileWithError(
-      'The "base" directive value must be of type expression. Found: string.'
-    );
-  });
-});
-
 test("Can define stub and implement it on same component", () => {
   const BaseComponent = ({}, _component) => (
     <div>

@@ -112,26 +112,19 @@ expect.extend({
    * @param {string} errorMessage The first line of the expected error message.
    *
    */
-  toCompileWithError(codeOrConfig, errorMessage) {
-    const isConfig = typeof codeOrConfig === "object";
-    const code = isConfig ? codeOrConfig.code : codeOrConfig;
-    const options = isConfig ? codeOrConfig.options : {};
-    const expected = errorMessage;
+  toCompileWithError(code, errorMessage) {
     let received = "NO ERROR - COMPILED OK";
-    const transformOptions = {
-      plugins: [["babel-plugin-wallace", options], "@babel/plugin-syntax-jsx"],
-    };
     try {
-      transform(code, transformOptions);
+      transform(code);
     } catch (e) {
       received = e.message.split("\n", 1)[0].substring("unknown file: ".length);
-      if (received !== expected) {
+      if (received !== errorMessage) {
         console.debug(e);
       }
     }
-    const pass = received === expected;
+    const pass = received === errorMessage;
     const failMessage = () => {
-      const diffString = diff(expected, received, {
+      const diffString = diff(errorMessage, received, {
         expand: this.expand,
       });
       return (

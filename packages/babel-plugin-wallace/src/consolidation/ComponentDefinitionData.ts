@@ -42,7 +42,7 @@ export class ComponentDefinitionData {
     this.#dynamicElementKey++;
     this.dynamicElements[this.#dynamicElementKey] = buildFindElementCall(
       this.component.module,
-      address,
+      address
     );
     return this.#dynamicElementKey;
   }
@@ -51,7 +51,7 @@ export class ComponentDefinitionData {
     this.dynamicElements[this.#dynamicElementKey] = buildNestedClassCall(
       this.component.module,
       address,
-      componentCls,
+      componentCls
     );
     return this.#dynamicElementKey;
   }
@@ -62,14 +62,14 @@ export class ComponentDefinitionData {
       return JSON.stringify(copy);
     };
     const hash = hashExpression(expression);
-    if (this.#lookupKeys.indexOf(hash) === -1) {
+    if (!this.#lookupKeys.includes(hash)) {
       this.#lookupKeys.push(hash);
     }
     const key = this.#lookupKeys.indexOf(hash);
     this.lookups[key] = functionExpression(
       null,
       this.getLookupCallBackParams(),
-      blockStatement([returnStatement(expression)]),
+      blockStatement([returnStatement(expression)])
     );
     return key;
   }
@@ -83,11 +83,11 @@ export class ComponentDefinitionData {
   wrapDynamicElementCall(
     key: number,
     functionName: IMPORTABLES,
-    remainingArgs: Expression[],
+    remainingArgs: Expression[]
   ) {
     this.dynamicElements[key] = callExpression(
       this.getFunctionIdentifier(functionName),
-      [this.dynamicElements[key], ...remainingArgs],
+      [this.dynamicElements[key], ...remainingArgs]
     );
   }
   getNextmiscStashKey() {

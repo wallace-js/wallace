@@ -14,9 +14,12 @@ export type Qualifier = string | undefined;
 export class Directive {
   static attributeName: string;
   static help: string;
+  static allowOnNested = false;
+  static allowOnRepeated = false;
+  static allowedTypes: NodeValue["type"][];
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {}
   assertType(node: TagNode, value: NodeValue, ...allowed: NodeValue["type"][]) {
-    if (allowed.indexOf(value.type) === -1) {
+    if (allowed.includes(value.type)) {
       error(
         node.path,
         ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(

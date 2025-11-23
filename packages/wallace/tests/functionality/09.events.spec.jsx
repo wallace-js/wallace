@@ -6,6 +6,7 @@ describe("Event directive", () => {
       <div ref:target onClick="console.debug(999)"></div>
     );
     const component = testMount(MyComponent);
+    // In HTML is should be lower case.
     expect(component).toRender(`<div onclick="console.debug(999)"></div>`);
   });
 
@@ -15,7 +16,7 @@ describe("Event directive", () => {
       callBackArgs = Array.from(arguments);
     }
     const props = { name: "bird" };
-    const MyComponent = () => <div ref:target onclick={foo(42)}></div>;
+    const MyComponent = () => <div ref:target onClick={foo(42)}></div>;
     const component = testMount(MyComponent, props);
     expect(component).toRender(`<div></div>`);
 
@@ -30,7 +31,7 @@ describe("Event directive", () => {
     }
     const props = { name: "bird" };
     const MyComponent = ({}, _component, _element, _event) => (
-      <div ref:target onclick={foo(_event, _component, _element)}></div>
+      <div ref:target onClick={foo(_event, _component, _element)}></div>
     );
     const component = testMount(MyComponent, props);
     expect(component).toRender(`<div></div>`);
@@ -47,7 +48,7 @@ describe("Event directive", () => {
     };
     const props = { name: "bird" };
     const MyComponent = (props, _element) => (
-      <div ref:target onclick={setName(_element, props.name)}></div>
+      <div ref:target onClick={setName(_element, props.name)}></div>
     );
     const component = testMount(MyComponent, props);
     component.ref.target.click();
