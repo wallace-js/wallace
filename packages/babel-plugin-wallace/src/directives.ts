@@ -24,6 +24,7 @@ class BaseDirective extends Directive {
 
 class BindDirective extends Directive {
   static attributeName = "bind";
+  static allowQualifier = true;
   static help = `
     Create a two-way binding between an input element's "value" property and the
     expression, which must be assignable. 
@@ -44,6 +45,7 @@ class BindDirective extends Directive {
 class ClassDirective extends Directive {
   static attributeName = "class";
   static allowString = true;
+  static allowQualifier = true;
   static help = `
     Without a qualifer this acts as a normal attribute, but with a qualifier it creates
     a toggle target for use with the "toggle" directive:
@@ -69,6 +71,8 @@ class ClassDirective extends Directive {
 
 class HideDirective extends Directive {
   static attributeName = "hide";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
   static help = `
     Hides an element by toggling its hidden attribute.
 
@@ -88,13 +92,6 @@ class IfDirective extends Directive {
     /h <div if={}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    // this.ensureValueType();
-    if (node.isRepeatedNode || node.isNestedClass) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT
-      );
-    }
     node.setVisibilityToggle(value.expression, true, true);
   }
 }
@@ -117,6 +114,9 @@ class OnEventDirective extends Directive {
 
 class PropsDirective extends Directive {
   static attributeName = "props";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
   static help: `
   Specify props for a nested or repeated component:
   
@@ -132,6 +132,10 @@ class PropsDirective extends Directive {
 
 class RefDirective extends Directive {
   static attributeName = "ref";
+  static allowOnNested = true;
+  static allowNull = true;
+  static allowExpression = false;
+  static requireQualifier = true;
   static help = `
     Saves a reference to an element or nested component:
 
@@ -144,6 +148,8 @@ class RefDirective extends Directive {
 
 class ShowDirective extends Directive {
   static attributeName = "show";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
   static help = `
     Shows an element by toggling its hidden attribute.
 
@@ -157,14 +163,13 @@ class ShowDirective extends Directive {
 
 class StyleDirective extends Directive {
   static attributeName = "style";
+  static allowString = true;
+  static allowQualifier = true;
   static help = `
 
     /h <div style:color="red"></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    if (value.type === "null") {
-      throw new Error("Value cannot be null");
-    }
     if (qualifier) {
       if (value.type === "string") {
         throw new Error("Value must be an expression");
@@ -186,6 +191,7 @@ class StyleDirective extends Directive {
 
 class ToggleDirective extends Directive {
   static attributeName = "toggle";
+  static requireQualifier = true;
   static help = `
     If used on its own, the qualifer is the name of the css class to toggle:
 
@@ -199,9 +205,6 @@ class ToggleDirective extends Directive {
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
-    }
-    if (value.type !== "expression") {
-      throw new Error("Value must be an expression");
     }
     node.addToggleTrigger(qualifier, value.expression);
   }

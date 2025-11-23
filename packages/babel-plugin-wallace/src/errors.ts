@@ -2,13 +2,25 @@ import type { NodePath } from "@babel/core";
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",
+  BIND_ONLY_ALLOWED_ON_INPUT:
+    "The `bind` directive may only be used on `input` tags.",
   FOUND_JSX_IN_INVALID_LOCATION: "Found JSX in invalid location.",
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
-  CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT:
-    "Cannot use 'if' on nested or repeated element.",
+  CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT: (directive: string) => {
+    return `The "${directive}" directive may not be used on nested elements.`;
+  },
+  CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT: (directive: string) => {
+    return `The "${directive}" directive may not be used on repeated elements.`;
+  },
+  CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER: (directive: string) => {
+    return `The "${directive}" directive must have a qualifier.`;
+  },
+  CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
+    return `The "${directive}" directive may not have a qualifier.`;
+  },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT:
     "Nest components using <Name.nest /> or <Name.repeat />.",
@@ -20,11 +32,10 @@ export const ERROR_MESSAGES = {
     actual: string
   ) => {
     return allowed.length
-      ? `The "${directive}" directive value must be of type ${allowed.join("or ")}. Found: ${actual}.`
+      ? `The "${directive}" directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
       : `The "${directive}" directive value must be of type ${allowed[0]}. Found: ${actual}.`;
   },
-  BIND_ONLY_ALLOWED_ON_INPUT:
-    "The `bind` directive may only be used on `input` tags.",
+
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
   JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS:
