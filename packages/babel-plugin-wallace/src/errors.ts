@@ -14,6 +14,15 @@ export const ERROR_MESSAGES = {
     "Nest components using <Name.nest /> or <Name.repeat />.",
   ARROW_FUNCTION_NOT_ASSIGNED:
     "Component function must be assigned to a variable.",
+  DIRECTIVE_INVALID_TYPE: (
+    directive: string,
+    allowed: string[],
+    actual: string
+  ) => {
+    return allowed.length
+      ? `The "${directive}" directive value must be of type ${allowed.join("or ")}. Found: ${actual}.`
+      : `The "${directive}" directive value must be of type ${allowed[0]}. Found: ${actual}.`;
+  },
   BIND_ONLY_ALLOWED_ON_INPUT:
     "The `bind` directive may only be used on `input` tags.",
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
@@ -57,7 +66,7 @@ export function error(path: NodePath<any>, errorMessage: string) {
 export function ensure(
   condition: boolean,
   path: NodePath<any>,
-  errorMessage: string,
+  errorMessage: string
 ) {
   if (!condition) {
     error(path, errorMessage);
