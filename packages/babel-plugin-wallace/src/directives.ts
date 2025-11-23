@@ -18,7 +18,6 @@ class BaseDirective extends Directive {
     /h <div base={OtherComponent}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    this.assertType(node, value, "expression");
     node.setBaseComponent(value.expression);
   }
 }
@@ -26,7 +25,7 @@ class BaseDirective extends Directive {
 class BindDirective extends Directive {
   static attributeName = "bind";
   static help = `
-    Create a two-way binding between and input element's "value" property and the
+    Create a two-way binding between an input element's "value" property and the
     expression, which must be assignable. 
     If the input is of type "checkbox", it uses the "checked" property instead.
     
@@ -37,7 +36,6 @@ class BindDirective extends Directive {
     /h <div bind:keyup={p.count}></div>
   `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    this.assertType(node, value, "expression");
     const eventName = qualifier || "change";
     node.addBindInstruction(eventName, value.expression);
   }
@@ -45,6 +43,7 @@ class BindDirective extends Directive {
 
 class ClassDirective extends Directive {
   static attributeName = "class";
+  static allowString = true;
   static help = `
     Without a qualifer this acts as a normal attribute, but with a qualifier it creates
     a toggle target for use with the "toggle" directive:
@@ -52,9 +51,6 @@ class ClassDirective extends Directive {
     /h <div class:danger="btn-danger" toggle:danger={expr}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    if (value.type === "null") {
-      throw new Error("Value cannot be null");
-    }
     if (qualifier) {
       node.addToggleTarget(
         qualifier,

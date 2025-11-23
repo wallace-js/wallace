@@ -1,6 +1,7 @@
 /**
  * This suite tests correct usage of all directives, not their effects.
  */
+
 import { testMount } from "../utils";
 
 describe("base", () => {
@@ -41,7 +42,7 @@ describe("bind", () => {
   test("allows expression", () => {
     const code = `
       const Foo = (user) => (
-        <input bind={user.name}>Hello</input>
+        <input bind={user.name} />
       )
     `;
     expect(code).toCompileWithoutError();
@@ -49,21 +50,21 @@ describe("bind", () => {
   test("disallows null", () => {
     const code = `
       const Bar = () => (
-        <span base>Hello</span>
+        <input bind />
       )
     `;
     expect(code).toCompileWithError(
-      'The "base" directive value must be of type expression. Found: null.'
+      'The "bind" directive value must be of type expression. Found: null.'
     );
   });
   test("disallows string", () => {
     const code = `
       const Bar = () => (
-        <span base="Foo">Hello</span>
+        <input bind="Foo" />
       )
     `;
     expect(code).toCompileWithError(
-      'The "base" directive value must be of type expression. Found: string.'
+      'The "bind" directive value must be of type expression. Found: string.'
     );
   });
 });

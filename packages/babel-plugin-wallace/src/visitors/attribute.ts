@@ -73,6 +73,7 @@ export const attributeVisitors = {
       : wallaceConfig.directives[base];
     if (directiveClass) {
       const handler = new directiveClass();
+      handler.validate(extractedNode, extractedValue, qualifier, base);
       handler.apply(extractedNode, extractedValue, qualifier, base);
     } else {
       const attName = qualifier ? `${base}:${qualifier}` : base;
