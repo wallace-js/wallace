@@ -48,7 +48,7 @@ class ClassDirective extends Directive {
     if (qualifier) {
       node.addToggleTarget(
         qualifier,
-        value.type === "expression" ? value.expression : value.value,
+        value.type === "expression" ? value.expression : value.value
       );
     } else {
       // TODO: refactor as "process as normal" function.
@@ -98,7 +98,7 @@ class IfDirective extends Directive {
     if (node.isRepeatedNode || node.isNestedClass) {
       error(
         node.path,
-        ERROR_MESSAGES.CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT,
+        ERROR_MESSAGES.CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT
       );
     }
     node.setVisibilityToggle(value.expression, true, true);
@@ -113,7 +113,6 @@ class OnEventDirective extends Directive {
     /h <div onclick={alert('hello')}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    // TODO: change behaviour if value vs expression
     if (value.type === "string") {
       node.addFixedAttribute(base, value.value);
     } else {
@@ -178,7 +177,7 @@ class StyleDirective extends Directive {
       } else if (value.type === "expression") {
         node.addWatch(
           value.expression,
-          `${WATCH_CALLBACK_PARAMS.element}.style.${qualifier} = n`,
+          `${WATCH_CALLBACK_PARAMS.element}.style.${qualifier} = n`
         );
       }
     } else {

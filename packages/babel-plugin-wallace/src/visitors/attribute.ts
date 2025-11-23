@@ -14,7 +14,6 @@ interface State {
  * Name could be:
  *  foo
  *  foo:bar
- *
  */
 function extractName(path: NodePath<JSXAttribute>): {
   base: string;
