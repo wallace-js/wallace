@@ -60,6 +60,7 @@ export class ExtractedNode {
   element: HTMLElement | Text | undefined;
   elementKey: number | undefined;
   detacherStashKey: number | undefined;
+  isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
   repeatNode: ExtractedNode | undefined;
   address: Array<number>;
@@ -68,7 +69,6 @@ export class ExtractedNode {
   watches: Watch[] = [];
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
-  isNestedComponent: boolean = false;
   hasConditionalChildren: boolean = false;
   repeatExpression: Expression | undefined;
   poolExpression: Expression | undefined;

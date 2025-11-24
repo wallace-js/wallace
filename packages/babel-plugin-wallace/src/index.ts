@@ -18,7 +18,7 @@ import { programVisitors } from "./visitors/program";
 // This avoids the use of global state which would be necessary if visitors were
 // all in the same set.
 
-export default function gleekitPlugin({ types: t }: Babel): PluginObj {
+export default function wallacePlugin({ types: t }: Babel): PluginObj {
   return {
     visitor: {
       Program: {

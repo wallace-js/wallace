@@ -35,4 +35,18 @@ describe("Style directive", () => {
     component.update();
     expect(component.ref.target.style.width).toBe("100px");
   });
+
+  test("Can use style without qualifier", () => {
+    const getStyle = () => ({ color: "red" });
+    const Leopard = () => (
+      <div ref:target style={getStyle()}>
+        leopard
+      </div>
+    );
+    const component = testMount(Leopard);
+    expect(component.ref.target.style.color).toBe("red");
+    // expect(component).toRender(`
+    //   <div style="color: red;">leopard</div>
+    // `);
+  });
 });

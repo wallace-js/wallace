@@ -196,17 +196,25 @@ declare module "wallace" {
 
 type MustBeExpression = Exclude<any, string>;
 
-/** Custom JSX directives available on any intrinsic element */
+/**
+ * Custom JSX directives available on any intrinsic element.
+ * We can't make it work with qualifiers - that requires a VSCode plugin.
+ * */
 interface DirectiveAttributes extends AllDomEvents {
   /**
-   * Wallace uses this as a base class to inherit from.
+   * ## Wallace directive: base
    *
+   * Specifies a base component definition to inherit from.
+   *
+   * This allows you to inherit methods and override stubs.
    * Must be an expression returning a component definition.
    */
   base?: MustBeExpression;
 
   /**
-   * Wallace sets up two-way binding:
+   * ## Wallace directive: bind
+   *
+   * Sets up two-way binding:
    *
    *   1. It uses the expression as the element's value.
    *   2. It assigns the value back to the expression when the element's `change` event
@@ -244,24 +252,119 @@ interface DirectiveAttributes extends AllDomEvents {
    * );
    * ```
    *
+   * Unfortunately you lose the tooltip in that format.
+   *
    * Note that destructured props are converted to member expressions, so these examples
    * work even though it looks like you're setting a local variable.
    */
   bind?: MustBeExpression;
 
+  /**
+   * ## Wallace directive: class
+   *
+   * Without a qualifer this acts as a normal attribute:
+   *
+   * ```
+   * <div class={foo} ></div>
+   * ```
+   *
+   * With a qualifier it defines a group of classes which can be toggled:
+   *
+   * ```
+   * <div class:danger="danger red" toggle:danger={expr}></div>
+   * ```
+   *
+   * Unfortunately you lose the tooltip in that format.
+   */
   class?: any;
+
+  /** ## Wallace directive: hide
+   *
+   * Set the element's `hidden` property and if true, does not render dynamic elements
+   * underneath.
+   */
+  hide?: MustBeExpression;
 
   /** Wallace excludes this element from the DOM if the condition is false,
    * and does not render dynamic elements underneath. */
   if?: MustBeExpression;
 
-  /** Wallace sets the element's `hidden` property and if false,
-   * does not render dynamic elements underneath. */
+  /**
+   * ## Wallace directive: props
+   *
+   * Specifies props for a nested or repeated component.
+   *
+   * If it is a repeated component, the props should be an array of whatever type it
+   * accepts.
+   */
+  props?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: ref
+   *
+   * Saves a reference to the element on the component, allowing it to be accessed.
+   *
+   * ```
+   * <div ref:title></div>
+   * ```
+   *
+   * ```
+   * component.ref.title.textContent = 'hello';
+   * ```
+   *
+   * Requires a qualifier, but you lose the tooltip in that format.
+   */
+  ref?: string;
+
+  /*
+  - `style:xyz` sets a specific style property.
+  - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
+  */
+
+  /** ## Wallace directive: show
+   *
+   * Set the element's `hidden` property and if false, does not render dynamic elements
+   * underneath.
+   */
   show?: MustBeExpression;
 
-  /** Wallace sets the element's `hidden` property and if true,
-   * does not render dynamic elements underneath. */
-  hide?: MustBeExpression;
+  /**
+   * ## Wallace directive: style
+   *
+   * Sets a style property.
+   *
+   * ```
+   * <div style:color={getColor()}></div>
+   * ```
+   *
+   * Requires a qualifier, but you lose the tooltip in that format.
+   */
+  style?: string;
+
+  /**
+   * ## Wallace directive: toggle
+   *
+   * Toggles classes, with two use options.
+   *
+   * If there is a set of classes named with `class:xyz` then it toggles those classes:
+   *
+   * ```
+   * <div class:danger="danger red" toggle:danger={expr}></div>
+   * ```
+   *
+   * If there isn't, then it treats the qualifier as the class name:
+   * ```
+   * <div toggle:danger={expr}></div>
+   * ```
+   *
+   * Requires a qualifier, but you lose the tooltip in that format.
+   */
+  toggle?: string;
+
+  /**
+   * Foo
+   */
+  "class-a"?: string;
 }
 
 declare namespace JSX {
