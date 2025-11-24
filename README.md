@@ -14,7 +14,7 @@ Wallace is a front end JavaScript framework (like [React](https://react.dev/), [
 - Mobile apps using tools likes [capacitator](https://capacitorjs.com/).
 - Desktop apps using tools like [Tauri](https://v2.tauri.app/).
 
-Here are five things that make Wallace different:
+Here are five things that set Wallace apart:
 
 #### 1. Size
 
@@ -22,29 +22,60 @@ Wallace is perhaps the smallest and fastest loading framework out there:
 
 (show bar charts)
 
-This make it ideal for landing pages that need to load fast.
+This makes it ideal for landing pages and other situations where bundle size is critical.
 
-#### 2. Ease
+#### 2. Simplicity
 
-You can learn Wallace in 15 minutes. After that you only need the cheat sheet, which is so small we put it in the package JSDoc so you can read it by hovering:
+Wallace is so simple you can learn everything in 15 minutes, after which you can use tool tips to remind yourself:
 
 (tooltip image)
 
-This make Wallace ideal for learning and teaching, developers who rarely touch the front-end, or those who struggle with burnt-out 👀
+This make it ideal for:
 
-#### 3. Speed
+- Beginners.
+- Teachers.
+- Developers who might not touch the front end for extended periods.
+- People who struggle with cognitive load or burnout 👀
+
+#### 3. Productivity
+
+Frameworks drain our productivity by:
+
+- Forcing us to structure code a specific way - which affects reuse and readability.
+- Using weird patterns like hooks, providers and portals - which adds cognitive load.
+- Doing too much magic, especially reactive behaviour - which causes glitches and confusion.
+
+Wallace doesn't do these things, and as a result you:
+
+1. End up with very natural code that is much easier to read, fix, modify and refactor as your project grows.
+2. Spend less time fighting with the framework, and more time writing features.
+
+That's not to say Wallace lacks power - creating a reusable reactive dialog box base component is rather easy.
+
+#### 4. Speed
 
 Wallace is insanely fast out of the box:
 
 (bar chart)
 
-But benchmarks are not real world throws curve balls at you, Wallace gives you more control, making it the best option for apps where performance matters (without sacrificing velocity).
+But that's just benchmarks. The real world throws curve balls at you, and performance is really down to:
 
-#### 4. Velocity
+1. How much control you have over DOM operation.
+2. How easily you can do funky things, like partial updates, reparenting etc.
 
-Write simpler code that's easier to read, reuse and change than any other framework - with no hidden magic, or abominable patterns like hooks and providers, and portals.
+Wallace beats other frameworks hands down in this respect, because it gives you total freedom.
 
-#### 3. Freedom
+#### 5. Freedom//
+
+Wallace has an open architecture 
+
+points:
+
+- override anything
+- do stuff alongside
+- interact with the tree
+
+its open architecture
 
 Wallace lets you override, interact with and supplement DOM operations safely and cleanly - essentially protecting you from the performance and productivity sinks that frameworks land you in.
 
