@@ -238,17 +238,21 @@ Component<iTask>
 Help make Wallace better by giving it a star: https://github.com/wallace-js/wallace
  */
 declare module "wallace" {
-  interface ComponentFunction<Type, Controller> {
+  interface ComponentFunction<
+    Props = any,
+    Controller = any,
+    Methods extends object = {},
+  > {
     (
-      props: Type,
-      xtra?: { ctrl: Controller; self: Component<Type, Controller> }
-    ): JSX.Element; //...rest: Array<any>
+      props: Props,
+      other?: { ctrl: Controller; self: Component<Props, Controller, Methods> }
+    ): JSX.Element;
     nest?({
       props,
       show,
       hide,
     }: {
-      props?: Type;
+      props?: Props;
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
@@ -257,41 +261,51 @@ declare module "wallace" {
       show,
       hide,
     }: {
-      props: Array<Type>;
+      props: Array<Props>;
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
   }
 
-  export type Magic<Props, Controller = any, Methods = any> = ComponentFunction<
-    Props,
-    Controller
-  >;
-  // export type Accepts<Type> = ComponentFunction<Type>;
-  // export type AcceptsExtends<Type, Proto> = ComponentFunction<Type>;
+  export type Uses<
+    Props = any,
+    Controller = any,
+    Methods extends object = {},
+  > = ComponentFunction<Props, Controller, Methods>;
 
-  export interface Component<T, Controller = any> {
+  export type Component<
+    Props = any,
+    Controller = any,
+    Methods extends object = {},
+  > = {
     update(): void;
-    render(props: T): void;
+    render(props: Props, ctrl?: Controller): void;
     el: HTMLElement;
-    props: T;
+    props: Props;
     ctrl: Controller;
-  }
-  export type ComponentExtends<Proto> = Component<any> & Proto;
+  } & Methods;
 
-  // export function mount<T, Proto>(
-  //   element: string | HTMLElement,
-  //   component: Accepts<T> | AcceptsExtends<T, Proto>,
-  //   props?: T,
-  //   ctrl?: any
-  // ): Component<T> & Proto;
+  export function mount<
+    Props = any,
+    Controller = any,
+    Methods extends object = {},
+  >(
+    element: string | HTMLElement,
+    component: Uses<Props, Controller, Methods>,
+    props?: Props,
+    ctrl?: Controller
+  ): Component<Props, Controller, Methods>;
 
-  // export function watch<T>(obj: T, callback: CallableFunction): T;
+  export function watch<T>(obj: T, callback: CallableFunction): T;
 
-  // export function extendComponent<T>(
-  //   base: Accepts<T>,
-  //   extras?: { [key: string]: any }
-  // ): Accepts<T>;
+  export function extendComponent<
+    Props = any,
+    Controller = any,
+    Methods extends object = {},
+  >(
+    base: Uses<Props, Controller, Methods>,
+    extras?: { [key: string]: any }
+  ): Uses<Props, Controller, Methods>;
 }
 
 type MustBeExpression = Exclude<any, string>;
@@ -299,7 +313,7 @@ type MustBeExpression = Exclude<any, string>;
 /**
  * Custom JSX directives available on any intrinsic element.
  * We can't make it work with qualifiers - that requires a VSCode plugin.
- * */
+ */
 interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: base

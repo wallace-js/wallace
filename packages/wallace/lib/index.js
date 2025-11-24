@@ -9,7 +9,6 @@ import {
   onEvent,
   nestComponent,
   defineComponent,
-  extendPrototype,
   stashMisc,
   saveRef,
 } from "./initCalls";
@@ -20,7 +19,6 @@ export {
   createComponent,
   watch,
   defineComponent,
-  extendPrototype,
   findElement,
   getKeyedRepeater,
   getSequentialRepeater,
