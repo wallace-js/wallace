@@ -149,7 +149,7 @@ SubComponent.prototype.display = ({ name }) => <span>{name}</span>;
 Help make Wallace better by giving it a star: https://github.com/wallace-js/wallace
  */
 declare module "wallace" {
-  interface ComponentFunction<Type> extends Function {
+  interface ComponentFunction<Type> {
     (props: Type, ...rest: Array<any>): JSX.Element;
     nest?({
       props,
@@ -172,19 +172,21 @@ declare module "wallace" {
   }
 
   export type Accepts<Type> = ComponentFunction<Type>;
+  export type AcceptsExtends<Type, Proto> = ComponentFunction<Type>;
 
   export interface Component<T> {
     update(): void;
     render(props: T): void;
     el: HTMLElement;
   }
+  export type ComponentExtends<Proto> = Component<any> & Proto;
 
-  export function mount<T>(
+  export function mount<T, Proto>(
     element: string | HTMLElement,
-    component: Accepts<T>,
+    component: Accepts<T> | AcceptsExtends<T, Proto>,
     props?: T,
     ctrl?: any
-  ): Component<T>;
+  ): Component<T> & Proto;
 
   export function watch<T>(obj: T, callback: CallableFunction): T;
 

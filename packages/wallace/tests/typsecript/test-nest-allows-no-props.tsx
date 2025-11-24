@@ -6,7 +6,7 @@ const ClickCounter: Accepts<null> = () => (
   </div>
 );
 
-const CounterList = (
+const CounterList = () => (
   <div>
     <ClickCounter.nest />
   </div>

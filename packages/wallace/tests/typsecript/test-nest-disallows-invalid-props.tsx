@@ -14,7 +14,7 @@ const ClickCounter: Accepts<Props> = (counter: Props) => (
 
 const badProps = { foo: 8 };
 
-const CounterList = (
+const CounterList = () => (
   <div>
     <ClickCounter.nest props={badProps} />
   </div>

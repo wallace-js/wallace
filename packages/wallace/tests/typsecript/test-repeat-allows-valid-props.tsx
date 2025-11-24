@@ -12,7 +12,7 @@ const ClickCounter: Accepts<Props> = (counter: Props) => (
   </div>
 );
 
-const CounterList = (
+const CounterList = () => (
   <div>
     <ClickCounter.repeat props={counters} />
   </div>

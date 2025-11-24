@@ -1,4 +1,4 @@
-//@16 error TS2741: Property 'props' is missing in type '{}' but required in type '{ props: Props[]; showIf?: boolean; }'.
+//@16 error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { props: Props[]; show?: boolean; hide?: boolean; }'.
 import { mount, Accepts } from "wallace";
 
 interface Props {
@@ -11,7 +11,7 @@ const ClickCounter: Accepts<Props> = (counter: Props) => (
   </div>
 );
 
-const CounterList = (
+const CounterList = () => (
   <div>
     <ClickCounter.repeat />
   </div>

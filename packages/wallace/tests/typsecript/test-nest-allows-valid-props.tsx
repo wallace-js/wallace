@@ -10,7 +10,7 @@ const ClickCounter: Accepts<Props> = (counter: Props) => (
   </div>
 );
 
-const CounterList = (
+const CounterList = () => (
   <div>
     <ClickCounter.nest props={{ clicks: 8 }} />
   </div>
