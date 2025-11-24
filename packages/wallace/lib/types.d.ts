@@ -238,8 +238,11 @@ Component<iTask>
 Help make Wallace better by giving it a star: https://github.com/wallace-js/wallace
  */
 declare module "wallace" {
-  interface ComponentFunction<Type> {
-    (props: Type, ...rest: Array<any>): JSX.Element;
+  interface ComponentFunction<Type, Controller> {
+    (
+      props: Type,
+      xtra?: { ctrl: Controller; self: Component<Type, Controller> }
+    ): JSX.Element; //...rest: Array<any>
     nest?({
       props,
       show,
@@ -260,31 +263,35 @@ declare module "wallace" {
     }): JSX.Element;
   }
 
-  export type Accepts<Type> = ComponentFunction<Type>;
-  export type AcceptsExtends<Type, Proto> = ComponentFunction<Type>;
+  export type Magic<Props, Controller = any, Methods = any> = ComponentFunction<
+    Props,
+    Controller
+  >;
+  // export type Accepts<Type> = ComponentFunction<Type>;
+  // export type AcceptsExtends<Type, Proto> = ComponentFunction<Type>;
 
-  export interface Component<T> {
+  export interface Component<T, Controller = any> {
     update(): void;
     render(props: T): void;
     el: HTMLElement;
     props: T;
-    ctrl: any;
+    ctrl: Controller;
   }
   export type ComponentExtends<Proto> = Component<any> & Proto;
 
-  export function mount<T, Proto>(
-    element: string | HTMLElement,
-    component: Accepts<T> | AcceptsExtends<T, Proto>,
-    props?: T,
-    ctrl?: any
-  ): Component<T> & Proto;
+  // export function mount<T, Proto>(
+  //   element: string | HTMLElement,
+  //   component: Accepts<T> | AcceptsExtends<T, Proto>,
+  //   props?: T,
+  //   ctrl?: any
+  // ): Component<T> & Proto;
 
-  export function watch<T>(obj: T, callback: CallableFunction): T;
+  // export function watch<T>(obj: T, callback: CallableFunction): T;
 
-  export function extendComponent<T>(
-    base: Accepts<T>,
-    extras?: { [key: string]: any }
-  ): Accepts<T>;
+  // export function extendComponent<T>(
+  //   base: Accepts<T>,
+  //   extras?: { [key: string]: any }
+  // ): Accepts<T>;
 }
 
 type MustBeExpression = Exclude<any, string>;
