@@ -19,16 +19,16 @@ import { COMPONENT_BUILD_PARAMS } from "../constants";
 
 // component base to inherit from. Using 0 as false.
 function buildComponentBaseArg(
-  componentDefinition: ComponentDefinitionData,
+  componentDefinition: ComponentDefinitionData
 ): Expression {
   return componentDefinition.baseComponent || t.numericLiteral(0);
 }
 
 function buildTemplateArg(
-  componentDefinition: ComponentDefinitionData,
+  componentDefinition: ComponentDefinitionData
 ): StringLiteral {
   return t.stringLiteral(
-    escapeSingleQuotes(stripHtml(componentDefinition.html)),
+    escapeSingleQuotes(stripHtml(componentDefinition.html))
   );
 }
 
@@ -58,7 +58,7 @@ function buildObjectExpression(object: {
 }
 
 function buildWatchesArg(
-  componentDefinition: ComponentDefinitionData,
+  componentDefinition: ComponentDefinitionData
 ): ArrayExpression {
   const watchDeclarations = componentDefinition.watches.map((watch) => {
     const watchArg = {
@@ -87,18 +87,18 @@ function buildWatchesArg(
 }
 
 function buildLookupsArg(
-  componentDefinition: ComponentDefinitionData,
+  componentDefinition: ComponentDefinitionData
 ): ArrayExpression {
   // TODO: clean up temp code when original is an array too.
   const keys = Object.keys(componentDefinition.lookups).sort();
   const values: FunctionExpression[] = keys.map(
-    (key) => componentDefinition.lookups[key],
+    (key) => componentDefinition.lookups[key]
   );
   return t.arrayExpression(values);
 }
 
 function buildComponentBuildFunction(
-  componentDefinition: ComponentDefinitionData,
+  componentDefinition: ComponentDefinitionData
 ): FunctionExpression {
   // const dynamicElementsValueObject = buildObjectExpression(
   //   componentDefinition.dynamicElements,
@@ -107,13 +107,13 @@ function buildComponentBuildFunction(
   // TODO: clean up temp code when original is an array too.
   const keys = Object.keys(componentDefinition.dynamicElements).sort();
   const values: CallExpression[] = keys.map(
-    (key) => componentDefinition.dynamicElements[key],
+    (key) => componentDefinition.dynamicElements[key]
   );
 
   const dynamicElementsAssignment = t.assignmentExpression(
     "=",
     t.memberExpression(t.identifier("component"), t.identifier("_e")),
-    t.arrayExpression(values),
+    t.arrayExpression(values)
   );
   const statements = [t.expressionStatement(dynamicElementsAssignment)];
   return t.functionExpression(
@@ -122,12 +122,12 @@ function buildComponentBuildFunction(
       t.identifier(COMPONENT_BUILD_PARAMS.component),
       t.identifier(COMPONENT_BUILD_PARAMS.rootElement),
     ],
-    t.blockStatement(statements),
+    t.blockStatement(statements)
   );
 }
 
 function buildProtoExtrasCall(
-  component: ComponentDefinitionData,
+  component: ComponentDefinitionData
 ): ObjectExpression {
   return t.objectExpression([]);
 }
@@ -149,6 +149,7 @@ export function buildDefineComponentCall(component: Component): CallExpression {
  */
 export function buildExtendComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
+  // Note that extendComponent used to be different.
   return t.callExpression(t.identifier("extendComponent"), [
     t.memberExpression(t.identifier(component.name), t.identifier("prototype")),
     buildTemplateArg(componentDefinition),

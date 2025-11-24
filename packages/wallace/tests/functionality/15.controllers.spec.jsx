@@ -1,5 +1,5 @@
 import { testMount } from "../utils";
-import { extendPrototype } from "wallace";
+import { extendComponent } from "wallace";
 
 class Controller {
   constructor(multiplier) {
@@ -75,7 +75,7 @@ describe("Inherited component", () => {
       <stub:display />
     </div>
   );
-  const SubComponent = extendPrototype(BaseComponent);
+  const SubComponent = extendComponent(BaseComponent);
   SubComponent.prototype.display = (_, ctrl) => <span>{ctrl.multiply(2)}</span>;
   SubComponent.prototype.render = function () {
     this.ctrl = new Controller(2);

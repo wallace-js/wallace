@@ -1,5 +1,5 @@
 import { testMount } from "../utils";
-import { extendPrototype } from "wallace";
+import { extendComponent } from "wallace";
 
 const BaseComponent = ({}, _component) => (
   <div>hello {_component.getName()}</div>
@@ -11,15 +11,15 @@ test("Can acccess prototype method", () => {
   expect(component).toRender(`<div>hello <span>mouse</span></div>`);
 });
 
-describe("Component extended with extendPrototype", () => {
+describe("Component extended with extendComponent", () => {
   test("Can access method on parent", () => {
-    const SubComponent = extendPrototype(BaseComponent);
+    const SubComponent = extendComponent(BaseComponent);
     const component = testMount(SubComponent);
     expect(component).toRender(`<div>hello <span>mouse</span></div>`);
   });
 
   test("Can override method on parent", () => {
-    const SubComponent = extendPrototype(BaseComponent);
+    const SubComponent = extendComponent(BaseComponent);
     SubComponent.prototype.getName = () => "cat";
     const component = testMount(SubComponent);
     expect(component).toRender(`<div>hello <span>cat</span></div>`);

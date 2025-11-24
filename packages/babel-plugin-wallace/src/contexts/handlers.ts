@@ -35,7 +35,7 @@ class AbstractContextHandler {
       componentName,
       this.module,
       scope.generateUidIdentifier("p"),
-      scope.generateUidIdentifier("c"),
+      scope.generateUidIdentifier("c")
     );
     this.isMatch = true;
   }
@@ -70,28 +70,28 @@ class AssignedJsxFunction extends AbstractContextHandler {
   }
 }
 
-class JsxClassMethod extends AbstractContextHandler {
-  classDeclarationPath: NodePath<ClassDeclaration>;
-  constructor(path: NodePath<Function>, module: Module) {
-    super(path, module);
-    if (functionReturnsOnlyJSX(path)) {
-      // @ts-ignore
-      this.classDeclarationPath = path.parentPath.parentPath;
-      if (t.isClassDeclaration(this.classDeclarationPath.node)) {
-        const className = this.classDeclarationPath.node.id.name;
-        this.initialiseComponent(className);
-        module.requireImport(IMPORTABLES.extendComponent);
-      }
-    }
-  }
-  applyTransformations(): void {
-    processFunctionParameters(this.path, this.component);
-    this.path.traverse(jsxVisitors, { component: this.component });
-    this.classDeclarationPath.insertAfter(
-      buildExtendComponentCall(this.component),
-    );
-  }
-}
+// class JsxClassMethod extends AbstractContextHandler {
+//   classDeclarationPath: NodePath<ClassDeclaration>;
+//   constructor(path: NodePath<Function>, module: Module) {
+//     super(path, module);
+//     if (functionReturnsOnlyJSX(path)) {
+//       // @ts-ignore
+//       this.classDeclarationPath = path.parentPath.parentPath;
+//       if (t.isClassDeclaration(this.classDeclarationPath.node)) {
+//         const className = this.classDeclarationPath.node.id.name;
+//         this.initialiseComponent(className);
+//         module.requireImport(IMPORTABLES.extendComponent);
+//       }
+//     }
+//   }
+//   applyTransformations(): void {
+//     processFunctionParameters(this.path, this.component);
+//     this.path.traverse(jsxVisitors, { component: this.component });
+//     this.classDeclarationPath.insertAfter(
+//       buildExtendComponentCall(this.component),
+//     );
+//   }
+// }
 
 // NOT SUPPORTED UNTIL WE FIND A WAY TO MAKE IT WORK WITH .nest AND .repeat
 // class AbstractClassPropertyContext extends AbstractContextHandler {
@@ -158,7 +158,7 @@ const contextClasses = [
 
 export function identifyContextToBeHandled(
   path: NodePath<Function>,
-  module: Module,
+  module: Module
 ): AbstractContextHandler | undefined {
   const contexts = [];
   contextClasses.forEach((contextClass) => {
@@ -167,7 +167,7 @@ export function identifyContextToBeHandled(
   const matches = contexts.filter((context) => context.isMatch);
   if (matches.length > 1) {
     throw new Error(
-      "Function matches more than one context. This is an error with the plugin.",
+      "Function matches more than one context. This is an error with the plugin."
     );
   } else if (matches.length === 1) {
     return matches[0];

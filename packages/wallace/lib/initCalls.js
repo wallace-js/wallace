@@ -63,31 +63,22 @@ export function defineComponent(
   lookups,
   buildFunction,
   inheritFrom,
-  prototypeExtras,
+  prototypeExtras
 ) {
-  const Constructor = extendPrototype(
+  const Constructor = extendComponent(
     inheritFrom || Component,
-    prototypeExtras,
+    prototypeExtras
   );
-  extendComponent(Constructor.prototype, html, watches, lookups, buildFunction);
-  return Constructor;
-}
-
-export function extendComponent(
-  prototype,
-  html,
-  watches,
-  lookups,
-  buildFunction,
-) {
+  const prototype = Constructor.prototype;
   //Ensure these do not clash with fields on the component itself.
   prototype._w = watches;
   prototype._l = new Lookup(lookups);
   prototype._b = buildFunction;
   prototype._n = makeEl(html);
+  return Constructor;
 }
 
-export function extendPrototype(base, prototypeExtras) {
+export function extendComponent(base, prototypeExtras) {
   const Constructor = function () {
     base.call(this);
   };

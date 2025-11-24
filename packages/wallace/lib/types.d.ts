@@ -12,6 +12,7 @@
  4. Utilities
  5. Rendering
  6. Inheritance
+ 7. TypeScript
 
 ## 1. Components
 
@@ -31,7 +32,17 @@ The extra arguments can any of the following, in any order:
 - `_event` the event arg in an event callback.
 - `_element` the element arg in an event callback.
 
-The extra arguments may not be desctructured. 
+The extra arguments may not be desctructured.
+
+Example:
+
+```
+const MyComponent = ({title, callback}, ctrl, _event) => (
+  <button onClick={callback(_event)}>
+    {title}
+  </button>
+);
+```
 
 ## 2. JSX
 
@@ -88,7 +99,7 @@ const BaseComponent = () => (
       <stub:display />
     </div>
   );
-  const SubComponent = extendPrototype(BaseComponent);
+  const SubComponent = extendComponent(BaseComponent);
   SubComponent.prototype.display = ({ name }) => <span>{name}</span>;
 ```
 
@@ -138,10 +149,88 @@ you like.
 
 ## 6. Inheritance
 
-
+To extend without changing the DOM use `extendComponent`:
 
 ```
-SubComponent.prototype.display = ({ name }) => <span>{name}</span>;
+const Parent = () => <div></div>;
+const Child = extendComponent(Parent);
+```
+
+To change the DOM use `base` directive:
+
+```
+const Child = () => (
+  <div base={Parent}>
+  </div>
+);
+```
+
+Either way the new component definition inherits the parent prototype, including stub
+implementations.
+
+Stubs can be defined or implemented on Child or Parent:
+
+```
+const Parent = () => (
+  <div>
+    <stub:stub1 />
+    <stub:stub2 />
+  </div>
+);
+Parent.prototype.stub1 = () => <span>Red</span>;
+Parent.prototype.stub2 = () => <span>Yellow</span>;
+Parent.prototype.stub3 = () => <span>Green</span>;
+
+const ChildA = extendComponent(Parent);
+ChildA.prototype.stub1 = () => <span>Blue</span>;
+// ChildA renders: Blue Yellow
+
+ChildB = () => (
+  <div base={Parent}>
+    <stub:stub2 />
+    <stub:stub3 />
+  </div>
+)
+ChildB.prototype.stub2 = () => <span>Orange</span>;
+// ChildB renders: Orange Green
+```
+
+## 7. TypeScript
+
+Use `Accepts` to specify the props type a component accepts:
+
+```
+import { Accepts } from 'wallace';
+
+interface iTask {
+  text: string,
+  done: boolean
+}
+
+const Task: Accepts<iTask> = ({text, done}) => <div></div>
+```
+
+Use `AcceptsExtends` for components with custom methods:
+
+```
+import { AcceptsExtends } from 'wallace';
+
+interface Methods {
+  someFunction: () => void;
+}
+
+const Task: AcceptsExtends<any, Methods> = () => (
+  <div></div>
+);
+const root = mount('root', Task);
+root.someFunction();
+```
+
+Use `Component` if you need a type for component instances:
+
+//TODO: complete later...
+```
+Component<iTask>
 ```
 
 ---
@@ -178,6 +267,8 @@ declare module "wallace" {
     update(): void;
     render(props: T): void;
     el: HTMLElement;
+    props: T;
+    ctrl: any;
   }
   export type ComponentExtends<Proto> = Component<any> & Proto;
 
@@ -190,7 +281,7 @@ declare module "wallace" {
 
   export function watch<T>(obj: T, callback: CallableFunction): T;
 
-  export function extendPrototype<T>(
+  export function extendComponent<T>(
     base: Accepts<T>,
     extras?: { [key: string]: any }
   ): Accepts<T>;
