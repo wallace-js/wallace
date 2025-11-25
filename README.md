@@ -18,7 +18,7 @@ Here are five things that set Wallace apart:
 
 #### 1. Size
 
-Wallace is perhaps the smallest and fastest loading framework out there:
+Wallace produces smaller and faster loading bundles:
 
 (show bar charts)
 
@@ -43,7 +43,7 @@ Frameworks drain our productivity by:
 
 - Forcing us to structure code a specific way - which affects reuse and readability.
 - Using weird patterns like hooks, providers and portals - which adds cognitive load.
-- Doing too much magic, especially reactive behaviour - which causes glitches and confusion.
+- Doing magic, like reactive behaviour - which causes glitches and confusion.
 
 Wallace doesn't do these things, and as a result you:
 
@@ -88,8 +88,6 @@ It is named after William Wallace - or rather his fictional portrayal in the 199
 That scene was immortalised in Scottish culture for its comedy value, and internationally as a symbol of resistance against oppressive monarchies. In honour of this, Wallace is released under a [NO KINGS LICENSE](./LICENCE).
 
 ## Tutorial
-
-Wallace is so simple you can learn everything in 15 minutes. After that, simply hover over the package import in your IDE to access the cheat sheet.
 
 ### Code along
 
