@@ -1,7 +1,7 @@
 //@14 error TS2345: Argument of type 'number' is not assignable to parameter of type 'string | HTMLElement'.
-import { mount, Accepts } from "wallace";
+import { mount, Uses } from "wallace";
 
-const MyComponent: Accepts<null> = () => (
+const MyComponent: Uses<null> = () => (
   <div>
     <p>Whatever</p>
   </div>

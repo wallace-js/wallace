@@ -30,8 +30,8 @@ describe("Event directive", () => {
       callBackArgs = Array.from(arguments);
     }
     const props = { name: "bird" };
-    const MyComponent = ({}, _component, _element, _event) => (
-      <div ref:target onClick={foo(_event, _component, _element)}></div>
+    const MyComponent = ({}, { self, e }) => (
+      <div ref:target onClick={foo(e, self, e.target)}></div>
     );
     const component = testMount(MyComponent, props);
     expect(component).toRender(`<div></div>`);
@@ -47,8 +47,8 @@ describe("Event directive", () => {
       el.textContent = birdName;
     };
     const props = { name: "bird" };
-    const MyComponent = (props, _element) => (
-      <div ref:target onClick={setName(_element, props.name)}></div>
+    const MyComponent = (props, { e }) => (
+      <div ref:target onClick={setName(e.target, props.name)}></div>
     );
     const component = testMount(MyComponent, props);
     component.ref.target.click();

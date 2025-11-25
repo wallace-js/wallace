@@ -34,7 +34,7 @@ describe("Nested components", () => {
 });
 
 describe("Repeated components", () => {
-  const Foo = (i, ctrl) => <div>{ctrl.multiply(i)}</div>;
+  const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
   const Bar = () => (
     <div>
       <Foo.repeat props={[1, 2, 3]} />
@@ -69,14 +69,16 @@ describe("Repeated components", () => {
 });
 
 describe("Inherited component", () => {
-  const BaseComponent = ({}, ctrl) => (
+  const BaseComponent = ({}, { ctrl }) => (
     <div>
       <span>{ctrl.multiply(1)}</span>
       <stub:display />
     </div>
   );
   const SubComponent = extendComponent(BaseComponent);
-  SubComponent.prototype.display = (_, ctrl) => <span>{ctrl.multiply(2)}</span>;
+  SubComponent.prototype.display = (_, { ctrl }) => (
+    <span>{ctrl.multiply(2)}</span>
+  );
   SubComponent.prototype.render = function () {
     this.ctrl = new Controller(2);
     this.update();
@@ -105,7 +107,7 @@ describe("Inherited component", () => {
 });
 
 test("Can pass controller in mount", () => {
-  const Foo = (i, ctrl) => <div>{ctrl.multiply(i)}</div>;
+  const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
   const component = testMount(Foo, 2, new Controller(2));
   expect(component).toRender("<div>4</div>");
 });

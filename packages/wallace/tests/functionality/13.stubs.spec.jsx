@@ -2,7 +2,7 @@ import { testMount } from "../utils";
 import { extendComponent } from "wallace";
 
 test("Can define stub and implement it on same component", () => {
-  const Foo = ({}, _component) => (
+  const Foo = ({}) => (
     <div>
       hello
       <stub:display />

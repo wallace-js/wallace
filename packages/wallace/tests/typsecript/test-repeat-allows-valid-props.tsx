@@ -1,4 +1,4 @@
-import { mount, Accepts } from "wallace";
+import { mount, Uses } from "wallace";
 
 interface Props {
   clicks: number;
@@ -6,7 +6,7 @@ interface Props {
 
 const counters: Array<Props> = [{ clicks: 0 }];
 
-const ClickCounter: Accepts<Props> = (counter: Props) => (
+const ClickCounter: Uses<Props> = (counter: Props) => (
   <div>
     <a>Clicked {counter.clicks} times</a>
   </div>

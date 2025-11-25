@@ -20,25 +20,24 @@ A component function:
 
 1. Must be an arrow function which implicitly returns a JSX statement.
 2. Must be assigned to a const that starts with a capital letter.
-3. Accepts `props` as its first argument, then any extra arguments.
+3. Uses `props` as its first argument, then any extra arguments.
 
-The props argument can be destructured, but the names must not match the 
-name of any extra argument, even if unused.
+The props argument can be destructured (but only to one level) and the names must not
+match the name of any extra argument, even if unused.
 
-The extra arguments can any of the following, in any order:
+The extra argument, destructured:
 
 - `ctrl` the controller.
-- `_component` the component.
-- `_event` the event arg in an event callback.
-- `_element` the element arg in an event callback.
+- `self` the component.
+- `e` the event arg in an event callback, just for TypeScript support.
 
 The extra arguments may not be desctructured.
 
 Example:
 
 ```
-const MyComponent = ({title, callback}, ctrl, _event) => (
-  <button onClick={callback(_event)}>
+const MyComponent = ({title}, {ctrl, self, e)) => (
+  <button onClick={ctrl.doSomething(self, e)}>
     {title}
   </button>
 );
@@ -65,16 +64,16 @@ Other than that, its standard JSX, except for three special cases:
 Use `ComponentName.nest` and `ComponentName.repeat` to nest components:
 
 ```tsx
-const Task: Accepts<iTask> = (task) => (<div></div>);
+const Task: Uses<iTask> = (task) => (<div></div>);
 
-const TopTasks: Accepts<iTask[]> = (tasks) => (
+const TopTasks: Uses<iTask[]> = (tasks) => (
   <div>
     <Task.nest props={tasks[0]} />
     <Task.nest props={tasks[1]} />
   </div>
 );
 
-const TaskList: Accepts<iTask[]> = (tasks) => (
+const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
     <Task.repeat props={tasks} />
   </div>
@@ -122,7 +121,7 @@ const BaseComponent = () => (
 A sentence woth `code` inside
 
 ```
-const Task: Accepts<iTask> = ({ text, done }, ctrl) => (
+const Task: Uses<iTask> = ({ text, done }, ctrl) => (
   <div>
     <input type="checkbox" bind={done} />
     <label onClick={console.log(ctrl)} style:color={done ? "grey" : "black"}>
@@ -197,41 +196,69 @@ ChildB.prototype.stub2 = () => <span>Orange</span>;
 
 ## 7. TypeScript
 
-Use `Accepts` to specify the props type a component accepts:
+To specify the types of props component uses, use 
+
+The `Uses` type can be used to specify three things.
+
+### Props type
 
 ```
-import { Accepts } from 'wallace';
+import { Uses } from 'wallace';
 
 interface iTask {
   text: string,
   done: boolean
 }
 
-const Task: Accepts<iTask> = ({text, done}) => <div></div>
+const Task: Uses<iTask> = ({text, done}) => <div></div>
 ```
 
-Use `AcceptsExtends` for components with custom methods:
+Here `text` will be of type `string` etc. This also restricts the props you can pass when
+nesting or mounting.
+
+### Controller type
+
+Here `ctrl` will be of type TaskController:
 
 ```
-import { AcceptsExtends } from 'wallace';
+import { Uses } from 'wallace';
 
-interface Methods {
-  someFunction: () => void;
+class TaskController () {
+  doSomething() {}
 }
 
-const Task: AcceptsExtends<any, Methods> = () => (
-  <div></div>
-);
-const root = mount('root', Task);
-root.someFunction();
+const Task: Uses<any, TaskController> = (_, {ctrl}) => (
+  <div>{ctrel.doSomething()}</div>
+)
 ```
 
-Use `Component` if you need a type for component instances:
+### Custom methods:
 
-//TODO: complete later...
-```
-Component<iTask>
-```
+- 
+
+
+Also instance type
+
+// ```
+// import { AcceptsExtends } from 'wallace';
+
+// interface Methods {
+//   someFunction: () => void;
+// }
+
+// const Task: AcceptsExtends<any, Methods> = () => (
+//   <div></div>
+// );
+// const root = mount('root', Task);
+// root.someFunction();
+// ```
+
+// Use `Component` if you need a type for component instances:
+
+// //TODO: complete later...
+// ```
+// Component<iTask>
+// ```
 
 ---
 
@@ -245,7 +272,11 @@ declare module "wallace" {
   > {
     (
       props: Props,
-      other?: { ctrl: Controller; self: Component<Props, Controller, Methods> }
+      other?: {
+        ctrl: Controller;
+        self: Component<Props, Controller, Methods>;
+        e: Event;
+      }
     ): JSX.Element;
     nest?({
       props,
@@ -345,16 +376,16 @@ interface DirectiveAttributes extends AllDomEvents {
    * Is the equivalent of this:
    *
    *```
-   * const MyComponent = ({name}) => (
-   *   <input type="text" onChange={name = _element.value} value={name}/>
+   * const MyComponent = ({name}, {e}) => (
+   *   <input type="text" onChange={name = e.target.value} value={name}/>
    * );
    * ```
    *
    * In the case of a checkbox it uses `checked` instead of `value`, so is the equivalent of this:
    *
    * ```
-   * const MyComponent = ({done}) => (
-   *   <input type="checkbox" onChange={done = _element.checked} checked={done}/>
+   * const MyComponent = ({done}, {e}) => (
+   *   <input type="checkbox" onChange={done = e.target.checked} checked={done}/>
    * );
    * ```
    *
@@ -501,8 +532,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onAbort?: any;
@@ -511,8 +542,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onAnimationCancel?: any;
@@ -521,8 +552,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onAnimationEnd?: any;
@@ -531,8 +562,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onAnimationIteration?: any;
@@ -541,8 +572,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onAnimationStart?: any;
@@ -551,8 +582,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onAuxClick?: any;
@@ -561,8 +592,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onBeforeInput?: any;
@@ -571,8 +602,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onBlur?: any;
@@ -581,8 +612,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onCancel?: any;
@@ -591,8 +622,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onCanPlay?: any;
@@ -601,8 +632,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onCanPlayThrough?: any;
@@ -611,8 +642,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onChange?: any;
@@ -621,8 +652,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onClick?: any;
@@ -631,8 +662,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onClose?: any;
@@ -641,8 +672,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onContextMenu?: any;
@@ -651,8 +682,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onCopy?: any;
@@ -661,8 +692,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onCueChange?: any;
@@ -671,8 +702,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onCut?: any;
@@ -681,8 +712,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDblClick?: any;
@@ -691,8 +722,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDrag?: any;
@@ -701,8 +732,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDragEnd?: any;
@@ -711,8 +742,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDragEnter?: any;
@@ -721,8 +752,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDragLeave?: any;
@@ -731,8 +762,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDragOver?: any;
@@ -741,8 +772,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDragStart?: any;
@@ -751,8 +782,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDrop?: any;
@@ -761,8 +792,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onDurationChange?: any;
@@ -771,8 +802,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onEmptied?: any;
@@ -781,8 +812,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onEnded?: any;
@@ -791,8 +822,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onError?: any;
@@ -801,8 +832,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onFocus?: any;
@@ -811,8 +842,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onFormData?: any;
@@ -821,8 +852,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onGotPointerCapture?: any;
@@ -831,8 +862,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onInput?: any;
@@ -841,8 +872,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onInvalid?: any;
@@ -851,8 +882,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onKeyDown?: any;
@@ -861,8 +892,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onKeyPress?: any;
@@ -871,8 +902,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onKeyUp?: any;
@@ -881,8 +912,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onLoad?: any;
@@ -891,8 +922,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onLoadedData?: any;
@@ -901,8 +932,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onLoadedMetadata?: any;
@@ -911,8 +942,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onLoadStart?: any;
@@ -921,8 +952,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onLostPointerCapture?: any;
@@ -931,8 +962,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseDown?: any;
@@ -941,8 +972,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseEnter?: any;
@@ -951,8 +982,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseLeave?: any;
@@ -961,8 +992,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseMove?: any;
@@ -971,8 +1002,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseOut?: any;
@@ -981,8 +1012,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseOver?: any;
@@ -991,8 +1022,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onMouseUp?: any;
@@ -1001,8 +1032,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPaste?: any;
@@ -1011,8 +1042,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPause?: any;
@@ -1021,8 +1052,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPlay?: any;
@@ -1031,8 +1062,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPlaying?: any;
@@ -1041,8 +1072,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerCancel?: any;
@@ -1051,8 +1082,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerDown?: any;
@@ -1061,8 +1092,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerEnter?: any;
@@ -1071,8 +1102,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerLeave?: any;
@@ -1081,8 +1112,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerMove?: any;
@@ -1091,8 +1122,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerOut?: any;
@@ -1101,8 +1132,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerOver?: any;
@@ -1111,8 +1142,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onPointerUp?: any;
@@ -1121,8 +1152,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onProgress?: any;
@@ -1131,8 +1162,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onRateChange?: any;
@@ -1141,8 +1172,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onReset?: any;
@@ -1151,8 +1182,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onResize?: any;
@@ -1161,8 +1192,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onScroll?: any;
@@ -1171,8 +1202,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSecurityPolicyViolation?: any;
@@ -1181,8 +1212,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSeeked?: any;
@@ -1191,8 +1222,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSeeking?: any;
@@ -1201,8 +1232,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSelect?: any;
@@ -1211,8 +1242,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSlotChange?: any;
@@ -1221,8 +1252,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onStalled?: any;
@@ -1231,8 +1262,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSubmit?: any;
@@ -1241,8 +1272,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onSuspend?: any;
@@ -1251,8 +1282,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTimeUpdate?: any;
@@ -1261,8 +1292,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onToggle?: any;
@@ -1271,8 +1302,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTouchCancel?: any;
@@ -1281,8 +1312,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTouchEnd?: any;
@@ -1291,8 +1322,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTouchMove?: any;
@@ -1301,8 +1332,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTouchStart?: any;
@@ -1311,8 +1342,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTransitionCancel?: any;
@@ -1321,8 +1352,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTransitionEnd?: any;
@@ -1331,8 +1362,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTransitionRun?: any;
@@ -1341,8 +1372,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onTransitionStart?: any;
@@ -1351,8 +1382,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onVolumeChange?: any;
@@ -1361,8 +1392,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onWaiting?: any;
@@ -1371,8 +1402,8 @@ interface AllDomEvents {
    *
    * Use xargs to access the event or element:
    * ```
-   * const MyComponent = (_, _event, _element) => (
-   *    <button onClick={clickHandler(_event, _element)} />
+   * const MyComponent = (_, { e }) => (
+   *    <button onClick={clickHandler(e)} />
    * );
    * ```
    */ onWheel?: any;

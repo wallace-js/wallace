@@ -1,11 +1,10 @@
-import { Accepts } from "wallace";
+import { Uses } from "wallace";
 import { iTask } from "./types";
 import { TaskListController } from "./controllers";
 
-const Task: Accepts<iTask> = (
+const Task: Uses<iTask, TaskListController> = (
   { text, done, id },
-  ctrl: TaskListController,
-  _element,
+  { ctrl }
 ) => (
   <div>
     <input
@@ -17,11 +16,9 @@ const Task: Accepts<iTask> = (
   </div>
 );
 
-export const TaskList: Accepts<null> = (
+export const TaskList: Uses<any, TaskListController> = (
   _,
-  ctrl: TaskListController,
-  _event,
-  _component,
+  { ctrl, self, e }
 ) => (
   <div class="tasklist">
     <div if={!ctrl.loading}>
@@ -30,7 +27,7 @@ export const TaskList: Accepts<null> = (
         <Task.repeat props={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
-        <input type="text" onKeyUp={_component.txtInputKeyUp(_event)} />
+        <input type="text" onKeyUp={self.txtInputKeyUp(e)} />
         <span> (hit enter to add)</span>
       </div>
     </div>
@@ -45,9 +42,9 @@ TaskList.prototype.render = function () {
   this.ctrl.init();
 };
 
-TaskList.prototype.txtInputKeyUp = function (_event: any) {
-  if (_event.key === "Enter") {
-    this.ctrl.addTask(_event.target.value);
-    _event.target.value = "";
+TaskList.prototype.txtInputKeyUp = function (e: any) {
+  if (e.key === "Enter") {
+    this.ctrl.addTask(e.target.value);
+    e.target.value = "";
   }
 };

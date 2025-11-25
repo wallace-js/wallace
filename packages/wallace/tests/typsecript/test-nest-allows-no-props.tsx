@@ -1,6 +1,6 @@
-import { mount, Accepts } from "wallace";
+import { mount, Uses } from "wallace";
 
-const ClickCounter: Accepts<null> = () => (
+const ClickCounter: Uses<null> = () => (
   <div>
     <a>Whatever</a>
   </div>

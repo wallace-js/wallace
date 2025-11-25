@@ -24,9 +24,8 @@ export enum IMPORTABLES {
 
 export enum EXTRA_PARAMETERS {
   controller = "ctrl",
-  component = "_component",
-  element = "_element",
-  event = "_event",
+  component = "self",
+  event = "e",
 }
 
 export enum SPECIAL_SYMBOLS {

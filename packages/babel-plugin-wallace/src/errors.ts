@@ -1,4 +1,9 @@
 import type { NodePath } from "@babel/core";
+import { EXTRA_PARAMETERS } from "./constants";
+
+const ALLOWED_XARGS: string[] = Object.values(EXTRA_PARAMETERS).map(
+  (n) => `"${n}"`
+);
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",
@@ -65,9 +70,10 @@ export const ERROR_MESSAGES = {
   ILLEGAL_NAMES_IN_PROPS: (names: string[]) =>
     `Illegal names in props: ${names
       .map((name) => `"${name}"`)
-      .join(", ")} - these are reserved for event callbacks.`,
-  ILLEGAL_PARAMETERS: (name: string) =>
-    `Illegal parameters: "${name}". You are only allowed "_element", "_event" and "_component".`,
+      .join(", ")} - these are reserved for extra args.`,
+  XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
+  ILLEGAL_XARG: (name: string) =>
+    `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`,
 };
 
 export function error(path: NodePath<any>, errorMessage: string) {

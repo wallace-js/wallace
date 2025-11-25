@@ -1,11 +1,11 @@
 //@16 error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { props: Props[]; show?: boolean; hide?: boolean; }'.
-import { mount, Accepts } from "wallace";
+import { mount, Uses } from "wallace";
 
 interface Props {
   clicks: number;
 }
 
-const ClickCounter: Accepts<Props> = (counter: Props) => (
+const ClickCounter: Uses<Props> = (counter: Props) => (
   <div>
     <a>Clicked {counter.clicks} times</a>
   </div>

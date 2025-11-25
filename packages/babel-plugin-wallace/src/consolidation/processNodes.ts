@@ -40,7 +40,10 @@ function addBindInstruction(node: ExtractedNode) {
         "=",
         expression as Identifier,
         t.memberExpression(
-          t.identifier(EXTRA_PARAMETERS.element),
+          t.memberExpression(
+            t.identifier(EXTRA_PARAMETERS.event),
+            t.identifier("target")
+          ),
           t.identifier(attribute)
         )
       );
@@ -371,7 +374,6 @@ export function processNodes(
           `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
         [component.propsIdentifier.name]:
           `${COMPONENT_BUILD_PARAMS.component}.props`,
-        [EXTRA_PARAMETERS.element]: `${EXTRA_PARAMETERS.event}.target`,
       };
       node.eventListeners.forEach((listener) => {
         const updatedExpression = renameVariablesInExpression(

@@ -22,7 +22,7 @@ function splitLast(s: string, on: string): Array<string | null> {
  *   "a.b" >  t.MemberExpression(...)
  */
 function expandNameToMemberExpression(
-  name: string,
+  name: string
 ): t.MemberExpression | t.Identifier {
   const [end, rest] = splitLast(name, ".");
   if (rest === null) {
@@ -30,13 +30,13 @@ function expandNameToMemberExpression(
   }
   return t.memberExpression(
     expandNameToMemberExpression(rest),
-    t.identifier(end),
+    t.identifier(end)
   );
 }
 
 function checkForIllegalNamesInProps(
   path: NodePath<Function>,
-  propVariableMap: { [key: string]: string },
+  propVariableMap: { [key: string]: string }
 ) {
   const illegalNamesFound = [];
   for (let name in EXTRA_PARAMETERS) {
@@ -50,24 +50,38 @@ function checkForIllegalNamesInProps(
   }
 }
 
-function checkForIllegalNamesInRemainingParameters(path: NodePath<Function>) {
-  const extraParameters = path.node.params.slice(1);
-  for (const param of extraParameters) {
-    if (t.isIdentifier(param)) {
-      const name = param["name"];
-      if (!Object.values(EXTRA_PARAMETERS).includes(name as EXTRA_PARAMETERS)) {
-        error(path, ERROR_MESSAGES.ILLEGAL_PARAMETERS(name));
+function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
+  const extraArg = path.node.params[1];
+  if (extraArg === undefined) {
+    return;
+  }
+  const allowed: string[] = Array.from(Object.values(EXTRA_PARAMETERS));
+  if (t.isObjectPattern(extraArg)) {
+    // key: prop on original object, may be an ObjectPattern
+    // value: as used in function
+    for (const prop of extraArg.properties) {
+      if (t.isObjectProperty(prop)) {
+        if (t.isIdentifier(prop.value) && t.isIdentifier(prop.key)) {
+          if (!allowed.includes(prop.key.name)) {
+            error(path, ERROR_MESSAGES.ILLEGAL_XARG(prop.key.name));
+          }
+        } else {
+          // ObjectPattern - TODO: allow further deconstruction?
+          throw new Error(`Unexpected value type in xargs: ${prop.type}`);
+        }
+      } else {
+        throw new Error(`Unexpected key type in xargs: ${prop.type}`);
       }
-    } else {
-      error(path, ERROR_MESSAGES.ILLEGAL_PARAMETERS(param.type));
     }
+  } else {
+    error(path, ERROR_MESSAGES.XARGS_MUST_BE_OBJECT);
   }
 }
 
 function renamePropKeysInsideFunction(
   path: NodePath<Function>,
   propVariableMap: PropsMap,
-  propsVar: string,
+  propsVar: string
 ) {
   // Babel lets us set identifier names that look like member expressions, however...
   for (const [key, value] of Object.entries(propVariableMap)) {
@@ -112,15 +126,18 @@ function extractFinalPropsName(path: NodePath<Function>): PropsMap {
   return propVariableMap;
 }
 
-function renameGeneralArgs(
+/**
+ * Only renames if function has its own binding.
+ */
+function renameExtaArgs(
   path: NodePath<Function>,
-  componentIdentifier: Identifier,
+  extraArgMap: { [key: string]: string }
 ) {
-  path.scope.rename(EXTRA_PARAMETERS.component, componentIdentifier.name);
-  path.scope.rename(
-    EXTRA_PARAMETERS.controller,
-    `${componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`,
-  );
+  for (const [key, value] of Object.entries(extraArgMap)) {
+    if (path.scope.hasOwnBinding(key)) {
+      path.scope.rename(key, value);
+    }
+  }
 }
 
 /**
@@ -129,18 +146,22 @@ function renameGeneralArgs(
  */
 export function processFunctionParameters(
   path: NodePath<Function>,
-  component: Component,
+  component: Component
 ) {
   if (path.node.params.length < 1) {
     return;
   }
   const propVariableMap = extractFinalPropsName(path);
   checkForIllegalNamesInProps(path, propVariableMap);
-  checkForIllegalNamesInRemainingParameters(path);
+  checkForIllegalNamesInExtraArgs(path);
   renamePropKeysInsideFunction(
     path,
     propVariableMap,
-    component.propsIdentifier.name,
+    component.propsIdentifier.name
   );
-  renameGeneralArgs(path, component.componentIdentifier);
+  const extraArgMap = {};
+  extraArgMap[EXTRA_PARAMETERS.component] = component.componentIdentifier.name;
+  extraArgMap[EXTRA_PARAMETERS.controller] =
+    `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;
+  renameExtaArgs(path, extraArgMap);
 }

@@ -1,11 +1,11 @@
 //@16 error TS2345: Argument of type '{ name: string; }' is not assignable to parameter of type 'Props'.
-import { mount, Accepts } from "wallace";
+import { mount, Uses } from "wallace";
 
 interface Props {
   clicks: number;
 }
 
-const FunctionWithProps: Accepts<Props> = ({ clicks }) => (
+const FunctionWithProps: Uses<Props> = ({ clicks }) => (
   <div>
     <p>Clicked {1 + clicks} times</p>
   </div>
