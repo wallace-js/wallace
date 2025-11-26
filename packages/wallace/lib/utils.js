@@ -34,11 +34,6 @@ export function buildComponent(componentDefinition) {
   return component;
 }
 
-export function define(componentDef, methods) {
-  Object.assign(componentDef.prototype, methods);
-  return componentDef;
-}
-
 /**
  * Wraps target in a Proxy which calls a function whenever it is modified.
  *

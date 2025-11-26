@@ -53,6 +53,26 @@ export function getSequentialRepeater(cls) {
   return new SequentialRepeater(cls);
 }
 
+export function define(componentDef, prototypeExtras, inheritFrom) {
+  if (componentDef) {
+    if (inheritFrom) {
+      Object.assign(componentDef.prototype, inheritFrom.prototype);
+    }
+  } else {
+    if (inheritFrom) {
+      componentDef.prototype = extendComponent(inheritFrom);
+    } else {
+      throw new Error(
+        "You must provide a component definition or inherit from one."
+      );
+    }
+  }
+  if (prototypeExtras) {
+    Object.assign(componentDef.prototype, prototypeExtras);
+  }
+  return componentDef;
+}
+
 export function defineComponent(
   html,
   watches,

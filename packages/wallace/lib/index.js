@@ -1,7 +1,8 @@
-import { mount, define, watch } from "./utils";
+import { mount, watch } from "./utils";
 import { Component } from "./component";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 import {
+  define,
   extendComponent,
   findElement,
   getKeyedRepeater,
