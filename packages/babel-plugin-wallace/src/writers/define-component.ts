@@ -1,6 +1,7 @@
 import * as t from "@babel/types";
 import type { CallExpression } from "@babel/types";
 import { Component } from "../models";
+import { COMPONENT_BUILD_PARAMS, IMPORTABLES } from "../constants";
 import type {
   ArrayExpression,
   FunctionExpression,
@@ -15,7 +16,6 @@ import {
   ComponentDefinitionData,
   consolidateComponent,
 } from "../consolidation";
-import { COMPONENT_BUILD_PARAMS } from "../constants";
 
 // component base to inherit from. Using 0 as false.
 function buildComponentBaseArg(
@@ -134,7 +134,7 @@ function buildProtoExtrasCall(
 
 export function buildDefineComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
-  return t.callExpression(t.identifier("defineComponent"), [
+  return t.callExpression(t.identifier(IMPORTABLES.defineComponent), [
     buildTemplateArg(componentDefinition),
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
@@ -150,7 +150,7 @@ export function buildDefineComponentCall(component: Component): CallExpression {
 export function buildExtendComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
   // Note that extendComponent used to be different.
-  return t.callExpression(t.identifier("extendComponent"), [
+  return t.callExpression(t.identifier(IMPORTABLES.extendComponent), [
     t.memberExpression(t.identifier(component.name), t.identifier("prototype")),
     buildTemplateArg(componentDefinition),
     buildWatchesArg(componentDefinition),

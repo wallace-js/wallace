@@ -196,75 +196,64 @@ ChildB.prototype.stub2 = () => <span>Orange</span>;
 
 ## 7. TypeScript
 
-To specify the types of props component uses, use 
+The `Uses` type can control props, controller and prototype.
 
-The `Uses` type can be used to specify three things.
-
-### Props type
+### Props
 
 ```
 import { Uses } from 'wallace';
 
 interface iTask {
-  text: string,
-  done: boolean
+  text: string
 }
 
-const Task: Uses<iTask> = ({text, done}) => <div></div>
+// Here `text` will be of type string:
+const Task: Uses<iTask> = ({text}) => <div>{text}</div>
+
+// also restricts the props you can pass when nesting or mounting.
 ```
 
-Here `text` will be of type `string` etc. This also restricts the props you can pass when
-nesting or mounting.
 
-### Controller type
-
-Here `ctrl` will be of type TaskController:
+### Controller
 
 ```
 import { Uses } from 'wallace';
 
 class TaskController () {
-  doSomething() {}
+  getName() {}
 }
 
+// Here `ctrl` will be of type TaskController:
 const Task: Uses<any, TaskController> = (_, {ctrl}) => (
-  <div>{ctrel.doSomething()}</div>
+  <div>{ctrl.getName()}</div>
 )
 ```
 
-### Custom methods:
+### Prototype
 
-- 
+```
+import { Uses } from 'wallace';
 
+interface Methods () {
+  getName() {}
+}
 
-Also instance type
-
-// ```
-// import { AcceptsExtends } from 'wallace';
-
-// interface Methods {
-//   someFunction: () => void;
-// }
-
-// const Task: AcceptsExtends<any, Methods> = () => (
-//   <div></div>
-// );
-// const root = mount('root', Task);
-// root.someFunction();
-// ```
-
-// Use `Component` if you need a type for component instances:
-
-// //TODO: complete later...
-// ```
-// Component<iTask>
-// ```
+// The properties will be available on `self`:
+const Task: Uses<any, TaskController> = (_, {self}) => (
+  <div>{self.getName()}</div>
+)
+```
 
 ---
-
+---
 Help make Wallace better by giving it a star: https://github.com/wallace-js/wallace
- */
+*/
+
 declare module "wallace" {
+  /**
+   * For internal use. Ensures a component can be nested in JSX, and also sets the types
+   * for the args.
+   */
   interface ComponentFunction<
     Props = any,
     Controller = any,
@@ -297,6 +286,34 @@ declare module "wallace" {
       hide?: boolean;
     }): JSX.Element;
   }
+
+  type PrototypeExtras<Props, Controller> = {
+    render?(props: Props, ctrl: Controller): void;
+  } & Record<string, any>;
+
+  /**
+   * Defines a component with optional properties to add to its prototype.
+   *
+   * @param component An arrow function which returns JSX.
+   * @param prototypeExtras An object with properties to be added to the prototype.
+   *
+   * If you specify <iProps, Controller> types, then
+   * All the parameters will have the corresponding types:
+   *
+   * ```
+   * const MyComponent = uses<iProps, ControllerClass>(
+   *   (props, {ctrl}) => <div></div>,
+   *   {
+   *     render(props, ctrl){},
+   *     otherMethod(){}
+   *   }
+   * );
+   */
+  export function define<Props, Controller>(
+    component: ComponentFunction<Props, Controller, typeof prototypeExtras>,
+    prototypeExtras?: PrototypeExtras<Props, Controller> &
+      ThisType<Component<Props, Controller>>
+  ): Uses<Props, Controller, typeof prototypeExtras>;
 
   export type Uses<
     Props = any,

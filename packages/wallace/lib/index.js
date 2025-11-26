@@ -1,4 +1,4 @@
-import { createComponent, watch, mount } from "./utils";
+import { createComponent, mount, uses, watch } from "./utils";
 import { Component } from "./component";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 import {
@@ -17,7 +17,6 @@ export {
   extendComponent,
   Component,
   createComponent,
-  watch,
   defineComponent,
   findElement,
   getKeyedRepeater,
@@ -29,4 +28,6 @@ export {
   stashMisc,
   saveRef,
   SequentialRepeater,
+  uses,
+  watch,
 };

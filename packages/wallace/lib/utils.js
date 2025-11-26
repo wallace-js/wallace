@@ -45,6 +45,11 @@ export function buildComponent(cls) {
   return component;
 }
 
+export function uses(componentDef, methods) {
+  Object.assign(componentDef.prototype, methods);
+  return componentDef;
+}
+
 /**
  * Wraps target in a Proxy which calls a function whenever it is modified.
  *
