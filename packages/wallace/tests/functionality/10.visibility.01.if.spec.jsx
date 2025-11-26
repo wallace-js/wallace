@@ -24,7 +24,7 @@ describe("Conditional directive not allowed", () => {
       );
     `;
     expect(code).toCompileWithError(
-      "Cannot use 'if' on nested or repeated element.",
+      'The "if" directive may not be used on nested elements.'
     );
   });
 
@@ -40,7 +40,7 @@ describe("Conditional directive not allowed", () => {
       );
     `;
     expect(code).toCompileWithError(
-      "Cannot use 'if' on nested or repeated element.",
+      'The "if" directive may not be used on repeated elements.'
     );
   });
 });

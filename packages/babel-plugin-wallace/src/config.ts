@@ -22,12 +22,12 @@ class WallaceConfig {
       const attributeName = directiveClass.attributeName;
       if (attributeName === undefined) {
         throw new Error(
-          `"Directive class "${directiveClass.name}" must have an attributName.`,
+          `"Directive class "${directiveClass.name}" must have an attributName.`
         );
       }
       if (this.directives.hasOwnProperty(attributeName)) {
         console.debug(
-          `Overriding directive ${attributeName} with ${directiveClass}.`,
+          `Overriding directive ${attributeName} with ${directiveClass}.`
         );
       }
       this.directives[attributeName] = directiveClass;

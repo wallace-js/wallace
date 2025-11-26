@@ -1,16 +1,16 @@
-import { mount, Accepts } from "wallace";
+import { mount, Uses } from "wallace";
 
 interface Props {
   clicks: number;
 }
 
-const FunctionWithoutProps: Accepts<null> = () => (
+const FunctionWithoutProps: Uses<null> = () => (
   <div>
     <p>Whatever</p>
   </div>
 );
 
-const FunctionWithProps: Accepts<Props> = ({ clicks }) => (
+const FunctionWithProps: Uses<Props> = ({ clicks }) => (
   <div>
     <p>Clicked {1 + clicks} times</p>
   </div>

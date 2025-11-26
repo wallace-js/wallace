@@ -53,7 +53,7 @@ describe("Toggle with target", () => {
   class directive on its own still works
   */
 
-  test("Toggle leaves existing classes alone", () => {
+  test("Toggles set on and off, leaving existing classes alone", () => {
     let spotted = false;
     const Leopard = () => (
       <div class="foo" ref:target class:spotty="spotty" toggle:spotty={spotted}>

@@ -606,30 +606,30 @@ test('Descriptive name', () => {
 Assess whether the code compiled with or without an error:
 
 ```jsx
-describe("Additional arguments", () => {
-  test("are allowed if recognised", () => {
-    const src = `
-    const A = ({}, _event, _component, _element) => (
-      <div>
-        Test
-      </div>
-    );
-  `;
-    expect(src).toCompileWithoutError();
-  });
+test("are allowed if recognised", () => {
+  const src = `
+  const A = ({}) => (
+    <div>
+      Test
+    </div>
+  );
+`;
+  expect(src).toCompileWithoutError();
+});
 
-  test("must be identifiers", () => {
-    const src = `
-    const A = ({}, {}) => (
-      <div>
-        Test
-      </div>
+test("JSX not allowed in expressions", () => {
+  const code = `
+    const Foo = () => (
+      <center>
+        {props.texts.map((paragraph, i) => (
+          <p key={i}>{paragraph}</p>
+        ))}
+      </center>
     );
   `;
-    expect(src).toCompileWithError(
-      'Illegal parameters: "ObjectPattern". You are only allowed "_element", "_event" and "_component".',
-    );
-  });
+  expect(code).toCompileWithError(
+    "JSX elements are not allowed in expressions."
+  );
 });
 ```
 
