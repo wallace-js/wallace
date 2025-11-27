@@ -37,7 +37,7 @@ describe("Custom directive", () => {
     const component = testMount(A);
     expect(component.el.getAttribute("value-value")).toBe("");
     expect(component.el.getAttribute("value-expression")).toBe(
-      "[object Object]",
+      "[object Object]"
     );
   });
 
@@ -49,7 +49,6 @@ describe("Custom directive", () => {
         value-value="pelican"
         value-expression=""
         qualifier="foo"
-        base="test-directive"
       ></div>`);
   });
 });

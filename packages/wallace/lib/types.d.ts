@@ -148,21 +148,19 @@ you like.
 
 ## 6. Inheritance
 
-To extend without changing the DOM use `extendComponent`:
+`extendComponent` creates a new component definition from a base:
 
 ```
 const Parent = () => <div></div>;
-const Child = extendComponent(Parent);
+Parent.methods({
+  getName() {return 'wallace'}
+})
+const Child = extendComponent(Parent, ({}, {self}) => (
+  <div>{self.getName()}</div>
+));
 ```
 
-To change the DOM use `base` directive:
-
-```
-const Child = () => (
-  <div base={Parent}>
-  </div>
-);
-```
+If you omit the 2nd arg, the new component will have the same DOM as the base.
 
 Either way the new component definition inherits the parent prototype, including stub
 implementations.
@@ -184,12 +182,12 @@ const ChildA = extendComponent(Parent);
 ChildA.prototype.stub1 = () => <span>Blue</span>;
 // ChildA renders: Blue Yellow
 
-ChildB = () => (
-  <div base={Parent}>
+ChildB = extendComponent(Parent, () => (
+  <div>
     <stub:stub2 />
     <stub:stub3 />
   </div>
-)
+));
 ChildB.prototype.stub2 = () => <span>Orange</span>;
 // ChildB renders: Orange Green
 ```
@@ -465,11 +463,6 @@ interface DirectiveAttributes extends AllDomEvents {
    * Requires a qualifier, but you lose the tooltip in that format.
    */
   ref?: string;
-
-  /*
-  - `style:xyz` sets a specific style property.
-  - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
-  */
 
   /** ## Wallace directive: show
    *

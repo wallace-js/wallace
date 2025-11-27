@@ -8,19 +8,6 @@
  */
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_PARAMS } from "./constants";
-import { ERROR_MESSAGES, error } from "./errors";
-
-class BaseDirective extends Directive {
-  static attributeName = "base";
-  static help = `
-    Causes this component to extend (inherit from) a base component:
-
-    /h <div base={OtherComponent}></div>
-    `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    node.setBaseComponent(value.expression);
-  }
-}
 
 class BindDirective extends Directive {
   static attributeName = "bind";
@@ -211,7 +198,6 @@ class ToggleDirective extends Directive {
 }
 
 export const builtinDirectives = [
-  BaseDirective,
   BindDirective,
   ClassDirective,
   HideDirective,

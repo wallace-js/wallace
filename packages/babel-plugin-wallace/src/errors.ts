@@ -13,6 +13,7 @@ export const ERROR_MESSAGES = {
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
+  CANNOT_MAKE_ROOT_ELEMENT_A_STUB: "Cannot make the root element a stub.",
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
   CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT: (directive: string) => {
     return `The "${directive}" directive may not be used on nested elements.`;

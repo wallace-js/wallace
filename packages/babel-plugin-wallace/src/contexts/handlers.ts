@@ -1,15 +1,14 @@
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
-import type { Function, ClassDeclaration } from "@babel/types";
+import type { Function, ObjectMethod } from "@babel/types";
 import { IMPORTABLES } from "../constants";
 import { jsxVisitors } from "../visitors/jsx";
 import { buildDefineComponentCall } from "../writers";
-import { error, ERROR_MESSAGES } from "../errors";
 import { Component, Module } from "../models";
 import { functionReturnsOnlyJSX } from "../helpers";
-import { isCapitalized } from "../utils";
 import { processFunctionParameters } from "./parameters";
 
+type AnyFunction = Function & ObjectMethod;
 /**
  * Base class for contexts where an arrow function of interest may be found.
  */
@@ -18,22 +17,21 @@ class AbstractContextHandler {
   component: Component;
   isMatch: boolean = false;
   module: Module;
-  path: NodePath<Function>;
-  functionPath: NodePath<Function>;
-  constructor(path: NodePath<Function>, module: Module) {
+  path: NodePath<AnyFunction>;
+  functionPath: NodePath<AnyFunction>;
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     this.path = path;
     this.module = module;
   }
   /**
    * Call this when you have found a component.
    */
-  initialiseComponent(componentName: string) {
-    if (!isCapitalized(componentName)) {
-      error(this.path.parentPath, ERROR_MESSAGES.CAPITALISED_COMPONENT_NAME);
-    }
+  initialiseComponent() {
+    // if (!isCapitalized(componentName)) {
+    //   error(this.path.parentPath, ERROR_MESSAGES.CAPITALISED_COMPONENT_NAME);
+    // }
     const scope = this.path.scope;
     this.component = new Component(
-      componentName,
       this.module,
       scope.generateUidIdentifier("p"),
       scope.generateUidIdentifier("c")
@@ -52,7 +50,7 @@ class AbstractContextHandler {
   }
 }
 
-function getAssignedName(path: NodePath<Function>): string {
+function getAssignedName(path: NodePath<AnyFunction>): string {
   const parentNode = path.parentPath.node;
   if (t.isVariableDeclarator(parentNode) && t.isIdentifier(parentNode.id)) {
     return parentNode.id.name;
@@ -64,13 +62,13 @@ function getAssignedName(path: NodePath<Function>): string {
  * const Foo = () => <div></div>
  */
 class AssignedJsxFunction extends AbstractContextHandler {
-  constructor(path: NodePath<Function>, module: Module) {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
     if (
       functionReturnsOnlyJSX(path) &&
       path.parentPath.isVariableDeclarator()
     ) {
-      this.initialiseComponent(getAssignedName(path));
+      this.initialiseComponent();
     }
   }
 }
@@ -79,14 +77,13 @@ class AssignedJsxFunction extends AbstractContextHandler {
  * A.prototype.foo = () => <div></div>
  */
 class JsxFunctionAssignedToMember extends AbstractContextHandler {
-  constructor(path: NodePath<Function>, module: Module) {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
     if (
       functionReturnsOnlyJSX(path) &&
       path.parentPath.isAssignmentExpression()
     ) {
-      // TODO: fix name to be `stub something`
-      this.initialiseComponent(getAssignedName(path));
+      this.initialiseComponent();
     }
   }
 }
@@ -95,7 +92,7 @@ class JsxFunctionAssignedToMember extends AbstractContextHandler {
  * extendComponent(Foo, () => <div></div>);
  */
 class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
-  constructor(path: NodePath<Function>, module: Module) {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
     if (
       functionReturnsOnlyJSX(path) &&
@@ -103,8 +100,7 @@ class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
       // @ts-ignore
       path.parentPath.node.callee?.name === "extendComponent"
     ) {
-      console.log("Found one");
-      this.initialiseComponent(getAssignedName(path));
+      this.initialiseComponent();
     }
   }
   getBaseComponent(): t.Identifier {
@@ -117,14 +113,61 @@ class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
   }
 }
 
+/**
+ *  const stubs = {
+ *   foo: () => <div></div>
+ *  };
+ */
+class JsxFunctionInProperty extends AbstractContextHandler {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (functionReturnsOnlyJSX(path) && path.parentPath.isProperty()) {
+      this.initialiseComponent();
+    }
+  }
+}
+
+/**
+ *  Foo.methods({
+ *   aStub() {
+ *      return <div></div>;
+ *    },
+ *  });
+ */
+class JsxFunctionInObjectMethod extends AbstractContextHandler {
+  keyName: string;
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (
+      functionReturnsOnlyJSX(path) &&
+      path.isObjectMethod() &&
+      path.node.key.type === "Identifier"
+    ) {
+      this.keyName = path.node.key.name;
+      // TODO: fix name to be `stub something`
+      this.initialiseComponent();
+    }
+  }
+  replaceWithDefineComponentCall() {
+    this.functionPath.replaceWith(
+      t.objectProperty(
+        t.identifier(this.keyName),
+        buildDefineComponentCall(this.component)
+      )
+    );
+  }
+}
+
 const contextClasses = [
+  JsxFunctionInExtendComponentCall,
   AssignedJsxFunction,
   JsxFunctionAssignedToMember,
-  JsxFunctionInExtendComponentCall,
+  JsxFunctionInProperty,
+  JsxFunctionInObjectMethod,
 ];
 
 export function identifyContextToBeHandled(
-  path: NodePath<Function>,
+  path: NodePath<AnyFunction>,
   module: Module
 ): AbstractContextHandler | undefined {
   const contexts = [];

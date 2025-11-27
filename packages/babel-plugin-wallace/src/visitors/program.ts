@@ -1,5 +1,10 @@
 import type { NodePath } from "@babel/core";
-import type { Function, JSXElement, ImportSpecifier } from "@babel/types";
+import type {
+  Function,
+  ObjectMethod,
+  JSXElement,
+  ImportSpecifier,
+} from "@babel/types";
 import { error, ERROR_MESSAGES } from "../errors";
 import { Module } from "../models";
 import { identifyContextToBeHandled } from "../contexts/handlers";
@@ -18,7 +23,7 @@ export const programVisitors = {
   ImportSpecifier(path: NodePath<ImportSpecifier>, { module }: State) {
     module.foundImport(path);
   },
-  Function(path: NodePath<Function>, { module }: State) {
+  Function(path: NodePath<Function & ObjectMethod>, { module }: State) {
     const contextHandler = identifyContextToBeHandled(path, module);
     if (contextHandler) {
       contextHandler.applyTransformations();

@@ -41,7 +41,6 @@ at runtime.
 */
 export class Component {
   _currentNodeAddress: Array<number> = [];
-  name: string;
   module: Module;
   baseComponent: Expression | undefined;
   rootElement: HTMLElement;
@@ -49,12 +48,10 @@ export class Component {
   propsIdentifier: Identifier;
   componentIdentifier: Identifier;
   constructor(
-    name: string,
     module: Module,
     propsIdentifier: Identifier,
     componentIdentifier: Identifier
   ) {
-    this.name = name;
     this.module = module;
     this.propsIdentifier = propsIdentifier;
     this.componentIdentifier = componentIdentifier;

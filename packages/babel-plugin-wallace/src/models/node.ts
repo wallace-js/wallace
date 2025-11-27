@@ -208,6 +208,9 @@ export class ExtractedNode {
       : undefined;
   }
   setStub(name: string) {
+    if (!this.parent) {
+      error(this.path, ERROR_MESSAGES.CANNOT_MAKE_ROOT_ELEMENT_A_STUB);
+    }
     if (this.#stubName) {
       error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
     }
