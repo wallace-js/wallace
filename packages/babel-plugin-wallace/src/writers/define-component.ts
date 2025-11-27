@@ -126,35 +126,16 @@ function buildComponentBuildFunction(
   );
 }
 
-function buildProtoExtrasCall(
-  component: ComponentDefinitionData
-): ObjectExpression {
-  return t.objectExpression([]);
-}
-
 export function buildDefineComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
-  return t.callExpression(t.identifier(IMPORTABLES.defineComponent), [
+  const args: any[] = [
     buildTemplateArg(componentDefinition),
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
     buildComponentBuildFunction(componentDefinition),
-    buildComponentBaseArg(componentDefinition),
-    buildProtoExtrasCall(componentDefinition),
-  ]);
-}
-
-/**
- * Unused. Was for classes.
- */
-export function buildExtendComponentCall(component: Component): CallExpression {
-  const componentDefinition = consolidateComponent(component);
-  // Note that extendComponent used to be different.
-  return t.callExpression(t.identifier(IMPORTABLES.extendComponent), [
-    t.memberExpression(t.identifier(component.name), t.identifier("prototype")),
-    buildTemplateArg(componentDefinition),
-    buildWatchesArg(componentDefinition),
-    buildLookupsArg(componentDefinition),
-    buildComponentBuildFunction(componentDefinition),
-  ]);
+  ];
+  if (componentDefinition.baseComponent) {
+    args.push(buildComponentBaseArg(componentDefinition));
+  }
+  return t.callExpression(t.identifier(IMPORTABLES.defineComponent), args);
 }

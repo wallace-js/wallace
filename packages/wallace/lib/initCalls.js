@@ -53,24 +53,12 @@ export function getSequentialRepeater(cls) {
   return new SequentialRepeater(cls);
 }
 
-export function define(componentDef, prototypeExtras, inheritFrom) {
-  if (componentDef) {
-    if (inheritFrom) {
-      Object.assign(componentDef.prototype, inheritFrom.prototype);
-    }
-  } else {
-    if (inheritFrom) {
-      componentDef.prototype = extendComponent(inheritFrom);
-    } else {
-      throw new Error(
-        "You must provide a component definition or inherit from one."
-      );
-    }
-  }
-  if (prototypeExtras) {
-    Object.assign(componentDef.prototype, prototypeExtras);
-  }
-  return componentDef;
+export function extendComponent(base, componentDef) {
+  // This function call will have been replaced if 2nd arg is a valid component func.
+  // and therefor we would not receive it.
+  if (componentDef)
+    throw new Error("2nd arg to extendComponent must be a JSX arrow function");
+  return _createConstructor(base);
 }
 
 export function defineComponent(
@@ -78,33 +66,32 @@ export function defineComponent(
   watches,
   lookups,
   buildFunction,
-  inheritFrom,
-  prototypeExtras
+  inheritFrom
 ) {
-  const Constructor = extendComponent(
-    inheritFrom || Component,
-    prototypeExtras
-  );
-  const prototype = Constructor.prototype;
+  const ComponentDefinition = _createConstructor(inheritFrom || Component);
+  const prototype = ComponentDefinition.prototype;
   //Ensure these do not clash with fields on the component itself.
   prototype._w = watches;
   prototype._l = new Lookup(lookups);
   prototype._b = buildFunction;
   prototype._n = makeEl(html);
-  return Constructor;
+  return ComponentDefinition;
 }
 
-export function extendComponent(base, prototypeExtras) {
-  const Constructor = function () {
+function _createConstructor(base) {
+  const ComponentDefinition = function () {
     base.call(this);
   };
-  Constructor.prototype = Object.create(base && base.prototype, {
+  // This is a helper function for the user.
+  ComponentDefinition.methods = function (obj) {
+    Object.assign(ComponentDefinition.prototype, obj);
+  };
+  ComponentDefinition.prototype = Object.create(base && base.prototype, {
     constructor: {
-      value: Constructor,
+      value: ComponentDefinition,
       writable: true,
       configurable: true,
     },
   });
-  Object.assign(Constructor.prototype, prototypeExtras);
-  return Constructor;
+  return ComponentDefinition;
 }

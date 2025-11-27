@@ -2,22 +2,21 @@ import { mount, watch } from "./utils";
 import { Component } from "./component";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 import {
-  define,
   extendComponent,
+  defineComponent,
   findElement,
   getKeyedRepeater,
   getSequentialRepeater,
   onEvent,
   nestComponent,
-  defineComponent,
-  stashMisc,
   saveRef,
+  stashMisc,
 } from "./initCalls";
 
 export {
-  extendComponent,
   Component,
   defineComponent,
+  extendComponent,
   findElement,
   getKeyedRepeater,
   getSequentialRepeater,
@@ -25,9 +24,8 @@ export {
   mount,
   nestComponent,
   onEvent,
-  stashMisc,
   saveRef,
   SequentialRepeater,
-  define,
+  stashMisc,
   watch,
 };

@@ -11,7 +11,7 @@ interface State {
 // Although we're mainly interested in JSXElements, we visit nodes above where
 // we expect to find those, so that we can get in before other plugins apply
 // their transformations (like ES6 ArrowFunction conversion).
-// Note that those plugins may not be loaded, so we can't depend on their
+// Note that other such plugins may not be loaded, so we can't depend on their
 // transformations happening.
 
 export const programVisitors = {

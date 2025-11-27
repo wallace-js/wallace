@@ -285,35 +285,16 @@ declare module "wallace" {
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
+    methods?(
+      m: ComponenMethods<Props, Controller> &
+        ThisType<Component<Props, Controller, Methods>>
+    ): void;
   }
 
-  type PrototypeExtras<Props, Controller> = {
+  type ComponenMethods<Props, Controller> = {
     render?(props: Props, ctrl: Controller): void;
-  } & Record<string, any>;
-
-  /**
-   * Defines a component with optional properties to add to its prototype.
-   *
-   * @param component An arrow function which returns JSX.
-   * @param prototypeExtras An object with properties to be added to the prototype.
-   *
-   * If you specify <iProps, Controller> types, then
-   * All the parameters will have the corresponding types:
-   *
-   * ```
-   * const MyComponent = uses<iProps, ControllerClass>(
-   *   (props, {ctrl}) => <div></div>,
-   *   {
-   *     render(props, ctrl){},
-   *     otherMethod(){}
-   *   }
-   * );
-   */
-  export function define<Props, Controller>(
-    component: ComponentFunction<Props, Controller, typeof prototypeExtras>,
-    prototypeExtras?: PrototypeExtras<Props, Controller> &
-      ThisType<Component<Props, Controller>>
-  ): Uses<Props, Controller, typeof prototypeExtras>;
+    [key: string]: any;
+  };
 
   export type Uses<
     Props = any,
@@ -333,6 +314,22 @@ declare module "wallace" {
     ctrl: Controller;
   } & Methods;
 
+  /**
+   * Use to define a new component which extends another component, meaning it will
+   * inherit its prototye.
+   * If componentFunc is omitted, the new component inherits the base's DOM structure.
+   * @param base The component definition to inherit from.
+   * @param componentFunc A JSX function to override the DOM.
+   */
+  export function extendComponent<
+    Props = any,
+    Controller = any,
+    Methods extends object = {},
+  >(
+    base: Uses<Props, Controller, Methods>,
+    componentFunc?: ComponentFunction<Props, Controller, Methods>
+  ): Uses<Props, Controller, Methods>;
+
   export function mount<
     Props = any,
     Controller = any,
@@ -345,15 +342,6 @@ declare module "wallace" {
   ): Component<Props, Controller, Methods>;
 
   export function watch<T>(obj: T, callback: CallableFunction): T;
-
-  export function extendComponent<
-    Props = any,
-    Controller = any,
-    Methods extends object = {},
-  >(
-    base: Uses<Props, Controller, Methods>,
-    extras?: { [key: string]: any }
-  ): Uses<Props, Controller, Methods>;
 }
 
 type MustBeExpression = Exclude<any, string>;
