@@ -1,67 +1,157 @@
-// This module lies about several definitions in order to make TypeScript work with JSX.
-// Note that docstrings will appear in most IDE tooltips, but only the latest overload.
-// These may use Markdown syntax.
+/**
+ * This file lies about several definitions in order to make TypeScript work with JSX.
+ * Note that docstrings will appear in most IDE tooltips, selecting the latest overload.
+ */
 
 /**
-
 # Wallace cheat sheet
 
- 1. Components
- 2. JSX
- 3. Directives
- 4. Utilities
- 5. Rendering
- 6. Inheritance
- 7. TypeScript
+### Contents
+
+  1. Components
+  2. JSX
+  3. Nesting
+  4. Directives
+  5. Controllers
+  6. Inheritance
+  7. Stubs
+  8. TypeScript
+
+For more detailed documentation go to https://github.com/wallace-js/wallace
 
 ## 1. Components
 
-A component function:
+### 1.1 Defining
 
-1. Must be an arrow function which implicitly returns a JSX statement.
-2. Must be assigned to a const that starts with a capital letter.
-3. Uses `props` as its first argument, then any extra arguments.
+You define a component by assigning a JSX function to a value:
 
-The props argument can be destructured (but only to one level) and the names must not
-match the name of any extra argument, even if unused.
-
-The extra argument, destructured:
-
-- `ctrl` the controller.
-- `self` the component.
-- `e` the event arg in an event callback, just for TypeScript support.
-
-The extra arguments may not be desctructured.
-
-Example:
-
+```tsx
+const MyComponent = () => <div>Hello</div>;
 ```
-const MyComponent = ({title}, {ctrl, self, e)) => (
-  <button onClick={ctrl.doSomething(self, e)}>
+
+The function body must be a single JSX expression, returned, and nothing else.
+
+The function takes two arguments, both optional:
+
+1. **props** - which *may* be destructured.
+2. **xargs** - which *must* be destructured to exactly one level, as shown:
+
+```tsx
+const MyComponent = ({title}, {ctrl, e}) => (
+  <button onClick={ctrl.doSomething(e)}>
     {title}
   </button>
 );
 ```
 
+The **xargs** contains:
+
+- `ctrl` a reference to a controller object.
+- `self` a reference to the component instance (as `this` is not allowed).
+- `e` for use in event callbacks, signifies the event.
+
+The function will be replaced by a very different one during compilation, therefore:
+
+1. Do not call it from your own code.
+2. Do not do weird things with it or within it.
+
+### 1.2 Mounting
+
+You mount the root component of your tree using `mount`:
+
+```tsx
+const root = mount("root", MyComponent, props, ctrl);
+```
+
+The arguments are:
+
+1. Element or id string.
+2. Component definition.
+3. props for the element (optional)
+4. controller (optional)
+
+`mount` returns the component instance, allowing you to call methods on it:
+
+```tsx
+root.update()
+```
+
+### 1.3 Methods
+
+Components have two public methods:
+
+#### render(props, ctrl)
+
+Called from "above" by `mount` or when nesting other components. Here it is:
+
+```tsx
+render(props, ctrl) {
+    this.props = props;
+    this.ctrl = ctrl;
+    this.update();
+  }
+```
+
+#### update()
+
+Updates the DOM. Only called internally by `render`, but you can call it from other
+places.
+
+You can override these methods, and add new ones:
+
+```tsx
+MyComponent.methods({
+  render(props) {
+    this.ctrl = new MyController(this, props);
+    this.update();
+  },
+  getName() {
+    return 'wallace';
+  }
+});
+```
+
+Use `this` in methods, but `self` in the JSX.
+
+
+### 1.4 Fields
+
+Component instances have the following fields:
+
+- `props` the data for this component instance, stored as reference to original, not a 
+copy.
+- `ctrl` an object to help coordinate things, also stored as reference.
+- `ref` a dictionary of named elements.
+- `el` the component instance's root element.
+
+Both `props` and `ctrl` are set during the `render` method before calling `update`.
+There are no restrictions on types but typically:
+
+- `props` is an object with primitive data.
+- `ctrl` is an instance of a custom class.
+
+Nested components will receive:
+
+- The same `ctrl` as the parent.
+- The `props` specified in JSX.
+
 ## 2. JSX
 
-JSX is only permitted as the implicit return of an arrow function, which must be either:
+Wallace has two JSX rules:
 
-1. A component definition (as described in **1. Components**).
-2. A stub (as described in **6. Inheritance**).
-
-You cannot put JavaScript expressions before, within or around JSX, except inside
-placeholders so long as it does not return JSX. 
+1. JSX is only permitted in components as described above.
+2. You cannot put JavaScript expressions before, within or around JSX - except inside
+placeholders, and only so long as it does not return further JSX.
 
 Other than that, its standard JSX, except for three special cases:
 
-1. Directives (attributes with special meanings, see **3. Directives**).
+1. Directives (attributes with special behaviours).
 2. Nesting.
 3. Stubs, for inheritance.
 
-### 2.1 Nesting
+## 3 Nesting
 
-Use `ComponentName.nest` and `ComponentName.repeat` to nest components:
+To nest or repeat components use its name followed by `.nest` or `.repeat`:
 
 ```tsx
 const Task: Uses<iTask> = (task) => (<div></div>);
@@ -82,165 +172,213 @@ const TaskList: Uses<iTask[]> = (tasks) => (
 
 Notes:
 
+  - You may only use the directives `prop`, `show` and `hide`.
   - TypeScript will adjust `props` to require `iTask` or `iTask[]` accordingly.
   - You may not nest the root element.
-  - Repeat must not have siblings.
-  - You may not use `if` directive - use `show` and `hide` instead.
+  - A repeat must be the only child element under its parent.
 
-### 2.2 Stubs
+## 4. Directives
 
-You can define a `stub`
+Directives are attributes with special behaviours, as listed below. Each has more
+detailed information on its JSDoc, which should display as a tool tip\* when you hover
+over it in your IDE:
 
-```jsx
-const BaseComponent = () => (
-    <div>
-      hello
-      <stub:display />
-    </div>
-  );
-  const SubComponent = extendComponent(BaseComponent);
-  SubComponent.prototype.display = ({ name }) => <span>{name}</span>;
-```
-
-## 3. Directives
-
-- `base` specifies a base class to inherit from.
 - `bind` updates a value when an input is changed.
 - `class:xyz` defines a set of classes to be toggled. 
 - `hide` sets and element or component's hidden property.
 - `if` excludes an element from the DOM.
 - `on[EventName]` creates an event handler (note the code is copied)
-- `props` specifes props for a nested or repeated component, in which case it must be an array.
+- `props` specifes props for a nested or repeated component, in which case it must be
+an array.
 - `ref` saves a reference to an element or nested component.
 - `show` sets and element or component's hidden property.
 - `style:xyz` sets a specific style property.
 - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
 
-## 4. Utilities
+\* The tool tip won't display when you use a qualifier, like `class:danger`. 
 
-A sentence woth `code` inside
+## 5. Controllers
 
-```
-const Task: Uses<iTask> = ({ text, done }, ctrl) => (
+A controller is just an object you create which gets passed down to every nested
+component, making it a convenient place to handle:
+
+- Event handlers.
+- Fetching data.
+- Sorting, filtering and formatting props.
+- Coordinating updates.
+
+This lets you use props solely for data, without callbacks.
+
+Controllers often reference:
+
+- Any components that should be updated after data changes.
+- Higher level controllers.
+
+```tsx
+class TaskController {
+  constructor (rootComponent, mainController) {
+    this.root = rootComponent;
+    this.main = mainController;
+  }
+  getTasks () {
+    return this.main.fetch(...);
+  }
+  newTask () {
+      // do stuff...
+    this.root.update();
+  }
+}
+
+const Task = (task) => (<div>{task.name}</div>);
+
+const TaskList = (_, {ctrl}) => (
   <div>
-    <input type="checkbox" bind={done} />
-    <label onClick={console.log(ctrl)} style:color={done ? "grey" : "black"}>
-      {text}
-    </label>
+    <Task.repeat props={ctrl.getTasks()} />
   </div>
 );
+
+TaskList.methods({
+  render(props, ctrl) {
+    this.props = props;
+    this.ctrl = new TaskController(this, ctrl);
+  }
+});
 ```
-
-## 5. Rendering
-
-The `render` method looks like, and can be overriden like this:
-
-```
-MyComponent.prototype.render = function(props, ctrl) {
-  this.props = props;
-  this.ctrl = ctrl;
-  this.update();
-}
-```
-
-This is the only place where Wallace calls `update` - but you may call it from anywhere
-you like.
 
 ## 6. Inheritance
 
-`extendComponent` creates a new component definition from a base:
+You can define new components by extending other component definitions, either with
+using the base's structure, or overriding it:
 
+```tsx
+import { extendComponent } from 'wallace';
+
+const Parent = ({name}) => <h1>{name}</h1>;
+
+const Child1 = extendComponent(Parent);
+const Child2 = extendComponent(Parent, ({name}) => <h3>{name}</h3>);
 ```
-const Parent = () => <div></div>;
-Parent.methods({
-  getName() {return 'wallace'}
-})
-const Child = extendComponent(Parent, ({}, {self}) => (
-  <div>{self.getName()}</div>
-));
-```
 
-If you omit the 2nd arg, the new component will have the same DOM as the base.
+Either way the new component definition inherits the parent *prototype* and *stubs*.
 
-Either way the new component definition inherits the parent prototype, including stub
-implementations.
+## 7. Stubs
 
-Stubs can be defined or implemented on Child or Parent:
+Stubs are named placeholders for nested components which are requested in the JSX:
 
-```
-const Parent = () => (
+```tsx
+const MyComponent = () => (
   <div>
-    <stub:stub1 />
-    <stub:stub2 />
+    <stub:animation />
+    <stub:text />
   </div>
 );
-Parent.prototype.stub1 = () => <span>Red</span>;
-Parent.prototype.stub2 = () => <span>Yellow</span>;
-Parent.prototype.stub3 = () => <span>Green</span>;
-
-const ChildA = extendComponent(Parent);
-ChildA.prototype.stub1 = () => <span>Blue</span>;
-// ChildA renders: Blue Yellow
-
-ChildB = extendComponent(Parent, () => (
-  <div>
-    <stub:stub2 />
-    <stub:stub3 />
-  </div>
-));
-ChildB.prototype.stub2 = () => <span>Orange</span>;
-// ChildB renders: Orange Green
 ```
 
-## 7. TypeScript
+And defined on the `stubs` property of the component definition:
+
+```tsx
+MyComponent.stubs.animation: () => <div>...</div>;
+MyComponent.stubs.text: MyTextComponent;
+```
+
+Stubs are inherited and can be overridden, which means you can either:
+
+- Let the base define the DOM structure, and implement/override stubs on the inherited
+component.
+- Let the inherited component define the DOM structure, and use stubs from the base.
+
+Notes:
+
+* Stubs receive the same props and controller as their containing component.
+* Stubs are separate components, so cannot access methods on the containing component
+* through `self` (use the controller for that kind of thing).
+
+## 8. TypeScript
+
+### 8.1 `Uses` type
 
 The `Uses` type can control props, controller and prototype.
 
-### Props
+##### Props
 
-```
+```tsx
 import { Uses } from 'wallace';
 
 interface iTask {
   text: string
 }
 
-// Here `text` will be of type string:
-const Task: Uses<iTask> = ({text}) => <div>{text}</div>
-
-// also restricts the props you can pass when nesting or mounting.
+const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
 ```
 
+The `Uses` type must be placed exactly where shown. If you require no props, set it to
+`null` to ensure no props are passed when nesting or mounting:
 
-### Controller
-
+```tsx
+const Task: Uses<null> = () => <div>{text}</div>;
 ```
+
+##### Controller
+
+```tsx
 import { Uses } from 'wallace';
 
 class TaskController () {
   getName() {}
 }
 
-// Here `ctrl` will be of type TaskController:
-const Task: Uses<any, TaskController> = (_, {ctrl}) => (
+const Task: Uses<null, TaskController> = (_, { ctrl }) => (
   <div>{ctrl.getName()}</div>
-)
+));
 ```
 
-### Prototype
+##### Methods
 
-```
+To see custom methods on `self` you need to use an interface:
+
+```tsx
 import { Uses } from 'wallace';
 
-interface Methods () {
-  getName() {}
+interface TaskMethods () {
+  getName(): string;
 }
 
-// The properties will be available on `self`:
-const Task: Uses<any, TaskController> = (_, {self}) => (
+const Task: Uses<null, null, TaskMethods> = (_, { self }) => (
   <div>{self.getName()}</div>
-)
+));
+
+Task.methods({
+  getName() { return 'wallace' },
+  render(props, ctrl) {  // types are already known
+    this.props = { ...props, notallowed: 1 };  // type error
+  }
+});
 ```
+
+The type will pass into the object passed into `methods` so it recognises custom methods
+in addition to standard methods like `render`, which are already typed for you.
+
+### 8.2 Types for `extendComponent`
+
+The `extendComponent` function transfers the types specified on the base:
+
+```tsx
+const Child = extendComponent(Parent);
+```
+
+You may specify different types:
+
+```tsx
+const Child = extendComponent<newProps, Controller, Methods>(Parent);
+```
+
+ However:
+
+1. You must specify all those that are specified on base - as omitted types default
+   to `any`.
+2. Each type must extend its corresponding type on base.
+
+Note that these are just typing restrictions, you can ignore them if you must.
 
 ---
 ---
@@ -287,6 +425,12 @@ declare module "wallace" {
       m: ComponenMethods<Props, Controller> &
         ThisType<Component<Props, Controller, Methods>>
     ): void;
+    readonly prototype?: ComponenMethods<Props, Controller> &
+      ThisType<Component<Props, Controller, Methods>>;
+    readonly stubs?: Record<
+      string,
+      ComponentFunction<Props, Controller, Methods>
+    >;
   }
 
   type ComponenMethods<Props, Controller> = {

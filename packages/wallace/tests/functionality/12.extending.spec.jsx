@@ -88,7 +88,7 @@ describe("child component with new dom", () => {
   </div>`);
   });
 
-  test("Can access owndmethods", () => {
+  test("Can access overridden methods", () => {
     const ChildComponent = extendComponent(BaseComponent, ({}, { self }) => (
       <div>
         <h3>{self.getName()}</h3>
