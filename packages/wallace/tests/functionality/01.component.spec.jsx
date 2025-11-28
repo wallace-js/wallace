@@ -1,7 +1,7 @@
 /*
 Test that components can be defined in all legal ways.
 */
-import { transform } from "../utils";
+import { transform, testMount } from "../utils";
 
 describe("Defining functions in equivalent ways compiles to same output", () => {
   const expectedOutput = transform(
@@ -19,6 +19,33 @@ describe("Defining functions in equivalent ways compiles to same output", () => 
     ],
   ])("%s", (condition, code) => {
     expect(transform(code).code).toBe(expectedOutput);
+  });
+});
+
+describe("Components can be defined", () => {
+  test("in member expressions", () => {
+    const foo = {};
+    foo.bar = ({ name }) => <span>{name}</span>;
+    const component = testMount(foo.bar, { name: "porcupine" });
+    expect(component).toRender(`<span>porcupine</span>`);
+  });
+
+  test("in object property", () => {
+    const foo = {
+      bar: ({ name }) => <span>{name}</span>,
+    };
+    const component = testMount(foo.bar, { name: "porcupine" });
+    expect(component).toRender(`<span>porcupine</span>`);
+  });
+
+  test("in ObjectMethods", () => {
+    const foo = {
+      bar({ name }) {
+        return <span>{name}</span>;
+      },
+    };
+    const component = testMount(foo.bar, { name: "porcupine" });
+    expect(component).toRender(`<span>porcupine</span>`);
   });
 });
 

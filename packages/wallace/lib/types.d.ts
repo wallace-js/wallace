@@ -427,10 +427,8 @@ declare module "wallace" {
     ): void;
     readonly prototype?: ComponenMethods<Props, Controller> &
       ThisType<Component<Props, Controller, Methods>>;
-    readonly stubs?: Record<
-      string,
-      ComponentFunction<Props, Controller, Methods>
-    >;
+    // Methods will not be available of nested component.
+    readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
   }
 
   type ComponenMethods<Props, Controller> = {

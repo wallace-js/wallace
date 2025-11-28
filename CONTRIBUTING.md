@@ -535,16 +535,13 @@ Having the guidelines, yet being able to break them, solves some dilemmas:
 When we add stubs:
 
 ```jsx
-// problem with :hide not working.
-export class DialogWithHub extends ModalBase {
-  __stubs__ = {
-    content:
-      <div class="mb-4">
-        <div :show=".hub.loading" class="loader"></div>
-        <div :hide=".hub.loading">Loaded</div>
-      </div>
-  };
-}
+const Foo = ({}) => (
+    <div>
+      hello
+      <stub:display />
+    </div>
+  );
+  Foo.stubs.display = ({ name }) => <span>{name}</span>;
 ```
 
 We have to decide whether we add that structure to `1.defining.spec.jsx` and therefore cater for it throughout the other suites, or to create it as its own feature, and test other features within it.

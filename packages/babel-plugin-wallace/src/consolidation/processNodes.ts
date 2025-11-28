@@ -15,6 +15,7 @@ import { Component, VisibilityToggle, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
+  COMPONENT_METHODS,
   EXTRA_PARAMETERS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
@@ -141,9 +142,12 @@ export function processNodes(
 
     const stubName = node.getStub();
     const stubComponentName = stubName
-      ? t.memberExpression(
-          t.identifier(COMPONENT_BUILD_PARAMS.component),
-          t.identifier(stubName)
+      ? t.callExpression(
+          t.memberExpression(
+            t.identifier(COMPONENT_BUILD_PARAMS.component),
+            t.identifier(COMPONENT_METHODS.getStub)
+          ),
+          [t.stringLiteral(stubName)]
         )
       : undefined;
     const visibilityToggle = node.getVisibilityToggle();
@@ -229,7 +233,7 @@ export function processNodes(
               callExpression(
                 memberExpression(
                   identifier(WATCH_CALLBACK_PARAMS.element),
-                  identifier("render")
+                  identifier(COMPONENT_METHODS.render)
                 ),
                 args
               )
@@ -245,14 +249,15 @@ export function processNodes(
           );
         }
 
-        // Need to be careful with WATCH_CALLBACK_PARAMS
+        // Need to be careful with WATCH_CALLBACK_PARAMS as `e` is actually a reference
+        // to the nested component, and that's what we want to render.
         if (stubName) {
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
               callExpression(
                 memberExpression(
                   identifier(WATCH_CALLBACK_PARAMS.element),
-                  identifier("render")
+                  identifier(COMPONENT_METHODS.render)
                 ),
                 [
                   component.propsIdentifier,

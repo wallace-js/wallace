@@ -11,6 +11,11 @@ export enum COMPONENT_BUILD_PARAMS {
   rootElement = "root",
 }
 
+export enum COMPONENT_METHODS {
+  render = "render",
+  getStub = "_gs",
+}
+
 export enum IMPORTABLES {
   defineComponent = "defineComponent",
   extendComponent = "extendComponent",

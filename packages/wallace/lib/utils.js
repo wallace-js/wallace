@@ -26,6 +26,8 @@ export function getElement(elementOrId) {
  * Builds a component's initial DOM.
  */
 export function buildComponent(componentDefinition) {
+  // TODO: add a dev warning here:
+  // if "componentDefinition is not a constructor" then we're probably missing a stub.
   const component = new componentDefinition();
   const proto = componentDefinition.prototype;
   const dom = proto._n.cloneNode(true);

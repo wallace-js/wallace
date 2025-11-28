@@ -82,6 +82,8 @@ function _createConstructor(base) {
   const ComponentDefinition = function () {
     base.call(this);
   };
+  ComponentDefinition.stubs = {};
+  Object.assign(ComponentDefinition.stubs, base.stubs);
   // This is a helper function for the user.
   ComponentDefinition.methods = function (obj) {
     Object.assign(ComponentDefinition.prototype, obj);

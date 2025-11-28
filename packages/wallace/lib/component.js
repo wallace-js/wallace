@@ -12,6 +12,8 @@ export function Component() {
   this._s = []; // A stash for misc objects.
 }
 
+Component.stubs = {};
+
 var proto = Component.prototype;
 
 Object.defineProperty(proto, "hidden", {
@@ -19,6 +21,10 @@ Object.defineProperty(proto, "hidden", {
     this.el.hidden = value;
   },
 });
+
+proto._gs = function (name) {
+  return this.constructor.stubs[name];
+};
 
 /**
  * The render function that gets called by parent components.
@@ -97,7 +103,7 @@ proto.update = function () {
             }).length;
           parent.insertBefore(
             detachedElement,
-            parent.childNodes[adjustedIndex],
+            parent.childNodes[adjustedIndex]
           );
           detachedElements[index] = null;
         } else if (!shouldBeVisible && !detachedElement) {

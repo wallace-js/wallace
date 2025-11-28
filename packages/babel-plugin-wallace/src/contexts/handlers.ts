@@ -74,7 +74,8 @@ class AssignedJsxFunction extends AbstractContextHandler {
 }
 
 /**
- * A.prototype.foo = () => <div></div>
+ * foo = {}
+ * foo.bar = () => <div></div>
  */
 class JsxFunctionAssignedToMember extends AbstractContextHandler {
   constructor(path: NodePath<AnyFunction>, module: Module) {
@@ -114,8 +115,8 @@ class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
 }
 
 /**
- *  const stubs = {
- *   foo: () => <div></div>
+ *  foo = {
+ *    bar: () => <div></div>
  *  };
  */
 class JsxFunctionInProperty extends AbstractContextHandler {
@@ -128,11 +129,11 @@ class JsxFunctionInProperty extends AbstractContextHandler {
 }
 
 /**
- *  Foo.methods({
- *   aStub() {
+ *  foo = {
+ *   bar() {
  *      return <div></div>;
- *    },
- *  });
+ *    }
+ *  };
  */
 class JsxFunctionInObjectMethod extends AbstractContextHandler {
   keyName: string;
@@ -144,7 +145,6 @@ class JsxFunctionInObjectMethod extends AbstractContextHandler {
       path.node.key.type === "Identifier"
     ) {
       this.keyName = path.node.key.name;
-      // TODO: fix name to be `stub something`
       this.initialiseComponent();
     }
   }
