@@ -15,6 +15,7 @@ class TestDirectiveInConfig extends Directive {
     node.addFixedAttribute("value-value", value.value);
     node.addFixedAttribute("value-expression", value.expression);
     node.addFixedAttribute("qualifier", qualifier);
+    node.addFixedAttribute("base", base);
   }
 }
 

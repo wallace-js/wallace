@@ -112,6 +112,7 @@ export class Component {
       tracker.parent,
       this,
       tagName,
+      false,
       false
     );
     path.traverse(attributeVisitors, { extractedNode });
@@ -135,9 +136,9 @@ export class Component {
       tracker.parent,
       this,
       tagName,
-      true
+      true,
+      isRepeat
     );
-    extractedNode.isRepeatedComponent = isRepeat;
     path.traverse(attributeVisitors, { extractedNode });
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();

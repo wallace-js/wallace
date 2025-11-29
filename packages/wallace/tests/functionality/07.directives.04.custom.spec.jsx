@@ -49,6 +49,7 @@ describe("Custom directive", () => {
         value-value="pelican"
         value-expression=""
         qualifier="foo"
+        base="test-directive"
       ></div>`);
   });
 });

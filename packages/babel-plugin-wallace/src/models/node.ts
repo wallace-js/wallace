@@ -180,9 +180,6 @@ export class ExtractedNode {
   }
   // TODO: fix not to use directive.
   setRepeatExpression(expression: Expression) {
-    if (!this.parent) {
-      error(this.path, ERROR_MESSAGES.REPEAT_WITHOUT_PARENT);
-    }
     // if (this.isRepeatedComponent) {
     //   error(this.path, ERROR_MESSAGES.REPEAT_ALREADY_DEFINED);
     // }
@@ -253,7 +250,8 @@ export class TagNode extends ExtractedNode {
     parent: TagNode,
     component: any, // TODO: fix type circular import.
     tagName: string,
-    isNestedComponent: boolean
+    isNestedComponent: boolean,
+    isRepeatedComponent: boolean
   ) {
     super(address, path, parent);
     this.path = path;
@@ -262,8 +260,13 @@ export class TagNode extends ExtractedNode {
     this.tagName = tagName;
     this.parent = parent;
     this.isNestedComponent = isNestedComponent;
-    if (isNestedComponent && !this.parent) {
-      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+    this.isRepeatedComponent = isRepeatedComponent;
+    if (!this.parent) {
+      if (this.isRepeatedComponent) {
+        error(this.path, ERROR_MESSAGES.REPEAT_NOT_ALLOWED_ON_ROOT);
+      } else if (this.isNestedComponent) {
+        error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+      }
     }
   }
   addFixedAttribute(name: string, value?: string) {

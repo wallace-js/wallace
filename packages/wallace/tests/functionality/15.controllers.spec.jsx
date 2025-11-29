@@ -76,9 +76,7 @@ describe("Inherited component", () => {
     </div>
   );
   const SubComponent = extendComponent(BaseComponent);
-  SubComponent.prototype.display = (_, { ctrl }) => (
-    <span>{ctrl.multiply(2)}</span>
-  );
+  SubComponent.stubs.display = (_, { ctrl }) => <span>{ctrl.multiply(2)}</span>;
   SubComponent.prototype.render = function () {
     this.ctrl = new Controller(2);
     this.update();

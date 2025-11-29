@@ -20,7 +20,7 @@ describe("Repeat", () => {
         <div>Seahorse</div>
         <div>Squid</div>
       </div>
-    `,
+    `
     );
 
     items.reverse();
@@ -31,7 +31,7 @@ describe("Repeat", () => {
         <div>Seahorse</div>
         <div>Octopus</div>
       </div>
-    `,
+    `
     );
   });
 });
@@ -55,7 +55,7 @@ describe("Repeat compiles with error when", () => {
       );
     `;
     expect(code).toCompileWithError(
-      "Repeat may only be used under a parent node.",
+      "Repeated component not allowed on root element."
     );
   });
 
@@ -69,7 +69,7 @@ describe("Repeat compiles with error when", () => {
       );
     `;
     expect(code).toCompileWithError(
-      "Repeat may only be used when the parent node has no other children.",
+      "Repeat may only be used when the parent node has no other children."
     );
   });
 
@@ -85,7 +85,7 @@ describe("Repeat compiles with error when", () => {
       );
     `;
     expect(code).toCompileWithError(
-      "Nested component may not have child nodes.",
+      "Nested component may not have child nodes."
     );
   });
 });
