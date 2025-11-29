@@ -2,7 +2,7 @@
   "private": true,
   "name": "todo-basic",
   "version": "1.0.0",
-  "description": "Playground for experimenting with Wallace",
+  "description": "Wallace demo",
   "main": "src/index.tsx",
   "scripts": {
     "build-prod": "NODE_ENV=production webpack",

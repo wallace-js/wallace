@@ -482,7 +482,36 @@ declare module "wallace" {
     ctrl?: Controller
   ): Component<Props, Controller, Methods>;
 
-  export function watch<T>(obj: T, callback: CallableFunction): T;
+  /**
+   * Returns a Proxy of an object which calls `callback` when keys are set, and this
+   * extends to nested objects:
+   *
+   * ```js
+   * ar = watch([], callback)
+   * obj = watch({}, callback)
+   *
+   * // all of the following trigger the callback:
+   * ar.push(100)
+   * obj.x = 100
+   * obj.y = {}
+   * obj.y.z = 1000
+   * ```
+   * The callback does not indicate the data has changed, only that a key was set.
+   *
+   * Some methods like `Array.push` set the index and then the length immediately after,
+   * so we use a grace period to avoid calling the callback twice for what is really a
+   * single operation.
+   *
+   * @param {*} target - Any object, including arrays.
+   * @param {*} grace - Any value in ms. Defaults to 100.
+   * @param {*} callback - A callback function.
+   * @returns a Proxy of the object.
+   */
+  export function watch<T>(
+    target: T,
+    callback: CallableFunction,
+    grace?: number
+  ): T;
 }
 
 type MustBeExpression = Exclude<any, string>;

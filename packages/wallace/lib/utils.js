@@ -36,14 +36,9 @@ export function buildComponent(componentDefinition) {
   return component;
 }
 
-/**
- * Wraps target in a Proxy which calls a function whenever it is modified.
- *
- * @param {*} target - Any object, including arrays.
- * @param {*} callback - A callback function.
- * @returns a Proxy of the object.
- */
-export function watch(target, callback) {
+export function watch(target, callback, grace) {
+  let active = false;
+  if (grace === undefined) grace = 100;
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
@@ -54,9 +49,16 @@ export function watch(target, callback) {
         target[key] = new Proxy(prop, handler);
       return target[key];
     },
+
     set(target, key, value) {
       target[key] = value;
-      callback();
+      if (!active) {
+        setTimeout(() => {
+          active = false;
+        }, grace);
+        active = true;
+        callback();
+      }
       return true;
     },
   };
