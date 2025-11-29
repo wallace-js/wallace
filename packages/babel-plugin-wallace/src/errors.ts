@@ -53,6 +53,8 @@ export const ERROR_MESSAGES = {
   REF_ALREADY_DEFINED: "Ref already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
   PROPS_ALREADY_DEFINED: "Props already defined on element.",
+  NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT:
+    "Nested component not allowed on root element.",
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
   NO_ATTRIBUTES_ON_NESTED_CLASS:
     "Attributes not allowed on nested class elements.",

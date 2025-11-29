@@ -262,6 +262,9 @@ export class TagNode extends ExtractedNode {
     this.tagName = tagName;
     this.parent = parent;
     this.isNestedComponent = isNestedComponent;
+    if (isNestedComponent && !this.parent) {
+      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+    }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });

@@ -422,17 +422,18 @@ declare module "wallace" {
       hide?: boolean;
     }): JSX.Element;
     methods?(
-      m: ComponenMethods<Props, Controller> &
+      object: ComponenMethods<Props, Controller> &
         ThisType<Component<Props, Controller, Methods>>
     ): void;
     readonly prototype?: ComponenMethods<Props, Controller> &
       ThisType<Component<Props, Controller, Methods>>;
-    // Methods will not be available of nested component.
+    // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
   }
 
   type ComponenMethods<Props, Controller> = {
     render?(props: Props, ctrl: Controller): void;
+    update?(): void;
     [key: string]: any;
   };
 

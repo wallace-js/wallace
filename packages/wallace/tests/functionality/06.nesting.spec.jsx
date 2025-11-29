@@ -81,5 +81,7 @@ test("Disallow nesting on root", () => {
       <Child.nest />
     );
   `;
-  expect(code).toCompileWithError("Nested component may not have child nodes.");
+  expect(code).toCompileWithError(
+    "Nested component not allowed on root element."
+  );
 });
