@@ -36,6 +36,9 @@ export function buildComponent(componentDefinition) {
   return component;
 }
 
+/**
+ * See types for docs. Set grace to 0 for testing.
+ */
 export function watch(target, callback, grace) {
   let active = false;
   if (grace === undefined) grace = 100;
@@ -52,11 +55,15 @@ export function watch(target, callback, grace) {
 
     set(target, key, value) {
       target[key] = value;
-      if (!active) {
-        setTimeout(() => {
-          active = false;
-        }, grace);
-        active = true;
+      if (grace) {
+        if (!active) {
+          setTimeout(() => {
+            active = false;
+          }, grace);
+          active = true;
+          callback();
+        }
+      } else {
         callback();
       }
       return true;
