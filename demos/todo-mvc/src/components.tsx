@@ -16,7 +16,7 @@ const Task: Uses<iTask, TaskListController> = (
   </div>
 );
 
-export const TaskList: Uses<any, TaskListController> = (
+export const TaskList: Uses<any, TaskListController, TaskListMethods> = (
   _,
   { ctrl, self, e }
 ) => (
@@ -36,15 +36,20 @@ export const TaskList: Uses<any, TaskListController> = (
   </div>
 );
 
-TaskList.prototype.render = function () {
-  this.ctrl = new TaskListController(this);
-  this.update(); // Ensures spinner displays while loading.
-  this.ctrl.init();
-};
+interface TaskListMethods {
+  txtInputKeyUp(e: any): void;
+}
 
-TaskList.prototype.txtInputKeyUp = function (e: any) {
-  if (e.key === "Enter") {
-    this.ctrl.addTask(e.target.value);
-    e.target.value = "";
-  }
-};
+TaskList.methods({
+  render() {
+    this.ctrl = new TaskListController(this);
+    this.update(); // Ensures spinner displays while loading.
+    this.ctrl.init();
+  },
+  txtInputKeyUp(e: any) {
+    if (e.key === "Enter") {
+      this.ctrl.addTask(e.target.value);
+      e.target.value = "";
+    }
+  },
+});

@@ -95,7 +95,7 @@ proto.update = function () {
   const props = this.props;
   const il = watches.length;
   this._r = {};
-  /* 
+  /*
   Watches is an array of objects with keys:
     e: the element reference (string)
     c: the callbacks (object)

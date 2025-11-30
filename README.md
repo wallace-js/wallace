@@ -1,15 +1,15 @@
-![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
-![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)
-
 # Wallace
 
 *The tiny framework that brings you FREEEDOM!!!*
+
+![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
+![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)
 
 ## About
 
 Wallace is a front end JavaScript framework for building:
 
-- Web apps.
+- Web apps
 - Mobile apps (using tools likes [Capacitator](https://capacitorjs.com/))
 - Desktop apps (using tools like [Tauri](https://v2.tauri.app/))
 
@@ -29,7 +29,7 @@ And DOM updates are pretty fast too:
 
 [img]
 
-But the truth about performance is that you rarely need *fast*. What matters is avoiding *slow* - which happens in more complex scenarios than benchmarks cover. And the only *real* protection against that is **freedom** (see below).
+But in truth you rarely need *fast*. You just need to avoid *slow* - which happens in more complex scenarios than benchmarks. And the only *real* protection against that is **freedom** (see below).
 
 ### 2. Productivity
 
@@ -38,41 +38,39 @@ Wallace has several features which boost productivity:
 1. Clean and compact syntax (~40% fewer lines of JSX than React).
 2. Sensible reactivity - you control where and how.
 3. Flexible inheritance & composition patterns.
-4. Deep TypeScript support.
+4. Deep TypeScript support (if you want it).
 5. Tool tips everywhere.
 
-You even get the full **cheat sheet** on the module import, so you need never leave your IDE:
+You even get the full **cheat sheet** by hovering over the module import, so you need never leave your IDE:
 
-![](./assets/cheat-sheet.jpg)
+![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
-But its biggest feature is that despite *feeling* like a functional React-like framework, it is actually object-oriented, which has several implications:
+But the killer feature is really the lack of features.
 
-1. You do all the clever things (controlling state, responding to events, coordinating updates etc...) by overriding or adding methods.
-2. So there's no need for awful patterns like hooks, portals, signals, providers, context managers etc... Wallace gives you components, nothing else.
-3. So there's less framework to learn, remember, trip you up, or accuse while debugging.
-4. You end up with more natural code that is easier to read, test, organise, modify and reuse.
+Wallace only provides *components* - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks force you to use.
 
-These things significantly impact productivity.
+There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a *lot* of time.
 
 ### 3. Freedom
 
-The object-oriented model lets you override *any* run time aspect, at a granular level. The direct DOM model lets you safely run manual DOM operations independently, alongside, or during automatic updates.
+Wallace lets you:
 
-This means you can easily, cleanly and safely:
+1. Override all run time behaviour in a granular manner (as everything happens in component methods).
+2. Safely manipulate the DOM independently, alongside, or during automatic updates.
 
-- Run partial updates deep in the tree.
-- Pull of things like reparenting (which requires "portals" in React).
-- Do anything that was possible without a framework.
+This helps you:
 
-The point is not to produce the fastest app, but to relax knowing you will be able to produce a timely, clean and safe solution to any bottleneck you encounter.
+- Achieve vanilla level performance.
+- Solve performance issues, cleanly.
+- Do gnarly things that would be painful or impossible with other frameworks (like deep partial updates, reparenting etc...)
 
-The problem with trading your freedom for convenience, is that you never know when you'll want your freedom back.
+You might never need that level freedom on a given project, but why take the risk with a framework which takes it away from you?
 
 ---
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the 1995 movie [Braveheart](https://www.imdb.com/title/tt0112573/) whose battle cry "FREEDOM" has been immortalised in Scottish comedy culture ever since:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say "*freedom*" in Scotland without conjuring this image:
 
-![](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
+![Mel Gibson in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
 ## Status
 
