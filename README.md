@@ -39,15 +39,11 @@ Wallace has several features which boost productivity:
 2. Sensible reactivity - you control where and how.
 3. Flexible inheritance & composition patterns.
 4. Deep TypeScript support (if you want it).
-5. Tool tips everywhere.
-
-You even get the full **cheat sheet** by hovering over the module import, so you need never leave your IDE:
-
-![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
+5. Full documentation in IDE tool tips.
 
 But the killer feature is really the lack of features.
 
-Wallace only provides *components* - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks force you to use.
+Wallace only provides *components* - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks dump on you.
 
 There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a *lot* of time.
 
@@ -82,23 +78,21 @@ Wallace is rather young, and hasn't been fully battle tested but:
 
 ## Usage
 
-Try it the browser in [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx), or create a local project with:
+Try it the browser with [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx), or create a local project with:
 
 ```
 npx create-wallace-app
 ```
 
-Read the cheat sheet by hovering over `"wallace"`:
+Then read the cheat sheet by hovering over `"wallace"`:
 
-```tsx
-import { mount } from "wallace"
-```
+![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
 There are also examples in the [demos](https://github.com/wallace-js/wallace/tree/master/demos) directory.
 
 ## Contributions
 
-Yes.
+Yes please.
 
 ## License
 
