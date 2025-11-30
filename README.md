@@ -1,4 +1,5 @@
 ![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
+![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)
 
 # Wallace
 
