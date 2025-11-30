@@ -70,10 +70,10 @@ The arguments are:
 3. props for the element (optional)
 4. controller (optional)
 
-`mount` returns the component instance, allowing you to call methods on it:
+`mount` returns the component instance, allowing you to call it methods:
 
 ```tsx
-root.update()
+root.update();
 ```
 
 ### 1.3 Methods
@@ -86,10 +86,10 @@ Called from "above" by `mount` or when nesting other components. Here it is:
 
 ```tsx
 render(props, ctrl) {
-    this.props = props;
-    this.ctrl = ctrl;
-    this.update();
-  }
+  this.props = props;
+  this.ctrl = ctrl;
+  this.update();
+}
 ```
 
 #### update()
@@ -111,8 +111,13 @@ MyComponent.methods({
 });
 ```
 
-Use `this` in methods, but `self` in the JSX.
+This has the same effect as setting them on the prototype:
 
+```tsx
+MyComponent.prototype.render = function () {};
+```
+
+You access the instance as `this` in methods, but `self` in the JSX.
 
 ### 1.4 Fields
 
@@ -181,10 +186,12 @@ Notes:
 
 Directives are attributes with special behaviours, as listed below. Each has more
 detailed information on its JSDoc, which should display as a tool tip\* when you hover
-over it in your IDE:
+over it in your IDE.
+
+You can also display this list by hovering over any JSX element, like `div`.
 
 - `bind` updates a value when an input is changed.
-- `class:xyz` defines a set of classes to be toggled. 
+- `class:xyz` defines a set of classes to be toggled.
 - `hide` sets and element or component's hidden property.
 - `if` excludes an element from the DOM.
 - `on[EventName]` creates an event handler (note the code is copied)
@@ -297,9 +304,7 @@ Notes:
 
 ### 8.1 `Uses` type
 
-The `Uses` type can control props, controller and prototype.
-
-##### Props
+The `Uses` type must be placed where shown:
 
 ```tsx
 import { Uses } from 'wallace';
@@ -311,14 +316,30 @@ interface iTask {
 const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
 ```
 
-The `Uses` type must be placed exactly where shown. If you require no props, set it to
-`null` to ensure no props are passed when nesting or mounting:
+This will set up typing for the props inside the function and many other things.
+
+If you require no props, set it to `null`:
 
 ```tsx
-const Task: Uses<null> = () => <div>{text}</div>;
+const Task: Uses<null> = () => <div>Hello</div>;
+```
+
+##### Nesting
+
+With `Uses` in place, you will be warned if you attempt to pass incorrect props during
+mounting or nesting, including repeat, which expects an arry of the type:
+
+```
+const TaskList: Uses<iTask[]> = (tasks) => (
+  <div>
+    <Task.repeat props={tasks} />
+  </div>
+);
 ```
 
 ##### Controller
+
+The 2nd type is used for the controller, available as `ctrl` in **xargs**:
 
 ```tsx
 import { Uses } from 'wallace';
@@ -334,7 +355,7 @@ const Task: Uses<null, TaskController> = (_, { ctrl }) => (
 
 ##### Methods
 
-To see custom methods on `self` you need to use an interface:
+To see custom methods on `self` you'll need use an interface:
 
 ```tsx
 import { Uses } from 'wallace';
@@ -358,6 +379,20 @@ Task.methods({
 The type will pass into the object passed into `methods` so it recognises custom methods
 in addition to standard methods like `render`, which are already typed for you.
 
+##### Stubs
+
+The `props` and `controller` will pass through to functions you assign to
+`Component.stubs` as stubs receive the same props as the parent.
+
+But `methods` are not passed through as stubs are distinct components and will have
+their own methods.
+
+```tsx
+Task.stubs.foo = (_, { self }) => (
+  <div>{self.getName()}</div>
+));
+```
+
 ### 8.2 Types for `extendComponent`
 
 The `extendComponent` function transfers the types specified on the base:
@@ -379,6 +414,7 @@ const Child = extendComponent<newProps, Controller, Methods>(Parent);
 2. Each type must extend its corresponding type on base.
 
 Note that these are just typing restrictions, you can ignore them if you must.
+
 
 ---
 ---
@@ -437,12 +473,30 @@ declare module "wallace" {
     [key: string]: any;
   };
 
+  /**
+   * A type which ust be placed as shown:
+   *
+   * ```tsx
+   * const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
+   * ```
+   *
+   * If you require no props, set it to `null`:
+   *
+   * ```tsx
+   * const Task: Uses<null> = () => <div>Hello</div>;
+   * ```
+   *
+   * See cheat sheet by hovering over the module import for more details.
+   */
   export type Uses<
     Props = any,
     Controller = any,
     Methods extends object = {},
   > = ComponentFunction<Props, Controller, Methods>;
 
+  /**
+   * The type for a component instance.
+   */
   export type Component<
     Props = any,
     Controller = any,
@@ -457,8 +511,10 @@ declare module "wallace" {
 
   /**
    * Use to define a new component which extends another component, meaning it will
-   * inherit its prototye.
+   * inherit its prototye and stubs.
+   *
    * If componentFunc is omitted, the new component inherits the base's DOM structure.
+   *
    * @param base The component definition to inherit from.
    * @param componentFunc A JSX function to override the DOM.
    */
@@ -471,13 +527,18 @@ declare module "wallace" {
     componentFunc?: ComponentFunction<Props, Controller, Methods>
   ): Uses<Props, Controller, Methods>;
 
+  /**
+   * *Replaces* element with an instance of componentDefinition and renders it.
+   *
+   * Note that the original element is removed along with its attributes (class, id...).
+   */
   export function mount<
     Props = any,
     Controller = any,
     Methods extends object = {},
   >(
     element: string | HTMLElement,
-    component: Uses<Props, Controller, Methods>,
+    componentDefinition: Uses<Props, Controller, Methods>,
     props?: Props,
     ctrl?: Controller
   ): Component<Props, Controller, Methods>;
@@ -684,7 +745,25 @@ interface DirectiveAttributes extends AllDomEvents {
 
 declare namespace JSX {
   interface Element {}
+
   interface IntrinsicElements {
+    /**
+     * Available Wallace directives:
+     *
+     * - `bind` updates a value when an input is changed.
+     * - `class:xyz` defines a set of classes to be toggled.
+     * - `hide` sets and element or component's hidden property.
+     * - `if` excludes an element from the DOM.
+     * - `on[EventName]` creates an event handler (note the code is copied)
+     * - `props` specifes props for a nested or repeated component, in which case it must be
+     * an array.
+     * - `ref` saves a reference to an element or nested component.
+     * - `show` sets and element or component's hidden property.
+     * - `style:xyz` sets a specific style property.
+     * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
+     *
+     * Note the tool tip won't display when you use a qualifier, like `class:danger`.
+     */
     [elemName: string]: DirectiveAttributes & Record<string, any>;
   }
   interface ElementClass {}
