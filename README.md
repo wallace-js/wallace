@@ -12,7 +12,11 @@ Wallace is a front end JavaScript framework for building:
 - Mobile apps (using tools likes [Capacitator](https://capacitorjs.com/))
 - Desktop apps (using tools like [Tauri](https://v2.tauri.app/))
 
-It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) and co on three points: **performance**, **productivity** and **freedom**.
+It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) and co on three points:
+
+1. **Performance**
+2. **Productivity**
+3. **Freedom**
 
 ### 1. Performance
 
@@ -34,7 +38,9 @@ Wallace has several features which boost productivity:
 2. Sensible reactivity - you control where and how.
 3. Flexible inheritance & composition patterns.
 4. Deep TypeScript support.
-5. Tool tips everywhere - including the full **cheat sheet** on the module import, so you need never leave your IDE:
+5. Tool tips everywhere.
+
+You even get the full **cheat sheet** on the module import, so you need never leave your IDE:
 
 ![](./assets/cheat-sheet.jpg)
 
@@ -73,7 +79,7 @@ Wallace is rather young, and hasn't been fully battle tested but:
 
 1. You can override all behaviour at a granular level, which offers a degree of safety.
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
-3. If you give it a star, it will rapidly attract more use, encounter more edge cases, and attract more development :-)
+3. You can attract more users and contributors by giving it a star!
 
 ## Usage
 
@@ -83,13 +89,13 @@ Try it the browser in [TypeScript](https://stackblitz.com/edit/wallace-ts?file=s
 npx create-wallace-app
 ```
 
-There is no tutorial yet, but its so simple you can figure it out from the tool tips. Read the cheat sheet by hovering over `"wallace"`:
+Read the cheat sheet by hovering over `"wallace"`:
 
 ```tsx
 import { mount } from "wallace"
 ```
 
-There are also examples in [packages/demos](./package/demos).
+There are also examples in the [demos](https://github.com/wallace-js/wallace/tree/master/demos) directory.
 
 ## Contributions
 
