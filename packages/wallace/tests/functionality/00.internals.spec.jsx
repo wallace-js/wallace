@@ -49,7 +49,7 @@ describe("Lookups", () => {
         <span>woof {css}</span>
       </div>
     );
-    expect(Object.keys(Dog.prototype._l.callbacks).length).toBe(1);
+    expect(Object.keys(Dog.prototype._q).length).toBe(1);
   });
 
   test("are not created for duplicate mentions in same element", () => {
@@ -60,6 +60,6 @@ describe("Lookups", () => {
         </span>
       </div>
     );
-    expect(Object.keys(Dog.prototype._l.callbacks).length).toBe(1);
+    expect(Object.keys(Dog.prototype._q).length).toBe(1);
   });
 });

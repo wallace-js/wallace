@@ -20,9 +20,7 @@ describe("Class components", () => {
 
   test("can use own methods", () => {
     class MyComponent extends Component {
-      jsx = ({ name }, _component) => (
-        <div>hello {_component.format(name)}</div>
-      );
+      jsx = ({ name }, { self }) => <div>hello {self.format(name)}</div>;
       format(name) {
         return name.toUpperCase();
       }

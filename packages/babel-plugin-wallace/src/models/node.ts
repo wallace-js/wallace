@@ -60,7 +60,8 @@ export class ExtractedNode {
   element: HTMLElement | Text | undefined;
   elementKey: number | undefined;
   detacherStashKey: number | undefined;
-  isRepeatedNode: boolean = false;
+  isNestedComponent: boolean = false;
+  isRepeatedComponent: boolean = false;
   repeatNode: ExtractedNode | undefined;
   address: Array<number>;
   path: NodePath<ValidElementType>;
@@ -68,7 +69,6 @@ export class ExtractedNode {
   watches: Watch[] = [];
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
-  isNestedClass: boolean = false;
   hasConditionalChildren: boolean = false;
   repeatExpression: Expression | undefined;
   poolExpression: Expression | undefined;
@@ -89,7 +89,7 @@ export class ExtractedNode {
   constructor(
     address: Array<number>,
     path: NodePath<ValidElementType>,
-    parent: TagNode,
+    parent: TagNode
   ) {
     this.path = path;
     this.address = address;
@@ -99,13 +99,13 @@ export class ExtractedNode {
     throw new Error("Not implemented");
   }
   addEventListener(eventName: string, callback: Expression) {
-    if (this.isNestedClass) {
+    if (this.isNestedComponent) {
       error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
     }
     this.eventListeners.push({ eventName, callback });
   }
   addBindInstruction(eventName: string, expression: Expression) {
-    if (this.isNestedClass) {
+    if (this.isNestedComponent) {
       error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
     }
     this.bindInstructions.push({ eventName, expression });
@@ -123,7 +123,7 @@ export class ExtractedNode {
     this.toggleTargets.push({ name, value });
   }
   watchAttribute(attName: string, expression: Expression) {
-    if (this.isNestedClass) {
+    if (this.isNestedComponent) {
       error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
     }
     this.addWatch(expression, setAttributeCallback(attName));
@@ -131,11 +131,11 @@ export class ExtractedNode {
   watchText(expression: Expression) {
     this.addWatch(
       expression,
-      `${WATCH_CALLBACK_PARAMS.element}.textContent = n`,
+      `${WATCH_CALLBACK_PARAMS.element}.textContent = ${WATCH_CALLBACK_PARAMS.newValue}`
     );
   }
   setProps(expression: Expression) {
-    if (this.isRepeatedNode) {
+    if (this.isRepeatedComponent) {
       this.setRepeatExpression(expression);
     } else {
       if (this.#props) {
@@ -150,12 +150,12 @@ export class ExtractedNode {
   setVisibilityToggle(
     expression: Expression,
     reverse: boolean,
-    detach: boolean,
+    detach: boolean
   ) {
     if (this.#visibilityToggle) {
       error(
         this.path,
-        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED,
+        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED
       );
     }
     this.#visibilityToggle = { expression, reverse, detach };
@@ -180,16 +180,13 @@ export class ExtractedNode {
   }
   // TODO: fix not to use directive.
   setRepeatExpression(expression: Expression) {
-    if (!this.parent) {
-      error(this.path, ERROR_MESSAGES.REPEAT_WITHOUT_PARENT);
-    }
-    // if (this.isRepeatedNode) {
+    // if (this.isRepeatedComponent) {
     //   error(this.path, ERROR_MESSAGES.REPEAT_ALREADY_DEFINED);
     // }
-    // if (!this.isNestedClass) {
+    // if (!this.isNestedComponent) {
     //   error(this.path, ERROR_MESSAGES.REPEAT_ONLY_ON_NESTED_CLASS);
     // }
-    this.isRepeatedNode = true;
+    this.isRepeatedComponent = true;
     // While this could potentially be set multiple times, we later check that repeat
     // cannot be used if there siblings.
     this.repeatExpression = expression;
@@ -208,6 +205,9 @@ export class ExtractedNode {
       : undefined;
   }
   setStub(name: string) {
+    if (!this.parent) {
+      error(this.path, ERROR_MESSAGES.CANNOT_MAKE_ROOT_ELEMENT_A_STUB);
+    }
     if (this.#stubName) {
       error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
     }
@@ -250,7 +250,8 @@ export class TagNode extends ExtractedNode {
     parent: TagNode,
     component: any, // TODO: fix type circular import.
     tagName: string,
-    isNestedClass: boolean,
+    isNestedComponent: boolean,
+    isRepeatedComponent: boolean
   ) {
     super(address, path, parent);
     this.path = path;
@@ -258,13 +259,21 @@ export class TagNode extends ExtractedNode {
     this.component = component;
     this.tagName = tagName;
     this.parent = parent;
-    this.isNestedClass = isNestedClass;
+    this.isNestedComponent = isNestedComponent;
+    this.isRepeatedComponent = isRepeatedComponent;
+    if (!this.parent) {
+      if (this.isRepeatedComponent) {
+        error(this.path, ERROR_MESSAGES.REPEAT_NOT_ALLOWED_ON_ROOT);
+      } else if (this.isNestedComponent) {
+        error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+      }
+    }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
   }
   getElement(): HTMLElement | undefined {
-    if (this.isRepeatedNode) {
+    if (this.isRepeatedComponent) {
       return undefined;
     }
     const element = createElement(this.tagName);
@@ -281,7 +290,7 @@ export class StubNode extends ExtractedNode {
     path: NodePath<JSXElement>,
     address: Array<number>,
     parent: TagNode,
-    name: string,
+    name: string
   ) {
     super(address, path, parent);
     this.setStub(name);
@@ -297,7 +306,7 @@ export class DynamicTextNode extends ExtractedNode {
     path: NodePath<JSXExpressionContainer>,
     address: Array<number>,
     parent: TagNode,
-    expression: Expression,
+    expression: Expression
   ) {
     super(address, path, parent);
     this.watchText(expression);
@@ -312,7 +321,7 @@ export class PlainTextNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXText>,
     address: Array<number>,
-    parent: TagNode,
+    parent: TagNode
   ) {
     super(address, path, parent);
   }

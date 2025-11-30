@@ -2,6 +2,7 @@ import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { JSXAttribute } from "@babel/types";
 import { wallaceConfig } from "../config";
+import { domEventNames } from "../constants";
 import { TagNode, NodeValue } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
@@ -14,7 +15,6 @@ interface State {
  * Name could be:
  *  foo
  *  foo:bar
- *
  */
 function extractName(path: NodePath<JSXAttribute>): {
   base: string;
@@ -65,13 +65,15 @@ export const attributeVisitors = {
     if (!extractedValue) {
       return;
     }
+
     const isEventHandler =
-      extractedValue.type === "expression" && base.startsWith("on");
+      extractedValue.type === "expression" && domEventNames.includes(base);
     const directiveClass = isEventHandler
       ? wallaceConfig.directives["on*"]
       : wallaceConfig.directives[base];
     if (directiveClass) {
       const handler = new directiveClass();
+      handler.validate(extractedNode, extractedValue, qualifier, base);
       handler.apply(extractedNode, extractedValue, qualifier, base);
     } else {
       const attName = qualifier ? `${base}:${qualifier}` : base;

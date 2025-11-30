@@ -41,7 +41,6 @@ at runtime.
 */
 export class Component {
   _currentNodeAddress: Array<number> = [];
-  name: string;
   module: Module;
   baseComponent: Expression | undefined;
   rootElement: HTMLElement;
@@ -49,12 +48,10 @@ export class Component {
   propsIdentifier: Identifier;
   componentIdentifier: Identifier;
   constructor(
-    name: string,
     module: Module,
     propsIdentifier: Identifier,
-    componentIdentifier: Identifier,
+    componentIdentifier: Identifier
   ) {
-    this.name = name;
     this.module = module;
     this.propsIdentifier = propsIdentifier;
     this.componentIdentifier = componentIdentifier;
@@ -74,12 +71,12 @@ export class Component {
   #addElement(
     element: HTMLElement | Text | undefined,
     path: NodePath,
-    tracker: WalkTracker,
+    tracker: WalkTracker
   ) {
-    if (tracker.parent?.isNestedClass) {
+    if (tracker.parent?.isNestedComponent) {
       error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN);
     }
-    if (tracker.parent?.isRepeatedNode) {
+    if (tracker.parent?.isRepeatedComponent) {
       error(path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
     }
     if (!element) {
@@ -89,7 +86,7 @@ export class Component {
       const relativePath = this._currentNodeAddress.slice(0, -1);
       const parentNode = relativePath.reduce(
         (acc, index) => acc.childNodes[index],
-        this.rootElement,
+        this.rootElement
       );
       parentNode.appendChild(element);
     } else {
@@ -106,7 +103,7 @@ export class Component {
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
     tagName: string,
-    jsxVisitors: any,
+    jsxVisitors: any
   ) {
     this.#enterLevel(tracker.childIndex);
     const extractedNode = new TagNode(
@@ -116,6 +113,7 @@ export class Component {
       this,
       tagName,
       false,
+      false
     );
     path.traverse(attributeVisitors, { extractedNode });
     this.#addNode(extractedNode, path, tracker);
@@ -129,7 +127,7 @@ export class Component {
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
     tagName: string,
-    isRepeat: boolean,
+    isRepeat: boolean
   ) {
     this.#enterLevel(tracker.childIndex);
     const extractedNode = new TagNode(
@@ -139,8 +137,8 @@ export class Component {
       this,
       tagName,
       true,
+      isRepeat
     );
-    extractedNode.isRepeatedNode = isRepeat;
     path.traverse(attributeVisitors, { extractedNode });
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
@@ -151,7 +149,7 @@ export class Component {
       path,
       this.#getCurrentAddress(),
       tracker.parent,
-      name,
+      name
     );
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
@@ -162,14 +160,14 @@ export class Component {
     const extractedNode = new PlainTextNode(
       path,
       this.#getCurrentAddress(),
-      tracker.parent,
+      tracker.parent
     );
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
   }
   processJSXExpressionInText(
     path: NodePath<JSXExpressionContainer>,
-    tracker: WalkTracker,
+    tracker: WalkTracker
   ) {
     this.#enterLevel(tracker.childIndex);
     const expression = getPlaceholderExpression(path, path.node.expression);
@@ -178,7 +176,7 @@ export class Component {
         path,
         this.#getCurrentAddress(),
         tracker.parent,
-        expression,
+        expression
       );
       this.#addNode(extractedNode, path, tracker);
     }

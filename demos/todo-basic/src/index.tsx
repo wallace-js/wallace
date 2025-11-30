@@ -1,41 +1,48 @@
-import { mount, Accepts, watch } from "wallace";
+import { mount, Uses, watch } from "wallace";
 
 interface iTask {
   text: string;
   done: boolean;
 }
 
-const Task: Accepts<iTask> = ({ text, done }) => (
+interface TaskListMethods {
+  addTaskKeyup(e: KeyboardEvent): void;
+}
+
+const Task: Uses<iTask> = ({ text, done }) => (
   <div>
     <input type="checkbox" bind={done} />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-const TaskList: Accepts<iTask[]> = (tasks, _event) => (
+const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { e, self }) => (
   <div class="tasklist">
     <span>Completed: {tasks.filter((t) => t.done).length}</span>
     <div style="margin-top: 10px">
       <Task.repeat props={tasks} />
     </div>
     <div style="margin-top: 10px">
-      <input type="text" onKeyUp={onKeyUp(tasks, _event)} />
+      <input type="text" onKeyUp={self.addTaskKeyup(e as KeyboardEvent)} />
       <span> (hit enter to add)</span>
     </div>
   </div>
 );
 
-TaskList.prototype.render = function (tasks) {
-  this.props = watch(tasks, () => this.update());
-  this.update();
-};
-
-const onKeyUp = (tasks: iTask[], _event: any) => {
-  if (_event.key === "Enter") {
-    tasks.push({ text: _event.target.value, done: false });
-    _event.target.value = "";
-  }
-};
+TaskList.methods({
+  render(tasks) {
+    this.props = watch(tasks, () => this.update());
+    this.update();
+  },
+  addTaskKeyup(e: KeyboardEvent) {
+    const target = e.target as HTMLInputElement;
+    const text = target.value;
+    if (e.key === "Enter" && text.length > 0) {
+      this.props.push({ text, done: false });
+      target.value = "";
+    }
+  },
+});
 
 mount("main", TaskList, [
   { text: "Complete Wallace tutorial", done: false },

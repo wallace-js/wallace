@@ -15,6 +15,7 @@ import { Component, VisibilityToggle, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
+  COMPONENT_METHODS,
   EXTRA_PARAMETERS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
@@ -40,9 +41,12 @@ function addBindInstruction(node: ExtractedNode) {
         "=",
         expression as Identifier,
         t.memberExpression(
-          t.identifier(EXTRA_PARAMETERS.element),
-          t.identifier(attribute),
-        ),
+          t.memberExpression(
+            t.identifier(EXTRA_PARAMETERS.event),
+            t.identifier("target")
+          ),
+          t.identifier(attribute)
+        )
       );
       node.addEventListener(eventName, callback);
     });
@@ -54,7 +58,7 @@ function addBindInstruction(node: ExtractedNode) {
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
   node.toggleTargets.forEach((target) => {
     const match = node.toggleTriggers.find(
-      (trigger) => trigger.name == target.name,
+      (trigger) => trigger.name == target.name
     );
     if (!match) {
       error(node.path, ERROR_MESSAGES.TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS);
@@ -82,12 +86,12 @@ function addToggleCallbackStatement(
   node: ExtractedNode,
   addCallbackStatement: (
     lookupKey: string | number,
-    statements: Statement[],
-  ) => void,
+    statements: Statement[]
+  ) => void
 ) {
   node.toggleTriggers.forEach((trigger) => {
     const target = node.toggleTargets.find(
-      (target) => target.name == trigger.name,
+      (target) => target.name == trigger.name
     );
     const classesToToggle = target
       ? extractCssClasses(target.value)
@@ -99,18 +103,18 @@ function addToggleCallbackStatement(
         memberExpression(
           memberExpression(
             identifier(WATCH_CALLBACK_PARAMS.element),
-            identifier("classList"),
+            identifier("classList")
           ),
-          identifier(method),
+          identifier(method)
         ),
-        classesToToggle,
+        classesToToggle
       );
 
     addCallbackStatement(lookupKey, [
       t.ifStatement(
         t.identifier(WATCH_CALLBACK_PARAMS.newValue),
         blockStatement([expressionStatement(getCallback("add"))]),
-        blockStatement([expressionStatement(getCallback("remove"))]),
+        blockStatement([expressionStatement(getCallback("remove"))])
       ),
     ]);
   });
@@ -119,10 +123,10 @@ function addToggleCallbackStatement(
 // TODO: break this up.
 export function processNodes(
   component: Component,
-  componentDefinition: ComponentDefinitionData,
+  componentDefinition: ComponentDefinitionData
 ) {
   component.extractedNodes.forEach((node) => {
-    if (node.isRepeatedNode) {
+    if (node.isRepeatedComponent) {
       // The watch should already have been added to the parent node, which is already
       // processed. All we do here is run some extra checks.
       const siblings = getSiblings(node, component.extractedNodes);
@@ -138,9 +142,12 @@ export function processNodes(
 
     const stubName = node.getStub();
     const stubComponentName = stubName
-      ? t.memberExpression(
-          t.identifier(COMPONENT_BUILD_PARAMS.component),
-          t.identifier(stubName),
+      ? t.callExpression(
+          t.memberExpression(
+            t.identifier(COMPONENT_BUILD_PARAMS.component),
+            t.identifier(COMPONENT_METHODS.getStub)
+          ),
+          [t.stringLiteral(stubName)]
         )
       : undefined;
     const visibilityToggle = node.getVisibilityToggle();
@@ -151,7 +158,7 @@ export function processNodes(
       node.bindInstructions.length > 0 ||
       node.toggleTriggers.length > 0 ||
       visibilityToggle ||
-      node.isNestedClass ||
+      node.isNestedComponent ||
       stubName ||
       repeatInstruction;
 
@@ -165,13 +172,13 @@ export function processNodes(
     ensureToggleTargetsHaveTriggers(node);
 
     if (shouldSaveElement) {
-      const nestedComponentCls = node.isNestedClass
+      const nestedComponentCls = node.isNestedComponent
         ? t.identifier(node.tagName)
         : stubComponentName;
       node.elementKey = nestedComponentCls
         ? componentDefinition.saveNestedAsDynamicElement(
             node.address,
-            nestedComponentCls,
+            nestedComponentCls
           )
         : componentDefinition.saveDynamicElement(node.address);
 
@@ -184,10 +191,7 @@ export function processNodes(
         componentDefinition.wrapDynamicElementCall(
           node.elementKey,
           IMPORTABLES.stashMisc,
-          [
-            identifier(COMPONENT_BUILD_PARAMS.component),
-            t.objectExpression([]),
-          ],
+          [identifier(COMPONENT_BUILD_PARAMS.component), t.objectExpression([])]
         );
       }
 
@@ -195,7 +199,7 @@ export function processNodes(
         const _callbacks: { [key: string | number]: Array<Statement> } = {};
         const addCallbackStatement = (
           key: string | number,
-          statements: Statement[],
+          statements: Statement[]
         ) => {
           if (!_callbacks.hasOwnProperty(key)) {
             _callbacks[key] = [];
@@ -215,11 +219,11 @@ export function processNodes(
           addCallbackStatement(lookupKey, codeToNode(watch.callback));
         });
 
-        if (node.isNestedClass) {
+        if (node.isNestedComponent) {
           const props = node.getProps();
           const ctrlArg = memberExpression(
             component.componentIdentifier,
-            identifier(SPECIAL_SYMBOLS.ctrl),
+            identifier(SPECIAL_SYMBOLS.ctrl)
           );
           const args = props
             ? [props, ctrlArg]
@@ -229,10 +233,10 @@ export function processNodes(
               callExpression(
                 memberExpression(
                   identifier(WATCH_CALLBACK_PARAMS.element),
-                  identifier("render"),
+                  identifier(COMPONENT_METHODS.render)
                 ),
-                args,
-              ),
+                args
+              )
             ),
           ]);
         }
@@ -241,34 +245,35 @@ export function processNodes(
           addToggleCallbackStatement(
             componentDefinition,
             node,
-            addCallbackStatement,
+            addCallbackStatement
           );
         }
 
-        // Need to be careful with WATCH_CALLBACK_PARAMS
+        // Need to be careful with WATCH_CALLBACK_PARAMS as `e` is actually a reference
+        // to the nested component, and that's what we want to render.
         if (stubName) {
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
               callExpression(
                 memberExpression(
                   identifier(WATCH_CALLBACK_PARAMS.element),
-                  identifier("render"),
+                  identifier(COMPONENT_METHODS.render)
                 ),
                 [
                   component.propsIdentifier,
                   memberExpression(
                     component.componentIdentifier,
-                    identifier(SPECIAL_SYMBOLS.ctrl),
+                    identifier(SPECIAL_SYMBOLS.ctrl)
                   ),
-                ],
-              ),
+                ]
+              )
             ),
           ]);
         }
 
         if (visibilityToggle) {
           const shieldLookupKey = componentDefinition.addLookup(
-            visibilityToggle.expression,
+            visibilityToggle.expression
           );
           componentWatch.shieldInfo = {
             skipCount: 0, // gets set later once we've processed all the nodes.
@@ -289,7 +294,7 @@ export function processNodes(
 
         if (repeatInstruction) {
           componentDefinition.component.module.requireImport(
-            IMPORTABLES.getSequentialRepeater,
+            IMPORTABLES.getSequentialRepeater
           );
           const poolInstance =
             repeatInstruction.poolExpression ||
@@ -303,7 +308,7 @@ export function processNodes(
           componentDefinition.wrapDynamicElementCall(
             node.elementKey,
             IMPORTABLES.stashMisc,
-            [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance],
+            [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance]
           );
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
@@ -312,22 +317,22 @@ export function processNodes(
                   memberExpression(
                     memberExpression(
                       component.componentIdentifier,
-                      identifier(SPECIAL_SYMBOLS.objectStash),
+                      identifier(SPECIAL_SYMBOLS.objectStash)
                     ),
                     numericLiteral(miscStashKey),
-                    true,
+                    true
                   ),
-                  identifier(SPECIAL_SYMBOLS.patch),
+                  identifier(SPECIAL_SYMBOLS.patch)
                 ),
                 [
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   repeatInstruction.expression,
                   memberExpression(
                     component.componentIdentifier,
-                    identifier(SPECIAL_SYMBOLS.ctrl),
+                    identifier(SPECIAL_SYMBOLS.ctrl)
                   ),
-                ],
-              ),
+                ]
+              )
             ),
           ]);
         }
@@ -344,7 +349,7 @@ export function processNodes(
           componentWatch.callbacks[key] = functionExpression(
             null,
             args,
-            blockStatement(_callbacks[key]),
+            blockStatement(_callbacks[key])
           );
         }
       }
@@ -353,14 +358,14 @@ export function processNodes(
         if (componentDefinition.collectedRefs.includes(ref)) {
           error(
             node.path,
-            ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT,
+            ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT
           );
         }
         componentDefinition.collectedRefs.push(ref);
         componentDefinition.wrapDynamicElementCall(
           node.elementKey,
           IMPORTABLES.saveRef,
-          [identifier(COMPONENT_BUILD_PARAMS.component), stringLiteral(ref)],
+          [identifier(COMPONENT_BUILD_PARAMS.component), stringLiteral(ref)]
         );
       }
 
@@ -374,12 +379,11 @@ export function processNodes(
           `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
         [component.propsIdentifier.name]:
           `${COMPONENT_BUILD_PARAMS.component}.props`,
-        [EXTRA_PARAMETERS.element]: `${EXTRA_PARAMETERS.event}.target`,
       };
       node.eventListeners.forEach((listener) => {
         const updatedExpression = renameVariablesInExpression(
           listener.callback,
-          eventVariableMapping,
+          eventVariableMapping
         );
 
         componentDefinition.wrapDynamicElementCall(
@@ -390,9 +394,9 @@ export function processNodes(
             functionExpression(
               null,
               [identifier(EXTRA_PARAMETERS.event)],
-              blockStatement([expressionStatement(updatedExpression)]),
+              blockStatement([expressionStatement(updatedExpression)])
             ),
-          ],
+          ]
         );
       });
     }

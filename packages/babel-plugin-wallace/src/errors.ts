@@ -1,21 +1,47 @@
 import type { NodePath } from "@babel/core";
+import { EXTRA_PARAMETERS } from "./constants";
+
+const ALLOWED_XARGS: string[] = Object.values(EXTRA_PARAMETERS).map(
+  (n) => `"${n}"`
+);
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",
+  BIND_ONLY_ALLOWED_ON_INPUT:
+    "The `bind` directive may only be used on `input` tags.",
   FOUND_JSX_IN_INVALID_LOCATION: "Found JSX in invalid location.",
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
+  CANNOT_MAKE_ROOT_ELEMENT_A_STUB: "Cannot make the root element a stub.",
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
-  CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT:
-    "Cannot use 'if' on nested or repeated element.",
+  CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT: (directive: string) => {
+    return `The "${directive}" directive may not be used on nested elements.`;
+  },
+  CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT: (directive: string) => {
+    return `The "${directive}" directive may not be used on repeated elements.`;
+  },
+  CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER: (directive: string) => {
+    return `The "${directive}" directive must have a qualifier.`;
+  },
+  CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
+    return `The "${directive}" directive may not have a qualifier.`;
+  },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT:
     "Nest components using <Name.nest /> or <Name.repeat />.",
   ARROW_FUNCTION_NOT_ASSIGNED:
     "Component function must be assigned to a variable.",
-  BIND_ONLY_ALLOWED_ON_INPUT:
-    "The `bind` directive may only be used on `input` tags.",
+  DIRECTIVE_INVALID_TYPE: (
+    directive: string,
+    allowed: string[],
+    actual: string
+  ) => {
+    return allowed.length
+      ? `The "${directive}" directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
+      : `The "${directive}" directive value must be of type ${allowed[0]}. Found: ${actual}.`;
+  },
+
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
   JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS:
@@ -27,6 +53,8 @@ export const ERROR_MESSAGES = {
   REF_ALREADY_DEFINED: "Ref already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
   PROPS_ALREADY_DEFINED: "Props already defined on element.",
+  NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT:
+    "Nested component not allowed on root element.",
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
   NO_ATTRIBUTES_ON_NESTED_CLASS:
     "Attributes not allowed on nested class elements.",
@@ -35,7 +63,7 @@ export const ERROR_MESSAGES = {
   REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",
   REPEAT_ONLY_ON_NESTED_CLASS:
     "Repeat only allowed on nested component elements.",
-  REPEAT_WITHOUT_PARENT: "Repeat may only be used under a parent node.",
+  REPEAT_NOT_ALLOWED_ON_ROOT: "Repeated component not allowed on root element.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
     "Repeat may only be used when the parent node has no other children.",
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",
@@ -45,9 +73,10 @@ export const ERROR_MESSAGES = {
   ILLEGAL_NAMES_IN_PROPS: (names: string[]) =>
     `Illegal names in props: ${names
       .map((name) => `"${name}"`)
-      .join(", ")} - these are reserved for event callbacks.`,
-  ILLEGAL_PARAMETERS: (name: string) =>
-    `Illegal parameters: "${name}". You are only allowed "_element", "_event" and "_component".`,
+      .join(", ")} - these are reserved for extra args.`,
+  XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
+  ILLEGAL_XARG: (name: string) =>
+    `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`,
 };
 
 export function error(path: NodePath<any>, errorMessage: string) {
@@ -57,7 +86,7 @@ export function error(path: NodePath<any>, errorMessage: string) {
 export function ensure(
   condition: boolean,
   path: NodePath<any>,
-  errorMessage: string,
+  errorMessage: string
 ) {
   if (!condition) {
     error(path, errorMessage);

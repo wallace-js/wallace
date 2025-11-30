@@ -535,16 +535,13 @@ Having the guidelines, yet being able to break them, solves some dilemmas:
 When we add stubs:
 
 ```jsx
-// problem with :hide not working.
-export class DialogWithHub extends ModalBase {
-  __stubs__ = {
-    content:
-      <div class="mb-4">
-        <div :show=".hub.loading" class="loader"></div>
-        <div :hide=".hub.loading">Loaded</div>
-      </div>
-  };
-}
+const Foo = ({}) => (
+    <div>
+      hello
+      <stub:display />
+    </div>
+  );
+  Foo.stubs.display = ({ name }) => <span>{name}</span>;
 ```
 
 We have to decide whether we add that structure to `1.defining.spec.jsx` and therefore cater for it throughout the other suites, or to create it as its own feature, and test other features within it.
@@ -606,30 +603,30 @@ test('Descriptive name', () => {
 Assess whether the code compiled with or without an error:
 
 ```jsx
-describe("Additional arguments", () => {
-  test("are allowed if recognised", () => {
-    const src = `
-    const A = ({}, _event, _component, _element) => (
-      <div>
-        Test
-      </div>
-    );
-  `;
-    expect(src).toCompileWithoutError();
-  });
+test("are allowed if recognised", () => {
+  const src = `
+  const A = ({}) => (
+    <div>
+      Test
+    </div>
+  );
+`;
+  expect(src).toCompileWithoutError();
+});
 
-  test("must be identifiers", () => {
-    const src = `
-    const A = ({}, {}) => (
-      <div>
-        Test
-      </div>
+test("JSX not allowed in expressions", () => {
+  const code = `
+    const Foo = () => (
+      <center>
+        {props.texts.map((paragraph, i) => (
+          <p key={i}>{paragraph}</p>
+        ))}
+      </center>
     );
   `;
-    expect(src).toCompileWithError(
-      'Illegal parameters: "ObjectPattern". You are only allowed "_element", "_event" and "_component".',
-    );
-  });
+  expect(code).toCompileWithError(
+    "JSX elements are not allowed in expressions."
+  );
 });
 ```
 

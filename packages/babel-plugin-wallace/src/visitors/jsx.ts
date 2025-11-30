@@ -16,7 +16,7 @@ interface State {
 export const jsxVisitors = {
   JSXElement(
     path: NodePath<JSXElement>,
-    { component, tracker = { childIndex: 0, parent: undefined } }: State,
+    { component, tracker = { childIndex: 0, parent: undefined } }: State
   ) {
     const tagName = getJSXElementName(path);
     if (typeof tagName === "string") {
@@ -35,11 +35,12 @@ export const jsxVisitors = {
           path,
           tracker,
           componentCls,
-          name === "repeat",
+          name === "repeat"
         );
         path.traverse(errorIfJSXelementsFoundUnderNested);
       } else if (namespace === "stub") {
         // TODO: ensure there is nothing inside and no other attributes.
+        // alternatively, allow attributes to control the stub.
         component.processStub(path, name, tracker);
       } else {
         error(path, ERROR_MESSAGES.UNSUPPORTED_NAMESPACE);
@@ -55,7 +56,7 @@ export const jsxVisitors = {
   },
   JSXExpressionContainer(
     path: NodePath<JSXExpressionContainer>,
-    { component, tracker }: State,
+    { component, tracker }: State
   ) {
     path.traverse(errorIfJSXelementsFoundInExpression);
     // We remove attributes while processing JSXElements, so the only expressions left
@@ -75,10 +76,10 @@ function getVisitorThatErrorsIfJSXElementFound(errorMessage: string) {
 
 const errorIfJSXelementsFoundInExpression =
   getVisitorThatErrorsIfJSXElementFound(
-    ERROR_MESSAGES.JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS,
+    ERROR_MESSAGES.JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS
   );
 
 const errorIfJSXelementsFoundUnderNested =
   getVisitorThatErrorsIfJSXElementFound(
-    ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN,
+    ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN
   );

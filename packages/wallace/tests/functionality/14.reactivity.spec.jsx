@@ -10,20 +10,20 @@ test("Can make a component reactive", () => {
     </div>
   );
   MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update());
+    this.props = watch(props, () => this.update(), 0);
     this.update();
   };
   const component = testMount(MyComponent, { checked: false });
   expect(component).toRender(
-    `<div><input type="checkbox"><span>nope</span></div>`,
+    `<div><input type="checkbox"><span>nope</span></div>`
   );
   const checkbox = component.ref.cbx;
   checkbox.click();
   expect(component).toRender(
-    `<div><input type="checkbox"><span>yep</span></div>`,
+    `<div><input type="checkbox"><span>yep</span></div>`
   );
   checkbox.click();
   expect(component).toRender(
-    `<div><input type="checkbox"><span>nope</span></div>`,
+    `<div><input type="checkbox"><span>nope</span></div>`
   );
 });

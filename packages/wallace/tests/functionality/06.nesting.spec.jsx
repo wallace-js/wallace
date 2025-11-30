@@ -26,7 +26,7 @@ test("Disallow React style nesting", () => {
     );
   `;
   expect(code).toCompileWithError(
-    "Nest components using <Name.nest /> or <Name.repeat />.",
+    "Nest components using <Name.nest /> or <Name.repeat />."
   );
 });
 
@@ -40,7 +40,7 @@ test("Disallow passing a litteral object as props", () => {
     );
   `;
   expect(code).toCompileWithError(
-    "Literal objects in placeholders not allowed as they will become constants.",
+    "Literal objects in placeholders not allowed as they will become constants."
   );
 });
 
@@ -73,4 +73,15 @@ test("Disallow child nodes under nested component", () => {
     );
   `;
   expect(code).toCompileWithError("Nested component may not have child nodes.");
+});
+
+test("Disallow nesting on root", () => {
+  const code = `
+    const Parent = () => (
+      <Child.nest />
+    );
+  `;
+  expect(code).toCompileWithError(
+    "Nested component not allowed on root element."
+  );
 });

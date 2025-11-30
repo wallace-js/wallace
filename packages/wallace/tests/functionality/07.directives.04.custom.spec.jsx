@@ -37,7 +37,7 @@ describe("Custom directive", () => {
     const component = testMount(A);
     expect(component.el.getAttribute("value-value")).toBe("");
     expect(component.el.getAttribute("value-expression")).toBe(
-      "[object Object]",
+      "[object Object]"
     );
   });
 

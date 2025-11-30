@@ -1,4 +1,1 @@
-export {
-  buildDefineComponentCall,
-  buildExtendComponentCall,
-} from "./define-component";
+export { buildDefineComponentCall } from "./define-component";

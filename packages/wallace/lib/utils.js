@@ -1,12 +1,13 @@
 /**
  * Creates and mounts a component onto an element.
  *
- * @param {unsure} elementOrId Either a string representing an id, or an element.
- * @param {class} cls The class of Component to create
+ * @param {any} elementOrId Either a string representing an id, or an element.
+ * @param {callable} componentDefinition The class of Component to create
  * @param {object} props The props to pass to the component (optional)
  */
-export function mount(elementOrId, cls, props, ctrl) {
-  const component = createComponent(cls, props, ctrl);
+export function mount(elementOrId, componentDefinition, props, ctrl) {
+  const component = buildComponent(componentDefinition);
+  component.render(props, ctrl);
   replaceNode(getElement(elementOrId), component.el);
   return component;
 }
@@ -22,23 +23,13 @@ export function getElement(elementOrId) {
 }
 
 /**
- * Creates a component and initialises it.
- *
- * @param {class} cls The class of Component to create
- * @param {object} props The props to pass to the component (optional)
- */
-export function createComponent(cls, props, ctrl) {
-  const component = buildComponent(cls);
-  component.render(props, ctrl);
-  return component;
-}
-
-/**
  * Builds a component's initial DOM.
  */
-export function buildComponent(cls) {
-  const component = new cls();
-  const proto = cls.prototype;
+export function buildComponent(componentDefinition) {
+  // TODO: add a dev warning here:
+  // if "componentDefinition is not a constructor" then we're probably missing a stub.
+  const component = new componentDefinition();
+  const proto = componentDefinition.prototype;
   const dom = proto._n.cloneNode(true);
   component.el = dom;
   proto._b(component, dom);
@@ -46,13 +37,11 @@ export function buildComponent(cls) {
 }
 
 /**
- * Wraps target in a Proxy which calls a function whenever it is modified.
- *
- * @param {*} target - Any object, including arrays.
- * @param {*} callback - A callback function.
- * @returns a Proxy of the object.
+ * See types for docs. Set grace to 0 for testing.
  */
-export function watch(target, callback) {
+export function watch(target, callback, grace) {
+  let active = false;
+  if (grace === undefined) grace = 100;
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
@@ -63,9 +52,20 @@ export function watch(target, callback) {
         target[key] = new Proxy(prop, handler);
       return target[key];
     },
+
     set(target, key, value) {
       target[key] = value;
-      callback();
+      if (grace) {
+        if (!active) {
+          setTimeout(() => {
+            active = false;
+          }, grace);
+          active = true;
+          callback();
+        }
+      } else {
+        callback();
+      }
       return true;
     },
   };

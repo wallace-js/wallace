@@ -8,6 +8,9 @@ const { Directive } = require("babel-plugin-wallace");
  */
 class TestDirectiveInConfig extends Directive {
   static attributeName = "test-directive";
+  static allowNull = true;
+  static allowString = true;
+  static allowQualifier = true;
   apply(node, value, qualifier, base) {
     node.addFixedAttribute("value-value", value.value);
     node.addFixedAttribute("value-expression", value.expression);

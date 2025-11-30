@@ -1,15 +1,14 @@
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
-import type { Function, ClassDeclaration } from "@babel/types";
+import type { Function, ObjectMethod } from "@babel/types";
 import { IMPORTABLES } from "../constants";
 import { jsxVisitors } from "../visitors/jsx";
-import { buildDefineComponentCall, buildExtendComponentCall } from "../writers";
-import { error, ERROR_MESSAGES } from "../errors";
+import { buildDefineComponentCall } from "../writers";
 import { Component, Module } from "../models";
 import { functionReturnsOnlyJSX } from "../helpers";
-import { isCapitalized } from "../utils";
 import { processFunctionParameters } from "./parameters";
 
+type AnyFunction = Function & ObjectMethod;
 /**
  * Base class for contexts where an arrow function of interest may be found.
  */
@@ -18,30 +17,40 @@ class AbstractContextHandler {
   component: Component;
   isMatch: boolean = false;
   module: Module;
-  path: NodePath<Function>;
-  constructor(path: NodePath<Function>, module: Module) {
+  path: NodePath<AnyFunction>;
+  functionPath: NodePath<AnyFunction>;
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     this.path = path;
     this.module = module;
   }
-  applyTransformations(): void {
-    throw new Error("not implemented");
-  }
-  initialiseComponent(componentName: string) {
-    if (!isCapitalized(componentName)) {
-      error(this.path.parentPath, ERROR_MESSAGES.CAPITALISED_COMPONENT_NAME);
-    }
+  /**
+   * Call this when you have found a component.
+   */
+  initialiseComponent() {
+    // if (!isCapitalized(componentName)) {
+    //   error(this.path.parentPath, ERROR_MESSAGES.CAPITALISED_COMPONENT_NAME);
+    // }
     const scope = this.path.scope;
     this.component = new Component(
-      componentName,
       this.module,
       scope.generateUidIdentifier("p"),
-      scope.generateUidIdentifier("c"),
+      scope.generateUidIdentifier("c")
     );
+    this.module.requireImport(IMPORTABLES.defineComponent);
+    this.functionPath = this.path;
     this.isMatch = true;
+  }
+  applyTransformations(): void {
+    processFunctionParameters(this.functionPath, this.component);
+    this.functionPath.traverse(jsxVisitors, { component: this.component });
+    this.replaceWithDefineComponentCall();
+  }
+  replaceWithDefineComponentCall() {
+    this.functionPath.replaceWith(buildDefineComponentCall(this.component));
   }
 }
 
-function getAssignedName(path: NodePath<Function>): string {
+function getAssignedName(path: NodePath<AnyFunction>): string {
   const parentNode = path.parentPath.node;
   if (t.isVariableDeclarator(parentNode) && t.isIdentifier(parentNode.id)) {
     return parentNode.id.name;
@@ -50,115 +59,116 @@ function getAssignedName(path: NodePath<Function>): string {
 }
 
 /**
- * const A = () => <div></div>
- * A.prototype.foo = () => <div></div>
+ * const Foo = () => <div></div>
  */
 class AssignedJsxFunction extends AbstractContextHandler {
-  pathToReplace: NodePath<Function>;
-  constructor(path: NodePath<Function>, module: Module) {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
-    if (functionReturnsOnlyJSX(path)) {
-      this.initialiseComponent(getAssignedName(path));
-      module.requireImport(IMPORTABLES.defineComponent);
-      this.pathToReplace = path;
+    if (
+      functionReturnsOnlyJSX(path) &&
+      path.parentPath.isVariableDeclarator()
+    ) {
+      this.initialiseComponent();
     }
-  }
-  applyTransformations(): void {
-    processFunctionParameters(this.path, this.component);
-    this.path.traverse(jsxVisitors, { component: this.component });
-    this.pathToReplace.replaceWith(buildDefineComponentCall(this.component));
   }
 }
 
-class JsxClassMethod extends AbstractContextHandler {
-  classDeclarationPath: NodePath<ClassDeclaration>;
-  constructor(path: NodePath<Function>, module: Module) {
+/**
+ * foo = {}
+ * foo.bar = () => <div></div>
+ */
+class JsxFunctionAssignedToMember extends AbstractContextHandler {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
-    if (functionReturnsOnlyJSX(path)) {
-      // @ts-ignore
-      this.classDeclarationPath = path.parentPath.parentPath;
-      if (t.isClassDeclaration(this.classDeclarationPath.node)) {
-        const className = this.classDeclarationPath.node.id.name;
-        this.initialiseComponent(className);
-        module.requireImport(IMPORTABLES.extendComponent);
-      }
+    if (
+      functionReturnsOnlyJSX(path) &&
+      path.parentPath.isAssignmentExpression()
+    ) {
+      this.initialiseComponent();
     }
   }
-  applyTransformations(): void {
-    processFunctionParameters(this.path, this.component);
-    this.path.traverse(jsxVisitors, { component: this.component });
-    this.classDeclarationPath.insertAfter(
-      buildExtendComponentCall(this.component),
+}
+
+/**
+ * extendComponent(Foo, () => <div></div>);
+ */
+class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (
+      functionReturnsOnlyJSX(path) &&
+      path.parentPath.isCallExpression() &&
+      // @ts-ignore
+      path.parentPath.node.callee?.name === "extendComponent"
+    ) {
+      this.initialiseComponent();
+    }
+  }
+  getBaseComponent(): t.Identifier {
+    // @ts-ignore
+    return this.path.parentPath.node.arguments[0];
+  }
+  replaceWithDefineComponentCall() {
+    this.component.baseComponent = this.getBaseComponent();
+    this.path.parentPath.replaceWith(buildDefineComponentCall(this.component));
+  }
+}
+
+/**
+ *  foo = {
+ *    bar: () => <div></div>
+ *  };
+ */
+class JsxFunctionInProperty extends AbstractContextHandler {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (functionReturnsOnlyJSX(path) && path.parentPath.isProperty()) {
+      this.initialiseComponent();
+    }
+  }
+}
+
+/**
+ *  foo = {
+ *   bar() {
+ *      return <div></div>;
+ *    }
+ *  };
+ */
+class JsxFunctionInObjectMethod extends AbstractContextHandler {
+  keyName: string;
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (
+      functionReturnsOnlyJSX(path) &&
+      path.isObjectMethod() &&
+      path.node.key.type === "Identifier"
+    ) {
+      this.keyName = path.node.key.name;
+      this.initialiseComponent();
+    }
+  }
+  replaceWithDefineComponentCall() {
+    this.functionPath.replaceWith(
+      t.objectProperty(
+        t.identifier(this.keyName),
+        buildDefineComponentCall(this.component)
+      )
     );
   }
 }
 
-// NOT SUPPORTED UNTIL WE FIND A WAY TO MAKE IT WORK WITH .nest AND .repeat
-// class AbstractClassPropertyContext extends AbstractContextHandler {
-//   classDeclarationPath: NodePath<ClassDeclaration>;
-//   constructor(path: NodePath<Function>, module: Module) {
-//     super(path, module);
-//     if (this.isRightShape(path)) {
-//       const parentNode = path.parentPath.node;
-//       if (t.isClassProperty(parentNode)) {
-//         // @ts-ignore
-//         const propName = parentNode.key.name;
-//         // @ts-ignore
-//         this.classDeclarationPath = path.parentPath.parentPath.parentPath;
-//         // @ts-ignore
-//         const className = this.classDeclarationPath.node.id.name;
-//         this.tryMatch(path, propName, className, module);
-//       }
-//     }
-//   }
-//   isRightShape(path: NodePath<Function>): boolean {
-//     throw new Error("not implemented");
-//   }
-//   tryMatch(
-//     path: NodePath<Function>,
-//     propName: string,
-//     className: string,
-//     module: Module,
-//   ) {
-//     throw new Error("not implemented");
-//   }
-// }
-
-// class JsxFunctionAssignedToJsxClassProperty extends AbstractClassPropertyContext {
-//   isRightShape(path: NodePath<Function>): boolean {
-//     return !!functionReturnsOnlyJSX(path);
-//   }
-//   tryMatch(
-//     path: NodePath<Function>,
-//     propName: string,
-//     className: string,
-//     module: Module,
-//   ) {
-//     if (propName === "jsx") {
-//       this.initialiseComponent(className);
-//       module.requireImport(IMPORTABLES.extendComponent);
-//     } else {
-//       error(path.parentPath, ERROR_MESSAGES.CLASS_METHOD_MUST_BE_PROPERTY_JSX);
-//     }
-//   }
-//   applyTransformations(): void {
-//     processFunctionParameters(this.path, this.component);
-//     this.path.traverse(jsxVisitors, { component: this.component });
-//     this.classDeclarationPath.insertAfter(
-//       buildExtendComponentCall(this.component),
-//     );
-//   }
-// }
-
 const contextClasses = [
+  JsxFunctionInExtendComponentCall,
   AssignedJsxFunction,
-  // JsxClassMethod,
-  // JsxFunctionAssignedToJsxClassProperty,
+  JsxFunctionAssignedToMember,
+  JsxFunctionInProperty,
+  JsxFunctionInObjectMethod,
 ];
 
 export function identifyContextToBeHandled(
-  path: NodePath<Function>,
-  module: Module,
+  path: NodePath<AnyFunction>,
+  module: Module
 ): AbstractContextHandler | undefined {
   const contexts = [];
   contextClasses.forEach((contextClass) => {
@@ -167,7 +177,7 @@ export function identifyContextToBeHandled(
   const matches = contexts.filter((context) => context.isMatch);
   if (matches.length > 1) {
     throw new Error(
-      "Function matches more than one context. This is an error with the plugin.",
+      "Function matches more than one context. This is an error with the plugin."
     );
   } else if (matches.length === 1) {
     return matches[0];

@@ -1,23 +1,19 @@
+/**
+ * These are the directives, which work by matching `attributeName`, except for the
+ * event directive.
+ *
+ * The `help` field was supposed to be used for docs, but we're now putting this in
+ * the packages/wallace/lib/types.d.ts to make it available by tool tip. When making
+ * changes here be sure to update that file.
+ */
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_PARAMS } from "./constants";
-import { ERROR_MESSAGES, error } from "./errors";
-
-class BaseDirective extends Directive {
-  static attributeName = "base";
-  static help = `
-    Causes this componento to extend (inherit from) a base component:
-
-    /h <div base={OtherComponent}></div>
-    `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    node.setBaseComponent(value.expression);
-  }
-}
 
 class BindDirective extends Directive {
   static attributeName = "bind";
+  static allowQualifier = true;
   static help = `
-    Create a two-way binding between and input element's "value" property and the
+    Create a two-way binding between an input element's "value" property and the
     expression, which must be assignable. 
     If the input is of type "checkbox", it uses the "checked" property instead.
     
@@ -35,6 +31,8 @@ class BindDirective extends Directive {
 
 class ClassDirective extends Directive {
   static attributeName = "class";
+  static allowString = true;
+  static allowQualifier = true;
   static help = `
     Without a qualifer this acts as a normal attribute, but with a qualifier it creates
     a toggle target for use with the "toggle" directive:
@@ -42,13 +40,10 @@ class ClassDirective extends Directive {
     /h <div class:danger="btn-danger" toggle:danger={expr}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    if (value.type === "null") {
-      throw new Error("Value cannot be null");
-    }
     if (qualifier) {
       node.addToggleTarget(
         qualifier,
-        value.type === "expression" ? value.expression : value.value,
+        value.type === "expression" ? value.expression : value.value
       );
     } else {
       // TODO: refactor as "process as normal" function.
@@ -61,20 +56,10 @@ class ClassDirective extends Directive {
   }
 }
 
-class HelpDirective extends Directive {
-  static attributeName = "help";
-  static help = `
-    Displays the help system:
-
-    /h <div help></div>
-    `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    console.log(`Help launched`);
-  }
-}
-
 class HideDirective extends Directive {
   static attributeName = "hide";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
   static help = `
     Hides an element by toggling its hidden attribute.
 
@@ -94,13 +79,6 @@ class IfDirective extends Directive {
     /h <div if={}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    // this.ensureValueType();
-    if (node.isRepeatedNode || node.isNestedClass) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_IF_ON_NESTED_OR_REPEATED_ELEMENT,
-      );
-    }
     node.setVisibilityToggle(value.expression, true, true);
   }
 }
@@ -113,7 +91,6 @@ class OnEventDirective extends Directive {
     /h <div onclick={alert('hello')}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    // TODO: change behaviour if value vs expression
     if (value.type === "string") {
       node.addFixedAttribute(base, value.value);
     } else {
@@ -124,6 +101,9 @@ class OnEventDirective extends Directive {
 
 class PropsDirective extends Directive {
   static attributeName = "props";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
   static help: `
   Specify props for a nested or repeated component:
   
@@ -139,6 +119,10 @@ class PropsDirective extends Directive {
 
 class RefDirective extends Directive {
   static attributeName = "ref";
+  static allowOnNested = true;
+  static allowNull = true;
+  static allowExpression = false;
+  static requireQualifier = true;
   static help = `
     Saves a reference to an element or nested component:
 
@@ -151,6 +135,8 @@ class RefDirective extends Directive {
 
 class ShowDirective extends Directive {
   static attributeName = "show";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
   static help = `
     Shows an element by toggling its hidden attribute.
 
@@ -164,21 +150,20 @@ class ShowDirective extends Directive {
 
 class StyleDirective extends Directive {
   static attributeName = "style";
+  static allowString = true;
+  static allowQualifier = true;
   static help = `
 
     /h <div style:color="red"></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    if (value.type === "null") {
-      throw new Error("Value cannot be null");
-    }
     if (qualifier) {
       if (value.type === "string") {
         throw new Error("Value must be an expression");
       } else if (value.type === "expression") {
         node.addWatch(
           value.expression,
-          `${WATCH_CALLBACK_PARAMS.element}.style.${qualifier} = n`,
+          `${WATCH_CALLBACK_PARAMS.element}.style.${qualifier} = n`
         );
       }
     } else {
@@ -193,6 +178,7 @@ class StyleDirective extends Directive {
 
 class ToggleDirective extends Directive {
   static attributeName = "toggle";
+  static requireQualifier = true;
   static help = `
     If used on its own, the qualifer is the name of the css class to toggle:
 
@@ -207,18 +193,13 @@ class ToggleDirective extends Directive {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
     }
-    if (value.type !== "expression") {
-      throw new Error("Value must be an expression");
-    }
     node.addToggleTrigger(qualifier, value.expression);
   }
 }
 
 export const builtinDirectives = [
-  BaseDirective,
   BindDirective,
   ClassDirective,
-  HelpDirective,
   HideDirective,
   IfDirective,
   OnEventDirective,

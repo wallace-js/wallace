@@ -1,4 +1,4 @@
-import { createComponent } from "./utils";
+import { buildComponent } from "./utils";
 
 /*
  * Gets a component from the pool.
@@ -7,11 +7,11 @@ function getComponent(pool, componentDefinition, ctrl, key, props) {
   let component;
   if (pool.hasOwnProperty(key)) {
     component = pool[key];
-    component.render(props, ctrl);
   } else {
-    component = createComponent(componentDefinition, props, ctrl);
+    component = buildComponent(componentDefinition);
     pool[key] = component;
   }
+  component.render(props, ctrl);
   return component;
 }
 
@@ -50,10 +50,10 @@ function pull(arr, item, to) {
  * @param {function} keyFn - A function which obtains the key.
  */
 export function KeyedRepeater(componentDefinition, keyFn) {
-  this._v = componentDefinition;
-  this._f = keyFn;
-  this._k = []; // keys
-  this._p = {}; // pool of component instances
+  this.def = componentDefinition;
+  this.keyFn = keyFn;
+  this.keys = []; // keys
+  this.pool = {}; // pool of component instances
 }
 const proto = KeyedRepeater.prototype;
 
@@ -64,7 +64,7 @@ const proto = KeyedRepeater.prototype;
  * @param {Object} item - The item which will be passed as props.
  */
 proto.getOne = function (item, ctrl) {
-  return getComponent(this._p, this._v, ctrl, this._f(item), item);
+  return getComponent(this.pool, this.def, ctrl, this.keyFn(item), item);
 };
 
 /**
@@ -77,12 +77,12 @@ proto.getOne = function (item, ctrl) {
 proto.patch = function (e, items, ctrl) {
   // Attempt to speed up by reducing lookups. Does this even do anything?
   // Does webpack undo this/do it for for me? Does the engine?
-  const pool = this._p;
-  const componentDefinition = this._v;
-  const keyFn = this._f;
+  const pool = this.pool;
+  const componentDefinition = this.def;
+  const keyFn = this.keyFn;
   const childNodes = e.childNodes;
   const itemsLength = items.length;
-  const oldKeySequence = this._k;
+  const oldKeySequence = this.keys;
   const newKeys = [];
   let item,
     key,
@@ -100,7 +100,7 @@ proto.patch = function (e, items, ctrl) {
       pull(oldKeySequence, key, i);
     }
   }
-  this._k = newKeys;
+  this.keys = newKeys;
   trimChildren(e, childNodes, itemsLength);
 };
 
@@ -110,9 +110,9 @@ proto.patch = function (e, items, ctrl) {
  * @param {componentDefinition} componentDefinition - The class ComponentDefinition to create.
  */
 export function SequentialRepeater(componentDefinition) {
-  this._v = componentDefinition;
-  this._p = []; // pool of component instances
-  this._c = 0; // Child element count
+  this.def = componentDefinition;
+  this.pool = []; // pool of component instances
+  this.count = 0; // Child element count
 }
 
 /**
@@ -124,29 +124,27 @@ export function SequentialRepeater(componentDefinition) {
  * @param {any} ctrl - The parent item's controller.
  */
 SequentialRepeater.prototype.patch = function (e, items, ctrl) {
-  const pool = this._p;
-  const componentDefinition = this._v;
+  const pool = this.pool;
+  const componentDefinition = this.def;
   const childNodes = e.childNodes;
   const itemsLength = items.length;
-  let item,
-    component,
+  let component,
     poolCount = pool.length,
-    childElementCount = this._c;
+    childElementCount = this.count;
 
   for (let i = 0; i < itemsLength; i++) {
-    item = items[i];
     if (i < poolCount) {
       component = pool[i];
-      component.render(item, ctrl);
     } else {
-      component = createComponent(componentDefinition, item, ctrl);
+      component = buildComponent(componentDefinition);
       pool.push(component);
       poolCount++;
     }
+    component.render(items[i], ctrl);
     if (i >= childElementCount) {
       e.appendChild(component.el);
     }
   }
-  this._c = itemsLength;
+  this.count = itemsLength;
   trimChildren(e, childNodes, itemsLength);
 };

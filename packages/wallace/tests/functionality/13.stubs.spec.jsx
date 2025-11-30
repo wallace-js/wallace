@@ -1,42 +1,66 @@
 import { testMount } from "../utils";
-import { extendPrototype } from "wallace";
+import { extendComponent } from "wallace";
+
+describe("Defining stubs", () => {
+  test("is not allowed on root ", () => {
+    const code = `
+    const Foo = () => (
+      <stub:display />
+      );
+      `;
+    expect(code).toCompileWithError("Cannot make the root element a stub.");
+  });
+});
 
 test("Can define stub and implement it on same component", () => {
-  const BaseComponent = ({}, _component) => (
+  const Foo = ({}) => (
     <div>
       hello
       <stub:display />
     </div>
   );
-  BaseComponent.prototype.display = ({ name }) => <span>{name}</span>;
-  const component = testMount(BaseComponent, { name: "swan" });
+  Foo.stubs.display = ({ name }) => <span>{name}</span>;
+  const component = testMount(Foo, { name: "swan" });
   expect(component).toRender(`<div>hello <span>swan</span></div>`);
 });
 
-test("Can define stub and only implement it on sub component", () => {
+test("Can define stub and only implement it on child", () => {
   const BaseComponent = () => (
     <div>
       hello
       <stub:display />
     </div>
   );
-  const SubComponent = extendPrototype(BaseComponent);
-  SubComponent.prototype.display = ({ name }) => <span>{name}</span>;
-  const component = testMount(SubComponent, { name: "beaver" });
+  const Child = extendComponent(BaseComponent);
+  Child.stubs.display = ({ name }) => <span>{name}</span>;
+  const component = testMount(Child, { name: "beaver" });
   expect(component).toRender(`<div>hello <span>beaver</span></div>`);
 });
 
-test("Can inherit stubs from base", () => {
-  const BaseComponent = () => <div></div>;
-  BaseComponent.prototype.display = ({ name }) => <span>{name}</span>;
-
-  const SubComponent = () => (
-    <div base={BaseComponent}>
-      goodbye
+test("Can define stub and not implement it on child", () => {
+  const BaseComponent = () => (
+    <div>
+      hello
       <stub:display />
     </div>
   );
+  BaseComponent.stubs.display = ({ name }) => <span>{name}</span>;
+  const Child = extendComponent(BaseComponent);
+  const component = testMount(Child, { name: "beaver" });
+  expect(component).toRender(`<div>hello <span>beaver</span></div>`);
+});
 
-  const component = testMount(SubComponent, { name: "goat" });
+test("Child can use stub implementations from parent", () => {
+  const BaseComponent = () => <div></div>;
+  BaseComponent.stubs.display = ({ name }) => <span>{name}</span>;
+
+  const Child = extendComponent(BaseComponent, () => (
+    <div>
+      goodbye
+      <stub:display />
+    </div>
+  ));
+
+  const component = testMount(Child, { name: "goat" });
   expect(component).toRender(`<div>goodbye <span>goat</span></div>`);
 });
