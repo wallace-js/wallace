@@ -1,5 +1,4 @@
 import { Component } from "./component";
-import { Lookup } from "./lookup";
 import { buildComponent, replaceNode } from "./utils";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 const throwAway = document.createElement("template");
@@ -64,7 +63,7 @@ export function extendComponent(base, componentDef) {
 export function defineComponent(
   html,
   watches,
-  lookups,
+  queries,
   buildFunction,
   inheritFrom
 ) {
@@ -72,7 +71,7 @@ export function defineComponent(
   const prototype = ComponentDefinition.prototype;
   //Ensure these do not clash with fields on the component itself.
   prototype._w = watches;
-  prototype._l = new Lookup(lookups);
+  prototype._q = queries;
   prototype._b = buildFunction;
   prototype._n = makeEl(html);
   return ComponentDefinition;

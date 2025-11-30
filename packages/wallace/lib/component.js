@@ -1,3 +1,5 @@
+const ALWAYS_UPDATE = "__";
+
 /**
  * The base component.
  */
@@ -8,8 +10,9 @@ export function Component() {
   this.ref = {}; // user set references to elements or components.
   // Internal state objects
   this._e = {}; // The dynamic elements in the DOM.
-  this._p = {}; // The previous values for watches to compare against.
   this._s = []; // A stash for misc objects.
+  this._p = {}; // The previous values for watches to compare against.
+  this._r = {}; // The current values read during an update.
 }
 
 Component.stubs = {};
@@ -24,6 +27,40 @@ Object.defineProperty(proto, "hidden", {
 
 proto._gs = function (name) {
   return this.constructor.stubs[name];
+};
+
+/**
+ * Reads a query during update, returns an array with (oldValue, newValue, changed)
+ * and saves the old value. Must reset this._r before each run.
+ */
+proto._rq = function (props, key) {
+  const run = this._r;
+  if (run[key] === undefined) {
+    let oldValue = this._p[key];
+    const newValue = this._q[key](props, this);
+    this._p[key] = newValue;
+    const rtn = [newValue, oldValue, newValue !== oldValue];
+    run[key] = rtn;
+    return rtn;
+  }
+  return run[key];
+};
+
+/**
+ * Applies the callbacks.
+ */
+proto._ac = function (props, element, callbacks) {
+  for (let key in callbacks) {
+    let callback = callbacks[key];
+    if (key === ALWAYS_UPDATE) {
+      callback(element, props, this);
+    } else {
+      const result = this._rq(props, key);
+      if (result[2]) {
+        callback(result[0], result[1], element, props, this);
+      }
+    }
+  }
 };
 
 /**
@@ -46,10 +83,8 @@ proto.update = function () {
     parent,
     displayToggle,
     detacher,
-    lookupReturn,
     lookupTrue,
     shouldBeVisible,
-    visibilityChanged,
     detachedElements,
     detachedElement,
     index,
@@ -57,10 +92,9 @@ proto.update = function () {
     thisElement;
 
   const watches = this._w;
-  const lookup = this._l;
   const props = this.props;
-  lookup.reset();
   const il = watches.length;
+  this._r = {};
   /* 
   Watches is an array of objects with keys:
     e: the element reference (string)
@@ -85,10 +119,8 @@ proto.update = function () {
     i++;
     shouldBeVisible = true;
     if (displayToggle) {
-      lookupReturn = lookup.get(this, props, displayToggle.q);
-      lookupTrue = !!lookupReturn.n;
+      lookupTrue = !!this._rq(props, displayToggle.q)[0];
       shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
-      visibilityChanged = lookupTrue != !!lookupReturn.o;
       detacher = displayToggle.d;
       if (detacher) {
         index = detacher.i;
@@ -119,7 +151,7 @@ proto.update = function () {
       }
     }
     if (shouldBeVisible) {
-      lookup.applyCallbacks(this, props, element, watch.c);
+      this._ac(props, element, watch.c);
     }
   }
 };
