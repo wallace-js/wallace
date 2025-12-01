@@ -1,6 +1,6 @@
 # Wallace
 
-*The tiny framework that brings you FREEEDOM!!!*
+_The tiny framework that brings you FREEEDOM!!!_
 
 ![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
 ![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg) [![Click Counter TypeScript](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
@@ -29,7 +29,7 @@ And DOM updates are pretty fast too:
 
 [img]
 
-But in truth you rarely need *fast*. You just need to avoid *slow* - which happens in more complex scenarios than benchmarks. And the only *real* protection against that is **freedom** (see below).
+But in truth you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
 
 ### 2. Productivity
 
@@ -71,7 +71,7 @@ You might never need to do any of that on your project, true. But why risk using
 
 ---
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say "*freedom*" in Scotland without conjuring this image:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say "_freedom_" in Scotland without conjuring this image:
 
 ![Mel Gibson in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
@@ -100,13 +100,13 @@ Wallace controls the DOM by building a tree of components, which you define as f
 ```tsx
 import { mount } from "wallace";
 
-const Greeting = ({name}) => <h3>{name} says hello</h3>;
+const Greeting = ({ name }) => <h3>{name} says hello</h3>;
 
 // replaces element with id "root"
 mount("root", Greeting, { name: "Wallace" });
 ```
 
-You might think Wallace *calls* this component function at some point, but it doesn't. It only *reads* it during compilation, then *replaces* it with a constructor function. 
+You might think Wallace _calls_ this component function at some point, but it doesn't. It only _reads_ it during compilation, then _replaces_ it with a constructor function.
 
 This has two major consequences:
 
@@ -116,9 +116,7 @@ The JSX is never run, and must be static in shape, like an HTML string. But you 
 
 ```tsx
 const Greeting = ({ name }) => (
-  <h3 show={name.startsWith("W")}>
-    {name} says hello
-  </h3>
+  <h3 show={name.startsWith("W")}>{name} says hello</h3>
 );
 ```
 
@@ -126,21 +124,17 @@ You can get a list (once I've made apply)
 
 (img)
 
-
-
 - more compact code.
 - Preserve indentation.
-
-
 
 #### Components
 
 In React, the "components" are functions that get called by a special "root" object. In Wallace there is no root object, only component objects which update their own DOM through methods.
 
- So `root` is actually an instance of `Greeting` and we can update it by calling its `render` method:
+So `root` is actually an instance of `Greeting` and we can update it by calling its `render` method:
 
 ```tsx
-root.render({name: "Gromit"});
+root.render({ name: "Gromit" });
 ```
 
 To see why this is so useful, we need slightly a more involved example.
@@ -158,12 +152,6 @@ To see why this is so useful, we need slightly a more involved example.
 
 ```
 
-
-
-
-
-
-
 (change to `show`)
 
 ```tsx
@@ -172,12 +160,9 @@ import { mount } from "wallace";
 const Greeting = ({ name }) => (
   <div>
     <h3>{name} says hello</h3>
-    <div show={name === 'Wallace'}> and goodbye</div>
+    <div show={name === "Wallace"}> and goodbye</div>
   </div>
 );
-
-
-
 
 const GreetingList = (greetings) => (
   <div>
@@ -190,8 +175,6 @@ const root = main("root", GreetingList, [
   { name: "Gromit" }
 ]);
 ```
-
-
 
 - simple example
 - JSX

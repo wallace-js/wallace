@@ -22,7 +22,7 @@ var proto = Component.prototype;
 Object.defineProperty(proto, "hidden", {
   set: function (value) {
     this.el.hidden = value;
-  },
+  }
 });
 
 proto._gs = function (name) {

@@ -90,5 +90,5 @@ export const attributeVisitors = {
       }
     }
     path.remove();
-  },
+  }
 };

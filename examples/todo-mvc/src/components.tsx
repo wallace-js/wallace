@@ -51,5 +51,5 @@ TaskList.methods({
       this.ctrl.addTask(e.target.value);
       e.target.value = "";
     }
-  },
+  }
 });

@@ -10,7 +10,7 @@ import {
   onEvent,
   nestComponent,
   saveRef,
-  stashMisc,
+  stashMisc
 } from "./initCalls";
 
 export {
@@ -27,5 +27,5 @@ export {
   saveRef,
   SequentialRepeater,
   stashMisc,
-  watch,
+  watch
 };

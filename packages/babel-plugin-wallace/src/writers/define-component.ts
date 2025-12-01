@@ -8,13 +8,13 @@ import type {
   Expression,
   ObjectExpression,
   ObjectProperty,
-  StringLiteral,
+  StringLiteral
 } from "@babel/types";
 import { identifier, objectExpression } from "@babel/types";
 import { escapeSingleQuotes, stripHtml } from "../utils";
 import {
   ComponentDefinitionData,
-  consolidateComponent,
+  consolidateComponent
 } from "../consolidation";
 
 // component base to inherit from. Using 0 as false.
@@ -51,7 +51,7 @@ function buildObjectExpression(object: {
       key: actualkey,
       value: value,
       computed: false,
-      shorthand: false,
+      shorthand: false
     });
   }
   return objectExpression(properties);
@@ -63,20 +63,20 @@ function buildWatchesArg(
   const watchDeclarations = componentDefinition.watches.map((watch) => {
     const watchArg = {
       e: t.numericLiteral(watch.elementKey),
-      c: buildObjectExpression(watch.callbacks),
+      c: buildObjectExpression(watch.callbacks)
     };
     if (watch.shieldInfo) {
       const visibilityToggle = {
         q: t.numericLiteral(watch.shieldInfo.key),
         s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
-        r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0),
+        r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0)
       };
       if (watch.shieldInfo.detacher) {
         const detacher = watch.shieldInfo.detacher;
         visibilityToggle["d"] = buildObjectExpression({
           i: t.numericLiteral(detacher.index),
           s: t.numericLiteral(detacher.stashKey),
-          e: t.numericLiteral(detacher.parentKey),
+          e: t.numericLiteral(detacher.parentKey)
         });
       }
       watchArg["v"] = buildObjectExpression(visibilityToggle);
@@ -120,7 +120,7 @@ function buildComponentBuildFunction(
     null,
     [
       t.identifier(COMPONENT_BUILD_PARAMS.component),
-      t.identifier(COMPONENT_BUILD_PARAMS.rootElement),
+      t.identifier(COMPONENT_BUILD_PARAMS.rootElement)
     ],
     t.blockStatement(statements)
   );
@@ -132,7 +132,7 @@ export function buildDefineComponentCall(component: Component): CallExpression {
     buildTemplateArg(componentDefinition),
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildComponentBuildFunction(componentDefinition),
+    buildComponentBuildFunction(componentDefinition)
   ];
   if (componentDefinition.baseComponent) {
     args.push(buildComponentBaseArg(componentDefinition));

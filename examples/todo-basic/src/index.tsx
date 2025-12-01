@@ -41,10 +41,10 @@ TaskList.methods({
       this.props.push({ text, done: false });
       target.value = "";
     }
-  },
+  }
 });
 
 mount("main", TaskList, [
   { text: "Complete Wallace tutorial", done: false },
-  { text: "Star Wallace on github", done: false },
+  { text: "Star Wallace on github", done: false }
 ]);

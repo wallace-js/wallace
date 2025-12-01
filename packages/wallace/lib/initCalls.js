@@ -91,8 +91,8 @@ function _createConstructor(base) {
     constructor: {
       value: ComponentDefinition,
       writable: true,
-      configurable: true,
-    },
+      configurable: true
+    }
   });
   return ComponentDefinition;
 }

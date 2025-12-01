@@ -63,14 +63,14 @@ export const jsxVisitors = {
     // must be text nodes.
     component.processJSXExpressionInText(path, tracker);
     path.remove();
-  },
+  }
 };
 
 function getVisitorThatErrorsIfJSXElementFound(errorMessage: string) {
   return {
     JSXElement(path: NodePath<JSXElement>) {
       error(path, errorMessage);
-    },
+    }
   };
 }
 

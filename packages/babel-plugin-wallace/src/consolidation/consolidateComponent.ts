@@ -29,7 +29,7 @@ function hoistTextNodes(component: Component) {
  * Deals with visibility toggles, setting ref keys and such.
  */
 export function consolidateComponent(
-  component: Component,
+  component: Component
 ): ComponentDefinitionData {
   const componentDefinition = new ComponentDefinitionData(component);
   hoistTextNodes(component);

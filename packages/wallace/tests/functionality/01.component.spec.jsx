@@ -11,12 +11,12 @@ describe("Defining functions in equivalent ways compiles to same output", () => 
     ["function without props", `const Foo = () => <div>Hello {name}</div>`],
     [
       "function with normal props",
-      `const Foo = (foo) => <div>Hello {name}</div>`,
+      `const Foo = (foo) => <div>Hello {name}</div>`
     ],
     [
       "function with destructured props",
-      `const Foo = ({foo}) => <div>Hello {name}</div>`,
-    ],
+      `const Foo = ({foo}) => <div>Hello {name}</div>`
+    ]
   ])("%s", (condition, code) => {
     expect(transform(code).code).toBe(expectedOutput);
   });
@@ -32,7 +32,7 @@ describe("Components can be defined", () => {
 
   test("in object property", () => {
     const foo = {
-      bar: ({ name }) => <span>{name}</span>,
+      bar: ({ name }) => <span>{name}</span>
     };
     const component = testMount(foo.bar, { name: "porcupine" });
     expect(component).toRender(`<span>porcupine</span>`);
@@ -42,7 +42,7 @@ describe("Components can be defined", () => {
     const foo = {
       bar({ name }) {
         return <span>{name}</span>;
-      },
+      }
     };
     const component = testMount(foo.bar, { name: "porcupine" });
     expect(component).toRender(`<span>porcupine</span>`);

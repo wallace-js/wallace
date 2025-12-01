@@ -8,7 +8,7 @@ import * as t from "@babel/types";
  */
 function functionOnlyReturns(
   path: NodePath<Function>,
-  test: (expr: Expression | BlockStatement) => boolean,
+  test: (expr: Expression | BlockStatement) => boolean
 ): Expression | BlockStatement | undefined {
   const body = path.node.body;
   if (test(body)) {
@@ -25,13 +25,13 @@ function functionOnlyReturns(
 }
 
 export function functionReturnsOnlyJSX(
-  path: NodePath<Function>,
+  path: NodePath<Function>
 ): Expression | BlockStatement | undefined {
   return functionOnlyReturns(path, t.isJSXElement);
 }
 
 export function functionReturnsObjectWithJSX(
-  path: NodePath<Function>,
+  path: NodePath<Function>
 ): Expression | BlockStatement | undefined {
   return functionOnlyReturns(path, (expr: Expression | BlockStatement) => {
     if (t.isObjectExpression(expr)) {
@@ -40,7 +40,7 @@ export function functionReturnsObjectWithJSX(
         expr.properties.length > 0 &&
         expr.properties.every(
           (prop: t.ObjectProperty) =>
-            t.isIdentifier(prop.key) && t.isJSXElement(prop.value),
+            t.isIdentifier(prop.key) && t.isJSXElement(prop.value)
         )
       );
     }

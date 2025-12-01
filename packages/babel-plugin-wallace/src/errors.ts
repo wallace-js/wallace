@@ -76,7 +76,7 @@ export const ERROR_MESSAGES = {
       .join(", ")} - these are reserved for extra args.`,
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
   ILLEGAL_XARG: (name: string) =>
-    `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`,
+    `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`
 };
 
 export function error(path: NodePath<any>, errorMessage: string) {

@@ -163,7 +163,7 @@ const contextClasses = [
   AssignedJsxFunction,
   JsxFunctionAssignedToMember,
   JsxFunctionInProperty,
-  JsxFunctionInObjectMethod,
+  JsxFunctionInObjectMethod
 ];
 
 export function identifyContextToBeHandled(

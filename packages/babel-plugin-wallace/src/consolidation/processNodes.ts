@@ -7,7 +7,7 @@ import {
   identifier,
   memberExpression,
   numericLiteral,
-  stringLiteral,
+  stringLiteral
 } from "@babel/types";
 import * as t from "@babel/types";
 import { codeToNode } from "../utils";
@@ -19,7 +19,7 @@ import {
   EXTRA_PARAMETERS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
-  WATCH_CALLBACK_PARAMS,
+  WATCH_CALLBACK_PARAMS
 } from "../constants";
 import { ComponentWatch } from "./types";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
@@ -27,7 +27,7 @@ import {
   getSiblings,
   getChildren,
   renameVariablesInExpression,
-  buildWatchCallbackParams,
+  buildWatchCallbackParams
 } from "./utils";
 
 function addBindInstruction(node: ExtractedNode) {
@@ -115,7 +115,7 @@ function addToggleCallbackStatement(
         t.identifier(WATCH_CALLBACK_PARAMS.newValue),
         blockStatement([expressionStatement(getCallback("add"))]),
         blockStatement([expressionStatement(getCallback("remove"))])
-      ),
+      )
     ]);
   });
 }
@@ -210,7 +210,7 @@ export function processNodes(
         const componentWatch: ComponentWatch = {
           elementKey: node.elementKey,
           callbacks: {},
-          address: node.address,
+          address: node.address
         };
         componentDefinition.watches.push(componentWatch);
 
@@ -244,7 +244,7 @@ export function processNodes(
                 ),
                 args
               )
-            ),
+            )
           ]);
         }
 
@@ -270,10 +270,10 @@ export function processNodes(
                   memberExpression(
                     component.componentIdentifier,
                     identifier(SPECIAL_SYMBOLS.ctrl)
-                  ),
+                  )
                 ]
               )
-            ),
+            )
           ]);
         }
 
@@ -284,7 +284,7 @@ export function processNodes(
           componentWatch.shieldInfo = {
             skipCount: 0, // gets set later once we've processed all the nodes.
             key: shieldLookupKey,
-            reverse: visibilityToggle.reverse,
+            reverse: visibilityToggle.reverse
           };
           if (visibilityToggle.detach) {
             if (node.parent.detacherStashKey === undefined) {
@@ -293,7 +293,7 @@ export function processNodes(
             componentWatch.shieldInfo.detacher = {
               index: node.address[node.address.length - 1],
               stashKey: node.parent.detacherStashKey,
-              parentKey: node.parent.elementKey,
+              parentKey: node.parent.elementKey
             };
           }
         }
@@ -305,7 +305,7 @@ export function processNodes(
           const poolInstance =
             repeatInstruction.poolExpression ||
             callExpression(identifier(IMPORTABLES.getSequentialRepeater), [
-              identifier(repeatInstruction.componentCls),
+              identifier(repeatInstruction.componentCls)
             ]);
 
           // TODO: couple the stash index with the call to save - if possible?
@@ -336,10 +336,10 @@ export function processNodes(
                   memberExpression(
                     component.componentIdentifier,
                     identifier(SPECIAL_SYMBOLS.ctrl)
-                  ),
+                  )
                 ]
               )
-            ),
+            )
           ]);
         }
 
@@ -349,7 +349,7 @@ export function processNodes(
               ? [
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   component.propsIdentifier,
-                  component.componentIdentifier,
+                  component.componentIdentifier
                 ]
               : buildWatchCallbackParams();
           componentWatch.callbacks[key] = functionExpression(
@@ -384,7 +384,7 @@ export function processNodes(
         [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
           `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
         [component.propsIdentifier.name]:
-          `${COMPONENT_BUILD_PARAMS.component}.props`,
+          `${COMPONENT_BUILD_PARAMS.component}.props`
       };
       node.eventListeners.forEach((listener) => {
         const updatedExpression = renameVariablesInExpression(
@@ -401,7 +401,7 @@ export function processNodes(
               null,
               [identifier(EXTRA_PARAMETERS.event)],
               blockStatement([expressionStatement(updatedExpression)])
-            ),
+            )
           ]
         );
       });

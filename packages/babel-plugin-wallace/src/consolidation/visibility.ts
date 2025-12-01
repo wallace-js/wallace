@@ -9,7 +9,7 @@ import { ComponentWatch } from "./types";
 function setSkipCounts(
   watch: ComponentWatch,
   index: number,
-  watches: Array<ComponentWatch>,
+  watches: Array<ComponentWatch>
 ) {
   watch.shieldInfo.skipCount = watches
     .slice(index)

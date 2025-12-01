@@ -41,7 +41,7 @@ export class Directive {
     const allowedTypes = [
       allowExpression && "expression",
       allowString && "string",
-      allowNull && "null",
+      allowNull && "null"
     ].filter(Boolean);
     if (!allowedTypes.includes(value.type)) {
       error(

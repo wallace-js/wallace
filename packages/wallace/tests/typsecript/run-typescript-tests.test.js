@@ -39,7 +39,7 @@ tsxFiles.forEach((fileName) => {
     const lineNo = parseInt(errorChunk.substring(3));
     if (isNaN(lineNo)) {
       throw new Error(
-        `Invalid format number in ${errorChunk} must be like "//@25"`,
+        `Invalid format number in ${errorChunk} must be like "//@25"`
       );
     }
     tsxFilesWithErrors.push({ fileName, lineNo, errorMessage });
@@ -63,7 +63,7 @@ test.each(tsxFilesWithoutErrors)(
         done();
       }
     });
-  },
+  }
 );
 
 test.each(tsxFilesWithErrors)(
@@ -76,11 +76,11 @@ test.each(tsxFilesWithErrors)(
         const foundMessage = splitOnce(rest, "\n")[0].trim();
         if (errorMessage != foundMessage) {
           done(
-            `Expected error:\n    ${errorMessage}\nbut found:\n    ${foundMessage}`,
+            `Expected error:\n    ${errorMessage}\nbut found:\n    ${foundMessage}`
           );
         } else if (foundLine != lineNo) {
           done(
-            `Expected error on line ${lineNo} but it appeared on line ${foundLine}.`,
+            `Expected error on line ${lineNo} but it appeared on line ${foundLine}.`
           );
         } else {
           done();
@@ -89,5 +89,5 @@ test.each(tsxFilesWithErrors)(
         done(`Expected error on line ${lineNo}: ${errorMessage}`);
       }
     });
-  },
+  }
 );

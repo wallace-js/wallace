@@ -5,7 +5,7 @@ import type {
   JSXElement,
   JSXExpressionContainer,
   JSXText,
-  Expression,
+  Expression
 } from "@babel/types";
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
@@ -15,7 +15,7 @@ import {
   DynamicTextNode,
   PlainTextNode,
   StubNode,
-  TagNode,
+  TagNode
 } from "./node";
 import { Module } from "./module";
 
@@ -119,7 +119,7 @@ export class Component {
     this.#addNode(extractedNode, path, tracker);
     path.traverse(jsxVisitors, {
       component: this,
-      tracker: { childIndex: 0, parent: extractedNode },
+      tracker: { childIndex: 0, parent: extractedNode }
     });
     this.#exitLevel();
   }

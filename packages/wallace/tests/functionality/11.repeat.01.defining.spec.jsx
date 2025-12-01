@@ -5,7 +5,7 @@ describe("Repeat", () => {
     const items = [
       { name: "Octopus" },
       { name: "Seahorse" },
-      { name: "Squid" },
+      { name: "Squid" }
     ];
     const Child = (animal) => <div>{animal.name}</div>;
     const Parent = () => (

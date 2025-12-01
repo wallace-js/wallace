@@ -25,8 +25,8 @@ function tsCompile(source, options) {
     lib: [
       "lib.es2020.d.ts",
       // Must point to packages, not node_modules!
-      "../../../packages/wallace/lib/types.d.ts",
-    ],
+      "../../../packages/wallace/lib/types.d.ts"
+    ]
   };
 
   const host = ts.createCompilerHost(finalOptions, true);
@@ -125,7 +125,7 @@ expect.extend({
     const pass = received === expected;
     const failMessage = () => {
       const diffString = diff(expected, received, {
-        expand: this.expand,
+        expand: this.expand
       });
       return (
         this.utils.matcherHint(".toBe") +
@@ -180,7 +180,7 @@ expect.extend({
     const pass = received === errorMessage;
     const failMessage = () => {
       const diffString = diff(errorMessage, received, {
-        expand: this.expand,
+        expand: this.expand
       });
       return (
         this.utils.matcherHint(".toBe") +
@@ -197,14 +197,14 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `Expected error "${errorMessage}" but no errors were thrown`,
+          `Expected error "${errorMessage}" but no errors were thrown`
       };
     }
     console.log(expected);
 
     return {
       pass: false,
-      message: () => `Expected error "${expected}" but no errors were thrown`,
+      message: () => `Expected error "${expected}" but no errors were thrown`
     };
   },
   toHaveNoTypeErrors(src) {
@@ -215,11 +215,10 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `Expected no errors but got ${errors.length}:\n\n` +
-          errors.join("\n"),
+          `Expected no errors but got ${errors.length}:\n\n` + errors.join("\n")
       };
     }
-  },
+  }
 });
 
 module.exports = {
@@ -227,5 +226,5 @@ module.exports = {
   splitOnce,
   testMount,
   tidyHTML,
-  transform,
+  transform
 };

@@ -4,7 +4,7 @@
 
 const tasks = [
   { id: 1, text: "Complete Wallace tutorial", done: true },
-  { id: 2, text: "Star Wallace on github", done: false },
+  { id: 2, text: "Star Wallace on github", done: false }
 ];
 
 let latestId = tasks.length - 1;

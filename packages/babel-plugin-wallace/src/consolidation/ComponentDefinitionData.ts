@@ -2,14 +2,14 @@ import type {
   Expression,
   CallExpression,
   FunctionExpression,
-  Identifier,
+  Identifier
 } from "@babel/types";
 import {
   blockStatement,
   callExpression,
   functionExpression,
   identifier,
-  returnStatement,
+  returnStatement
 } from "@babel/types";
 import { Component } from "../models";
 import { IMPORTABLES } from "../constants";
@@ -17,7 +17,7 @@ import { ComponentWatch, NodeAddress } from "./types";
 import {
   buildFindElementCall,
   buildNestedClassCall,
-  removeKeys,
+  removeKeys
 } from "./utils";
 
 /**

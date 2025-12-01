@@ -96,7 +96,7 @@ function renamePropKeysInsideFunction(
       if (name.includes(".")) {
         path.replaceWith(expandNameToMemberExpression(name));
       }
-    },
+    }
   });
 }
 

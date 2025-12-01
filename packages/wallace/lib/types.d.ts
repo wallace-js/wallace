@@ -431,7 +431,7 @@ declare module "wallace" {
   interface ComponentFunction<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   > {
     (
       props: Props,
@@ -444,7 +444,7 @@ declare module "wallace" {
     nest?({
       props,
       show,
-      hide,
+      hide
     }: {
       props?: Props;
       show?: boolean;
@@ -453,7 +453,7 @@ declare module "wallace" {
     repeat?({
       props,
       show,
-      hide,
+      hide
     }: {
       props: Array<Props>;
       show?: boolean;
@@ -493,7 +493,7 @@ declare module "wallace" {
   export type Uses<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   > = ComponentFunction<Props, Controller, Methods>;
 
   /**
@@ -502,7 +502,7 @@ declare module "wallace" {
   export type Component<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   > = {
     update(): void;
     render(props: Props, ctrl?: Controller): void;
@@ -523,7 +523,7 @@ declare module "wallace" {
   export function extendComponent<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   >(
     base: Uses<Props, Controller, Methods>,
     componentFunc?: ComponentFunction<Props, Controller, Methods>
@@ -537,7 +537,7 @@ declare module "wallace" {
   export function mount<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   >(
     element: string | HTMLElement,
     componentDefinition: Uses<Props, Controller, Methods>,
