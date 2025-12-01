@@ -6,12 +6,12 @@ import { IMPORTABLES } from "../constants";
 function addImportStatement(
   path: NodePath<Program>,
   name: string,
-  source: string,
+  source: string
 ) {
   const specifier = t.importSpecifier(t.identifier(name), t.identifier(name));
   const importStatement = t.importDeclaration(
     [specifier],
-    t.stringLiteral(source),
+    t.stringLiteral(source)
   );
   path.unshiftContainer("body", importStatement);
 }

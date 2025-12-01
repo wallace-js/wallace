@@ -215,8 +215,15 @@ export function processNodes(
         componentDefinition.watches.push(componentWatch);
 
         node.watches.forEach((watch) => {
-          const lookupKey = componentDefinition.addLookup(watch.expression);
-          addCallbackStatement(lookupKey, codeToNode(watch.callback));
+          if (watch.expression == SPECIAL_SYMBOLS.alwaysUpdate) {
+            addCallbackStatement(
+              SPECIAL_SYMBOLS.alwaysUpdate,
+              codeToNode(watch.callback)
+            );
+          } else {
+            const lookupKey = componentDefinition.addLookup(watch.expression);
+            addCallbackStatement(lookupKey, codeToNode(watch.callback));
+          }
         });
 
         if (node.isNestedComponent) {
@@ -249,13 +256,12 @@ export function processNodes(
           );
         }
 
-        // Need to be careful with WATCH_CALLBACK_PARAMS as `e` is actually a reference
-        // to the nested component, and that's what we want to render.
         if (stubName) {
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
               callExpression(
                 memberExpression(
+                  // In this case "element" is in fact the nested component.
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   identifier(COMPONENT_METHODS.render)
                 ),

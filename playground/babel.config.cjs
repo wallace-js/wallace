@@ -8,6 +8,8 @@
  * See `playground/package.json` and `babel-plugin-wallace/README.md`.
  */
 
+const { TestDirective } = require("./src/directive.js");
+
 function flag(name) {
   const value = process.env[name];
   switch (String(value).toLowerCase()) {
@@ -36,6 +38,14 @@ for (const [key, value] of Object.entries(toggles)) {
 console.log("Active presets (to disable, see babel.config.cjs):", presets);
 
 module.exports = {
-  plugins: ["babel-plugin-wallace", "@babel/plugin-syntax-jsx"],
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        directives: TestDirective ? [TestDirective] : [],
+      },
+    ],
+    "@babel/plugin-syntax-jsx",
+  ],
   presets: presets,
 };

@@ -7,7 +7,22 @@
  * changes here be sure to update that file.
  */
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import { WATCH_CALLBACK_PARAMS } from "./constants";
+import { WATCH_CALLBACK_PARAMS, SPECIAL_SYMBOLS } from "./constants";
+
+class ApplyDirective extends Directive {
+  static attributeName = "apply";
+  static allowNull = true;
+  static allowString = false;
+  static allowQualifier = false;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    node.addWatch(
+      SPECIAL_SYMBOLS.alwaysUpdate,
+      value.expression
+      // `${value.expression};`
+      // `return console.log(arguments);`
+    );
+  }
+}
 
 class BindDirective extends Directive {
   static attributeName = "bind";
@@ -198,6 +213,7 @@ class ToggleDirective extends Directive {
 }
 
 export const builtinDirectives = [
+  ApplyDirective,
   BindDirective,
   ClassDirective,
   HideDirective,

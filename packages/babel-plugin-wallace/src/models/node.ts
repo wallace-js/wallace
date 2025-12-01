@@ -7,7 +7,7 @@ import type {
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
-import { WATCH_CALLBACK_PARAMS } from "../constants";
+import { WATCH_CALLBACK_PARAMS, SPECIAL_SYMBOLS } from "../constants";
 
 interface Attribute {
   name: string;
@@ -15,9 +15,8 @@ interface Attribute {
 }
 
 interface Watch {
-  expression: Expression;
-  // TODO: change to proper expr
-  callback: string;
+  expression: Expression | SPECIAL_SYMBOLS.alwaysUpdate;
+  callback: string | Expression;
 }
 
 interface RepeatInstruction {
@@ -89,7 +88,7 @@ export class ExtractedNode {
   constructor(
     address: Array<number>,
     path: NodePath<ValidElementType>,
-    parent: TagNode
+    parent: TagNode,
   ) {
     this.path = path;
     this.address = address;
@@ -110,7 +109,10 @@ export class ExtractedNode {
     }
     this.bindInstructions.push({ eventName, expression });
   }
-  addWatch(expression: Expression, callback: string) {
+  addWatch(
+    expression: Expression | SPECIAL_SYMBOLS.alwaysUpdate,
+    callback: string | Expression,
+  ) {
     this.watches.push({
       expression,
       callback,
@@ -131,7 +133,7 @@ export class ExtractedNode {
   watchText(expression: Expression) {
     this.addWatch(
       expression,
-      `${WATCH_CALLBACK_PARAMS.element}.textContent = ${WATCH_CALLBACK_PARAMS.newValue}`
+      `${WATCH_CALLBACK_PARAMS.element}.textContent = ${WATCH_CALLBACK_PARAMS.newValue}`,
     );
   }
   setProps(expression: Expression) {
@@ -150,12 +152,12 @@ export class ExtractedNode {
   setVisibilityToggle(
     expression: Expression,
     reverse: boolean,
-    detach: boolean
+    detach: boolean,
   ) {
     if (this.#visibilityToggle) {
       error(
         this.path,
-        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED
+        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED,
       );
     }
     this.#visibilityToggle = { expression, reverse, detach };
@@ -251,7 +253,7 @@ export class TagNode extends ExtractedNode {
     component: any, // TODO: fix type circular import.
     tagName: string,
     isNestedComponent: boolean,
-    isRepeatedComponent: boolean
+    isRepeatedComponent: boolean,
   ) {
     super(address, path, parent);
     this.path = path;
@@ -290,7 +292,7 @@ export class StubNode extends ExtractedNode {
     path: NodePath<JSXElement>,
     address: Array<number>,
     parent: TagNode,
-    name: string
+    name: string,
   ) {
     super(address, path, parent);
     this.setStub(name);
@@ -306,7 +308,7 @@ export class DynamicTextNode extends ExtractedNode {
     path: NodePath<JSXExpressionContainer>,
     address: Array<number>,
     parent: TagNode,
-    expression: Expression
+    expression: Expression,
   ) {
     super(address, path, parent);
     this.watchText(expression);
@@ -321,7 +323,7 @@ export class PlainTextNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXText>,
     address: Array<number>,
-    parent: TagNode
+    parent: TagNode,
   ) {
     super(address, path, parent);
   }
