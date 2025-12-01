@@ -3,17 +3,17 @@ export enum WATCH_CALLBACK_PARAMS {
   oldValue = "o",
   element = "e",
   props = "p",
-  component = "c",
+  component = "c"
 }
 
 export enum COMPONENT_BUILD_PARAMS {
   component = "component",
-  rootElement = "root",
+  rootElement = "root"
 }
 
 export enum COMPONENT_METHODS {
   render = "render",
-  getStub = "_gs",
+  getStub = "_gs"
 }
 
 export enum IMPORTABLES {
@@ -24,20 +24,20 @@ export enum IMPORTABLES {
   saveRef = "saveRef",
   stashMisc = "stashMisc",
   onEvent = "onEvent",
-  getSequentialRepeater = "getSequentialRepeater",
+  getSequentialRepeater = "getSequentialRepeater"
 }
 
 export enum EXTRA_PARAMETERS {
   controller = "ctrl",
   component = "self",
-  event = "e",
+  event = "e"
 }
 
 export enum SPECIAL_SYMBOLS {
   objectStash = "_s",
   alwaysUpdate = "__",
   patch = "patch",
-  ctrl = "ctrl",
+  ctrl = "ctrl"
 }
 
 export const domEventNames = [
@@ -128,5 +128,5 @@ export const domEventNames = [
   "onTransitionStart",
   "onVolumeChange",
   "onWaiting",
-  "onWheel",
+  "onWheel"
 ];

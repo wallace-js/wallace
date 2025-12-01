@@ -36,9 +36,7 @@ describe("Custom directive", () => {
     const A = () => <div test-directive={pelican}></div>;
     const component = testMount(A);
     expect(component.el.getAttribute("value-value")).toBe("");
-    expect(component.el.getAttribute("value-expression")).toBe(
-      "[object Object]"
-    );
+    expect(component.el.getAttribute("value-expression")).toBe("[object Object]");
   });
 
   test("renders fully", () => {

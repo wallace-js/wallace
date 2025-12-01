@@ -67,7 +67,7 @@ export function watch(target, callback, grace) {
         callback();
       }
       return true;
-    },
+    }
   };
   return new Proxy(target, handler);
 }

@@ -6,7 +6,7 @@ import {
   TagNode,
   DynamicTextNode,
   PlainTextNode,
-  VisibilityToggle,
+  VisibilityToggle
 } from "./node";
 
 export {
@@ -20,5 +20,5 @@ export {
   PlainTextNode,
   Module,
   Qualifier,
-  WalkTracker,
+  WalkTracker
 };

@@ -2,12 +2,8 @@ import { testMount } from "../utils";
 
 describe("Repeat", () => {
   test("renders elements in correct order", () => {
-    const items = [
-      { name: "Octopus" },
-      { name: "Seahorse" },
-      { name: "Squid" },
-    ];
-    const Child = (animal) => <div>{animal.name}</div>;
+    const items = [{ name: "Octopus" }, { name: "Seahorse" }, { name: "Squid" }];
+    const Child = animal => <div>{animal.name}</div>;
     const Parent = () => (
       <div>
         <Child.repeat props={items} />
@@ -54,9 +50,7 @@ describe("Repeat compiles with error when", () => {
         <Child.repeat props={items} />
       );
     `;
-    expect(code).toCompileWithError(
-      "Repeated component not allowed on root element."
-    );
+    expect(code).toCompileWithError("Repeated component not allowed on root element.");
   });
 
   test("element has siblings", () => {
@@ -84,8 +78,6 @@ describe("Repeat compiles with error when", () => {
         </div>
       );
     `;
-    expect(code).toCompileWithError(
-      "Nested component may not have child nodes."
-    );
+    expect(code).toCompileWithError("Nested component may not have child nodes.");
   });
 });

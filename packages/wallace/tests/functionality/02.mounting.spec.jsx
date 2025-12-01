@@ -48,7 +48,7 @@ describe("Mounting with props", () => {
         <div id="b"></div>
         <div>Hello <span>crocodile</span></div>
       </div>
-    `),
+    `)
     );
   });
 });

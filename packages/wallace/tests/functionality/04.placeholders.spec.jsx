@@ -90,7 +90,7 @@ test("Placeholders in nested attribute works", () => {
   // were being linked to the root node.
   const css = {
     danger: "danger",
-    bold: "bold",
+    bold: "bold"
   };
   const MyComponent = () => (
     <div class={css.danger}>

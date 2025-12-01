@@ -4,19 +4,11 @@ Test that components can be defined in all legal ways.
 import { transform, testMount } from "../utils";
 
 describe("Defining functions in equivalent ways compiles to same output", () => {
-  const expectedOutput = transform(
-    `const Foo = () => <div>Hello {name}</div>`
-  ).code;
+  const expectedOutput = transform(`const Foo = () => <div>Hello {name}</div>`).code;
   test.each([
     ["function without props", `const Foo = () => <div>Hello {name}</div>`],
-    [
-      "function with normal props",
-      `const Foo = (foo) => <div>Hello {name}</div>`,
-    ],
-    [
-      "function with destructured props",
-      `const Foo = ({foo}) => <div>Hello {name}</div>`,
-    ],
+    ["function with normal props", `const Foo = (foo) => <div>Hello {name}</div>`],
+    ["function with destructured props", `const Foo = ({foo}) => <div>Hello {name}</div>`]
   ])("%s", (condition, code) => {
     expect(transform(code).code).toBe(expectedOutput);
   });
@@ -32,7 +24,7 @@ describe("Components can be defined", () => {
 
   test("in object property", () => {
     const foo = {
-      bar: ({ name }) => <span>{name}</span>,
+      bar: ({ name }) => <span>{name}</span>
     };
     const component = testMount(foo.bar, { name: "porcupine" });
     expect(component).toRender(`<span>porcupine</span>`);
@@ -42,7 +34,7 @@ describe("Components can be defined", () => {
     const foo = {
       bar({ name }) {
         return <span>{name}</span>;
-      },
+      }
     };
     const component = testMount(foo.bar, { name: "porcupine" });
     expect(component).toRender(`<span>porcupine</span>`);
@@ -59,9 +51,7 @@ test("JSX not allowed in expressions", () => {
       </center>
     );
   `;
-  expect(code).toCompileWithError(
-    "JSX elements are not allowed in expressions."
-  );
+  expect(code).toCompileWithError("JSX elements are not allowed in expressions.");
 });
 
 test("JSX ignores comments and empty expressiosn", () => {

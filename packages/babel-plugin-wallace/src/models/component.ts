@@ -5,18 +5,12 @@ import type {
   JSXElement,
   JSXExpressionContainer,
   JSXText,
-  Expression,
+  Expression
 } from "@babel/types";
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
-import {
-  ExtractedNode,
-  DynamicTextNode,
-  PlainTextNode,
-  StubNode,
-  TagNode,
-} from "./node";
+import { ExtractedNode, DynamicTextNode, PlainTextNode, StubNode, TagNode } from "./node";
 import { Module } from "./module";
 
 export interface WalkTracker {
@@ -119,7 +113,7 @@ export class Component {
     this.#addNode(extractedNode, path, tracker);
     path.traverse(jsxVisitors, {
       component: this,
-      tracker: { childIndex: 0, parent: extractedNode },
+      tracker: { childIndex: 0, parent: extractedNode }
     });
     this.#exitLevel();
   }

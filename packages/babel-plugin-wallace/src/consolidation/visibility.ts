@@ -9,11 +9,11 @@ import { ComponentWatch } from "./types";
 function setSkipCounts(
   watch: ComponentWatch,
   index: number,
-  watches: Array<ComponentWatch>,
+  watches: Array<ComponentWatch>
 ) {
   watch.shieldInfo.skipCount = watches
     .slice(index)
-    .filter((w) => arrayStartsWith(watch.address, w.address)).length;
+    .filter(w => arrayStartsWith(watch.address, w.address)).length;
 }
 
 export function processeVisibilityToggles(watches: Array<ComponentWatch>) {

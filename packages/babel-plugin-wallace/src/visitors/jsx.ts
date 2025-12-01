@@ -31,12 +31,7 @@ export const jsxVisitors = {
         if (!isCapitalized(componentCls)) {
           error(path, ERROR_MESSAGES.NESTED_COMPONENT_MUST_BE_CAPTIALIZED);
         }
-        component.processNestedElement(
-          path,
-          tracker,
-          componentCls,
-          name === "repeat"
-        );
+        component.processNestedElement(path, tracker, componentCls, name === "repeat");
         path.traverse(errorIfJSXelementsFoundUnderNested);
       } else if (namespace === "stub") {
         // TODO: ensure there is nothing inside and no other attributes.
@@ -63,23 +58,21 @@ export const jsxVisitors = {
     // must be text nodes.
     component.processJSXExpressionInText(path, tracker);
     path.remove();
-  },
+  }
 };
 
 function getVisitorThatErrorsIfJSXElementFound(errorMessage: string) {
   return {
     JSXElement(path: NodePath<JSXElement>) {
       error(path, errorMessage);
-    },
+    }
   };
 }
 
-const errorIfJSXelementsFoundInExpression =
-  getVisitorThatErrorsIfJSXElementFound(
-    ERROR_MESSAGES.JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS
-  );
+const errorIfJSXelementsFoundInExpression = getVisitorThatErrorsIfJSXElementFound(
+  ERROR_MESSAGES.JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS
+);
 
-const errorIfJSXelementsFoundUnderNested =
-  getVisitorThatErrorsIfJSXElementFound(
-    ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN
-  );
+const errorIfJSXelementsFoundUnderNested = getVisitorThatErrorsIfJSXElementFound(
+  ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN
+);

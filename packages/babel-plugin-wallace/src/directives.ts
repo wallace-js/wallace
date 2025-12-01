@@ -207,5 +207,5 @@ export const builtinDirectives = [
   RefDirective,
   ShowDirective,
   StyleDirective,
-  ToggleDirective,
+  ToggleDirective
 ];

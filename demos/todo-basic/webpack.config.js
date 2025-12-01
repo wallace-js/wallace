@@ -5,14 +5,14 @@ const config = {
   devServer: {
     static: "./",
     hot: true,
-    historyApiFallback: true,
+    historyApiFallback: true
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "index.js",
+    filename: "index.js"
   },
   resolve: {
-    extensions: [".js", ".jsx", ".tsx", ".ts"],
+    extensions: [".js", ".jsx", ".tsx", ".ts"]
   },
   module: {
     rules: [
@@ -28,19 +28,19 @@ const config = {
         exclude: /node_modules\/(?!(wallace)\/).*/,
         use: [
           {
-            loader: "babel-loader",
-          },
-        ],
-      },
-    ],
-  },
+            loader: "babel-loader"
+          }
+        ]
+      }
+    ]
+  }
 };
 
 module.exports = function () {
   config.mode = process.env.NODE_ENV || "development";
   if (config.mode === "production") {
     config.optimization = {
-      minimize: true,
+      minimize: true
     };
   } else {
     config.devtool = "eval-source-map";

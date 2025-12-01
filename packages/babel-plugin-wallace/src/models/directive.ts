@@ -24,33 +24,23 @@ export class Directive {
   static allowOnNormalElement = true;
   static allowedTypes: { [key: string]: NodeValue["type"] };
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {}
-  validate(
-    node: TagNode,
-    value: NodeValue,
-    qualifier: Qualifier,
-    base: string
-  ) {
+  validate(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     const constructor = this.constructor as typeof Directive;
     this.validateType(node, value, constructor);
     this.validateNestedAndRepeat(node, constructor);
     this.validateQualifier(node, qualifier, constructor);
   }
   validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
-    const { attributeName, allowExpression, allowString, allowNull } =
-      constructor;
+    const { attributeName, allowExpression, allowString, allowNull } = constructor;
     const allowedTypes = [
       allowExpression && "expression",
       allowString && "string",
-      allowNull && "null",
+      allowNull && "null"
     ].filter(Boolean);
     if (!allowedTypes.includes(value.type)) {
       error(
         node.path,
-        ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(
-          attributeName,
-          allowedTypes,
-          value.type
-        )
+        ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(attributeName, allowedTypes, value.type)
       );
     }
   }
@@ -69,11 +59,7 @@ export class Directive {
       );
     }
   }
-  validateQualifier(
-    node: TagNode,
-    qualifier: Qualifier,
-    constructor: typeof Directive
-  ) {
+  validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
     let { attributeName, allowQualifier, requireQualifier } = constructor;
     if (requireQualifier) {
       allowQualifier = true;
@@ -85,10 +71,7 @@ export class Directive {
       );
     }
     if (!allowQualifier && qualifier) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName)
-      );
+      error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
     }
   }
 }

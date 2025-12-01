@@ -1,10 +1,5 @@
 import type { NodePath } from "@babel/core";
-import type {
-  Function,
-  ObjectMethod,
-  JSXElement,
-  ImportSpecifier,
-} from "@babel/types";
+import type { Function, ObjectMethod, JSXElement, ImportSpecifier } from "@babel/types";
 import { error, ERROR_MESSAGES } from "../errors";
 import { Module } from "../models";
 import { identifyContextToBeHandled } from "../contexts/handlers";
@@ -32,5 +27,5 @@ export const programVisitors = {
   // This captures JSX not caught by valid contexts, and therefore not allowed.
   JSXElement(path: NodePath<JSXElement>) {
     error(path, ERROR_MESSAGES.FOUND_JSX_IN_INVALID_LOCATION);
-  },
+  }
 };

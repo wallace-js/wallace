@@ -25,8 +25,8 @@ function tsCompile(source, options) {
     lib: [
       "lib.es2020.d.ts",
       // Must point to packages, not node_modules!
-      "../../../packages/wallace/lib/types.d.ts",
-    ],
+      "../../../packages/wallace/lib/types.d.ts"
+    ]
   };
 
   const host = ts.createCompilerHost(finalOptions, true);
@@ -35,10 +35,8 @@ function tsCompile(source, options) {
   const originalFileExists = host.fileExists;
   const originalGetSourceFile = host.getSourceFile;
 
-  host.readFile = (f) =>
-    f === fileName ? source : originalReadFile.call(host, f);
-  host.fileExists = (f) =>
-    f === fileName ? true : originalFileExists.call(host, f);
+  host.readFile = f => (f === fileName ? source : originalReadFile.call(host, f));
+  host.fileExists = f => (f === fileName ? true : originalFileExists.call(host, f));
 
   host.getSourceFile = (f, langVersion, ...rest) => {
     if (f === fileName) {
@@ -50,7 +48,7 @@ function tsCompile(source, options) {
   const program = ts.createProgram([fileName], finalOptions, host);
   const diagnostics = ts.getPreEmitDiagnostics(program);
 
-  return diagnostics.map((d) => {
+  return diagnostics.map(d => {
     const message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
     if (d.file && typeof d.start === "number") {
       const { line, character } = d.file.getLineAndCharacterOfPosition(d.start);
@@ -125,7 +123,7 @@ expect.extend({
     const pass = received === expected;
     const failMessage = () => {
       const diffString = diff(expected, received, {
-        expand: this.expand,
+        expand: this.expand
       });
       return (
         this.utils.matcherHint(".toBe") +
@@ -148,9 +146,7 @@ expect.extend({
       transform(code);
     } catch (e) {
       console.debug(e.message);
-      errorMessage = e.message
-        .split("\n", 1)[0]
-        .substring("unknown file: ".length);
+      errorMessage = e.message.split("\n", 1)[0].substring("unknown file: ".length);
     }
     const pass = !errorMessage;
     const failMessage = () => {
@@ -180,7 +176,7 @@ expect.extend({
     const pass = received === errorMessage;
     const failMessage = () => {
       const diffString = diff(errorMessage, received, {
-        expand: this.expand,
+        expand: this.expand
       });
       return (
         this.utils.matcherHint(".toBe") +
@@ -196,15 +192,14 @@ expect.extend({
     if (errors.length === 0) {
       return {
         pass: false,
-        message: () =>
-          `Expected error "${errorMessage}" but no errors were thrown`,
+        message: () => `Expected error "${errorMessage}" but no errors were thrown`
       };
     }
     console.log(expected);
 
     return {
       pass: false,
-      message: () => `Expected error "${expected}" but no errors were thrown`,
+      message: () => `Expected error "${expected}" but no errors were thrown`
     };
   },
   toHaveNoTypeErrors(src) {
@@ -215,11 +210,10 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `Expected no errors but got ${errors.length}:\n\n` +
-          errors.join("\n"),
+          `Expected no errors but got ${errors.length}:\n\n` + errors.join("\n")
       };
     }
-  },
+  }
 });
 
 module.exports = {
@@ -227,5 +221,5 @@ module.exports = {
   splitOnce,
   testMount,
   tidyHTML,
-  transform,
+  transform
 };

@@ -60,13 +60,7 @@ export function extendComponent(base, componentDef) {
   return _createConstructor(base);
 }
 
-export function defineComponent(
-  html,
-  watches,
-  queries,
-  buildFunction,
-  inheritFrom
-) {
+export function defineComponent(html, watches, queries, buildFunction, inheritFrom) {
   const ComponentDefinition = _createConstructor(inheritFrom || Component);
   const prototype = ComponentDefinition.prototype;
   //Ensure these do not clash with fields on the component itself.
@@ -91,8 +85,8 @@ function _createConstructor(base) {
     constructor: {
       value: ComponentDefinition,
       writable: true,
-      configurable: true,
-    },
+      configurable: true
+    }
   });
   return ComponentDefinition;
 }

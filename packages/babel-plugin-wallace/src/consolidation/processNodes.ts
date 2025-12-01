@@ -7,7 +7,7 @@ import {
   identifier,
   memberExpression,
   numericLiteral,
-  stringLiteral,
+  stringLiteral
 } from "@babel/types";
 import * as t from "@babel/types";
 import { codeToNode } from "../utils";
@@ -19,7 +19,7 @@ import {
   EXTRA_PARAMETERS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
-  WATCH_CALLBACK_PARAMS,
+  WATCH_CALLBACK_PARAMS
 } from "../constants";
 import { ComponentWatch } from "./types";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
@@ -27,7 +27,7 @@ import {
   getSiblings,
   getChildren,
   renameVariablesInExpression,
-  buildWatchCallbackParams,
+  buildWatchCallbackParams
 } from "./utils";
 
 function addBindInstruction(node: ExtractedNode) {
@@ -56,10 +56,8 @@ function addBindInstruction(node: ExtractedNode) {
 }
 
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
-  node.toggleTargets.forEach((target) => {
-    const match = node.toggleTriggers.find(
-      (trigger) => trigger.name == target.name
-    );
+  node.toggleTargets.forEach(target => {
+    const match = node.toggleTriggers.find(trigger => trigger.name == target.name);
     if (!match) {
       error(node.path, ERROR_MESSAGES.TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS);
     }
@@ -71,7 +69,7 @@ function extractCssClasses(value: string | t.Expression) {
     return value
       .trim()
       .split(" ")
-      .map((v) => t.stringLiteral(v));
+      .map(v => t.stringLiteral(v));
   } else {
     return [t.spreadElement(value)];
   }
@@ -84,15 +82,10 @@ function extractCssClasses(value: string | t.Expression) {
 function addToggleCallbackStatement(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
-  addCallbackStatement: (
-    lookupKey: string | number,
-    statements: Statement[]
-  ) => void
+  addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void
 ) {
-  node.toggleTriggers.forEach((trigger) => {
-    const target = node.toggleTargets.find(
-      (target) => target.name == trigger.name
-    );
+  node.toggleTriggers.forEach(trigger => {
+    const target = node.toggleTargets.find(target => target.name == trigger.name);
     const classesToToggle = target
       ? extractCssClasses(target.value)
       : [t.stringLiteral(trigger.name)];
@@ -115,7 +108,7 @@ function addToggleCallbackStatement(
         t.identifier(WATCH_CALLBACK_PARAMS.newValue),
         blockStatement([expressionStatement(getCallback("add"))]),
         blockStatement([expressionStatement(getCallback("remove"))])
-      ),
+      )
     ]);
   });
 }
@@ -125,7 +118,7 @@ export function processNodes(
   component: Component,
   componentDefinition: ComponentDefinitionData
 ) {
-  component.extractedNodes.forEach((node) => {
+  component.extractedNodes.forEach(node => {
     if (node.isRepeatedComponent) {
       // The watch should already have been added to the parent node, which is already
       // processed. All we do here is run some extra checks.
@@ -164,10 +157,7 @@ export function processNodes(
 
     // TODO: should ref really save the element?
     const shouldSaveElement =
-      createWatch ||
-      ref ||
-      node.eventListeners.length > 0 ||
-      node.hasConditionalChildren;
+      createWatch || ref || node.eventListeners.length > 0 || node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
 
@@ -176,10 +166,7 @@ export function processNodes(
         ? t.identifier(node.tagName)
         : stubComponentName;
       node.elementKey = nestedComponentCls
-        ? componentDefinition.saveNestedAsDynamicElement(
-            node.address,
-            nestedComponentCls
-          )
+        ? componentDefinition.saveNestedAsDynamicElement(node.address, nestedComponentCls)
         : componentDefinition.saveDynamicElement(node.address);
 
       if (node.bindInstructions.length) {
@@ -197,10 +184,7 @@ export function processNodes(
 
       if (createWatch) {
         const _callbacks: { [key: string | number]: Array<Statement> } = {};
-        const addCallbackStatement = (
-          key: string | number,
-          statements: Statement[]
-        ) => {
+        const addCallbackStatement = (key: string | number, statements: Statement[]) => {
           if (!_callbacks.hasOwnProperty(key)) {
             _callbacks[key] = [];
           }
@@ -210,11 +194,11 @@ export function processNodes(
         const componentWatch: ComponentWatch = {
           elementKey: node.elementKey,
           callbacks: {},
-          address: node.address,
+          address: node.address
         };
         componentDefinition.watches.push(componentWatch);
 
-        node.watches.forEach((watch) => {
+        node.watches.forEach(watch => {
           const lookupKey = componentDefinition.addLookup(watch.expression);
           addCallbackStatement(lookupKey, codeToNode(watch.callback));
         });
@@ -225,9 +209,7 @@ export function processNodes(
             component.componentIdentifier,
             identifier(SPECIAL_SYMBOLS.ctrl)
           );
-          const args = props
-            ? [props, ctrlArg]
-            : [identifier("undefined"), ctrlArg];
+          const args = props ? [props, ctrlArg] : [identifier("undefined"), ctrlArg];
           addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
             expressionStatement(
               callExpression(
@@ -237,16 +219,12 @@ export function processNodes(
                 ),
                 args
               )
-            ),
+            )
           ]);
         }
 
         if (node.toggleTriggers.length) {
-          addToggleCallbackStatement(
-            componentDefinition,
-            node,
-            addCallbackStatement
-          );
+          addToggleCallbackStatement(componentDefinition, node, addCallbackStatement);
         }
 
         // Need to be careful with WATCH_CALLBACK_PARAMS as `e` is actually a reference
@@ -264,10 +242,10 @@ export function processNodes(
                   memberExpression(
                     component.componentIdentifier,
                     identifier(SPECIAL_SYMBOLS.ctrl)
-                  ),
+                  )
                 ]
               )
-            ),
+            )
           ]);
         }
 
@@ -278,7 +256,7 @@ export function processNodes(
           componentWatch.shieldInfo = {
             skipCount: 0, // gets set later once we've processed all the nodes.
             key: shieldLookupKey,
-            reverse: visibilityToggle.reverse,
+            reverse: visibilityToggle.reverse
           };
           if (visibilityToggle.detach) {
             if (node.parent.detacherStashKey === undefined) {
@@ -287,7 +265,7 @@ export function processNodes(
             componentWatch.shieldInfo.detacher = {
               index: node.address[node.address.length - 1],
               stashKey: node.parent.detacherStashKey,
-              parentKey: node.parent.elementKey,
+              parentKey: node.parent.elementKey
             };
           }
         }
@@ -299,7 +277,7 @@ export function processNodes(
           const poolInstance =
             repeatInstruction.poolExpression ||
             callExpression(identifier(IMPORTABLES.getSequentialRepeater), [
-              identifier(repeatInstruction.componentCls),
+              identifier(repeatInstruction.componentCls)
             ]);
 
           // TODO: couple the stash index with the call to save - if possible?
@@ -330,10 +308,10 @@ export function processNodes(
                   memberExpression(
                     component.componentIdentifier,
                     identifier(SPECIAL_SYMBOLS.ctrl)
-                  ),
+                  )
                 ]
               )
-            ),
+            )
           ]);
         }
 
@@ -343,7 +321,7 @@ export function processNodes(
               ? [
                   identifier(WATCH_CALLBACK_PARAMS.element),
                   component.propsIdentifier,
-                  component.componentIdentifier,
+                  component.componentIdentifier
                 ]
               : buildWatchCallbackParams();
           componentWatch.callbacks[key] = functionExpression(
@@ -356,17 +334,13 @@ export function processNodes(
 
       if (ref) {
         if (componentDefinition.collectedRefs.includes(ref)) {
-          error(
-            node.path,
-            ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT
-          );
+          error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
         }
         componentDefinition.collectedRefs.push(ref);
-        componentDefinition.wrapDynamicElementCall(
-          node.elementKey,
-          IMPORTABLES.saveRef,
-          [identifier(COMPONENT_BUILD_PARAMS.component), stringLiteral(ref)]
-        );
+        componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.saveRef, [
+          identifier(COMPONENT_BUILD_PARAMS.component),
+          stringLiteral(ref)
+        ]);
       }
 
       // TODO: improve this, as we are basically renaming things specifically for the
@@ -377,27 +351,22 @@ export function processNodes(
         [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
         [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
           `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
-        [component.propsIdentifier.name]:
-          `${COMPONENT_BUILD_PARAMS.component}.props`,
+        [component.propsIdentifier.name]: `${COMPONENT_BUILD_PARAMS.component}.props`
       };
-      node.eventListeners.forEach((listener) => {
+      node.eventListeners.forEach(listener => {
         const updatedExpression = renameVariablesInExpression(
           listener.callback,
           eventVariableMapping
         );
 
-        componentDefinition.wrapDynamicElementCall(
-          node.elementKey,
-          IMPORTABLES.onEvent,
-          [
-            stringLiteral(listener.eventName),
-            functionExpression(
-              null,
-              [identifier(EXTRA_PARAMETERS.event)],
-              blockStatement([expressionStatement(updatedExpression)])
-            ),
-          ]
-        );
+        componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.onEvent, [
+          stringLiteral(listener.eventName),
+          functionExpression(
+            null,
+            [identifier(EXTRA_PARAMETERS.event)],
+            blockStatement([expressionStatement(updatedExpression)])
+          )
+        ]);
       });
     }
   });

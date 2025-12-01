@@ -10,7 +10,7 @@ import { getSiblings } from "./utils";
  */
 function hoistTextNodes(component: Component) {
   const nodesToDelete = [];
-  component.extractedNodes.forEach((node) => {
+  component.extractedNodes.forEach(node => {
     if (node instanceof DynamicTextNode) {
       if (getSiblings(node, component.extractedNodes).length === 0) {
         const parent = node.parent;
@@ -20,7 +20,7 @@ function hoistTextNodes(component: Component) {
       }
     }
   });
-  nodesToDelete.forEach((node) => {
+  nodesToDelete.forEach(node => {
     component.extractedNodes.splice(component.extractedNodes.indexOf(node), 1);
   });
 }
@@ -28,9 +28,7 @@ function hoistTextNodes(component: Component) {
 /**
  * Deals with visibility toggles, setting ref keys and such.
  */
-export function consolidateComponent(
-  component: Component,
-): ComponentDefinitionData {
+export function consolidateComponent(component: Component): ComponentDefinitionData {
   const componentDefinition = new ComponentDefinitionData(component);
   hoistTextNodes(component);
   processNodes(component, componentDefinition);

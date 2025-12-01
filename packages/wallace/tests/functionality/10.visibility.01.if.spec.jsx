@@ -46,7 +46,7 @@ describe("Conditional directive not allowed", () => {
 });
 
 describe("Conditional directive on element", () => {
-  test.each([true, false])("when initalValue = %s", (showElement) => {
+  test.each([true, false])("when initalValue = %s", showElement => {
     const Foo = () => (
       <div>
         <span if={showElement}>Hello</span>

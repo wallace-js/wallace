@@ -1,6 +1,6 @@
 # Wallace
 
-*The tiny framework that brings you FREEEDOM!!!*
+_The tiny framework that brings you FREEEDOM!!!_
 
 ![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
 ![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)
@@ -29,7 +29,7 @@ And DOM updates are pretty fast too:
 
 [img]
 
-But in truth you rarely need *fast*. You just need to avoid *slow* - which happens in more complex scenarios than benchmarks. And the only *real* protection against that is **freedom** (see below).
+But in truth you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
 
 ### 2. Productivity
 
@@ -43,9 +43,9 @@ Wallace has several features which boost productivity:
 
 But the killer feature is really the lack of features.
 
-Wallace only provides *components* - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks dump on you.
+Wallace only provides _components_ - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks dump on you.
 
-There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a *lot* of time.
+There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a _lot_ of time.
 
 ### 3. Freedom
 
@@ -64,7 +64,7 @@ You might never need that level freedom on a given project, but why take the ris
 
 ---
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say "*freedom*" in Scotland without conjuring this image:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say "_freedom_" in Scotland without conjuring this image:
 
 ![Mel Gibson in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 

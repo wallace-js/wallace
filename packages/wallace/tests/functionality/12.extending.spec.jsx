@@ -13,7 +13,7 @@ BaseComponent.methods({
   },
   getAge() {
     return 9;
-  },
+  }
 });
 
 test("Base can acccess its own method", () => {
@@ -41,7 +41,7 @@ describe("child component with same dom", () => {
     ChildComponent.methods({
       getName() {
         return "robert";
-      },
+      }
     });
     const component = testMount(ChildComponent);
     expect(component).toRender(`
@@ -78,7 +78,7 @@ describe("child component with new dom", () => {
     ChildComponent.methods({
       getName() {
         return "robert";
-      },
+      }
     });
     const component = testMount(ChildComponent);
     expect(component).toRender(`
@@ -98,7 +98,7 @@ describe("child component with new dom", () => {
     ChildComponent.methods({
       getWeapon() {
         return "axe";
-      },
+      }
     });
     const component = testMount(ChildComponent);
     expect(component).toRender(`

@@ -2,10 +2,7 @@ import { Uses } from "wallace";
 import { iTask } from "./types";
 import { TaskListController } from "./controllers";
 
-const Task: Uses<iTask, TaskListController> = (
-  { text, done, id },
-  { ctrl }
-) => (
+const Task: Uses<iTask, TaskListController> = ({ text, done, id }, { ctrl }) => (
   <div>
     <input
       type="checkbox"
@@ -51,5 +48,5 @@ TaskList.methods({
       this.ctrl.addTask(e.target.value);
       e.target.value = "";
     }
-  },
+  }
 });

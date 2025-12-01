@@ -64,10 +64,7 @@ function getAssignedName(path: NodePath<AnyFunction>): string {
 class AssignedJsxFunction extends AbstractContextHandler {
   constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
-    if (
-      functionReturnsOnlyJSX(path) &&
-      path.parentPath.isVariableDeclarator()
-    ) {
+    if (functionReturnsOnlyJSX(path) && path.parentPath.isVariableDeclarator()) {
       this.initialiseComponent();
     }
   }
@@ -80,10 +77,7 @@ class AssignedJsxFunction extends AbstractContextHandler {
 class JsxFunctionAssignedToMember extends AbstractContextHandler {
   constructor(path: NodePath<AnyFunction>, module: Module) {
     super(path, module);
-    if (
-      functionReturnsOnlyJSX(path) &&
-      path.parentPath.isAssignmentExpression()
-    ) {
+    if (functionReturnsOnlyJSX(path) && path.parentPath.isAssignmentExpression()) {
       this.initialiseComponent();
     }
   }
@@ -163,7 +157,7 @@ const contextClasses = [
   AssignedJsxFunction,
   JsxFunctionAssignedToMember,
   JsxFunctionInProperty,
-  JsxFunctionInObjectMethod,
+  JsxFunctionInObjectMethod
 ];
 
 export function identifyContextToBeHandled(
@@ -171,10 +165,10 @@ export function identifyContextToBeHandled(
   module: Module
 ): AbstractContextHandler | undefined {
   const contexts = [];
-  contextClasses.forEach((contextClass) => {
+  contextClasses.forEach(contextClass => {
     contexts.push(new contextClass(path, module));
   });
-  const matches = contexts.filter((context) => context.isMatch);
+  const matches = contexts.filter(context => context.isMatch);
   if (matches.length > 1) {
     throw new Error(
       "Function matches more than one context. This is an error with the plugin."

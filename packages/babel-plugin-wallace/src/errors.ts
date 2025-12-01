@@ -1,14 +1,11 @@
 import type { NodePath } from "@babel/core";
 import { EXTRA_PARAMETERS } from "./constants";
 
-const ALLOWED_XARGS: string[] = Object.values(EXTRA_PARAMETERS).map(
-  (n) => `"${n}"`
-);
+const ALLOWED_XARGS: string[] = Object.values(EXTRA_PARAMETERS).map(n => `"${n}"`);
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",
-  BIND_ONLY_ALLOWED_ON_INPUT:
-    "The `bind` directive may only be used on `input` tags.",
+  BIND_ONLY_ALLOWED_ON_INPUT: "The `bind` directive may only be used on `input` tags.",
   FOUND_JSX_IN_INVALID_LOCATION: "Found JSX in invalid location.",
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
@@ -28,15 +25,9 @@ export const ERROR_MESSAGES = {
     return `The "${directive}" directive may not have a qualifier.`;
   },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
-  INCORRECTLY_NESTED_COMPONENT:
-    "Nest components using <Name.nest /> or <Name.repeat />.",
-  ARROW_FUNCTION_NOT_ASSIGNED:
-    "Component function must be assigned to a variable.",
-  DIRECTIVE_INVALID_TYPE: (
-    directive: string,
-    allowed: string[],
-    actual: string
-  ) => {
+  INCORRECTLY_NESTED_COMPONENT: "Nest components using <Name.nest /> or <Name.repeat />.",
+  ARROW_FUNCTION_NOT_ASSIGNED: "Component function must be assigned to a variable.",
+  DIRECTIVE_INVALID_TYPE: (directive: string, allowed: string[], actual: string) => {
     return allowed.length
       ? `The "${directive}" directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
       : `The "${directive}" directive value must be of type ${allowed[0]}. Found: ${actual}.`;
@@ -44,50 +35,39 @@ export const ERROR_MESSAGES = {
 
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
-  JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS:
-    "JSX elements are not allowed in expressions.",
-  UNSUPPORTED_ATTRIBUTE_VALUE:
-    "Attribute value must be a string or expression.",
+  JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS: "JSX elements are not allowed in expressions.",
+  UNSUPPORTED_ATTRIBUTE_VALUE: "Attribute value must be a string or expression.",
   VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
     "Can only define one visibility toggle on element.",
   REF_ALREADY_DEFINED: "Ref already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
   PROPS_ALREADY_DEFINED: "Props already defined on element.",
-  NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT:
-    "Nested component not allowed on root element.",
+  NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT: "Nested component not allowed on root element.",
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
-  NO_ATTRIBUTES_ON_NESTED_CLASS:
-    "Attributes not allowed on nested class elements.",
-  REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
-    "Refs must be unique within each component.",
+  NO_ATTRIBUTES_ON_NESTED_CLASS: "Attributes not allowed on nested class elements.",
+  REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
   REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",
-  REPEAT_ONLY_ON_NESTED_CLASS:
-    "Repeat only allowed on nested component elements.",
+  REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
   REPEAT_NOT_ALLOWED_ON_ROOT: "Repeated component not allowed on root element.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
     "Repeat may only be used when the parent node has no other children.",
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",
-  TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS:
-    "Toggle targets must have toggle triggers.",
+  TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",
   ILLEGAL_NAMES_IN_PROPS: (names: string[]) =>
     `Illegal names in props: ${names
-      .map((name) => `"${name}"`)
+      .map(name => `"${name}"`)
       .join(", ")} - these are reserved for extra args.`,
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
   ILLEGAL_XARG: (name: string) =>
-    `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`,
+    `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`
 };
 
 export function error(path: NodePath<any>, errorMessage: string) {
   throw path.buildCodeFrameError(errorMessage);
 }
 
-export function ensure(
-  condition: boolean,
-  path: NodePath<any>,
-  errorMessage: string
-) {
+export function ensure(condition: boolean, path: NodePath<any>, errorMessage: string) {
   if (!condition) {
     error(path, errorMessage);
   }

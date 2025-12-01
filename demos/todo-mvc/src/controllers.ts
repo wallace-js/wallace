@@ -39,24 +39,24 @@ export class TaskListController extends AsyncLoadController {
     this.tasks = [];
   }
   async _load() {
-    await fetchTasks().then((tasks) => {
+    await fetchTasks().then(tasks => {
       this.tasks = tasks;
     });
   }
   completedTasksCount() {
-    return this.tasks.filter((t) => t.done).length;
+    return this.tasks.filter(t => t.done).length;
   }
   async addTask(text: string) {
     await this._save(async () => {
-      await addTask(text).then((newTask) => {
+      await addTask(text).then(newTask => {
         this.tasks.push(newTask);
       });
     });
   }
   async toggleTask({ id, done }) {
     await this._save(async () => {
-      await toggleTask({ id, done }).then((changedTask) => {
-        const localCopy = this.tasks.find((t) => t.id === changedTask.id);
+      await toggleTask({ id, done }).then(changedTask => {
+        const localCopy = this.tasks.find(t => t.id === changedTask.id);
         localCopy.done = changedTask.done;
       });
     });

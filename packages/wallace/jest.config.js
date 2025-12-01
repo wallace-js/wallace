@@ -9,8 +9,8 @@ module.exports = {
     "\\.[jt]sx?$": [
       "babel-jest",
       {
-        configFile: "./test.babel.config.cjs",
-      },
-    ],
-  },
+        configFile: "./test.babel.config.cjs"
+      }
+    ]
+  }
 };

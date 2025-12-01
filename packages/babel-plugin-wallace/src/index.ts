@@ -27,9 +27,9 @@ export default function wallacePlugin({ types: t }: Babel): PluginObj {
           const module = new Module(path);
           path.traverse(programVisitors, { module });
           module.addMissingImports();
-        },
-      },
-    },
+        }
+      }
+    }
   };
 }
 

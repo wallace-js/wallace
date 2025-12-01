@@ -46,7 +46,7 @@ test("Disallow passing a litteral object as props", () => {
 
 test("Can nest component with props variable", () => {
   const fox = { name: "Fox" };
-  const Animal = (animal) => <div>{animal.name}</div>;
+  const Animal = animal => <div>{animal.name}</div>;
   const AnimalList = () => (
     <div>
       <Animal.nest props={fox} />
@@ -81,7 +81,5 @@ test("Disallow nesting on root", () => {
       <Child.nest />
     );
   `;
-  expect(code).toCompileWithError(
-    "Nested component not allowed on root element."
-  );
+  expect(code).toCompileWithError("Nested component not allowed on root element.");
 });

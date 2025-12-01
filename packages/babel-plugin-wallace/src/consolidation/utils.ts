@@ -5,55 +5,45 @@ import {
   cloneNode,
   identifier,
   isIdentifier,
-  numericLiteral,
+  numericLiteral
 } from "@babel/types";
 import { ExtractedNode, Module } from "../models";
-import {
-  COMPONENT_BUILD_PARAMS,
-  IMPORTABLES,
-  WATCH_CALLBACK_PARAMS,
-} from "../constants";
+import { COMPONENT_BUILD_PARAMS, IMPORTABLES, WATCH_CALLBACK_PARAMS } from "../constants";
 import { NodeAddress } from "./types";
 
-export function getSiblings(
-  node: ExtractedNode,
-  allNodes: Array<ExtractedNode>,
-) {
-  return allNodes.filter((n) => n.parent === node.parent && n !== node);
+export function getSiblings(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
+  return allNodes.filter(n => n.parent === node.parent && n !== node);
 }
 
-export function getChildren(
-  node: ExtractedNode,
-  allNodes: Array<ExtractedNode>,
-) {
-  return allNodes.filter((n) => n.parent === node);
+export function getChildren(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
+  return allNodes.filter(n => n.parent === node);
 }
 
 export function buildAddressArray(address: NodeAddress): ArrayExpression {
-  return arrayExpression(address.map((i) => numericLiteral(i)));
+  return arrayExpression(address.map(i => numericLiteral(i)));
 }
 
 export function buildFindElementCall(
   module: Module,
-  address: NodeAddress,
+  address: NodeAddress
 ): CallExpression {
   module.requireImport(IMPORTABLES.findElement);
   return callExpression(identifier(IMPORTABLES.findElement), [
     identifier(COMPONENT_BUILD_PARAMS.rootElement),
-    buildAddressArray(address),
+    buildAddressArray(address)
   ]);
 }
 
 export function buildNestedClassCall(
   module: Module,
   address: NodeAddress,
-  componentCls: Expression,
+  componentCls: Expression
 ): CallExpression {
   module.requireImport(IMPORTABLES.nestComponent);
   return callExpression(identifier(IMPORTABLES.nestComponent), [
     identifier(COMPONENT_BUILD_PARAMS.rootElement),
     buildAddressArray(address),
-    componentCls,
+    componentCls
   ]);
 }
 
@@ -70,7 +60,7 @@ export function removeKeys(obj: Object, keys: Array<string>) {
  */
 export function renameVariablesInExpression(
   originalExpression: Expression,
-  variableMapping: { [key: string]: string },
+  variableMapping: { [key: string]: string }
 ): Expression {
   // Clone the original expression to avoid modifying it
   const clonedExpression = cloneNode(originalExpression);
@@ -115,6 +105,6 @@ export function buildWatchCallbackParams() {
     WATCH_CALLBACK_PARAMS.oldValue,
     WATCH_CALLBACK_PARAMS.element,
     WATCH_CALLBACK_PARAMS.props,
-    WATCH_CALLBACK_PARAMS.component,
-  ].map((letter) => identifier(letter));
+    WATCH_CALLBACK_PARAMS.component
+  ].map(letter => identifier(letter));
 }

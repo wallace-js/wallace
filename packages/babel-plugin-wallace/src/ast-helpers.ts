@@ -4,7 +4,7 @@ import type { Expression, JSXElement, JSXEmptyExpression } from "@babel/types";
 import { ERROR_MESSAGES, error } from "./errors";
 
 export function getJSXElementName(
-  path: NodePath<JSXElement>,
+  path: NodePath<JSXElement>
 ): string | { name: string; namespace: string } {
   const openingElementName = path.node.openingElement.name;
   if (t.isJSXIdentifier(openingElementName)) {
@@ -30,7 +30,7 @@ export function getJSXElementName(
  */
 export function getPlaceholderExpression(
   path: NodePath,
-  expression: Expression | JSXEmptyExpression,
+  expression: Expression | JSXEmptyExpression
 ): Expression | undefined {
   if (t.isJSXEmptyExpression(expression)) {
     // This is really to handle comments

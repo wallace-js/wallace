@@ -429,7 +429,7 @@ declare module "wallace" {
   interface ComponentFunction<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   > {
     (
       props: Props,
@@ -442,7 +442,7 @@ declare module "wallace" {
     nest?({
       props,
       show,
-      hide,
+      hide
     }: {
       props?: Props;
       show?: boolean;
@@ -451,7 +451,7 @@ declare module "wallace" {
     repeat?({
       props,
       show,
-      hide,
+      hide
     }: {
       props: Array<Props>;
       show?: boolean;
@@ -491,17 +491,13 @@ declare module "wallace" {
   export type Uses<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   > = ComponentFunction<Props, Controller, Methods>;
 
   /**
    * The type for a component instance.
    */
-  export type Component<
-    Props = any,
-    Controller = any,
-    Methods extends object = {},
-  > = {
+  export type Component<Props = any, Controller = any, Methods extends object = {}> = {
     update(): void;
     render(props: Props, ctrl?: Controller): void;
     el: HTMLElement;
@@ -521,7 +517,7 @@ declare module "wallace" {
   export function extendComponent<
     Props = any,
     Controller = any,
-    Methods extends object = {},
+    Methods extends object = {}
   >(
     base: Uses<Props, Controller, Methods>,
     componentFunc?: ComponentFunction<Props, Controller, Methods>
@@ -532,11 +528,7 @@ declare module "wallace" {
    *
    * Note that the original element is removed along with its attributes (class, id...).
    */
-  export function mount<
-    Props = any,
-    Controller = any,
-    Methods extends object = {},
-  >(
+  export function mount<Props = any, Controller = any, Methods extends object = {}>(
     element: string | HTMLElement,
     componentDefinition: Uses<Props, Controller, Methods>,
     props?: Props,
@@ -568,11 +560,7 @@ declare module "wallace" {
    * @param {*} callback - A callback function.
    * @returns a Proxy of the object.
    */
-  export function watch<T>(
-    target: T,
-    callback: CallableFunction,
-    grace?: number
-  ): T;
+  export function watch<T>(target: T, callback: CallableFunction, grace?: number): T;
 }
 
 type MustBeExpression = Exclude<any, string>;

@@ -2,9 +2,7 @@ import { testMount } from "../utils";
 
 describe("Event directive", () => {
   test("with string value creates normal event", () => {
-    const MyComponent = () => (
-      <div ref:target onClick="console.debug(999)"></div>
-    );
+    const MyComponent = () => <div ref:target onClick="console.debug(999)"></div>;
     const component = testMount(MyComponent);
     // In HTML is should be lower case.
     expect(component).toRender(`<div onclick="console.debug(999)"></div>`);

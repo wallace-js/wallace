@@ -18,7 +18,7 @@ const Task: Uses<iTask> = ({ text, done }) => (
 
 const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { e, self }) => (
   <div class="tasklist">
-    <span>Completed: {tasks.filter((t) => t.done).length}</span>
+    <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
       <Task.repeat props={tasks} />
     </div>
@@ -41,10 +41,10 @@ TaskList.methods({
       this.props.push({ text, done: false });
       target.value = "";
     }
-  },
+  }
 });
 
 mount("main", TaskList, [
   { text: "Complete Wallace tutorial", done: false },
-  { text: "Star Wallace on github", done: false },
+  { text: "Star Wallace on github", done: false }
 ]);
