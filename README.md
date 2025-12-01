@@ -83,15 +83,13 @@ Wallace is rather young, and hasn't been fully battle tested but:
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
 3. You can attract more users and contributors by giving it a star!
 
-## Learn
+## Tutorial
 
-Wallace is very simple, with full documentation in the tool tips, so you can probably:
+Code along on StackBlitz with [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx) or [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx), or create a local project with:
 
-1. Read this once.
-2. Pick one of the online [examples](#Examples) (hosted on [StackBlitz](https://stackblitz.com)).
-3. Play around with it.
-4. Download it as a working project.
-5. Build an awesome app.
+```
+npx create-wallace-app
+```
 
 ### Overview
 
@@ -102,7 +100,6 @@ import { mount } from "wallace";
 
 const Greeting = ({ name }) => <h3>{name} says hello</h3>;
 
-// replaces element with id "root"
 mount("root", Greeting, { name: "Wallace" });
 ```
 
