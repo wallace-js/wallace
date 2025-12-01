@@ -3,7 +3,7 @@
 *The tiny framework that brings you FREEEDOM!!!*
 
 ![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
-![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)[![Click Counter TypeScript](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
+![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg) [![Click Counter TypeScript](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
 
 ## About
 
@@ -41,11 +41,18 @@ Wallace has several features which boost productivity:
 4. Deep TypeScript support (if you want it).
 5. Full documentation in IDE tool tips.
 
-But the killer feature is really the lack of features.
+**The package import shows the full cheat sheet**
 
-Wallace only provides *components* - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks dump on you.
+![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
-There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a *lot* of time.
+But the biggest boost is probably the lack of productivity-sapping features: no hooks, portals, signals, providers, state handlers, context managers or similar garbage.
+
+Instead you do that kind of thing with clean, obvious code that interacts with components, which are the only objects Wallace supplies. So you end up with:
+
+- Less to learn.
+- Less to remember.
+- Less to consider when debugging.
+- Code that's easier to read, write, modify test and reuse.
 
 ### 3. Freedom
 
@@ -56,11 +63,11 @@ Wallace lets you:
 
 This helps you:
 
-- Achieve vanilla level performance.
-- Solve performance issues, cleanly.
-- Do gnarly things that would be painful or impossible with other frameworks (like deep partial updates, reparenting etc...)
+1. Achieve vanilla level performance.
+2. Solve performance issues, cleanly.
+3. Do gnarly things that would be painful or impossible with other frameworks (like deep partial updates, reparenting etc...)
 
-You might never need that level freedom on a given project, but why take the risk with a framework which takes it away from you?
+You might never need to do any of that on your project, true. But why risk using a framework which grants you none of those freedoms, when there's one which offers them all?
 
 ---
 
@@ -76,13 +83,128 @@ Wallace is rather young, and hasn't been fully battle tested but:
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
 3. You can attract more users and contributors by giving it a star!
 
-## Start
+## Learn
 
-Wallace is so simple you don't really need a tutorial.
+Wallace is very simple, with full documentation in the tool tips, so you can probably:
 
-#### 1. Load an example
+1. Read this once.
+2. Pick one of the online [examples](#Examples) (hosted on [StackBlitz](https://stackblitz.com)).
+3. Play around with it.
+4. Download it as a working project.
+5. Build an awesome app.
 
-All of these open in [StackBlitz](https://stackblitz.com) so you can play around, then download the working project.
+### Overview
+
+Wallace controls the DOM by building a tree of components, which you define as functions that return JSX:
+
+```tsx
+import { mount } from "wallace";
+
+const Greeting = ({name}) => <h3>{name} says hello</h3>;
+
+// replaces element with id "root"
+mount("root", Greeting, { name: "Wallace" });
+```
+
+You might think Wallace *calls* this component function at some point, but it doesn't. It only *reads* it during compilation, then *replaces* it with a constructor function. 
+
+This has two major consequences:
+
+#### Static JSX
+
+The JSX is never run, and must be static in shape, like an HTML string. But you can do everything you need with directives instead:
+
+```tsx
+const Greeting = ({ name }) => (
+  <h3 show={name.startsWith("W")}>
+    {name} says hello
+  </h3>
+);
+```
+
+You can get a list (once I've made apply)
+
+(img)
+
+
+
+- more compact code.
+- Preserve indentation.
+
+
+
+#### Components
+
+In React, the "components" are functions that get called by a special "root" object. In Wallace there is no root object, only component objects which update their own DOM through methods.
+
+ So `root` is actually an instance of `Greeting` and we can update it by calling its `render` method:
+
+```tsx
+root.render({name: "Gromit"});
+```
+
+To see why this is so useful, we need slightly a more involved example.
+
+### Todo list
+
+- Show repeat
+- Show TypeScript
+- Override method to make it reactive
+- Move it do controller
+- set props on update
+- deep updates
+
+```tsx
+
+```
+
+
+
+
+
+
+
+(change to `show`)
+
+```tsx
+import { mount } from "wallace";
+
+const Greeting = ({ name }) => (
+  <div>
+    <h3>{name} says hello</h3>
+    <div show={name === 'Wallace'}> and goodbye</div>
+  </div>
+);
+
+
+
+
+const GreetingList = (greetings) => (
+  <div>
+    <Greeting.repeat props={greetings} />
+  </div>
+);
+
+const root = main("root", GreetingList, [
+  { name: "Wallace" },
+  { name: "Gromit" }
+]);
+```
+
+
+
+- simple example
+- JSX
+- Compilation
+- Object
+- Methods
+- Controllers
+- Deep updates
+- Stubs
+
+## Examples
+
+These examples open in [StackBlitz](https://stackblitz.com) so you can play around, then download the working project.
 
 Quick playgrounds:
 
@@ -100,12 +222,6 @@ Alternatively create an empty JavaScript or TypeScript (recommended) project wit
 ```
 npx create-wallace-app
 ```
-
-#### 2. Follow the tool tips
-
-There are tool tips on most things, including the package import which has the full cheat sheet, which is really the best starting point:
-
-![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
 ## Contributions
 
