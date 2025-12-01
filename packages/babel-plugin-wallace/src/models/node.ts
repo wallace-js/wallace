@@ -85,11 +85,7 @@ export class ExtractedNode {
   #props: Expression | undefined;
   #forExpression: Expression | undefined;
   #forVariable: string | undefined;
-  constructor(
-    address: Array<number>,
-    path: NodePath<ValidElementType>,
-    parent: TagNode
-  ) {
+  constructor(address: Array<number>, path: NodePath<ValidElementType>, parent: TagNode) {
     this.path = path;
     this.address = address;
     this.parent = parent;
@@ -149,16 +145,9 @@ export class ExtractedNode {
   getProps(): Expression | undefined {
     return this.#props;
   }
-  setVisibilityToggle(
-    expression: Expression,
-    reverse: boolean,
-    detach: boolean
-  ) {
+  setVisibilityToggle(expression: Expression, reverse: boolean, detach: boolean) {
     if (this.#visibilityToggle) {
-      error(
-        this.path,
-        ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED
-      );
+      error(this.path, ERROR_MESSAGES.VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED);
     }
     this.#visibilityToggle = { expression, reverse, detach };
     if (detach) {
@@ -320,11 +309,7 @@ export class DynamicTextNode extends ExtractedNode {
 }
 
 export class PlainTextNode extends ExtractedNode {
-  constructor(
-    path: NodePath<JSXText>,
-    address: Array<number>,
-    parent: TagNode
-  ) {
+  constructor(path: NodePath<JSXText>, address: Array<number>, parent: TagNode) {
     super(address, path, parent);
   }
   getElement(): HTMLElement | Text {

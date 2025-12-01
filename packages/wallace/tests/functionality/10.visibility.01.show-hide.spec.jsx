@@ -1,7 +1,7 @@
 import { testMount } from "../utils";
 
 describe("Visibility controlled by `hide` directive", () => {
-  test.each([true, false])("when initalValue = %s", (initalValue) => {
+  test.each([true, false])("when initalValue = %s", initalValue => {
     let hideTarget = initalValue;
     const MyComponent = () => (
       <ul>
@@ -22,7 +22,7 @@ describe("Visibility controlled by `hide` directive", () => {
 });
 
 describe("Visibility controlled by `show` directive", () => {
-  test.each([true, false])("when initalValue = %s", (initalValue) => {
+  test.each([true, false])("when initalValue = %s", initalValue => {
     let showTarget = initalValue;
     const MyComponent = () => (
       <ul>
@@ -82,7 +82,7 @@ describe("Nested components", () => {
     let showWalrus = true;
     const walrus = { name: "Mr Walrus" };
     const fox = { name: "Ms Fox" };
-    const Animal = (animal) => <div>Hello {animal.name}</div>;
+    const Animal = animal => <div>Hello {animal.name}</div>;
     const AnimalList = () => (
       <div>
         <Animal.nest show={showWalrus} props={walrus} ref:target />
@@ -100,11 +100,11 @@ describe("Nested components", () => {
 
   test("do not update when hidden", () => {
     let showTarget = true;
-    const getCcount = (p) => {
+    const getCcount = p => {
       p.count += 1;
       return p.count;
     };
-    const UpdateCounter = (p) => <div ref:val>{getCcount(p)}</div>;
+    const UpdateCounter = p => <div ref:val>{getCcount(p)}</div>;
     const c1 = { count: 0 };
     const c2 = { count: 0 };
     const Counters = () => (
@@ -148,7 +148,7 @@ describe("Repeated components", () => {
     const walrus = { name: "Mr Walrus" };
     const fox = { name: "Ms Fox" };
     const getAnimals = () => [walrus, fox];
-    const Animal = (animal) => <div>Hello {animal.name}</div>;
+    const Animal = animal => <div>Hello {animal.name}</div>;
     const AnimalList = () => (
       <div show={showAnimals}>
         <div class="list">

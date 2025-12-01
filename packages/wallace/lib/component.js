@@ -133,10 +133,7 @@ proto.update = function () {
             Object.keys(detachedElements).filter(function (k) {
               return k < index && detachedElements[k];
             }).length;
-          parent.insertBefore(
-            detachedElement,
-            parent.childNodes[adjustedIndex]
-          );
+          parent.insertBefore(detachedElement, parent.childNodes[adjustedIndex]);
           detachedElements[index] = null;
         } else if (!shouldBeVisible && !detachedElement) {
           thisElement = this._e[watch.e];

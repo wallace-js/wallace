@@ -14,11 +14,7 @@ import {
 import { Component } from "../models";
 import { IMPORTABLES } from "../constants";
 import { ComponentWatch, NodeAddress } from "./types";
-import {
-  buildFindElementCall,
-  buildNestedClassCall,
-  removeKeys
-} from "./utils";
+import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils";
 
 /**
  * An object with all the consolidated data for writing.
@@ -56,7 +52,7 @@ export class ComponentDefinitionData {
     return this.#dynamicElementKey;
   }
   addLookup(expression: Expression) {
-    const hashExpression = (expr) => {
+    const hashExpression = expr => {
       const copy = JSON.parse(JSON.stringify(expr));
       removeKeys(copy, ["start", "end", "loc"]);
       return JSON.stringify(copy);
@@ -85,10 +81,10 @@ export class ComponentDefinitionData {
     functionName: IMPORTABLES,
     remainingArgs: Expression[]
   ) {
-    this.dynamicElements[key] = callExpression(
-      this.getFunctionIdentifier(functionName),
-      [this.dynamicElements[key], ...remainingArgs]
-    );
+    this.dynamicElements[key] = callExpression(this.getFunctionIdentifier(functionName), [
+      this.dynamicElements[key],
+      ...remainingArgs
+    ]);
   }
   getNextmiscStashKey() {
     this.#miscStashKey++;

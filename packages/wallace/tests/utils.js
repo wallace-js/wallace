@@ -35,10 +35,8 @@ function tsCompile(source, options) {
   const originalFileExists = host.fileExists;
   const originalGetSourceFile = host.getSourceFile;
 
-  host.readFile = (f) =>
-    f === fileName ? source : originalReadFile.call(host, f);
-  host.fileExists = (f) =>
-    f === fileName ? true : originalFileExists.call(host, f);
+  host.readFile = f => (f === fileName ? source : originalReadFile.call(host, f));
+  host.fileExists = f => (f === fileName ? true : originalFileExists.call(host, f));
 
   host.getSourceFile = (f, langVersion, ...rest) => {
     if (f === fileName) {
@@ -50,7 +48,7 @@ function tsCompile(source, options) {
   const program = ts.createProgram([fileName], finalOptions, host);
   const diagnostics = ts.getPreEmitDiagnostics(program);
 
-  return diagnostics.map((d) => {
+  return diagnostics.map(d => {
     const message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
     if (d.file && typeof d.start === "number") {
       const { line, character } = d.file.getLineAndCharacterOfPosition(d.start);
@@ -148,9 +146,7 @@ expect.extend({
       transform(code);
     } catch (e) {
       console.debug(e.message);
-      errorMessage = e.message
-        .split("\n", 1)[0]
-        .substring("unknown file: ".length);
+      errorMessage = e.message.split("\n", 1)[0].substring("unknown file: ".length);
     }
     const pass = !errorMessage;
     const failMessage = () => {
@@ -196,8 +192,7 @@ expect.extend({
     if (errors.length === 0) {
       return {
         pass: false,
-        message: () =>
-          `Expected error "${errorMessage}" but no errors were thrown`
+        message: () => `Expected error "${errorMessage}" but no errors were thrown`
       };
     }
     console.log(expected);

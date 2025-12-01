@@ -61,9 +61,7 @@ export function arrayStartsWith(origin: Array<any>, test: Array<any>): boolean {
 
 export function codeToNode(code: string | Expression): Statement[] {
   const statement =
-    typeof code === "string"
-      ? babel.template.ast(code)
-      : t.expressionStatement(code);
+    typeof code === "string" ? babel.template.ast(code) : t.expressionStatement(code);
   if (statement instanceof Array) {
     return statement;
   }

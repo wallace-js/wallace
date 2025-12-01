@@ -21,17 +21,12 @@ function splitLast(s: string, on: string): Array<string | null> {
  *   "a"   >  t.Identifier('a')
  *   "a.b" >  t.MemberExpression(...)
  */
-function expandNameToMemberExpression(
-  name: string
-): t.MemberExpression | t.Identifier {
+function expandNameToMemberExpression(name: string): t.MemberExpression | t.Identifier {
   const [end, rest] = splitLast(name, ".");
   if (rest === null) {
     return t.identifier(end);
   }
-  return t.memberExpression(
-    expandNameToMemberExpression(rest),
-    t.identifier(end)
-  );
+  return t.memberExpression(expandNameToMemberExpression(rest), t.identifier(end));
 }
 
 function checkForIllegalNamesInProps(
@@ -154,11 +149,7 @@ export function processFunctionParameters(
   const propVariableMap = extractFinalPropsName(path);
   checkForIllegalNamesInProps(path, propVariableMap);
   checkForIllegalNamesInExtraArgs(path);
-  renamePropKeysInsideFunction(
-    path,
-    propVariableMap,
-    component.propsIdentifier.name
-  );
+  renamePropKeysInsideFunction(path, propVariableMap, component.propsIdentifier.name);
   const extraArgMap = {};
   extraArgMap[EXTRA_PARAMETERS.component] = component.componentIdentifier.name;
   extraArgMap[EXTRA_PARAMETERS.controller] =

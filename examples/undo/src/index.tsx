@@ -20,10 +20,7 @@ const Task: Uses<iTask> = ({ text, done }) => (
   </div>
 );
 
-const TaskList: Uses<iTask[], null, iTaskListComponent> = (
-  tasks,
-  { e, self }
-) => (
+const TaskList: Uses<iTask[], null, iTaskListComponent> = (tasks, { e, self }) => (
   <div class="tasklist">
     <button disabled={self.previousStates.length <= 1} onClick={self.undo()}>
       Undo
@@ -32,7 +29,7 @@ const TaskList: Uses<iTask[], null, iTaskListComponent> = (
       Redo
     </button>
     <div style="margin-top: 10px">
-      <span>Completed: {tasks.filter((t) => t.done).length}</span>
+      <span>Completed: {tasks.filter(t => t.done).length}</span>
       <div style="margin-top: 10px">
         <Task.repeat props={tasks} />
       </div>

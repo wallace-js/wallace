@@ -14,16 +14,10 @@ test("Can make a component reactive", () => {
     this.update();
   };
   const component = testMount(MyComponent, { checked: false });
-  expect(component).toRender(
-    `<div><input type="checkbox"><span>nope</span></div>`
-  );
+  expect(component).toRender(`<div><input type="checkbox"><span>nope</span></div>`);
   const checkbox = component.ref.cbx;
   checkbox.click();
-  expect(component).toRender(
-    `<div><input type="checkbox"><span>yep</span></div>`
-  );
+  expect(component).toRender(`<div><input type="checkbox"><span>yep</span></div>`);
   checkbox.click();
-  expect(component).toRender(
-    `<div><input type="checkbox"><span>nope</span></div>`
-  );
+  expect(component).toRender(`<div><input type="checkbox"><span>nope</span></div>`);
 });

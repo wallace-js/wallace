@@ -18,7 +18,7 @@ const Task: Uses<iTask> = ({ text, done }) => (
 
 const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { e, self }) => (
   <div class="tasklist">
-    <span>Completed: {tasks.filter((t) => t.done).length}</span>
+    <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
       <Task.repeat props={tasks} />
     </div>

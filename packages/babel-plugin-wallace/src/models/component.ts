@@ -10,13 +10,7 @@ import type {
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
-import {
-  ExtractedNode,
-  DynamicTextNode,
-  PlainTextNode,
-  StubNode,
-  TagNode
-} from "./node";
+import { ExtractedNode, DynamicTextNode, PlainTextNode, StubNode, TagNode } from "./node";
 import { Module } from "./module";
 
 export interface WalkTracker {

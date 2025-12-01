@@ -1,12 +1,12 @@
 import { testMount } from "../utils";
 
 describe("Repeat reordering", () => {
-  const Container = (data) => (
+  const Container = data => (
     <div>
       <Child.repeat props={data} />
     </div>
   );
-  const Child = (data) => <div>{data}</div>;
+  const Child = data => <div>{data}</div>;
 
   test("on initial testMount", () => {
     const component = testMount(Container, [1, 5, 2, 6]);

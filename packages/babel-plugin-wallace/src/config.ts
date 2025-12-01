@@ -26,9 +26,7 @@ class WallaceConfig {
         );
       }
       if (this.directives.hasOwnProperty(attributeName)) {
-        console.debug(
-          `Overriding directive ${attributeName} with ${directiveClass}.`
-        );
+        console.debug(`Overriding directive ${attributeName} with ${directiveClass}.`);
       }
       this.directives[attributeName] = directiveClass;
     }

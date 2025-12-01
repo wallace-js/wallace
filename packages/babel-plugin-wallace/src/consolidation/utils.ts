@@ -8,29 +8,19 @@ import {
   numericLiteral
 } from "@babel/types";
 import { ExtractedNode, Module } from "../models";
-import {
-  COMPONENT_BUILD_PARAMS,
-  IMPORTABLES,
-  WATCH_CALLBACK_PARAMS
-} from "../constants";
+import { COMPONENT_BUILD_PARAMS, IMPORTABLES, WATCH_CALLBACK_PARAMS } from "../constants";
 import { NodeAddress } from "./types";
 
-export function getSiblings(
-  node: ExtractedNode,
-  allNodes: Array<ExtractedNode>
-) {
-  return allNodes.filter((n) => n.parent === node.parent && n !== node);
+export function getSiblings(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
+  return allNodes.filter(n => n.parent === node.parent && n !== node);
 }
 
-export function getChildren(
-  node: ExtractedNode,
-  allNodes: Array<ExtractedNode>
-) {
-  return allNodes.filter((n) => n.parent === node);
+export function getChildren(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
+  return allNodes.filter(n => n.parent === node);
 }
 
 export function buildAddressArray(address: NodeAddress): ArrayExpression {
-  return arrayExpression(address.map((i) => numericLiteral(i)));
+  return arrayExpression(address.map(i => numericLiteral(i)));
 }
 
 export function buildFindElementCall(
@@ -116,5 +106,5 @@ export function buildWatchCallbackParams() {
     WATCH_CALLBACK_PARAMS.element,
     WATCH_CALLBACK_PARAMS.props,
     WATCH_CALLBACK_PARAMS.component
-  ].map((letter) => identifier(letter));
+  ].map(letter => identifier(letter));
 }

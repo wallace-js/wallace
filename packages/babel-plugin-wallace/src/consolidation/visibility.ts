@@ -13,7 +13,7 @@ function setSkipCounts(
 ) {
   watch.shieldInfo.skipCount = watches
     .slice(index)
-    .filter((w) => arrayStartsWith(watch.address, w.address)).length;
+    .filter(w => arrayStartsWith(watch.address, w.address)).length;
 }
 
 export function processeVisibilityToggles(watches: Array<ComponentWatch>) {

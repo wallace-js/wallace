@@ -499,11 +499,7 @@ declare module "wallace" {
   /**
    * The type for a component instance.
    */
-  export type Component<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  > = {
+  export type Component<Props = any, Controller = any, Methods extends object = {}> = {
     update(): void;
     render(props: Props, ctrl?: Controller): void;
     el: HTMLElement;
@@ -534,11 +530,7 @@ declare module "wallace" {
    *
    * Note that the original element is removed along with its attributes (class, id...).
    */
-  export function mount<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  >(
+  export function mount<Props = any, Controller = any, Methods extends object = {}>(
     element: string | HTMLElement,
     componentDefinition: Uses<Props, Controller, Methods>,
     props?: Props,
@@ -570,11 +562,7 @@ declare module "wallace" {
    * @param {*} callback - A callback function.
    * @returns a Proxy of the object.
    */
-  export function watch<T>(
-    target: T,
-    callback: CallableFunction,
-    grace?: number
-  ): T;
+  export function watch<T>(target: T, callback: CallableFunction, grace?: number): T;
 }
 
 type MustBeExpression = Exclude<any, string>;
