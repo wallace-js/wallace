@@ -3,7 +3,7 @@
 *The tiny framework that brings you FREEEDOM!!!*
 
 ![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
-![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)
+![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)[![Click Counter TypeScript](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
 
 ## About
 
@@ -76,19 +76,36 @@ Wallace is rather young, and hasn't been fully battle tested but:
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
 3. You can attract more users and contributors by giving it a star!
 
-## Usage
+## Start
 
-Try it the browser with [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx), or create a local project with:
+Wallace is so simple you don't really need a tutorial.
+
+#### 1. Load an example
+
+All of these open in [StackBlitz](https://stackblitz.com) so you can play around, then download the working project.
+
+Quick playgrounds:
+
+- [Click counter (JavaScript)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
+- [Click counter (TypeScript)](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx)
+
+Forked examples:
+
+- [Basic todo list (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-basic)
+- [Todo list with controller (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-mvc)
+- [Todo list with undo functionality (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/undo)
+
+Alternatively create an empty JavaScript or TypeScript (recommended) project with:
 
 ```
 npx create-wallace-app
 ```
 
-Then read the cheat sheet by hovering over `"wallace"`:
+#### 2. Follow the tool tips
+
+There are tool tips on most things, including the package import which has the full cheat sheet, which is really the best starting point:
 
 ![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
-
-There are also examples in the [demos](https://github.com/wallace-js/wallace/tree/master/demos) directory.
 
 ## Contributions
 

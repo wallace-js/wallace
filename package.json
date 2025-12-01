@@ -10,7 +10,7 @@
   },
   "workspaces": [
     "playground",
-    "demos/*",
+    "examples/*",
     "packages/*"
   ],
   "devDependencies": {
