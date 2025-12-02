@@ -11,9 +11,20 @@ import { getSiblings } from "./utils";
 function hoistTextNodes(component: Component) {
   const nodesToDelete = [];
   component.extractedNodes.forEach(node => {
+    // TODO: make node.canBeHoisted()
+    // DynamicTextNode will only have one watch, but check
     if (node instanceof DynamicTextNode) {
       if (getSiblings(node, component.extractedNodes).length === 0) {
+        console.log("hoisting>>>>");
+        console.log("text", `--${node.element}--`);
+        node.element.parentElement.childNodes.forEach(child => {
+          console.log("child", `--${child.textContent}--`);
+        });
+        console.log("<<<<<hoisting");
         const parent = node.parent;
+        console.log("element", node.element);
+        console.log("text", `--${node.element.textContent}--`);
+        console.log("watches", node.watches);
         parent.watches.push(...node.watches);
         nodesToDelete.push(node);
         node.element.remove();
@@ -30,7 +41,7 @@ function hoistTextNodes(component: Component) {
  */
 export function consolidateComponent(component: Component): ComponentDefinitionData {
   const componentDefinition = new ComponentDefinitionData(component);
-  hoistTextNodes(component);
+  // hoistTextNodes(component);
   processNodes(component, componentDefinition);
   processeVisibilityToggles(componentDefinition.watches);
   // This must be done after all the processing, as DOM may have changed.

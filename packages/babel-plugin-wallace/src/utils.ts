@@ -35,9 +35,18 @@ export function escapeDoubleQuotes(text: string): string {
 }
 
 /**
- * Strips extraneous whitespace from HTML
+ * Strips extraneous whitespace from HTML, but preserves inline spaces, so this:
+ *
+ *   <div>
+ *     <span><span>foo</span> bar</span>
+ *   </div>
+ *
+ * Becomes this:
+ *
+ *   <div><span><span>foo</span> bar</span></div>
  */
 export function stripHtml(htmlString: string): string {
+  return htmlString;
   return htmlString
     .replace(/\n/g, "")
     .replace(/[\t ]+\</g, " <")

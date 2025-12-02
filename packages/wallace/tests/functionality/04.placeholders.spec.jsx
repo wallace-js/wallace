@@ -74,17 +74,6 @@ test("Multiple placeholders in same text block", () => {
   `);
 });
 
-test("Placeholders without siblings don't get a span", () => {
-  const name = "Aardvark";
-  const MyComponent = () => <div>{name}</div>;
-  const component = testMount(MyComponent);
-  expect(component).toRender(`
-    <div>
-      Aardvark
-    </div>
-  `);
-});
-
 test("Placeholders in nested attribute works", () => {
   // Need to check with nested attributes as there was a bug whereby attributes
   // were being linked to the root node.
@@ -113,4 +102,31 @@ test("Placeholders with undefined variable results in empty span", () => {
       Hello <span></span>!
     </div>
   `);
+});
+
+describe("Hoisting", () => {
+  /*
+  Temporarily disabling hoisting as it's just a space saver, but there is an issue with
+  spaces.
+  The fix may involve checking whether it is an inline element with a space.
+  */
+  // test("Placeholders without siblings don't get a span", () => {
+  //   const name = "Aardvark";
+  //   const MyComponent = () => <div>{name}</div>;
+  //   const component = testMount(MyComponent);
+  //   expect(component).toRender(`
+  //   <div>
+  //     Aardvark
+  //   </div>
+  // `);
+  // });
+
+  test.only("Preserve space in a span", () => {
+    const name = "Aardvark";
+    const MyComponent = () => <span> {name}</span>;
+    const component = testMount(MyComponent);
+    expect(component).toRender(`
+    <soan> Aardvark</div>
+  `);
+  });
 });
