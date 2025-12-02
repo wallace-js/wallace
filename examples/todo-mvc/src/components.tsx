@@ -13,7 +13,7 @@ const Task: Uses<iTask, TaskListController> = ({ text, done, id }, { ctrl }) => 
   </div>
 );
 
-export const TaskList: Uses<any, TaskListController, TaskListMethods> = (
+export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
   _,
   { ctrl, self, e }
 ) => (
