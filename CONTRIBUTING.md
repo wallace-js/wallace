@@ -258,7 +258,9 @@ The node can be passed to another visitor. See https://github.com/babel/babel/is
 You create new nodes using `t` like so:
 
 ```js
-path.replaceWith(t.expressionStatement(t.stringLiteral("Is this the real life?")));
+path.replaceWith(
+  t.expressionStatement(t.stringLiteral("Is this the real life?"))
+);
 ```
 
 All the types are defined [here](https://github.com/babel/babel/blob/master/packages/babel-types/src/definitions/core.js).
@@ -619,7 +621,9 @@ test("JSX not allowed in expressions", () => {
       </center>
     );
   `;
-  expect(code).toCompileWithError("JSX elements are not allowed in expressions.");
+  expect(code).toCompileWithError(
+    "JSX elements are not allowed in expressions."
+  );
 });
 ```
 
