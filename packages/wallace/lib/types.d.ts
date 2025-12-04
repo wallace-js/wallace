@@ -154,21 +154,21 @@ Other than that, its standard JSX, except for three special cases:
 2. Nesting.
 3. Stubs, for inheritance.
 
-## 3 Nesting
+## 3. Nesting
 
 To nest or repeat components use its name followed by `.nest` or `.repeat`:
 
 ```tsx
-const Task: Uses<iTask> = (task) => (<div></div>);
+const Task = (task) => (<div></div>);
 
-const TopTasks: Uses<iTask[]> = (tasks) => (
+const TopTasks = (tasks) => (
   <div>
     <Task.nest props={tasks[0]} />
     <Task.nest props={tasks[1]} />
   </div>
 );
 
-const TaskList: Uses<iTask[]> = (tasks) => (
+const TaskList = (tasks) => (
   <div>
     <Task.repeat props={tasks} />
   </div>
@@ -177,10 +177,9 @@ const TaskList: Uses<iTask[]> = (tasks) => (
 
 Notes:
 
-  - You may only use the directives `prop`, `show` and `hide`.
-  - TypeScript will adjust `props` to require `iTask` or `iTask[]` accordingly.
-  - You may not nest the root element.
-  - A repeat must be the only child element under its parent.
+ - You cannot use nest or repeat on the root element.
+ - Repeat must be the only child element under its parent.
+ - The `props` expects an array on repeat (See **TypeScript** below) 
 
 ## 4. Directives
 
@@ -214,25 +213,28 @@ component, making it a convenient place to handle:
 - Sorting, filtering and formatting props.
 - Coordinating updates.
 
-This lets you use props solely for data, without callbacks.
+This lets you use props purely for data.
 
 Controllers often reference:
 
-- Any components that should be updated after data changes.
-- Higher level controllers.
+- One or more components to be updated after data changes.
+- Other controllers they need access to like services or modal containers.
+
+Components sometimes only use a controller, and no props.
 
 ```tsx
 class TaskController {
-  constructor (rootComponent, mainController) {
+  constructor (rootComponent, dbController) {
     this.root = rootComponent;
-    this.main = mainController;
+    this.db = dbController;
   }
   getTasks () {
-    return this.main.fetch(...);
+    return this.db.fetch(...);
   }
   newTask () {
-      // do stuff...
-    this.root.update();
+    this.db.put(...).then(() => {
+      this.root.update();
+    });
   }
 }
 
@@ -245,17 +247,17 @@ const TaskList = (_, {ctrl}) => (
 );
 
 TaskList.methods({
-  render(props, ctrl) {
-    this.props = props;
+  render(_, ctrl) {
     this.ctrl = new TaskController(this, ctrl);
+    this.update();
   }
 });
 ```
 
 ## 6. Inheritance
 
-You can define new components by extending other component definitions, either with
-using the base's structure, or overriding it:
+You can creat new component defintion by extending another one, either preserving the
+base's structure, or overriding it:
 
 ```tsx
 import { extendComponent } from 'wallace';
@@ -290,21 +292,20 @@ MyComponent.stubs.text: MyTextComponent;
 
 Stubs are inherited and can be overridden, which means you can either:
 
-- Let the base define the DOM structure, and implement/override stubs on the inherited
-component.
-- Let the inherited component define the DOM structure, and use stubs from the base.
+- Set the DOM structure in the base, and implement/override stubs on the child.
+- Set the DOM structure in the child, and use/override stubs from the base.
+
+So long as the rendered component has all its stubs defined somewhere, it will work.
 
 Notes:
 
-* Stubs receive the same props and controller as their containing component.
-* Stubs are separate components, so cannot access methods on the containing component
-* through `self` (use the controller for that kind of thing).
+ - Stubs receive the same props and controller as their containing component.
+ - Stubs are separate components, so cannot access methods on the containing component
+   through `self` (use the controller for that kind of thing).
 
 ## 8. TypeScript
 
-### 8.1 `Uses` type
-
-The `Uses` type must be placed where shown:
+All typing comes from the `Uses` type which must be placed right after the comonent name:
 
 ```tsx
 import { Uses } from 'wallace';
@@ -316,28 +317,32 @@ interface iTask {
 const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
 ```
 
-This will set up typing for the props inside the function and many other things.
-
 If you require no props, set it to `null`:
 
 ```tsx
 const Task: Uses<null> = () => <div>Hello</div>;
 ```
 
-##### Nesting
+`Uses` sets up type support in several places.
 
-With `Uses` in place, you will be warned if you attempt to pass incorrect props during
-mounting or nesting, including repeat, which expects an arry of the type:
+### Props
+
+TypeScript will ensure you pass correct props during mounting or nesting,
+including repeat, which expects an arry of the type:
 
 ```
 const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
-    <Task.repeat props={tasks} />
+    First task:
+    <Task.nest props={tasks[0]} />
+    <div>
+      <Task.repeat props={tasks.slice(1)} />
+    </div>
   </div>
 );
 ```
 
-##### Controller
+### Controller
 
 The 2nd type is used for the controller, available as `ctrl` in **xargs**:
 
@@ -353,7 +358,7 @@ const Task: Uses<null, TaskController> = (_, { ctrl }) => (
 ));
 ```
 
-##### Methods
+### Methods
 
 To see custom methods on `self` you'll need use an interface:
 
@@ -379,7 +384,7 @@ Task.methods({
 The type will pass into the object passed into `methods` so it recognises custom methods
 in addition to standard methods like `render`, which are already typed for you.
 
-##### Stubs
+### Stubs
 
 The `props` and `controller` will pass through to functions you assign to
 `Component.stubs` as stubs receive the same props as the parent.
@@ -393,7 +398,7 @@ Task.stubs.foo = (_, { self }) => (
 ));
 ```
 
-### 8.2 Types for `extendComponent`
+### Inheritance
 
 The `extendComponent` function transfers the types specified on the base:
 
@@ -413,12 +418,9 @@ const Child = extendComponent<newProps, Controller, Methods>(Parent);
    to `any`.
 2. Each type must extend its corresponding type on base.
 
-Note that these are just typing restrictions, you can ignore them if you must.
-
-
 ---
----
-Help make Wallace better by giving it a star: https://github.com/wallace-js/wallace
+Report any issues to https://github.com/wallace-js/wallace (and please give it a ★)
+
 */
 
 declare module "wallace" {
@@ -435,7 +437,7 @@ declare module "wallace" {
       props: Props,
       other?: {
         ctrl: Controller;
-        self: Component<Props, Controller, Methods>;
+        self: ComponentInstance<Props, Controller, Methods>;
         e: Event;
       }
     ): JSX.Element;
@@ -459,10 +461,10 @@ declare module "wallace" {
     }): JSX.Element;
     methods?(
       object: ComponenMethods<Props, Controller> &
-        ThisType<Component<Props, Controller, Methods>>
+        ThisType<ComponentInstance<Props, Controller, Methods>>
     ): void;
     readonly prototype?: ComponenMethods<Props, Controller> &
-      ThisType<Component<Props, Controller, Methods>>;
+      ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
   }
@@ -497,13 +499,25 @@ declare module "wallace" {
   /**
    * The type for a component instance.
    */
-  export type Component<Props = any, Controller = any, Methods extends object = {}> = {
+  export type ComponentInstance<
+    Props = any,
+    Controller = any,
+    Methods extends object = {}
+  > = {
     update(): void;
     render(props: Props, ctrl?: Controller): void;
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
   } & Methods;
+
+  /**
+   * The component constructor function (typed as a class, but isn't).
+   */
+  export class Component__<Props = any, Controller = any> {
+    update(): void;
+    render(props: Props, ctrl?: Controller): void;
+  }
 
   /**
    * Use to define a new component which extends another component, meaning it will
@@ -533,7 +547,7 @@ declare module "wallace" {
     componentDefinition: Uses<Props, Controller, Methods>,
     props?: Props,
     ctrl?: Controller
-  ): Component<Props, Controller, Methods>;
+  ): ComponentInstance<Props, Controller, Methods>;
 
   /**
    * Returns a Proxy of an object which calls `callback` when keys are set, and this
