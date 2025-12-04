@@ -2,8 +2,8 @@
 
 _The tiny framework that brings you FREEEDOM!!!_
 
-![npm](https://img.shields.io/badge/npm-wallace-blue) ![npm](https://img.shields.io/npm/v/wallace.svg) ![npm](https://img.shields.io/npm/dt/wallace.svg)
-![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg)
+[![nmp](https://img.shields.io/badge/npm-wallace-blue)](https://npmjs.com/package/wallace) [![npm](https://img.shields.io/npm/v/wallace.svg)](https://npmjs.com/package/wallace) [![npm](https://img.shields.io/npm/dt/wallace.svg)](https://npmjs.com/package/wallace)
+![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg) [![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
 
 ## About
 
@@ -13,7 +13,7 @@ Wallace is a front end JavaScript framework for building:
 - Mobile apps (using tools likes [Capacitator](https://capacitorjs.com/))
 - Desktop apps (using tools like [Tauri](https://v2.tauri.app/))
 
-It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) and co on three points:
+It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) etc on three points:
 
 1. **Performance**
 2. **Productivity**
@@ -23,13 +23,13 @@ It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/
 
 Wallace is perhaps the fastest loading framework out there:
 
-[img]
+![Bar chart showing bundle sizes](./assets/bundle-sizes.jpg)
 
 And DOM updates are pretty fast too:
 
-[img]
+![Bar chart showing benchmark metrics](./assets/benchmark-metrics.jpg)
 
-But in truth you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
+But the truth is you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
 
 ### 2. Productivity
 
@@ -37,34 +37,43 @@ Wallace has several features which boost productivity:
 
 1. Clean and compact syntax (~40% fewer lines of JSX than React).
 2. Sensible reactivity - you control where and how.
-3. Flexible inheritance & composition patterns.
+3. Powerful inheritance & composition patterns.
 4. Deep TypeScript support (if you want it).
 5. Full documentation in IDE tool tips.
 
-But the killer feature is really the lack of features.
+But the real win comes from what Wallace *lacks*:
 
-Wallace only provides _components_ - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks dump on you.
+##### No voodoo magic
 
-There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a _lot_ of time.
+Everything is clear, mechanical and obvious - even reactive behaviour.
+
+##### No hidden engines
+
+The rendering and DOM operations are so simple you can interact with them.
+
+##### No awkward patterns
+
+The object oriented design means you don't need hooks, portals, signals, providers, state handlers, context managers etc...
+
+There's simply a lot less to learn, remember, wrangle with or accuse when things break. And that saves a *lot* of time.
 
 ### 3. Freedom
 
-Wallace lets you:
+Wallace sets up a tree of components, which are objects you can interact with, and whose methods you can override. There are no other objects in play. This makes Wallace the only truly "open" framework in that every behaviour and operation can be overridden.
 
-1. Override all run time behaviour in a granular manner (as everything happens in component methods).
-2. Safely manipulate the DOM independently, alongside, or during automatic updates.
+This gives you full freedom to do anything really, but most likely:
 
-This helps you:
+- Run partial updates or direct DOM operations deep in the tree, cleanly and safely.
+- Optimise further than any other framework - making it the best option for performance.
+- Solve performance bottlenecks (which can hit any framework) with relative ease - making it the safest option all round.
 
-- Achieve vanilla level performance.
-- Solve performance issues, cleanly.
-- Do gnarly things that would be painful or impossible with other frameworks (like deep partial updates, reparenting etc...)
+You can't predict whether a project will hit one of these snags, how badly the framework will get in your way, how much time that will drain or how much time you'd have saved by using jQuery instead.
 
-You might never need that level freedom on a given project, but why take the risk with a framework which takes it away from you?
+The only safe option is a fully open framework.
 
----
+### Name
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say "_freedom_" in Scotland without conjuring this image:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say *freedom* in Scotland without someone shouting *FREEDOM!!* back at you, because of this scene :
 
 ![Mel Gibson in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
@@ -74,25 +83,41 @@ Wallace is rather young, and hasn't been fully battle tested but:
 
 1. You can override all behaviour at a granular level, which offers a degree of safety.
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
-3. You can attract more users and contributors by giving it a star!
+3. You can attract more users and contributors by giving it a ★
 
 ## Usage
 
-Try it the browser with [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx), or create a local project with:
+To try Wallace you have three options.
+
+1. Open a StackBlitz in [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
+2. Load up one of the examples below.
+3. Create a local project with:
 
 ```
 npx create-wallace-app
 ```
 
-Then read the cheat sheet by hovering over `"wallace"`:
+Whichever you pick, you probably want to start by reading the cheat sheet by hovering over `"wallace"`:
 
 ![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
-There are also examples in the [demos](https://github.com/wallace-js/wallace/tree/master/demos) directory.
+There are more specific tool tips on most things, including JSX elements:
 
-## Contributions
+![Tool tip on JSX element](./assets/element-hover.jpg)
 
-Yes please.
+You might be able to find your way from there, if not read the [GUIDE](https://github.com/wallace-js/wallace/tree/master/GUIDE.md).
+
+## Examples
+
+These links open in [StackBlitz](https://stackblitz.com) so you can play around, and then download the working project to start your project. If StackBlitz doesn't load, try to refresh, if not you can find all these in the [examples](https://github.com/wallace-js/wallace/tree/master/examples) directory.
+
+- [Basic todo list (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-basic)
+- [Todo list with controller (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-mvc)
+- [Todo list with undo functionality (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/undo)
+
+## Issues
+
+Please open a ticket for any issue, including usage questions, as everything should be documented in tool tips and I'd want to know if its not.
 
 ## License
 
