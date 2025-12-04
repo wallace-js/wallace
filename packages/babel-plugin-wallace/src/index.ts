@@ -4,6 +4,7 @@ import type { NodePath, PluginObj, PluginPass } from "@babel/core";
 import type { Program } from "@babel/types";
 import type { Babel } from "./babel-types";
 
+import * as constants from "./constants";
 import { wallaceConfig } from "./config";
 import { Directive, NodeValue } from "./models";
 import { Module } from "./models/module";
@@ -36,4 +37,4 @@ export default function wallacePlugin({ types: t }: Babel): PluginObj {
 /**
  * These exports are for custom plugin development.
  */
-export { wallaceConfig, Directive, NodeValue };
+export { wallaceConfig, Directive, NodeValue, constants };

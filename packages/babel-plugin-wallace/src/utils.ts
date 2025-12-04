@@ -1,7 +1,8 @@
 import { JSDOM } from "jsdom";
 
+import * as t from "@babel/types";
 import * as babel from "@babel/core";
-import type { Statement } from "@babel/types";
+import type { Expression, Statement } from "@babel/types";
 import { WATCH_CALLBACK_PARAMS } from "./constants";
 
 const document = new JSDOM("<!DOCTYPE html>").window.document;
@@ -58,8 +59,9 @@ export function arrayStartsWith(origin: Array<any>, test: Array<any>): boolean {
   return true;
 }
 
-export function codeToNode(code: string): Statement[] {
-  const statement = babel.template.ast(code);
+export function codeToNode(code: string | Expression): Statement[] {
+  const statement =
+    typeof code === "string" ? babel.template.ast(code) : t.expressionStatement(code);
   if (statement instanceof Array) {
     return statement;
   }
