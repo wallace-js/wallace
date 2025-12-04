@@ -1,11 +1,3 @@
-export enum WATCH_CALLBACK_PARAMS {
-  newValue = "n",
-  oldValue = "o",
-  element = "e",
-  props = "p",
-  component = "c"
-}
-
 export enum COMPONENT_BUILD_PARAMS {
   component = "component",
   rootElement = "root"
@@ -27,10 +19,36 @@ export enum IMPORTABLES {
   getSequentialRepeater = "getSequentialRepeater"
 }
 
-export enum EXTRA_PARAMETERS {
+/**
+ * The names allowed in xargs.
+ * The value is not indicative of the final variable name.
+ */
+export enum XARGS {
   controller = "ctrl",
   component = "self",
-  event = "e"
+  event = "event",
+  element = "element",
+  // These two are allowed, they just get renamed.
+  ev = "ev",
+  el = "el"
+}
+
+export enum WATCH_CALLBACK_ARGS {
+  newValue = "n",
+  oldValue = "o",
+  element = XARGS.element,
+  props = "p",
+  component = "c"
+}
+
+export enum WATCH_AlWAYS_CALLBACK_ARGS {
+  element = XARGS.element,
+  props = "p",
+  component = "c"
+}
+
+export enum EVENT_CALLBACK_ARGS {
+  event = XARGS.event
 }
 
 export enum SPECIAL_SYMBOLS {

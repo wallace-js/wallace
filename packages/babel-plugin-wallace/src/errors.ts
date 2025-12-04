@@ -1,7 +1,7 @@
 import type { NodePath } from "@babel/core";
-import { EXTRA_PARAMETERS } from "./constants";
+import { XARGS } from "./constants";
 
-const ALLOWED_XARGS: string[] = Object.values(EXTRA_PARAMETERS).map(n => `"${n}"`);
+const ALLOWED_XARGS: string[] = Object.values(XARGS).map(n => `"${n}"`);
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",

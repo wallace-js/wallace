@@ -37,8 +37,8 @@ The function takes two arguments, both optional:
 2. **xargs** - which *must* be destructured to exactly one level, as shown:
 
 ```tsx
-const MyComponent = ({title}, {ctrl, e}) => (
-  <button onClick={ctrl.doSomething(e)}>
+const MyComponent = ({title}, {ctrl, event}) => (
+  <button onClick={ctrl.doSomething(event)}>
     {title}
   </button>
 );
@@ -48,7 +48,7 @@ The **xargs** contains:
 
 - `ctrl` a reference to a controller object.
 - `self` a reference to the component instance (as `this` is not allowed).
-- `e` for use in event callbacks, signifies the event.
+- `event` for use in event callbacks, signifies the event.
 
 The function will be replaced by a very different one during compilation, therefore:
 
@@ -438,7 +438,7 @@ declare module "wallace" {
       other?: {
         ctrl: Controller;
         self: ComponentInstance<Props, Controller, Methods>;
-        e: Event;
+        event: Event;
       }
     ): JSX.Element;
     nest?({
@@ -614,16 +614,16 @@ interface DirectiveAttributes extends AllDomEvents {
    * Is the equivalent of this:
    *
    *```
-   * const MyComponent = ({name}, {e}) => (
-   *   <input type="text" onChange={name = e.target.value} value={name}/>
+   * const MyComponent = ({name}, {event}) => (
+   *   <input type="text" onChange={name = event.target.value} value={name}/>
    * );
    * ```
    *
    * In the case of a checkbox it uses `checked` instead of `value`, so is the equivalent of this:
    *
    * ```
-   * const MyComponent = ({done}, {e}) => (
-   *   <input type="checkbox" onChange={done = e.target.checked} checked={done}/>
+   * const MyComponent = ({done}, {event}) => (
+   *   <input type="checkbox" onChange={done = event.target.checked} checked={done}/>
    * );
    * ```
    *
@@ -779,882 +779,970 @@ declare namespace JSX {
  */
 interface AllDomEvents {
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onAbort?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler.
    *
-   * Use xargs to access the event or element:
+   * Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onAnimationCancel?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onAnimationEnd?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onAnimationIteration?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onAnimationStart?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onAuxClick?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onBeforeInput?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onBlur?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onCancel?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onCanPlay?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onCanPlayThrough?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onChange?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onClick?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onClose?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onContextMenu?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onCopy?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onCueChange?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onCut?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDblClick?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDrag?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDragEnd?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDragEnter?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDragLeave?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDragOver?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDragStart?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDrop?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onDurationChange?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onEmptied?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onEnded?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onError?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onFocus?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onFormData?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onGotPointerCapture?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onInput?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onInvalid?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onKeyDown?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onKeyPress?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onKeyUp?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onLoad?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onLoadedData?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onLoadedMetadata?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onLoadStart?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onLostPointerCapture?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseDown?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseEnter?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseLeave?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseMove?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseOut?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseOver?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onMouseUp?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPaste?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPause?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPlay?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPlaying?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerCancel?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerDown?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerEnter?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerLeave?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerMove?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerOut?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerOver?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onPointerUp?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onProgress?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onRateChange?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onReset?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onResize?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onScroll?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSecurityPolicyViolation?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSeeked?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSeeking?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSelect?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSlotChange?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onStalled?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSubmit?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onSuspend?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTimeUpdate?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onToggle?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTouchCancel?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTouchEnd?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTouchMove?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTouchStart?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTransitionCancel?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTransitionEnd?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTransitionRun?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onTransitionStart?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onVolumeChange?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onWaiting?: any;
   /**
-   * Wallace runs the expression when the event fires.
+   * ## Wallace event handler
    *
-   * Use xargs to access the event or element:
+   * Note the code is copied. Use xargs to access the event:
+   *
    * ```
-   * const MyComponent = (_, { e }) => (
-   *    <button onClick={clickHandler(e)} />
+   * const MyComponent = (_, { event }) => (
+   *    <button onClick={clickHandler(event)} />
    * );
    * ```
    */ onWheel?: any;

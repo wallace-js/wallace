@@ -33,8 +33,8 @@ class AbstractContextHandler {
     const scope = this.path.scope;
     this.component = new Component(
       this.module,
-      scope.generateUidIdentifier("p"),
-      scope.generateUidIdentifier("c")
+      scope.generateUidIdentifier("props"),
+      scope.generateUidIdentifier("component")
     );
     this.module.requireImport(IMPORTABLES.defineComponent);
     this.functionPath = this.path;

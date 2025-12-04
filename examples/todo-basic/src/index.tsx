@@ -6,7 +6,7 @@ interface iTask {
 }
 
 interface TaskListMethods {
-  addTaskKeyup(e: KeyboardEvent): void;
+  addTaskKeyup(event: KeyboardEvent): void;
 }
 
 const Task: Uses<iTask> = ({ text, done }) => (
@@ -16,14 +16,14 @@ const Task: Uses<iTask> = ({ text, done }) => (
   </div>
 );
 
-const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { e, self }) => (
+const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) => (
   <div class="tasklist">
     <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
       <Task.repeat props={tasks} />
     </div>
     <div style="margin-top: 10px">
-      <input type="text" onKeyUp={self.addTaskKeyup(e as KeyboardEvent)} />
+      <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
       <span> (hit enter to add)</span>
     </div>
   </div>
@@ -34,10 +34,10 @@ TaskList.methods({
     this.props = watch(tasks, () => this.update());
     this.update();
   },
-  addTaskKeyup(e: KeyboardEvent) {
-    const target = e.target as HTMLInputElement;
+  addTaskKeyup(event: KeyboardEvent) {
+    const target = event.target as HTMLInputElement;
     const text = target.value;
-    if (e.key === "Enter" && text.length > 0) {
+    if (event.key === "Enter" && text.length > 0) {
       this.props.push({ text, done: false });
       target.value = "";
     }

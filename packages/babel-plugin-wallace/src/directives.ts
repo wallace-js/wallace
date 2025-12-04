@@ -7,7 +7,7 @@
  * changes here be sure to update that file.
  */
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import { WATCH_CALLBACK_PARAMS, SPECIAL_SYMBOLS } from "./constants";
+import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
@@ -173,7 +173,7 @@ class StyleDirective extends Directive {
       } else if (value.type === "expression") {
         node.addWatch(
           value.expression,
-          `${WATCH_CALLBACK_PARAMS.element}.style.${qualifier} = n`
+          `${WATCH_CALLBACK_ARGS.element}.style.${qualifier} = ${WATCH_CALLBACK_ARGS.newValue}`
         );
       }
     } else {

@@ -3,7 +3,7 @@ import { testMount } from "../utils";
 describe("Extra arguments", () => {
   test("are allowed if recognised", () => {
     const src = `
-    const A = ({}, {self, ctrl, e}) => (
+    const A = ({}, {self, ctrl, ev, el, element, event}) => (
       <div>
         Test
       </div>
@@ -32,7 +32,7 @@ describe("Extra arguments", () => {
     );
   `;
     expect(src).toCompileWithError(
-      'Illegal parameter in extra args: "x". You are only allowed "ctrl", "self", "e".'
+      'Illegal parameter in extra args: "x". You are only allowed "ctrl", "self", "event", "element", "ev", "el".'
     );
   });
 

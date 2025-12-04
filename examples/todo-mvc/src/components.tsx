@@ -15,7 +15,7 @@ const Task: Uses<iTask, TaskListController> = ({ text, done, id }, { ctrl }) => 
 
 export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
   _,
-  { ctrl, self, e }
+  { ctrl, self, event }
 ) => (
   <div class="tasklist">
     <div if={!ctrl.loading}>
@@ -24,7 +24,7 @@ export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
         <Task.repeat props={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
-        <input type="text" onKeyUp={self.txtInputKeyUp(e)} />
+        <input type="text" onKeyUp={self.txtInputKeyUp(event)} />
         <span> (hit enter to add)</span>
       </div>
     </div>
@@ -34,7 +34,7 @@ export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
 );
 
 interface TaskListMethods {
-  txtInputKeyUp(e: any): void;
+  txtInputKeyUp(event: any): void;
 }
 
 TaskList.methods({
@@ -43,10 +43,10 @@ TaskList.methods({
     this.update(); // Ensures spinner displays while loading.
     this.ctrl.init();
   },
-  txtInputKeyUp(e: any) {
-    if (e.key === "Enter") {
-      this.ctrl.addTask(e.target.value);
-      e.target.value = "";
+  txtInputKeyUp(event: any) {
+    if (event.key === "Enter") {
+      this.ctrl.addTask(event.target.value);
+      event.target.value = "";
     }
   }
 });
