@@ -83,14 +83,14 @@ Wallace is rather young, and hasn't been fully battle tested but:
 
 1. You can override all behaviour at a granular level, which offers a degree of safety.
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
-3. You can attract more users and contributors by giving it a ★
+3. You can attract more users and contributors by giving Wallace a ★
 
 ## Usage
 
-To try Wallace you have three options.
+Three quick ways to try Wallace:
 
 1. Open a StackBlitz in [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
-2. Load up one of the examples below.
+2. Load up one of the [examples](#Examples) below (on StackBlitz or locally).
 3. Create a local project with:
 
 ```
@@ -109,7 +109,7 @@ You might be able to find your way from there, if not read the [GUIDE](https://g
 
 ## Examples
 
-These links open in [StackBlitz](https://stackblitz.com) so you can play around, and then download the working project to start your project. If StackBlitz doesn't load, try to refresh, if not you can find all these in the [examples](https://github.com/wallace-js/wallace/tree/master/examples) directory.
+These links open in [StackBlitz](https://stackblitz.com) so you can play around/fork/download a fully working project. If StackBlitz doesn't load, try to refresh, if not you can find all these in the [examples](https://github.com/wallace-js/wallace/tree/master/examples) directory.
 
 - [Basic todo list (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-basic)
 - [Todo list with controller (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-mvc)
@@ -121,4 +121,4 @@ Please open a ticket for any issue, including usage questions, as everything sho
 
 ## License
 
-MIT
+MIT.
