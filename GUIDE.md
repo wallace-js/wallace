@@ -402,13 +402,64 @@ Firstly, the original object is also updated, but only the proxy is reactive:
 ```tsx
 const original = {};
 const proxy = watch(original, () => alert('Changed'), 0);
-proxy.foo = 1;       // fires alert
-original.foo === 2;  // true
-original.foo = 3;    // doesn't fire alert
-proxy.foo === 3;     // true
+proxy.foo = 1;          // fires alert
+original.bar = 2;       // doesn't fire alert
+console.log(proxy);     // {foo: 1, bar: 2}
+console.log(original);  // {foo: 1, bar: 2}
+
+
+const original = [];
+const proxy = watch(original, () => alert('Changed'), 0);
+proxy.push({x: 1});            // fires alert
+original.push({x: 2});         // doesn't fire alert
+console.log(original.length);  // 2
+console.log(proxy.length);     // 2
+proxy[1].x = 3;                // fires alert
 ```
 
 Secondly, the callback will not be fired if it has already fired within the last 50ms/
+
+
+
+negates the grace period during which the callback is not called. This 
+
+ only needed when experimenting with watch
+
+
+
+when experimenting with `watch` like this you must pass  as 
+
+
+
+ within a grace period
+
+The grace period is because when you do  `array.push()`  JavaScript sets `array[i] = newItem` and then `array.length = newLength` immediately after, so the callback would get fired twice.
+
+ solve this waiting 50ms 
+
+
+
+, meaning the callback gets fired twice. Because we mostly use `watch` to respond to UI events, watch 
+
+```tsx
+let proxy watch([], () => alert('Changed'), 0);
+proxy.push('a');     // fires alert twice because JavaScript
+
+let proxy watch([], () => alert('Changed'));
+proxy.push('a');     // fires alert once
+proxy.push('b');     // doesn't fire alert as it happens within 50ms
+setTimeout(() => {
+  proxy.push('c');   // fires alert once
+}, 200)
+```
+
+
+
+The reason for the grace period is because JavaScript sets an array's length property immediately after pushing an item, meaning `push` would 
+
+
+
+
 
 ##### How it all holds together
 
