@@ -86,6 +86,17 @@ class HideDirective extends Directive {
   }
 }
 
+class HtmlDirective extends Directive {
+  static attributeName = "html";
+  static help = `
+
+    /h <div html={'<div>hello</div>'}></div>
+  `;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    node.watchAttribute("innerHTML", value.expression);
+  }
+}
+
 class IfDirective extends Directive {
   static attributeName = "if";
   static help = `
@@ -217,6 +228,7 @@ export const builtinDirectives = [
   BindDirective,
   ClassDirective,
   HideDirective,
+  HtmlDirective,
   IfDirective,
   OnEventDirective,
   PropsDirective,
