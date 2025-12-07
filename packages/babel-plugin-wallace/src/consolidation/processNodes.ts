@@ -37,7 +37,25 @@ function addBindInstruction(node: ExtractedNode) {
     const inputType = node.element.type.toLowerCase();
     const attribute = inputType === "checkbox" ? "checked" : "value";
     node.bindInstructions.forEach(({ eventName, expression }) => {
-      node.watchAttribute(attribute, expression);
+      // node.watchAttribute(attribute, expression);
+
+      // This is the callback, which must be alwaysUpate as there's otherwise a glitch
+      // caused by the fact this isn't tiggering an update, and therefore not resetting
+      // the previous stored value, which eventually ends up being the same as the new
+      // value, causing the element not to update.
+      node.addWatch(
+        SPECIAL_SYMBOLS.alwaysUpdate,
+        t.assignmentExpression(
+          "=",
+          t.memberExpression(
+            t.identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+            t.identifier(attribute)
+          ),
+          expression as Identifier
+        )
+      );
+
+      // This is the event handler that updates the data:
       const callback = t.assignmentExpression(
         "=",
         expression as Identifier,
