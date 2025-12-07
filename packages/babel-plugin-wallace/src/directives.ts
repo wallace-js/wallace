@@ -15,7 +15,7 @@ class ApplyDirective extends Directive {
   static allowString = false;
   static allowQualifier = false;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    node.addWatch(SPECIAL_SYMBOLS.alwaysUpdate, value.expression);
+    node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
 }
 

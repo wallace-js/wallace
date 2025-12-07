@@ -44,7 +44,7 @@ function addBindInstruction(node: ExtractedNode) {
       // the previous stored value, which eventually ends up being the same as the new
       // value, causing the element not to update.
       node.addWatch(
-        SPECIAL_SYMBOLS.alwaysUpdate,
+        SPECIAL_SYMBOLS.noLookup,
         t.assignmentExpression(
           "=",
           t.memberExpression(
@@ -218,11 +218,8 @@ export function processNodes(
         componentDefinition.watches.push(componentWatch);
 
         node.watches.forEach(watch => {
-          if (watch.expression == SPECIAL_SYMBOLS.alwaysUpdate) {
-            addCallbackStatement(
-              SPECIAL_SYMBOLS.alwaysUpdate,
-              codeToNode(watch.callback)
-            );
+          if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
+            addCallbackStatement(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
           } else {
             const lookupKey = componentDefinition.addLookup(watch.expression);
             addCallbackStatement(lookupKey, codeToNode(watch.callback));
@@ -236,7 +233,7 @@ export function processNodes(
             identifier(SPECIAL_SYMBOLS.ctrl)
           );
           const args = props ? [props, ctrlArg] : [identifier("undefined"), ctrlArg];
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -254,7 +251,7 @@ export function processNodes(
         }
 
         if (stubName) {
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -313,7 +310,7 @@ export function processNodes(
             IMPORTABLES.stashMisc,
             [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance]
           );
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -343,7 +340,7 @@ export function processNodes(
         for (const key in _callbacks) {
           const args = buildWatchCallbackParams(
             component,
-            key === SPECIAL_SYMBOLS.alwaysUpdate
+            key === SPECIAL_SYMBOLS.noLookup
           );
           componentWatch.callbacks[key] = functionExpression(
             null,

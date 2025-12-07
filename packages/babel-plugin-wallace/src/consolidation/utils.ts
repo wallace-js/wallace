@@ -98,9 +98,9 @@ export function renameVariablesInExpression(
 /**
  * Must match how it is called in wallace/lib/component.
  */
-export function buildWatchCallbackParams(component: Component, alwaysUpdate: boolean) {
+export function buildWatchCallbackParams(component: Component, noLookup: boolean) {
   // TODO: figure out why the always watch needs to be different.
-  return alwaysUpdate
+  return noLookup
     ? [
         identifier(WATCH_CALLBACK_ARGS.element),
         component.propsIdentifier,

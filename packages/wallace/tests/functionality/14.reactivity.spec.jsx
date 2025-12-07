@@ -78,7 +78,7 @@ test("Value updates to match data", () => {
   expect(input.value).toBe("foo");
   // previous value is still "" as there was no update.
 
-  // Clicking the button a second time fails if bind is not implemented as alwaysUpdate
+  // Clicking the button a second time fails if bind is not implemented as noLookup
   // because the previous value and new value are "", so the same, so the input element
   // is not updated, and its value therefore remains "foo", which is a really annoying
   // bug to track, so this test is absolutely vital.

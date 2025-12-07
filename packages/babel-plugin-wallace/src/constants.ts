@@ -53,7 +53,7 @@ export enum EVENT_CALLBACK_ARGS {
 
 export enum SPECIAL_SYMBOLS {
   objectStash = "_s",
-  alwaysUpdate = "__",
+  noLookup = "__",
   patch = "patch",
   ctrl = "ctrl"
 }

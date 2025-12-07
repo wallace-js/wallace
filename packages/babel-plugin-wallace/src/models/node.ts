@@ -15,7 +15,7 @@ interface Attribute {
 }
 
 interface Watch {
-  expression: Expression | SPECIAL_SYMBOLS.alwaysUpdate;
+  expression: Expression | SPECIAL_SYMBOLS.noLookup;
   callback: string | Expression;
 }
 
@@ -106,7 +106,7 @@ export class ExtractedNode {
     this.bindInstructions.push({ eventName, expression });
   }
   addWatch(
-    expression: Expression | SPECIAL_SYMBOLS.alwaysUpdate,
+    expression: Expression | SPECIAL_SYMBOLS.noLookup,
     callback: string | Expression
   ) {
     this.watches.push({
