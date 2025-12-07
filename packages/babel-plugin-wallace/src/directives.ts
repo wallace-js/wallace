@@ -6,8 +6,10 @@
  * the packages/wallace/lib/types.d.ts to make it available by tool tip. When making
  * changes here be sure to update that file.
  */
+
+import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "./constants";
+import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
@@ -35,6 +37,9 @@ class BindDirective extends Directive {
   `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     const eventName = qualifier || "change";
+    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
+      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME_IN_BIND(eventName));
+    }
     node.addBindInstruction(eventName, value.expression);
   }
 }
