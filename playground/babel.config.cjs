@@ -8,6 +8,8 @@
  * See `playground/package.json` and `babel-plugin-wallace/README.md`.
  */
 
+const { customDirectives } = require("./src/custom-directives.js");
+
 function flag(name) {
   const value = process.env[name];
   switch (String(value).toLowerCase()) {
@@ -23,7 +25,7 @@ function flag(name) {
 
 const toggles = {
   NO_PRESET_ENV: ["@babel/preset-env", { modules: false }],
-  NO_PRESET_TYPESCRIPT: "@babel/preset-typescript",
+  NO_PRESET_TYPESCRIPT: "@babel/preset-typescript"
 };
 const presets = [];
 
@@ -36,6 +38,14 @@ for (const [key, value] of Object.entries(toggles)) {
 console.log("Active presets (to disable, see babel.config.cjs):", presets);
 
 module.exports = {
-  plugins: ["babel-plugin-wallace", "@babel/plugin-syntax-jsx"],
-  presets: presets,
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        directives: customDirectives
+      }
+    ],
+    "@babel/plugin-syntax-jsx"
+  ],
+  presets: presets
 };
