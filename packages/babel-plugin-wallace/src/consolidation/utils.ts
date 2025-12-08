@@ -23,15 +23,18 @@ export function buildAddressArray(address: NodeAddress): ArrayExpression {
   return arrayExpression(address.map(i => numericLiteral(i)));
 }
 
-export function buildFindElementCall(
-  module: Module,
-  address: NodeAddress
-): CallExpression {
+/**
+ * Returns a findElement(root, []) call or `root` if address is [] as that just means
+ * root.
+ */
+export function buildFindElementCall(module: Module, address: NodeAddress): Expression {
   module.requireImport(IMPORTABLES.findElement);
-  return callExpression(identifier(IMPORTABLES.findElement), [
-    identifier(COMPONENT_BUILD_PARAMS.rootElement),
-    buildAddressArray(address)
-  ]);
+  return address.length
+    ? callExpression(identifier(IMPORTABLES.findElement), [
+        identifier(COMPONENT_BUILD_PARAMS.rootElement),
+        buildAddressArray(address)
+      ])
+    : identifier(COMPONENT_BUILD_PARAMS.rootElement);
 }
 
 export function buildNestedClassCall(
