@@ -17,6 +17,12 @@
     "size-compressed": 6.6,
     "first-paint": 124.7
   },
+  "react": {
+    "version": "19.2.0",
+    "run1k": 76.5,
+    "size-compressed": 51.4,
+    "first-paint": 370.8
+  },
   "riot": {
     "version": "9.4.4",
     "run1k": 75.4,

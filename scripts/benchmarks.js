@@ -25,14 +25,12 @@ const fs = require("fs");
 const frameworksToUse = {
   "keyed/angular-ngfor": "angular",
   "keyed/solid": "solid",
-  "keyed/preact": "preact",
+  "keyed/react-hooks": "react",
   "non-keyed/inferno": "inferno",
   "non-keyed/lit": "lit",
-  "non-keyed/react": "react",
   "non-keyed/riot": "riot",
   "non-keyed/svelte-classic": "svelte",
   "non-keyed/vue": "vue",
-  // "non-keyed/vanillajs": "vanillajs",
   "non-keyed/wallace04": "wallace"
 };
 
@@ -129,7 +127,6 @@ function flattenAndFilter(groupedData) {
       const framework = frameworksToUse[key];
       const versions = Object.keys(value).sort();
       const latest = versions[versions.length - 1];
-      console.log(key, versions, latest, value[latest]);
       newData[framework] = {
         version: latest,
         ...value[latest]
@@ -144,7 +141,7 @@ function dumpData(data) {
 
   fs.writeFile(filename, JSON.stringify(data, null, 2), err => {
     if (err) throw err;
-    console.log("The file has been saved!");
+    console.log(`File saved to ${filename}`);
   });
 }
 function main() {

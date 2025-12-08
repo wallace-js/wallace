@@ -23,11 +23,11 @@ It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/
 
 Wallace is perhaps the fastest loading framework out there:
 
-[img]
+![Bar chart of bundle sizes](./assets/size-compressed.jpg)
 
 And DOM updates are pretty fast too:
 
-[img]
+![Bar chart of times to create 1000 rows](./assets/run1k.jpg)
 
 But in truth you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
 
