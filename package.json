@@ -5,7 +5,7 @@
     "test": "npm test -w wallace",
     "build": "npm run build -w babel-plugin-wallace",
     "check": "babel $@",
-    "pretty": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --write",
+    "prettier": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --write",
     "publish": "npm whoami && lerna publish --no-private"
   },
   "workspaces": [

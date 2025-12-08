@@ -112,7 +112,9 @@ This has two major consequences:
 The JSX is never run, and must be static in shape, like an HTML string. But you can do everything you need with directives instead:
 
 ```tsx
-const Greeting = ({ name }) => <h3 show={name.startsWith("W")}>{name} says hello</h3>;
+const Greeting = ({ name }) => (
+  <h3 show={name.startsWith("W")}>{name} says hello</h3>
+);
 ```
 
 You can get a list (once I've made apply)
@@ -165,7 +167,10 @@ const GreetingList = greetings => (
   </div>
 );
 
-const root = main("root", GreetingList, [{ name: "Wallace" }, { name: "Gromit" }]);
+const root = main("root", GreetingList, [
+  { name: "Wallace" },
+  { name: "Gromit" }
+]);
 ```
 
 - simple example
