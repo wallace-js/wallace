@@ -549,6 +549,7 @@ declare module "wallace" {
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
+    base: Component<Props, Controller>;
   } & Methods;
 
   /**

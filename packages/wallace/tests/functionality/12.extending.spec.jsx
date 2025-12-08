@@ -102,9 +102,33 @@ describe("child component with new dom", () => {
     });
     const component = testMount(ChildComponent);
     expect(component).toRender(`
-  <div>
-    <h3>wallace</h3>  
-    <span>axe</span>
-  </div>`);
+      <div>
+        <h3>wallace</h3>  
+        <span>axe</span>
+      </div>
+    `);
+  });
+});
+
+describe("base field", () => {
+  test("Can access base field", () => {
+    const Foo = (props, { ctrl }) => (
+      <div>
+        <div>{props}</div>
+        <div>{ctrl}</div>
+      </div>
+    );
+    Foo.methods({
+      render(props, ctrl) {
+        this.base.render.call(this, props * 2, ctrl * 2);
+      }
+    });
+    const component = testMount(Foo, 2, 3);
+    expect(component).toRender(`
+      <div>
+        <div>4</div>
+        <div>6</div>
+      </div>
+    `);
   });
 });
