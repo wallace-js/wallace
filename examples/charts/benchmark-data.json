@@ -1,0 +1,50 @@
+{
+  "angular": {
+    "version": "20.0.1",
+    "run1k": 85.6,
+    "size-compressed": 46.3,
+    "first-paint": 317.8
+  },
+  "inferno": {
+    "version": "8.2.2",
+    "run1k": 57.7,
+    "size-compressed": 8.9,
+    "first-paint": 127.2
+  },
+  "lit": {
+    "version": "3.2.1",
+    "run1k": 70.5,
+    "size-compressed": 6.6,
+    "first-paint": 124.7
+  },
+  "riot": {
+    "version": "9.4.4",
+    "run1k": 75.4,
+    "size-compressed": 6.4,
+    "first-paint": 107.2
+  },
+  "solid": {
+    "version": "1.9.3",
+    "run1k": 63.9,
+    "size-compressed": 4.5,
+    "first-paint": 107.6
+  },
+  "svelte": {
+    "version": "5.13.0",
+    "run1k": 67.1,
+    "size-compressed": 8.3,
+    "first-paint": 107.5
+  },
+  "vue": {
+    "version": "3.6.0-alpha.2",
+    "run1k": 69.1,
+    "size-compressed": 22.9,
+    "first-paint": 173.6
+  },
+  "wallace": {
+    "version": "0.3.0",
+    "run1k": 59.9,
+    "size-compressed": 2.4,
+    "first-paint": 100.7
+  }
+}
