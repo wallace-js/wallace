@@ -1,7 +1,7 @@
 import type { NodePath } from "@babel/core";
-import { EXTRA_PARAMETERS } from "./constants";
+import { XARGS } from "./constants";
 
-const ALLOWED_XARGS: string[] = Object.values(EXTRA_PARAMETERS).map(n => `"${n}"`);
+const ALLOWED_XARGS: string[] = Object.values(XARGS).map(n => `"${n}"`);
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",
@@ -23,6 +23,9 @@ export const ERROR_MESSAGES = {
   },
   CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
     return `The "${directive}" directive may not have a qualifier.`;
+  },
+  INVALID_EVENT_NAME_IN_BIND: (badEventNameive: string) => {
+    return `"${badEventNameive}" is not a valid event name. Must be lowercase without "on" prefix. E.g. bind:keyup.`;
   },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT: "Nest components using <Name.nest /> or <Name.repeat />.",

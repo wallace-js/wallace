@@ -1,7 +1,6 @@
 import { testMount } from "../utils";
 import { watch } from "wallace";
 
-// This tests bind, checkboxes and watch in one go...
 test("Can make a component reactive", () => {
   const MyComponent = ({ checked }) => (
     <div>

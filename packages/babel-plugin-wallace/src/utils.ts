@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import * as t from "@babel/types";
 import * as babel from "@babel/core";
 import type { Expression, Statement } from "@babel/types";
-import { WATCH_CALLBACK_PARAMS } from "./constants";
+import { WATCH_CALLBACK_ARGS } from "./constants";
 
 const document = new JSDOM("<!DOCTYPE html>").window.document;
 
@@ -17,7 +17,7 @@ export function createTextNode(text: string): Text {
 
 export function setAttributeCallback(attName: string): string {
   attName = attName === "class" ? "className" : attName;
-  return `${WATCH_CALLBACK_PARAMS.element}.${attName} = ${WATCH_CALLBACK_PARAMS.newValue}`;
+  return `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`;
   // TODO: determine if non-standart att and use setAttribute() instead?
 }
 

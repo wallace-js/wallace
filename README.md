@@ -43,16 +43,9 @@ Wallace has several features which boost productivity:
 
 **The package import shows the full cheat sheet**
 
-![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
+Wallace only provides _components_ - and the way they work means you don't need hooks, portals, signals, providers, state handlers, context managers or any of the trash other frameworks dump on you.
 
-But the biggest boost is probably the lack of productivity-sapping features: no hooks, portals, signals, providers, state handlers, context managers or similar garbage.
-
-Instead you do that kind of thing with clean, obvious code that interacts with components, which are the only objects Wallace supplies. So you end up with:
-
-- Less to learn.
-- Less to remember.
-- Less to consider when debugging.
-- Code that's easier to read, write, modify test and reuse.
+There's a lot less to learn, remember, wrangle with or accuse when things break. And that saves a _lot_ of time.
 
 ### 3. Freedom
 

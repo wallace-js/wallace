@@ -6,8 +6,10 @@
  * the packages/wallace/lib/types.d.ts to make it available by tool tip. When making
  * changes here be sure to update that file.
  */
+
+import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import { WATCH_CALLBACK_PARAMS, SPECIAL_SYMBOLS } from "./constants";
+import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
@@ -15,12 +17,7 @@ class ApplyDirective extends Directive {
   static allowString = false;
   static allowQualifier = false;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    node.addWatch(
-      SPECIAL_SYMBOLS.alwaysUpdate,
-      value.expression
-      // `${value.expression};`
-      // `return console.log(arguments);`
-    );
+    node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
 }
 
@@ -40,6 +37,9 @@ class BindDirective extends Directive {
   `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     const eventName = qualifier || "change";
+    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
+      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME_IN_BIND(eventName));
+    }
     node.addBindInstruction(eventName, value.expression);
   }
 }
@@ -83,6 +83,17 @@ class HideDirective extends Directive {
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     // this.ensureValueType();
     node.setVisibilityToggle(value.expression, false, false);
+  }
+}
+
+class HtmlDirective extends Directive {
+  static attributeName = "html";
+  static help = `
+
+    /h <div html={'<div>hello</div>'}></div>
+  `;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    node.watchAttribute("innerHTML", value.expression);
   }
 }
 
@@ -178,7 +189,7 @@ class StyleDirective extends Directive {
       } else if (value.type === "expression") {
         node.addWatch(
           value.expression,
-          `${WATCH_CALLBACK_PARAMS.element}.style.${qualifier} = n`
+          `${WATCH_CALLBACK_ARGS.element}.style.${qualifier} = ${WATCH_CALLBACK_ARGS.newValue}`
         );
       }
     } else {
@@ -217,6 +228,7 @@ export const builtinDirectives = [
   BindDirective,
   ClassDirective,
   HideDirective,
+  HtmlDirective,
   IfDirective,
   OnEventDirective,
   PropsDirective,

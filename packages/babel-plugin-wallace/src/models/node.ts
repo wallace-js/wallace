@@ -7,7 +7,7 @@ import type {
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
-import { WATCH_CALLBACK_PARAMS, SPECIAL_SYMBOLS } from "../constants";
+import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "../constants";
 
 interface Attribute {
   name: string;
@@ -15,7 +15,7 @@ interface Attribute {
 }
 
 interface Watch {
-  expression: Expression | SPECIAL_SYMBOLS.alwaysUpdate;
+  expression: Expression | SPECIAL_SYMBOLS.noLookup;
   callback: string | Expression;
 }
 
@@ -106,7 +106,7 @@ export class ExtractedNode {
     this.bindInstructions.push({ eventName, expression });
   }
   addWatch(
-    expression: Expression | SPECIAL_SYMBOLS.alwaysUpdate,
+    expression: Expression | SPECIAL_SYMBOLS.noLookup,
     callback: string | Expression
   ) {
     this.watches.push({
@@ -129,7 +129,7 @@ export class ExtractedNode {
   watchText(expression: Expression) {
     this.addWatch(
       expression,
-      `${WATCH_CALLBACK_PARAMS.element}.textContent = ${WATCH_CALLBACK_PARAMS.newValue}`
+      `${WATCH_CALLBACK_ARGS.element}.textContent = ${WATCH_CALLBACK_ARGS.newValue}`
     );
   }
   setProps(expression: Expression) {

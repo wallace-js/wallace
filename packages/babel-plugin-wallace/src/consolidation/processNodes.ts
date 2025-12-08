@@ -11,15 +11,16 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { codeToNode } from "../utils";
-import { Component, VisibilityToggle, ExtractedNode } from "../models";
+import { Component, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_BUILD_PARAMS,
   COMPONENT_METHODS,
-  EXTRA_PARAMETERS,
+  EVENT_CALLBACK_ARGS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
-  WATCH_CALLBACK_PARAMS
+  WATCH_CALLBACK_ARGS,
+  WATCH_AlWAYS_CALLBACK_ARGS
 } from "../constants";
 import { ComponentWatch } from "./types";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
@@ -36,13 +37,31 @@ function addBindInstruction(node: ExtractedNode) {
     const inputType = node.element.type.toLowerCase();
     const attribute = inputType === "checkbox" ? "checked" : "value";
     node.bindInstructions.forEach(({ eventName, expression }) => {
-      node.watchAttribute(attribute, expression);
+      // node.watchAttribute(attribute, expression);
+
+      // This is the callback, which must be alwaysUpate as there's otherwise a glitch
+      // caused by the fact this isn't tiggering an update, and therefore not resetting
+      // the previous stored value, which eventually ends up being the same as the new
+      // value, causing the element not to update.
+      node.addWatch(
+        SPECIAL_SYMBOLS.noLookup,
+        t.assignmentExpression(
+          "=",
+          t.memberExpression(
+            t.identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+            t.identifier(attribute)
+          ),
+          expression as Identifier
+        )
+      );
+
+      // This is the event handler that updates the data:
       const callback = t.assignmentExpression(
         "=",
         expression as Identifier,
         t.memberExpression(
           t.memberExpression(
-            t.identifier(EXTRA_PARAMETERS.event),
+            t.identifier(EVENT_CALLBACK_ARGS.event),
             t.identifier("target")
           ),
           t.identifier(attribute)
@@ -95,7 +114,7 @@ function addToggleCallbackStatement(
       callExpression(
         memberExpression(
           memberExpression(
-            identifier(WATCH_CALLBACK_PARAMS.element),
+            identifier(WATCH_CALLBACK_ARGS.element),
             identifier("classList")
           ),
           identifier(method)
@@ -105,7 +124,7 @@ function addToggleCallbackStatement(
 
     addCallbackStatement(lookupKey, [
       t.ifStatement(
-        t.identifier(WATCH_CALLBACK_PARAMS.newValue),
+        t.identifier(WATCH_CALLBACK_ARGS.newValue),
         blockStatement([expressionStatement(getCallback("add"))]),
         blockStatement([expressionStatement(getCallback("remove"))])
       )
@@ -199,11 +218,8 @@ export function processNodes(
         componentDefinition.watches.push(componentWatch);
 
         node.watches.forEach(watch => {
-          if (watch.expression == SPECIAL_SYMBOLS.alwaysUpdate) {
-            addCallbackStatement(
-              SPECIAL_SYMBOLS.alwaysUpdate,
-              codeToNode(watch.callback)
-            );
+          if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
+            addCallbackStatement(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
           } else {
             const lookupKey = componentDefinition.addLookup(watch.expression);
             addCallbackStatement(lookupKey, codeToNode(watch.callback));
@@ -217,11 +233,11 @@ export function processNodes(
             identifier(SPECIAL_SYMBOLS.ctrl)
           );
           const args = props ? [props, ctrlArg] : [identifier("undefined"), ctrlArg];
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
-                  identifier(WATCH_CALLBACK_PARAMS.element),
+                  identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
                   identifier(COMPONENT_METHODS.render)
                 ),
                 args
@@ -235,12 +251,12 @@ export function processNodes(
         }
 
         if (stubName) {
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
                   // In this case "element" is in fact the nested component.
-                  identifier(WATCH_CALLBACK_PARAMS.element),
+                  identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
                   identifier(COMPONENT_METHODS.render)
                 ),
                 [
@@ -294,7 +310,7 @@ export function processNodes(
             IMPORTABLES.stashMisc,
             [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance]
           );
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -309,7 +325,7 @@ export function processNodes(
                   identifier(SPECIAL_SYMBOLS.patch)
                 ),
                 [
-                  identifier(WATCH_CALLBACK_PARAMS.element),
+                  identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
                   repeatInstruction.expression,
                   memberExpression(
                     component.componentIdentifier,
@@ -322,14 +338,10 @@ export function processNodes(
         }
 
         for (const key in _callbacks) {
-          const args =
-            key === SPECIAL_SYMBOLS.alwaysUpdate
-              ? [
-                  identifier(WATCH_CALLBACK_PARAMS.element),
-                  component.propsIdentifier,
-                  component.componentIdentifier
-                ]
-              : buildWatchCallbackParams();
+          const args = buildWatchCallbackParams(
+            component,
+            key === SPECIAL_SYMBOLS.noLookup
+          );
           componentWatch.callbacks[key] = functionExpression(
             null,
             args,
@@ -369,7 +381,7 @@ export function processNodes(
           stringLiteral(listener.eventName),
           functionExpression(
             null,
-            [identifier(EXTRA_PARAMETERS.event)],
+            [identifier(EVENT_CALLBACK_ARGS.event)],
             blockStatement([expressionStatement(updatedExpression)])
           )
         ]);

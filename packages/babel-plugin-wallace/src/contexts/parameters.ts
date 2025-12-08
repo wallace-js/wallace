@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { Function, Identifier } from "@babel/types";
 import { Component } from "../models";
-import { EXTRA_PARAMETERS, SPECIAL_SYMBOLS } from "../constants";
+import { XARGS, SPECIAL_SYMBOLS } from "../constants";
 import { error, ERROR_MESSAGES } from "../errors";
 
 interface PropsMap {
@@ -34,8 +34,8 @@ function checkForIllegalNamesInProps(
   propVariableMap: { [key: string]: string }
 ) {
   const illegalNamesFound = [];
-  for (let name in EXTRA_PARAMETERS) {
-    const variable = EXTRA_PARAMETERS[name];
+  for (let name in XARGS) {
+    const variable = XARGS[name];
     if (propVariableMap.hasOwnProperty(variable)) {
       illegalNamesFound.push(variable);
     }
@@ -50,7 +50,7 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
   if (extraArg === undefined) {
     return;
   }
-  const allowed: string[] = Array.from(Object.values(EXTRA_PARAMETERS));
+  const allowed: string[] = Array.from(Object.values(XARGS));
   if (t.isObjectPattern(extraArg)) {
     // key: prop on original object, may be an ObjectPattern
     // value: as used in function
@@ -151,8 +151,10 @@ export function processFunctionParameters(
   checkForIllegalNamesInExtraArgs(path);
   renamePropKeysInsideFunction(path, propVariableMap, component.propsIdentifier.name);
   const extraArgMap = {};
-  extraArgMap[EXTRA_PARAMETERS.component] = component.componentIdentifier.name;
-  extraArgMap[EXTRA_PARAMETERS.controller] =
+  extraArgMap[XARGS.ev] = XARGS.event;
+  extraArgMap[XARGS.el] = XARGS.element;
+  extraArgMap[XARGS.component] = component.componentIdentifier.name;
+  extraArgMap[XARGS.controller] =
     `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;
   renameExtaArgs(path, extraArgMap);
 }

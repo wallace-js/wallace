@@ -81,14 +81,14 @@ describe("Illegal names in props", () => {
 
   test("illegal name in destructured props compiles with error", () => {
     const src = `
-      const A = ({e}) => (
+      const A = ({element}) => (
         <div>
           Test
         </div>
       );
     `;
     expect(src).toCompileWithError(
-      'Illegal names in props: "e" - these are reserved for extra args.'
+      'Illegal names in props: "element" - these are reserved for extra args.'
     );
   });
 

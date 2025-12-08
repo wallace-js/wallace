@@ -23,7 +23,7 @@ export class ComponentDefinitionData {
   component: Component;
   html: string;
   watches: Array<ComponentWatch> = [];
-  dynamicElements: { [key: number]: CallExpression } = {};
+  dynamicElements: { [key: number]: Expression } = {};
   baseComponent: Expression | undefined;
   lookups: { [key: string]: FunctionExpression } = {};
   collectedRefs: Array<string> = [];

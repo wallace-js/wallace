@@ -7,8 +7,8 @@ import {
   isIdentifier,
   numericLiteral
 } from "@babel/types";
-import { ExtractedNode, Module } from "../models";
-import { COMPONENT_BUILD_PARAMS, IMPORTABLES, WATCH_CALLBACK_PARAMS } from "../constants";
+import { Component, ExtractedNode, Module } from "../models";
+import { COMPONENT_BUILD_PARAMS, IMPORTABLES, WATCH_CALLBACK_ARGS } from "../constants";
 import { NodeAddress } from "./types";
 
 export function getSiblings(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
@@ -23,15 +23,18 @@ export function buildAddressArray(address: NodeAddress): ArrayExpression {
   return arrayExpression(address.map(i => numericLiteral(i)));
 }
 
-export function buildFindElementCall(
-  module: Module,
-  address: NodeAddress
-): CallExpression {
+/**
+ * Returns a findElement(root, []) call or `root` if address is [] as that just means
+ * root.
+ */
+export function buildFindElementCall(module: Module, address: NodeAddress): Expression {
   module.requireImport(IMPORTABLES.findElement);
-  return callExpression(identifier(IMPORTABLES.findElement), [
-    identifier(COMPONENT_BUILD_PARAMS.rootElement),
-    buildAddressArray(address)
-  ]);
+  return address.length
+    ? callExpression(identifier(IMPORTABLES.findElement), [
+        identifier(COMPONENT_BUILD_PARAMS.rootElement),
+        buildAddressArray(address)
+      ])
+    : identifier(COMPONENT_BUILD_PARAMS.rootElement);
 }
 
 export function buildNestedClassCall(
@@ -96,15 +99,20 @@ export function renameVariablesInExpression(
 }
 
 /**
- * No user code gets copied into the watch callback functions, so we can hardcode params
- * as they won't clash with anything.
+ * Must match how it is called in wallace/lib/component.
  */
-export function buildWatchCallbackParams() {
-  return [
-    WATCH_CALLBACK_PARAMS.newValue,
-    WATCH_CALLBACK_PARAMS.oldValue,
-    WATCH_CALLBACK_PARAMS.element,
-    WATCH_CALLBACK_PARAMS.props,
-    WATCH_CALLBACK_PARAMS.component
-  ].map(letter => identifier(letter));
+export function buildWatchCallbackParams(component: Component, noLookup: boolean) {
+  // TODO: figure out why the always watch needs to be different.
+  return noLookup
+    ? [
+        identifier(WATCH_CALLBACK_ARGS.element),
+        component.propsIdentifier,
+        component.componentIdentifier
+      ]
+    : [
+        identifier(WATCH_CALLBACK_ARGS.element),
+        identifier(WATCH_CALLBACK_ARGS.props),
+        identifier(WATCH_CALLBACK_ARGS.component),
+        identifier(WATCH_CALLBACK_ARGS.newValue)
+      ];
 }
