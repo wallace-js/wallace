@@ -21,61 +21,78 @@ It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/
 
 ### 1. Performance
 
-Wallace is perhaps the fastest loading framework out there:
+Wallace is perhaps the smallest (and therefore fastest loading) framework out there. Here is the bundle size for different framework implementations of the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
 
 ![Bar chart of bundle sizes](./assets/size-compressed.jpg)
 
-And DOM updates are pretty fast too:
+This makes Wallace ideal for:
+
+- Landing pages.
+- Large apps where you switch pages frequently (there's less need for an SPA if you have tiny bundles, especially if when combined with a PWA app skeleton).
+- Situations where resources or connectivity are limited.
+
+And its DOM updates are pretty fast too. Here is the time* in milliseconds to create 1000 rows on the benchmark app:
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.jpg)
 
-But the truth is you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
+*\* Times are taken from local runs, using non-keyed implementations where available. Will submit for an official run soon. Bundle sizes would be identical.* 
+
+But benchmarks aren't the same as the real world, where performance is really down to how much freedom you have to find workarounds to bottlenecks. As we'll see below, Wallace gives you more freedom than any other framework.
 
 ### 2. Productivity
 
-Wallace has several features which boost productivity:
+Wallace is perhaps the simplest and easiest framework to learn and use (with the least to remember) making it ideal for:
 
-1. Clean and compact syntax (~40% fewer lines of JSX than React).
-2. Sensible reactivity - you control where and how.
+- Beginners.
+- Learning to code.
+- People who don't touch the code very often.
+- People who enjoy shipping on Thursday morning instead of Friday night.
+
+It has several features which boost productivity:
+
+1. Full documentation in IDE tool tips.
+2. Deep TypeScript support (if you want it).
 3. Powerful inheritance & composition patterns.
-4. Deep TypeScript support (if you want it).
-5. Full documentation in IDE tool tips.
+4. Clean and compact syntax (~40% fewer lines of JSX than React).
 
-But the real win comes from what Wallace _lacks_:
+And lacks several things which kill productivity:
 
-##### No voodoo magic
+##### No hidden magic
 
-Everything is clear, mechanical and obvious - even reactive behaviour.
+You know exactly why, when and how everything updates.
 
-##### No hidden engines
+##### No magic reactivity
 
-The rendering and DOM operations are so simple you can interact with them.
+You're in full control of any reactive behaviour, and can see exactly how it works.
 
 ##### No awkward patterns
 
-The object oriented design means you don't need hooks, portals, signals, providers, state handlers, context managers etc...
+No hooks, portals, signals, providers, state handlers, context managers etc... Just objects calling methods on other objects, as simple as can be.
 
-There's simply a lot less to learn, remember, wrangle with or accuse when things break. And that saves a _lot_ of time.
+Wallace essentially saves you time by wasting less of your time than other frameworks.
 
 ### 3. Freedom
 
-Wallace sets up a tree of components, which are objects you can interact with, and whose methods you can override. There are no other objects in play. This makes Wallace the only truly "open" framework in that every behaviour and operation can be overridden.
+Wallace is perhaps the world's only fully open framework, in that you can override *all* run time operations at a very granular level, if you so choose.
 
-This gives you full freedom to do anything really, but most likely:
+This gives you freedom to do anything, such as:
 
-- Run partial updates or direct DOM operations deep in the tree, cleanly and safely.
-- Optimise further than any other framework - making it the best option for performance.
+- Change how a component updates (all or part of) its DOM.
+- Run partial updates deep in the tree, cleanly and safely.
+- Optimise further than any other framework - making Wallace the best option for performance-critical apps.
 - Solve performance bottlenecks (which can hit any framework) with relative ease - making it the safest option all round.
 
-You can't predict whether a project will hit one of these snags, how badly the framework will get in your way, how much time that will drain or how much time you'd have saved by using jQuery instead.
+No other framework offers this. In fact most restrict you so severely that you can easily end up with a poorly performing view with no way to solve it - other than a really ugly raw DOM hack, which then drains your productivity as you have to write and maintain that mess (but not before wasting a ton of time searching for ways to avoid it).
 
-The only safe option is a fully open framework.
+Only freedom can protect your performance and productivity.
 
-### Name
+## Name
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say _freedom_ in Scotland without someone shouting _FREEDOM!!_ back at you, because of this scene :
+This framework is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) as you can't say "*freedom*" in Scotland (where this framework originates) more than a three times without someone shouting "*FREEDOM!!*", because of this scene:
 
-![Mel Gibson in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
+![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
+
+Whether this refers the freedom of a fully open framework, or freedom from the stranglehold of React remains to be seen.
 
 ## Status
 
@@ -85,7 +102,7 @@ Wallace is rather young, and hasn't been fully battle tested but:
 2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
 3. You can attract more users and contributors by giving Wallace a ★
 
-## Usage
+## Learn
 
 Three quick ways to try Wallace:
 
