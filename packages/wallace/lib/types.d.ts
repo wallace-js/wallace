@@ -98,7 +98,10 @@ render(props, ctrl) {
 Updates the DOM. Only called internally by `render`, but you can call it from other
 places.
 
-You can override these methods, and add new ones:
+#### Overriding
+
+You can override these methods, and add new ones using `methods` directly on the
+component definition:
 
 ```tsx
 MyComponent.methods({
@@ -118,7 +121,21 @@ This has the same effect as setting them on the prototype:
 MyComponent.prototype.render = function () {};
 ```
 
-You access the instance as `this` in methods, but `self` in the JSX.
+You can use `this.base` to access methods on the base `Component` class:
+
+```tsx
+MyComponent.methods({
+  render(props) {
+    this.base.render.call(this, props, ctrl);
+  }
+});
+```
+
+Note that `base` is not the same as `super` in classes which access the lowest override.
+
+You access the instance as `this` in methods, but cannot use `this` in arrow functions,
+so use `self` from the **xargs** in component functions.
+
 
 ### 1.4 Fields
 
