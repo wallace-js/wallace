@@ -475,10 +475,13 @@ declare module "wallace" {
   > {
     (
       props: Props,
-      other?: {
+      xargs?: {
         ctrl: Controller;
         self: ComponentInstance<Props, Controller, Methods>;
         event: Event;
+        ev: Event;
+        element: HTMLElement;
+        el: HTMLElement;
       }
     ): JSX.Element;
     nest?({
