@@ -111,6 +111,7 @@ class IfDirective extends Directive {
 
 class OnEventDirective extends Directive {
   static attributeName = "on*";
+  static allowString = true;
   static help = `
     Creates an event handler:
 

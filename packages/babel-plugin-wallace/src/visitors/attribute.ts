@@ -66,8 +66,7 @@ export const attributeVisitors = {
       return;
     }
 
-    const isEventHandler =
-      extractedValue.type === "expression" && DOM_EVENT_HANDLERS.includes(base);
+    const isEventHandler = DOM_EVENT_HANDLERS.includes(base.toLowerCase());
     const directiveClass = isEventHandler
       ? wallaceConfig.directives["on*"]
       : wallaceConfig.directives[base];

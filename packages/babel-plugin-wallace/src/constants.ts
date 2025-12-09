@@ -150,4 +150,4 @@ export const DOM_EVENTS = [
 ];
 
 export const DOM_EVENTS_LOWERCASE = DOM_EVENTS.map(e => e.toLowerCase());
-export const DOM_EVENT_HANDLERS = DOM_EVENTS.map(e => `on${e}`);
+export const DOM_EVENT_HANDLERS = DOM_EVENTS_LOWERCASE.map(e => `on${e}`);
