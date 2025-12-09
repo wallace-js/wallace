@@ -23,11 +23,11 @@ It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/
 
 Wallace is perhaps the fastest loading framework out there:
 
-![Bar chart showing bundle sizes](./assets/bundle-sizes.jpg)
+![Bar chart of bundle sizes](./assets/size-compressed.jpg)
 
 And DOM updates are pretty fast too:
 
-![Bar chart showing benchmark metrics](./assets/benchmark-metrics.jpg)
+![Bar chart of times to create 1000 rows](./assets/run1k.jpg)
 
 But the truth is you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks. And the only _real_ protection against that is **freedom** (see below).
 
@@ -41,7 +41,7 @@ Wallace has several features which boost productivity:
 4. Deep TypeScript support (if you want it).
 5. Full documentation in IDE tool tips.
 
-But the real win comes from what Wallace *lacks*:
+But the real win comes from what Wallace _lacks_:
 
 ##### No voodoo magic
 
@@ -55,7 +55,7 @@ The rendering and DOM operations are so simple you can interact with them.
 
 The object oriented design means you don't need hooks, portals, signals, providers, state handlers, context managers etc...
 
-There's simply a lot less to learn, remember, wrangle with or accuse when things break. And that saves a *lot* of time.
+There's simply a lot less to learn, remember, wrangle with or accuse when things break. And that saves a _lot_ of time.
 
 ### 3. Freedom
 
@@ -73,7 +73,7 @@ The only safe option is a fully open framework.
 
 ### Name
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say *freedom* in Scotland without someone shouting *FREEDOM!!* back at you, because of this scene :
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) because you can't say _freedom_ in Scotland without someone shouting _FREEDOM!!_ back at you, because of this scene :
 
 ![Mel Gibson in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 

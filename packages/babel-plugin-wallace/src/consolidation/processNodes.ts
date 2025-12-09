@@ -37,7 +37,25 @@ function addBindInstruction(node: ExtractedNode) {
     const inputType = node.element.type.toLowerCase();
     const attribute = inputType === "checkbox" ? "checked" : "value";
     node.bindInstructions.forEach(({ eventName, expression }) => {
-      node.watchAttribute(attribute, expression);
+      // node.watchAttribute(attribute, expression);
+
+      // This is the callback, which must be alwaysUpate as there's otherwise a glitch
+      // caused by the fact this isn't tiggering an update, and therefore not resetting
+      // the previous stored value, which eventually ends up being the same as the new
+      // value, causing the element not to update.
+      node.addWatch(
+        SPECIAL_SYMBOLS.noLookup,
+        t.assignmentExpression(
+          "=",
+          t.memberExpression(
+            t.identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+            t.identifier(attribute)
+          ),
+          expression as Identifier
+        )
+      );
+
+      // This is the event handler that updates the data:
       const callback = t.assignmentExpression(
         "=",
         expression as Identifier,
@@ -200,11 +218,8 @@ export function processNodes(
         componentDefinition.watches.push(componentWatch);
 
         node.watches.forEach(watch => {
-          if (watch.expression == SPECIAL_SYMBOLS.alwaysUpdate) {
-            addCallbackStatement(
-              SPECIAL_SYMBOLS.alwaysUpdate,
-              codeToNode(watch.callback)
-            );
+          if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
+            addCallbackStatement(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
           } else {
             const lookupKey = componentDefinition.addLookup(watch.expression);
             addCallbackStatement(lookupKey, codeToNode(watch.callback));
@@ -218,7 +233,7 @@ export function processNodes(
             identifier(SPECIAL_SYMBOLS.ctrl)
           );
           const args = props ? [props, ctrlArg] : [identifier("undefined"), ctrlArg];
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -236,7 +251,7 @@ export function processNodes(
         }
 
         if (stubName) {
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -295,7 +310,7 @@ export function processNodes(
             IMPORTABLES.stashMisc,
             [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance]
           );
-          addCallbackStatement(SPECIAL_SYMBOLS.alwaysUpdate, [
+          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
                 memberExpression(
@@ -325,7 +340,7 @@ export function processNodes(
         for (const key in _callbacks) {
           const args = buildWatchCallbackParams(
             component,
-            key === SPECIAL_SYMBOLS.alwaysUpdate
+            key === SPECIAL_SYMBOLS.noLookup
           );
           componentWatch.callbacks[key] = functionExpression(
             null,

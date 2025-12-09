@@ -1,4 +1,4 @@
-const ALWAYS_UPDATE = "__";
+const NO_LOOKUP = "__";
 
 /**
  * The base component.
@@ -52,7 +52,7 @@ proto._rq = function (props, key) {
 proto._ac = function (props, element, callbacks) {
   for (let key in callbacks) {
     let callback = callbacks[key];
-    if (key === ALWAYS_UPDATE) {
+    if (key === NO_LOOKUP) {
       callback(element, props, this);
     } else {
       const result = this._rq(props, key);

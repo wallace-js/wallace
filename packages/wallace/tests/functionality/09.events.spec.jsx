@@ -1,10 +1,21 @@
 import { testMount } from "../utils";
 
 describe("Event directive", () => {
+  test("disallows null", () => {
+    const code = `
+      const Bar = () => (
+        <button onClick />
+      )
+    `;
+    expect(code).toCompileWithError(
+      'The "on*" directive value must be of type expression or string. Found: null.'
+    );
+  });
+
   test("with string value creates normal event", () => {
     const MyComponent = () => <div ref:target onClick="console.debug(999)"></div>;
     const component = testMount(MyComponent);
-    // In HTML is should be lower case.
+    // In HTML it will be lower case.
     expect(component).toRender(`<div onclick="console.debug(999)"></div>`);
   });
 
@@ -22,7 +33,7 @@ describe("Event directive", () => {
     expect(callBackArgs[0]).toBe(42);
   });
 
-  test("with callback can pass extra args", () => {
+  test("with callback can access xargs", () => {
     let callBackArgs;
     function foo() {
       callBackArgs = Array.from(arguments);

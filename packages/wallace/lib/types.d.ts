@@ -16,6 +16,7 @@
   6. Inheritance
   7. Stubs
   8. TypeScript
+  9. Utility functions
 
 For more detailed documentation go to https://github.com/wallace-js/wallace
 
@@ -97,7 +98,10 @@ render(props, ctrl) {
 Updates the DOM. Only called internally by `render`, but you can call it from other
 places.
 
-You can override these methods, and add new ones:
+#### Overriding
+
+You can override these methods, and add new ones using `methods` directly on the
+component definition:
 
 ```tsx
 MyComponent.methods({
@@ -117,7 +121,21 @@ This has the same effect as setting them on the prototype:
 MyComponent.prototype.render = function () {};
 ```
 
-You access the instance as `this` in methods, but `self` in the JSX.
+You can use `this.base` to access methods on the base `Component` class:
+
+```tsx
+MyComponent.methods({
+  render(props) {
+    this.base.render.call(this, props, ctrl);
+  }
+});
+```
+
+Note that `base` is not the same as `super` in classes which access the lowest override.
+
+You access the instance as `this` in methods, but cannot use `this` in arrow functions,
+so use `self` from the **xargs** in component functions.
+
 
 ### 1.4 Fields
 
@@ -189,9 +207,11 @@ over it in your IDE.
 
 You can also display this list by hovering over any JSX element, like `div`.
 
+- `apply` runs a callback to modify an element.
 - `bind` updates a value when an input is changed.
 - `class:xyz` defines a set of classes to be toggled.
-- `hide` sets and element or component's hidden property.
+- `hide` sets an element or component's hidden property.
+- `html` Set the element's `innnerHTML` property.
 - `if` excludes an element from the DOM.
 - `on[EventName]` creates an event handler (note the code is copied)
 - `props` specifes props for a nested or repeated component, in which case it must be
@@ -305,7 +325,7 @@ Notes:
 
 ## 8. TypeScript
 
-All typing comes from the `Uses` type which must be placed right after the comonent name:
+The main type is `Uses` which must be placed right after the comonent name:
 
 ```tsx
 import { Uses } from 'wallace';
@@ -418,6 +438,43 @@ const Child = extendComponent<newProps, Controller, Methods>(Parent);
    to `any`.
 2. Each type must extend its corresponding type on base.
 
+### Other types:
+
+Wallace defines some other types you may use:
+
+ - `Component<Props, Controller, Methods>` - the base component class (it is a 
+    constructor, not a class)
+ - `ComponentInstance<Props, Controller, Methods>` - a component instance.
+
+## Utility functions
+
+Each of these has their own JSDoc, we just lsit them here.
+
+
+### extendComponent
+
+Define a new componend by extending another one:
+
+```
+const Foo = extendComponent(Base);
+const Bar = extendComponent(Base, () => <div></div>);
+```
+
+### mount
+
+Mounts an instance of a component to the DOM:
+
+```
+mount("elementId", MyComponent, props, ctrl);
+```
+
+### watch
+
+Returns a Proxy of an object which calls `callback` when keys are set:
+
+```
+watch(obj, () => console.log('obj modified);
+```
 ---
 Report any issues to https://github.com/wallace-js/wallace (and please give it a ★)
 
@@ -435,10 +492,13 @@ declare module "wallace" {
   > {
     (
       props: Props,
-      other?: {
+      xargs?: {
         ctrl: Controller;
         self: ComponentInstance<Props, Controller, Methods>;
         event: Event;
+        ev: Event;
+        element: HTMLElement;
+        el: HTMLElement;
       }
     ): JSX.Element;
     nest?({
@@ -509,12 +569,13 @@ declare module "wallace" {
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
+    base: Component<Props, Controller>;
   } & Methods;
 
   /**
    * The component constructor function (typed as a class, but isn't).
    */
-  export class Component__<Props = any, Controller = any> {
+  export class Component<Props = any, Controller = any> {
     update(): void;
     render(props: Props, ctrl?: Controller): void;
   }
@@ -566,15 +627,15 @@ declare module "wallace" {
    * The callback does not indicate the data has changed, only that a key was set.
    *
    * Some methods like `Array.push` set the index and then the length immediately after,
-   * so we use a grace period to avoid calling the callback twice for what is really a
+   * so we use a timeout period to avoid calling the callback twice for what is really a
    * single operation.
    *
    * @param {*} target - Any object, including arrays.
-   * @param {*} grace - Any value in ms. Defaults to 100.
+   * @param {*} timeout - Any value in ms. Defaults to 100.
    * @param {*} callback - A callback function.
    * @returns a Proxy of the object.
    */
-  export function watch<T>(target: T, callback: CallableFunction, grace?: number): T;
+  export function watch<T>(target: T, callback: CallableFunction, timeout?: number): T;
 }
 
 type MustBeExpression = Exclude<any, string>;
@@ -585,14 +646,25 @@ type MustBeExpression = Exclude<any, string>;
  */
 interface DirectiveAttributes extends AllDomEvents {
   /**
-   * ## Wallace directive: base
+   * ## Wallace directive: apply
    *
-   * Specifies a base component definition to inherit from.
+   * Applies a callback, typically to modify its element, which is accessible via
+   * **xargs**.
    *
-   * This allows you to inherit methods and override stubs.
-   * Must be an expression returning a component definition.
+   * Note that you can use `element` from **xargs** multiple times and each will refer
+   * to the element where it is used.
+   *
+   * ```
+   * const MyComponent = (_, { element }) => (
+   *   <div>
+   *     <div apply={doSomething(element)}></div>
+   *     <div apply={doSomethingElse(element)}></div>
+   *   </div>
+   * );
+   * ```
+   *
    */
-  base?: MustBeExpression;
+  apply?: MustBeExpression;
 
   /**
    * ## Wallace directive: bind
@@ -667,6 +739,12 @@ interface DirectiveAttributes extends AllDomEvents {
    * underneath.
    */
   hide?: MustBeExpression;
+
+  /** ## Wallace directive: html
+   *
+   * Set the element's `innnerHTML` property.
+   */
+  html?: MustBeExpression;
 
   /** Wallace excludes this element from the DOM if the condition is false,
    * and does not render dynamic elements underneath. */
@@ -750,11 +828,20 @@ declare namespace JSX {
 
   interface IntrinsicElements {
     /**
+     * Nesting syntax:
+     *   ```
+     *   <MyComponent.nest props={singleProps} />
+     *   <MyComponent.repeat props={arrayOfProps} />
+     *   ```
+     * But note that repeat must not have siblings.
+     *
      * Available Wallace directives:
      *
+     * - `apply` runs a callback to modify an element.
      * - `bind` updates a value when an input is changed.
      * - `class:xyz` defines a set of classes to be toggled.
-     * - `hide` sets and element or component's hidden property.
+     * - `hide` sets an element or component's hidden property.
+     * - `html` Set the element's `innnerHTML` property.
      * - `if` excludes an element from the DOM.
      * - `on[EventName]` creates an event handler (note the code is copied)
      * - `props` specifes props for a nested or repeated component, in which case it must be
