@@ -1,14 +1,14 @@
 import { Directive } from "./models";
 import { builtinDirectives } from "./directives";
 
-interface GleekitOptions {
+interface WallaceOptions {
   directives?: Array<typeof Directive>;
 }
 
 class WallaceConfig {
   directives: { [key: string]: typeof Directive } = {};
   #loaded: boolean = false;
-  applyOptions(options: GleekitOptions) {
+  applyOptions(options: WallaceOptions) {
     if (this.#loaded) {
       return;
     }
