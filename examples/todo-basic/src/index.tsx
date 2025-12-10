@@ -20,7 +20,7 @@ const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) 
   <div class="tasklist">
     <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
-      <Task.repeat props={tasks} />
+      <Task.repeat items={tasks} />
     </div>
     <div style="margin-top: 10px">
       <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />

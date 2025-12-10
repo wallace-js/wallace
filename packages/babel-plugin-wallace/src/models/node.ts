@@ -69,7 +69,7 @@ export class ExtractedNode {
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
   hasConditionalChildren: boolean = false;
-  repeatExpression: Expression | undefined;
+  #repeatExpression: Expression | undefined;
   poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
@@ -94,15 +94,9 @@ export class ExtractedNode {
     throw new Error("Not implemented");
   }
   addEventListener(eventName: string, callback: Expression) {
-    if (this.isNestedComponent) {
-      error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
-    }
     this.eventListeners.push({ eventName, callback });
   }
   addBindInstruction(eventName: string, expression: Expression) {
-    if (this.isNestedComponent) {
-      error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
-    }
     this.bindInstructions.push({ eventName, expression });
   }
   addWatch(
@@ -121,9 +115,6 @@ export class ExtractedNode {
     this.toggleTargets.push({ name, value });
   }
   watchAttribute(attName: string, expression: Expression) {
-    if (this.isNestedComponent) {
-      error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
-    }
     this.addWatch(expression, setAttributeCallback(attName));
   }
   watchText(expression: Expression) {
@@ -133,14 +124,10 @@ export class ExtractedNode {
     );
   }
   setProps(expression: Expression) {
-    if (this.isRepeatedComponent) {
-      this.setRepeatExpression(expression);
-    } else {
-      if (this.#props) {
-        error(this.path, ERROR_MESSAGES.PROPS_ALREADY_DEFINED);
-      }
-      this.#props = expression;
+    if (this.#props) {
+      error(this.path, ERROR_MESSAGES.PROPS_ALREADY_DEFINED);
     }
+    this.#props = expression;
   }
   getProps(): Expression | undefined {
     return this.#props;
@@ -169,18 +156,12 @@ export class ExtractedNode {
   getRef(): string | undefined {
     return this.#ref;
   }
-  // TODO: fix not to use directive.
   setRepeatExpression(expression: Expression) {
-    // if (this.isRepeatedComponent) {
-    //   error(this.path, ERROR_MESSAGES.REPEAT_ALREADY_DEFINED);
-    // }
-    // if (!this.isNestedComponent) {
-    //   error(this.path, ERROR_MESSAGES.REPEAT_ONLY_ON_NESTED_CLASS);
-    // }
+    if (this.#repeatExpression) {
+      error(this.path, ERROR_MESSAGES.ITEMS_ALREADY_DEFINED);
+    }
     this.isRepeatedComponent = true;
-    // While this could potentially be set multiple times, we later check that repeat
-    // cannot be used if there siblings.
-    this.repeatExpression = expression;
+    this.#repeatExpression = expression;
     this.parent.repeatNode = this;
   }
   /**
@@ -189,7 +170,7 @@ export class ExtractedNode {
   getRepeatInstruction(): RepeatInstruction | undefined {
     return this.repeatNode
       ? {
-          expression: this.repeatNode.repeatExpression,
+          expression: this.repeatNode.#repeatExpression,
           componentCls: this.repeatNode.tagName,
           poolExpression: this.repeatNode.poolExpression
         }

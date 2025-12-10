@@ -188,7 +188,7 @@ const TopTasks = (tasks) => (
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} />
+    <Task.repeat items={tasks} />
   </div>
 );
 ```
@@ -262,7 +262,7 @@ const Task = (task) => (<div>{task.name}</div>);
 
 const TaskList = (_, {ctrl}) => (
   <div>
-    <Task.repeat props={ctrl.getTasks()} />
+    <Task.repeat items={ctrl.getTasks()} />
   </div>
 );
 
@@ -347,8 +347,7 @@ const Task: Uses<null> = () => <div>Hello</div>;
 
 ### Props
 
-TypeScript will ensure you pass correct props during mounting or nesting,
-including repeat, which expects an arry of the type:
+TypeScript will ensure you pass correct props during mounting or nesting:
 
 ```
 const TaskList: Uses<iTask[]> = (tasks) => (
@@ -356,7 +355,7 @@ const TaskList: Uses<iTask[]> = (tasks) => (
     First task:
     <Task.nest props={tasks[0]} />
     <div>
-      <Task.repeat props={tasks.slice(1)} />
+      <Task.repeat items={tasks.slice(1)} />
     </div>
   </div>
 );
@@ -511,11 +510,11 @@ declare module "wallace" {
       hide?: boolean;
     }): JSX.Element;
     repeat?({
-      props,
+      items,
       show,
       hide
     }: {
-      props: Array<Props>;
+      items: Array<Props>;
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
@@ -536,7 +535,7 @@ declare module "wallace" {
   };
 
   /**
-   * A type which ust be placed as shown:
+   * A type which must be placed as shown:
    *
    * ```tsx
    * const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
@@ -564,20 +563,53 @@ declare module "wallace" {
     Controller = any,
     Methods extends object = {}
   > = {
-    update(): void;
-    render(props: Props, ctrl?: Controller): void;
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
+    ref: { [key: string]: HTMLElement };
     base: Component<Props, Controller>;
-  } & Methods;
+  } & Component<Props, Controller> &
+    Methods;
 
   /**
    * The component constructor function (typed as a class, but isn't).
    */
   export class Component<Props = any, Controller = any> {
-    update(): void;
     render(props: Props, ctrl?: Controller): void;
+    /**
+     * The base render method looks like this:
+     *
+     * ```
+     * render(props?: Props, ctrl?: Controller) {
+     *   this.props = props;
+     *   this.ctrl = ctrl;
+     *   this.update();
+     * }
+     * ```
+     *
+     * You can override like so:
+     *
+     * ```
+     * render(props?: Props, ctrl?: Controller) {
+     *   // do your thing
+     *   this.base.render.call(this, props, ctrl);
+     * }
+     * ```
+     */
+    render(props?: Props, ctrl?: Controller): void;
+    /**
+     * Updates the DOM.
+     *
+     * You can override like so:
+     *
+     * ```
+     * update() {
+     *   // do your thing
+     *   this.base.update.call(this);
+     * }
+     * ```
+     */
+    update(): void;
   }
 
   /**
@@ -746,17 +778,28 @@ interface DirectiveAttributes extends AllDomEvents {
    */
   html?: MustBeExpression;
 
-  /** Wallace excludes this element from the DOM if the condition is false,
-   * and does not render dynamic elements underneath. */
+  /** ## Wallace directive: if
+   *
+   * Excludes this element from the DOM completely if the condition is false,
+   * and does not render dynamic elements underneath.
+   * When the condition becomes true, the element is reattached.
+   */
   if?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: items
+   *
+   * Specifies items for repeated component. Must be an array of the props which the
+   * nested item accepts.
+   *
+   */
+  items?: MustBeExpression;
 
   /**
    * ## Wallace directive: props
    *
-   * Specifies props for a nested or repeated component.
+   * Specifies props for a nested component.
    *
-   * If it is a repeated component, the props should be an array of whatever type it
-   * accepts.
    */
   props?: MustBeExpression;
 
@@ -831,7 +874,7 @@ declare namespace JSX {
      * Nesting syntax:
      *   ```
      *   <MyComponent.nest props={singleProps} />
-     *   <MyComponent.repeat props={arrayOfProps} />
+     *   <MyComponent.repeat items={arrayOfProps} />
      *   ```
      * But note that repeat must not have siblings.
      *
@@ -843,9 +886,9 @@ declare namespace JSX {
      * - `hide` sets an element or component's hidden property.
      * - `html` Set the element's `innnerHTML` property.
      * - `if` excludes an element from the DOM.
+     * - `items` set items for repeated component, must be an array of props.
      * - `on[EventName]` creates an event handler (note the code is copied)
-     * - `props` specifes props for a nested or repeated component, in which case it must be
-     * an array.
+     * - `props` specifes props for a nested components.
      * - `ref` saves a reference to an element or nested component.
      * - `show` sets and element or component's hidden property.
      * - `style:xyz` sets a specific style property.

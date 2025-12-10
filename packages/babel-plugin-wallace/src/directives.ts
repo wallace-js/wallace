@@ -109,6 +109,20 @@ class IfDirective extends Directive {
   }
 }
 
+class ItemsDirective extends Directive {
+  static attributeName = "items";
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  static help: `
+  Specify items for a repeated component:
+  
+  /h <NestedComponent.repeat items={arrayOfProps} />
+  `;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.setRepeatExpression(value.expression);
+  }
+}
+
 class OnEventDirective extends Directive {
   static attributeName = "on*";
   static allowString = true;
@@ -129,15 +143,11 @@ class OnEventDirective extends Directive {
 class PropsDirective extends Directive {
   static attributeName = "props";
   static allowOnNested = true;
-  static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help: `
-  Specify props for a nested or repeated component:
+  Specify props for a nested component:
   
   /h <NestedComponent.nest props={{foo: 'bar'}} />
-  /h <NestedComponent.repeat props={{foo: 'bar'}} />
-  
-  If it is a repeated component, then props should be an array of props.
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setProps(value.expression);
@@ -231,6 +241,7 @@ export const builtinDirectives = [
   HideDirective,
   HtmlDirective,
   IfDirective,
+  ItemsDirective,
   OnEventDirective,
   PropsDirective,
   RefDirective,

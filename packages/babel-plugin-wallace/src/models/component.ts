@@ -117,7 +117,7 @@ export class Component {
     });
     this.#exitLevel();
   }
-  processNestedElement(
+  processNestedOrRepeatedElement(
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
     tagName: string,
@@ -130,7 +130,7 @@ export class Component {
       tracker.parent,
       this,
       tagName,
-      true,
+      !isRepeat,
       isRepeat
     );
     path.traverse(attributeVisitors, { extractedNode });

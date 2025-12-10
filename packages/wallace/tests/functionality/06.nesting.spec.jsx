@@ -16,7 +16,6 @@ test("Can nest component without props", () => {
 });
 
 test("Disallow React style nesting", () => {
-  const fox = { name: "Fox" };
   const code = `
     const Animal = (animal) => <div>{animal.name}</div>;
     const AnimalList = () => (

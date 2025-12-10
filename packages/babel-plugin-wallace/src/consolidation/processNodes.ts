@@ -171,8 +171,8 @@ export function processNodes(
       node.toggleTriggers.length > 0 ||
       visibilityToggle ||
       node.isNestedComponent ||
-      stubName ||
-      repeatInstruction;
+      repeatInstruction || // This is NOT the same as .isRepeatedComponent, which is on parent!
+      stubName;
 
     // TODO: should ref really save the element?
     const shouldSaveElement =
@@ -181,9 +181,10 @@ export function processNodes(
     ensureToggleTargetsHaveTriggers(node);
 
     if (shouldSaveElement) {
-      const nestedComponentCls = node.isNestedComponent
-        ? t.identifier(node.tagName)
-        : stubComponentName;
+      const nestedComponentCls =
+        node.isNestedComponent || node.isRepeatedComponent
+          ? t.identifier(node.tagName)
+          : stubComponentName;
       node.elementKey = nestedComponentCls
         ? componentDefinition.saveNestedAsDynamicElement(node.address, nestedComponentCls)
         : componentDefinition.saveDynamicElement(node.address);

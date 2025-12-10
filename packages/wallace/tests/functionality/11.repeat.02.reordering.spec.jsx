@@ -3,7 +3,7 @@ import { testMount } from "../utils";
 describe("Repeat reordering", () => {
   const Container = data => (
     <div>
-      <Child.repeat props={data} />
+      <Child.repeat items={data} />
     </div>
   );
   const Child = data => <div>{data}</div>;

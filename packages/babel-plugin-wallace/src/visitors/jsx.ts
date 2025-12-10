@@ -31,7 +31,12 @@ export const jsxVisitors = {
         if (!isCapitalized(componentCls)) {
           error(path, ERROR_MESSAGES.NESTED_COMPONENT_MUST_BE_CAPTIALIZED);
         }
-        component.processNestedElement(path, tracker, componentCls, name === "repeat");
+        component.processNestedOrRepeatedElement(
+          path,
+          tracker,
+          componentCls,
+          name === "repeat"
+        );
         path.traverse(errorIfJSXelementsFoundUnderNested);
       } else if (namespace === "stub") {
         // TODO: ensure there is nothing inside and no other attributes.

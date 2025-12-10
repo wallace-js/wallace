@@ -13,7 +13,7 @@ const ClickCounter: Uses<Props> = (counter: Props) => (
 
 const CounterList = () => (
   <div>
-    <ClickCounter.repeat props={[1, 2]} />
+    <ClickCounter.repeat items={[1, 2]} />
   </div>
 );
 
