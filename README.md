@@ -41,21 +41,44 @@ But benchmarks aren't the same as the real world, where performance is really do
 
 ### 2. Productivity
 
-Wallace is perhaps the simplest and easiest framework to learn and use (with the least to remember) making it ideal for:
+Wallace is insultingly simple and easy to use. Here's what you'll be dealing with most of the time:
 
-- Beginners.
-- Learning to code.
-- People who don't touch the code very often.
-- People who enjoy shipping on Thursday morning instead of Friday night.
 
-It has several features which boost productivity:
+```tsx
+import { mount } from 'wallace';
 
-1. Full documentation in IDE tool tips.
-2. Deep TypeScript support (if you want it).
-3. Powerful inheritance & composition patterns.
-4. Clean and compact syntax (~40% fewer lines of JSX than React).
+const Task = ({ text, done }) => (
+  <div>
+    <input type="checkbox" bind={done}/>
+    <label>{text}</label>
+  </div>
+);
 
-And lacks several things which kill productivity:
+const TaskList = ( tasks ) => (
+  <div>
+    <Task.repeat items={tasks} />
+  </div>
+);
+
+mount('main', TaskList, [
+  { text: 'Learn Wallace', done: true },
+  { text: 'Star on github', done: false },
+]);
+```
+
+Things like `<Task.repeat />` help keep your JSX uncluttered and compact, with components typically needing ~40% fewer lines of JSX than React.
+
+You don't even need to remember the syntax rules or what's available as there are tool tips everywhere, including the full cheat sheet on the module import:
+
+![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
+
+Wallace also offers:
+
+1. Deep TypeScript support (if you want it).
+3. Flexible inheritance & composition patterns.
+4. A simple but powerful system for passing controllers and services around.
+
+All these features help you work faster, but the real time saver is that Wallace deliberately doesn't do things which kill productivity in other frameworks:
 
 ##### No hidden magic
 
@@ -67,13 +90,17 @@ You're in full control of any reactive behaviour, and can see exactly how it wor
 
 ##### No awkward patterns
 
-No hooks, portals, signals, providers, state handlers, context managers etc... Just objects calling methods on other objects, as simple as can be.
+No hooks, portals, signals, providers, state handlers, context managers etc... It's just objects calling methods on other objects, as simple as can be.
 
-Wallace essentially saves you time by wasting less of your time than other frameworks.
+All this makes Wallace ideal for:
+
+- Learning/teaching.
+- People who don't touch the (front end) code very often.
+- Teams that enjoy shipping on Thursday morning instead of Friday evening.
 
 ### 3. Freedom
 
-Wallace is perhaps the world's only fully open framework, in that you can override *all* run time operations at a very granular level, if you so choose.
+Wallace is perhaps the world's only *fully open* framework, in that you can override *all* run time operations at a very granular level, if you so choose.
 
 This gives you freedom to do anything, such as:
 
@@ -82,55 +109,34 @@ This gives you freedom to do anything, such as:
 - Optimise further than any other framework - making Wallace the best option for performance-critical apps.
 - Solve performance bottlenecks (which can hit any framework) with relative ease - making it the safest option all round.
 
-No other framework offers this. In fact most restrict you so severely that you can easily end up with a poorly performing view with no way to solve it - other than a really ugly raw DOM hack, which then drains your productivity as you have to write and maintain that mess (but not before wasting a ton of time searching for ways to avoid it).
+No other framework offers this. In fact most restrict you so severely that you can easily end up with a poorly performing view with no way to solve it (other than a really ugly raw DOM hack, which then drains your productivity as you have to write and maintain that mess, but not before wasting a ton of time searching for ways to avoid it).
 
-Only freedom can protect your performance and productivity.
+This freedom is not something you'll use day to day, all it does is protect your performance or productivity advantage from curve balls.
 
-## Name
+#### Its all in the name
 
-This framework is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) as you can't say "*freedom*" in Scotland (where this framework originates) more than a three times without someone shouting "*FREEDOM!!*", because of this scene:
+This framework is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) (or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/)) as you can't say "*freedom*" in Scotland (where this framework originates) more than three times without someone shouting "*FREEDOM!!*" at you, because of this scene:
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
-
-Whether this refers the freedom of a fully open framework, or freedom from the stranglehold of React remains to be seen.
 
 ## Status
 
 Wallace is rather young, and hasn't been fully battle tested but:
 
 1. You can override all behaviour at a granular level, which offers a degree of safety.
-2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io).
+2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io) and [yourstreet.org](https://www.yourstreet.org).
 3. You can attract more users and contributors by giving Wallace a ★
 
 ## Learn
 
-Three quick ways to try Wallace:
+You could spin up a quick demo and follow the tool tips, either:
 
-1. Open a StackBlitz in [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx).
-2. Load up one of the [examples](#Examples) below (on StackBlitz or locally).
-3. Create a local project with:
+- In your browser using StackBlitz (choose [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx))
+- Locally with `npx create-wallace-app`
 
-```
-npx create-wallace-app
-```
+But to really grasp the power of Wallace you'll need to follow/read the [tutorial](https://github.com/wallace-js/wallace/tree/master/TUTORIAL.md) which takes 20-30 minutes to complete, and covers everything there is to know.
 
-Whichever you pick, you probably want to start by reading the cheat sheet by hovering over `"wallace"`:
-
-![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
-
-There are more specific tool tips on most things, including JSX elements:
-
-![Tool tip on JSX element](./assets/element-hover.jpg)
-
-You might be able to find your way from there, if not read the [GUIDE](https://github.com/wallace-js/wallace/tree/master/GUIDE.md).
-
-## Examples
-
-These links open in [StackBlitz](https://stackblitz.com) so you can play around/fork/download a fully working project. If StackBlitz doesn't load, try to refresh, if not you can find all these in the [examples](https://github.com/wallace-js/wallace/tree/master/examples) directory.
-
-- [Basic todo list (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-basic)
-- [Todo list with controller (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-mvc)
-- [Todo list with undo functionality (TypeScript)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/undo)
+Alternatively you can browse through some of the [examples](https://github.com/wallace-js/wallace/tree/master/examples). Each one has a link to open it in [StackBlitz](https://stackblitz.com) it its README, which lets you fork, play and eventually download the example as starting point for your project.
 
 ## Issues
 
