@@ -1,34 +1,87 @@
-# Wallace tutorial
+# Wallace Tutorial
 
-In this tutorial we'll be creating a task list app, gradually adding more features to cover everything there is to know about Wallace.
+Table of contents:
+
+1. **Overview** - what you'll need and what you'll learn.
+
+2. **Syntax** - a quick glance at syntax.
+
+3. **Compilation** - how Wallace does its magic.
+
+4. **Rendering** - the flow that controls your DOM.
+
+5. **Reactivity** - the sane approach.
+
+6. **Controllers** - the logic part of your app.
+
+7. **Methods** - when to use component methods.
+
+8. **Styles** - a flexible approach.
+
+9. **Extending** - reusing and overriding component parts.
+
+10. **Performance** - how to make things faster.
+
+11. **Testing** - making sure your code works.
+
+12. **Helpers** - routes, forms and dialog boxes.
+
+13. **Customising** - extending Wallace syntax.
+
+## 1. Overview
+
+This tutorial walks you through every aspect of Wallace in logical order by adding features to a TODO list. You can code along if you like. There are no exercises, so you'll have to think up your own if that's how you learn.
 
 It should take 20-30 minutes.
 
-1. **Overview** - quick glance at setup syntax.
+### Prerequisites
 
-2. **Compilation** - how Wallace does its magic.
+You'll need is a basic understanding of:
 
-3. **Rendering** - the flow that controls your DOM.
+1. **ES6** - aka modern JavaScript (nice summary on [w3schools](https://www.w3schools.com/js/js_es6.asp)).
+2. **JSX** - just bear in mind Wallace uses it differently to React.
+3. **TypeScript** - optional but very useful.
 
-4. **Reactivity** - the sane approach.
+### Files
 
-5. **Controllers** - the logic part of your app.
+You'll be doing all your work in regular ES6/JSX modules. All that's needed in the HTML is an element to attach your app to, and a script tag to load your JavaScript bundle:
 
-6. **Methods** - when to use component methods.
+```html
+<body>
+  <div id="main"></div>
+  <script src="index.js"></script>
+</body>
+```
 
-7. **Styling** - a flexible approach.
+Note that you must compile that bundle from your source files with a tool like [webpack](https://webpack.js.org/), which is taken care of in the code along options below.
 
-8. **Stubs** - the flexible component inheritance and composition system.
+You probably also want a stylesheet, but that is separate from Wallace.
 
-9. **Performance tweaks** - 
+### Code along
 
-10. **Helpers** - routing, forms and dialog boxes.
+You have two options:
 
-11. **Custom directives** - extending Wallace syntax.
+#### Browser
 
-### 1. Overview
+Use StackBlitz with either [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx). These links may not have the latest version, so change the entry for `wallace` in the **package.json** file.
 
-Wallace uses components to control the DOM, which you *define* as a function that accept **props** and returns a **JSX** expression:
+#### Locally
+
+Create a project with:
+
+```
+npx create-wallace-app
+```
+
+You'll need [node](https://nodejs.org/) 18 or above. Then run your project with:
+
+```
+npm start
+```
+
+## 2. Syntax
+
+Wallace uses components to control the DOM, which you define as a function that accept **props** and returns a **JSX** expression and must therefore be in a `.jsx` or `.tsx` file:
 
 ```tsx
 const Task = ({ text, completed }) => (
@@ -43,7 +96,7 @@ It looks like to React, but works differently in several ways.
 
 #### Directives
 
-**Directives** are attributes with special meaning. We used `bind` above which sets up two-way binding between a DOM element and a value. The effect will become apparent when we make the component reactive later on.
+**Directives** are attributes with special meaning. The `bind` directive we just used sets up two-way binding between a DOM element and a value. The effect will become apparent when we make the component reactive later on.
 
 To get a list of all available directives, simply hover over any JSX element:
 
@@ -51,7 +104,7 @@ To get a list of all available directives, simply hover over any JSX element:
 
 #### Nesting
 
-The next difference is nesting syntax:
+Wallace has its own syntax for nesting and repeating nested components:
 
 ```tsx
 const TaskList = ( props ) => (
@@ -59,15 +112,15 @@ const TaskList = ( props ) => (
     <Task.nest props={props[0]} />
     <hr/>
     <div>
-      <Task.repeat props={props.slice(1)} />
+      <Task.repeat items={props.slice(1)} />
     </div>
   </div>
 );
 ```
 
-As you can see the syntax is different to React, which leaves your JSX less cluttered, more compact, and without its indentation distorted by JavaScript.
+This leaves your JSX less cluttered than React, more compact, and without its indentation distorted.
 
-These rules are also displayed in tool tips, so you don't actually need to remember all this.
+These rules are also displayed in tool tips.
 
 #### Mounting
 
@@ -85,7 +138,7 @@ const tasks = [
 mount("main", TaskList, tasks);
 ```
 
-This replaces the element with `id="main"` with a `TaskList` and renders it. You can pass an element instead of an id string if you prefer.
+This replaces the element with `id="main"` with a `TaskList` component and renders it. You can pass an element instead of an id string if you prefer.
 
 You should now see this on the page:
 
@@ -109,7 +162,7 @@ You should now see this on the page:
 
 #### TypeScript
 
-The `Uses` type gives you full TypeScript support:
+To get TypeScript support import the `Uses` and use it as shown (in a `.tsx` file):
 
 ```tsx
 import { mount, Uses } from "wallace";
@@ -132,15 +185,19 @@ const TaskList: Uses<TaskProps[]> = ( props ) => (
     <Task.nest props={props[0]} />
     <hr/>
     <div>
-       <Task.repeat props={props.slice(1)} />
+       <Task.repeat items={props.slice(1)} />
     </div>
   </div>
 );
+
+/*...*/
+
+mount("main", TaskList, tasks);
 ```
 
-TypeScript will now warn you if pass invalid props when mounting or nesting, and much more as we'll see later. Notice how the `props` directive adapts depending on whether it is used with nest or repeat.
+TypeScript will now warn you if pass invalid props when mounting or nesting.
 
-### 2. Compilation
+## 3. Compilation
 
 It might look like Wallace *calls* the `TaskList` and `Task` functions, but it doesn't. Instead Wallace *replaces* these functions with constructor functions during compilation.
 
@@ -193,7 +250,7 @@ const Task = ({ text, completed }) => (
 
 Anything in curly brackets *copied* to a different location during compilation, which is why the event handler looks like its calling `self.addTask()`.
 
-### 3. Rendering
+## 4. Rendering
 
 Here's what the `render` method looks like:
 
@@ -243,7 +300,7 @@ Note that `this.base` always refers to `Component.prototype` so you get the orig
 
 There is a neater way of overriding/adding methods.
 
-### 4. Reactivity
+## 5. Reactivity
 
 To demonstrate reactive behaviour lets change the task list to display the total completed tasks:
 
@@ -253,7 +310,7 @@ const TaskList: Uses<TaskProps[]> = ( props ) => (
     <span>Completed: {props.filter(t => t.completed).length}</span>
     <hr/>
     <div>
-       <Task.repeat props={props} />
+       <Task.repeat items={props} />
     </div>
   </div>
 );
@@ -299,7 +356,7 @@ The component is now reactive: the total completed will update as you toggle tas
 
 Let's run through why it works...
 
-#### The `render` function
+#### The `render` method
 
 As per the previous section, the `TaskList`'s `render` method will only fire once on this page, after which only it's `update` method gets called. So we're only creating the `watchedProps` once.
 
@@ -326,7 +383,7 @@ nested object also gets turned into a proxy.
 
 The important part is that the reactivity doesn't come from the component or the framework. So when things get weird, you don't have to second guess the framework. This saves a ton of time compared to frameworks where reactivity is built in.
 
-### 5. Controllers
+## 6. Controllers
 
 Wallace doesn't have controllers, only components. However, components have a special field `ctrl` whose value gets passed down to each nested components during `render`. So each nested component gets:
 
@@ -372,7 +429,7 @@ const TaskList: Uses<null, Controller> = (_, { ctrl } ) => (
     <span>Completed: {ctrl.tasks.filter(t => t.completed).length}</span>
     <hr/>
     <div>
-       <Task.repeat props={ctrl.tasks} />
+       <Task.repeat items={ctrl.tasks} />
     </div>
   </div>
 );
@@ -419,13 +476,13 @@ const TaskList: Uses<TaskListProps, Controller> = ({ tasks, completed }) => (
     <span>Completed: {completed}</span>
     <hr/>
     <div>
-       <Task.repeat props={tasks} />
+       <Task.repeat items={tasks} />
     </div>
   </div>
 );
 
 class Controller {
-  root: ComponentInstance;
+  root: ComponentInstance<TaskListProps>;
   tasks: TaskProps[];
   constructor(root: ComponentInstance, tasks: TaskProps[]) {
     this.root = root;
@@ -443,6 +500,14 @@ class Controller {
 }
 ```
 
+Notes:
+
+1. The `ctrl` is still passed to nested components, even though it is not used in `TaskList`
+
+2. You get type support when setting `this.root.props` 
+
+   
+
 If you needed more stats than just "completed" it's pretty clear where you'd add that code.
 
 
@@ -451,7 +516,7 @@ This is so much nicer than shoehorning functions into props, or using hooks, sig
 
 
 
-### 6. Methods
+## 7. Methods
 
 We often start out writing methods on the component, then move them out to a controller class (very easy when you use `Component.methods({...})` format). However there are some things which should stay in component methods:
 
@@ -469,7 +534,7 @@ const TaskList: Uses<null, Controller, TaskListMethods> = (_, { ctrl, self, even
   <div>
     <span>Completed: {ctrl.tasks.filter(t => t.completed).length}</span>
     <div>
-      <Task.repeat props={ctrl.tasks} />
+      <Task.repeat items={ctrl.tasks} />
     </div>
     <input type="text" onKeyUp={self.addTaskKeyUp(event as KeyboardEvent)} />
   </div>
@@ -555,7 +620,7 @@ const TaskList: Uses<null, Controller> = (_, { ctrl }) => (
   <div>
     <span>Completed: {ctrl.tasks.filter(t => t.completed).length}</span>
     <div>
-      <Task.repeat props={ctrl.tasks} />
+      <Task.repeat items={ctrl.tasks} />
     </div>
     <AddTaskBox.nest />
   </div>
@@ -672,7 +737,7 @@ Next make it have its own controller.
 
 
 
-### 7. Styling
+## 8. Styles
 
 Wallace doesn't have its own way of treating styles as:
 
@@ -820,11 +885,15 @@ typeof style
 
 
 
-### 8. Stubs
+## 9. Composition
 
-### 9. Partial updates
+## 10. Performance
 
-### 10. Custom directives
+## 11. Testing
+
+## 12. Helpers
+
+## 11. Customising
 
 
 
@@ -910,7 +979,7 @@ const TaskList: Uses<TaskProps[]> = ( tasks, { self }) => (
   <div>
     <span>Completed: {tasks.filter(t => t.completed).length}</span>
     <div>
-      <Task.repeat props={tasks} />
+      <Task.repeat items={tasks} />
     </div>
     <div>
       <input ref:newTaskText type="text" />
@@ -1095,7 +1164,7 @@ const TaskList: Uses<null, Controller> = (_, { ctrl, self }) => (
   <div>
     <span>Completed: {ctrl.tasks.filter(t => t.completed).length}</span>
     <div>
-      <Task.repeat props={ctrl.tasks} />
+      <Task.repeat items={ctrl.tasks} />
     </div>
     <div>
       <input ref:newTaskText type="text" />
@@ -1174,7 +1243,7 @@ const TaskList: Uses<null, Controller> = (_, { ctrl }) => (
   <div>
     <span>Completed: {ctrl.tasks.filter(t => t.completed).length}</span>
     <div>
-      <Task.repeat props={ctrl.tasks} />
+      <Task.repeat items={ctrl.tasks} />
     </div>
     <AddTaskBox.nest />
   </div>
@@ -1256,7 +1325,7 @@ const TaskList: Uses<null, Controller> = (_, { ctrl }) => (
   <div>
     <span>Completed: {ctrl.tasks.filter(t => t.completed).length}</span>
     <div>
-      <Task.repeat props={ctrl.tasks} />
+      <Task.repeat items={ctrl.tasks} />
     </div>
     <stub.addTaskBox />
   </div>
@@ -1307,7 +1376,7 @@ const NoButtonTaskList = extendComponent(TaskList, (_, { ctrl }) => (
   <div>
     <stub.addTaskBox />
     <div>
-      <Task.repeat props={ctrl.tasks} />
+      <Task.repeat items={ctrl.tasks} />
     </div>
   </div>
 );
