@@ -1,4 +1,4 @@
-import { mount, Uses, watch } from "wallace";
+import { mount, watch } from "wallace";
 
 const buildChart = (ctx, data) => {
   new Chart(ctx, {
