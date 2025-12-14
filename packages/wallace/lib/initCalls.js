@@ -2,7 +2,7 @@
  * Everything in here is used by or modified by the Babel plugin.
  */
 import { Component } from "./component";
-import { buildComponent, replaceNode } from "./utils";
+import { replaceNode } from "./utils";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 
 const throwAway = document.createElement("template");
@@ -37,9 +37,9 @@ export function findElement(rootElement, path) {
   return path.reduce((acc, index) => acc.childNodes[index], rootElement);
 }
 
-export function nestComponent(rootElement, path, cls) {
+export function nestComponent(rootElement, path, componentDefinition) {
   const el = findElement(rootElement, path),
-    child = buildComponent(cls);
+    child = new componentDefinition();
   replaceNode(el, child.el);
   return child;
 }
@@ -66,12 +66,12 @@ export function onEvent(element, eventName, callback) {
   return element;
 }
 
-export function getKeyedRepeater(cls, keyFn) {
-  return new KeyedRepeater(cls, keyFn);
+export function getKeyedRepeater(componentDefinition, keyFn) {
+  return new KeyedRepeater(componentDefinition, keyFn);
 }
 
-export function getSequentialRepeater(cls) {
-  return new SequentialRepeater(cls);
+export function getSequentialRepeater(componentDefinition) {
+  return new SequentialRepeater(componentDefinition);
 }
 
 export function defineComponent(html, watches, queries, buildFunction, inheritFrom) {

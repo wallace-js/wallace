@@ -1,18 +1,19 @@
 const NO_LOOKUP = "__";
 
 /**
- * The base component.
+ * The base component constructor.
  */
 export function Component() {
-  this.ctrl = undefined; // The controller.
-  this.props = undefined; // The props passed to the component. May be changed.
-  this.el = null; // the element - will be set during build.
-  this.ref = {}; // user set references to elements or components.
-  // Internal state objects
-  this._e = {}; // The dynamic elements in the DOM.
+  this.ctrl = undefined;
+  this.props = undefined;
+  // Internal state objects (_e is created during build)
   this._s = []; // A stash for misc objects.
   this._p = {}; // The previous values for watches to compare against.
   this._r = {}; // The current values read during an update.
+  const root = this._n.cloneNode(true);
+  this.el = root;
+  this.ref = {};
+  this._b(this, root);
 }
 
 Component.stubs = {};
@@ -25,6 +26,9 @@ Object.defineProperty(proto, "hidden", {
   }
 });
 
+/**
+ * Gets a stub by name.
+ */
 proto._gs = function (name) {
   return this.constructor.stubs[name];
 };

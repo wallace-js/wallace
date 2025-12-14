@@ -1,5 +1,3 @@
-import { buildComponent } from "./utils";
-
 /*
  * Gets a component from the pool.
  */
@@ -8,7 +6,7 @@ function getComponent(pool, componentDefinition, ctrl, key, props) {
   if (pool.hasOwnProperty(key)) {
     component = pool[key];
   } else {
-    component = buildComponent(componentDefinition);
+    component = new componentDefinition();
     pool[key] = component;
   }
   component.render(props, ctrl);
@@ -136,7 +134,7 @@ SequentialRepeater.prototype.patch = function (e, items, ctrl) {
     if (i < poolCount) {
       component = pool[i];
     } else {
-      component = buildComponent(componentDefinition);
+      component = new componentDefinition();
       pool.push(component);
       poolCount++;
     }

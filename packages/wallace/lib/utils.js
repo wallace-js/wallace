@@ -6,7 +6,7 @@
  * @param {object} props The props to pass to the component (optional)
  */
 export function mount(elementOrId, componentDefinition, props, ctrl) {
-  const component = buildComponent(componentDefinition);
+  const component = new componentDefinition();
   component.render(props, ctrl);
   replaceNode(getElement(elementOrId), component.el);
   return component;
@@ -20,20 +20,6 @@ export function getElement(elementOrId) {
   return typeof elementOrId === "string"
     ? document.getElementById(elementOrId)
     : elementOrId;
-}
-
-/**
- * Builds a component's initial DOM.
- */
-export function buildComponent(componentDefinition) {
-  // TODO: add a dev warning here:
-  // if "componentDefinition is not a constructor" then we're probably missing a stub.
-  const component = new componentDefinition();
-  const proto = componentDefinition.prototype;
-  const dom = proto._n.cloneNode(true);
-  component.el = dom;
-  proto._b(component, dom);
-  return component;
 }
 
 /**
