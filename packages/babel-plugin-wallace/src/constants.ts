@@ -16,7 +16,7 @@ export enum IMPORTABLES {
   saveRef = "saveRef",
   stashMisc = "stashMisc",
   onEvent = "onEvent",
-  getSequentialRepeater = "getSequentialRepeater"
+  SequentialRepeater = "SequentialRepeater"
 }
 
 /**

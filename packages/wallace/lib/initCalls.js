@@ -66,14 +66,6 @@ export function onEvent(element, eventName, callback) {
   return element;
 }
 
-export function getKeyedRepeater(componentDefinition, keyFn) {
-  return new KeyedRepeater(componentDefinition, keyFn);
-}
-
-export function getSequentialRepeater(componentDefinition) {
-  return new SequentialRepeater(componentDefinition);
-}
-
 export function defineComponent(html, watches, queries, buildFunction, inheritFrom) {
   const ComponentDefinition = _createConstructor(inheritFrom || Component);
   const prototype = ComponentDefinition.prototype;

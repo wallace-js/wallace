@@ -6,6 +6,7 @@ import {
   functionExpression,
   identifier,
   memberExpression,
+  newExpression,
   numericLiteral,
   stringLiteral
 } from "@babel/types";
@@ -295,11 +296,11 @@ export function processNodes(
 
         if (repeatInstruction) {
           componentDefinition.component.module.requireImport(
-            IMPORTABLES.getSequentialRepeater
+            IMPORTABLES.SequentialRepeater
           );
           const poolInstance =
             repeatInstruction.poolExpression ||
-            callExpression(identifier(IMPORTABLES.getSequentialRepeater), [
+            newExpression(identifier(IMPORTABLES.SequentialRepeater), [
               identifier(repeatInstruction.componentCls)
             ]);
 

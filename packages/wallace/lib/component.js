@@ -7,7 +7,7 @@ export function Component() {
   this.ctrl = undefined;
   this.props = undefined;
   // Internal state objects (_e is created during build)
-  this._s = []; // A stash for misc objects.
+  this._s = []; // A stash for misc objects like repeaters.
   this._p = {}; // The previous values for watches to compare against.
   this._r = {}; // The current values read during an update.
   const root = this._n.cloneNode(true);
