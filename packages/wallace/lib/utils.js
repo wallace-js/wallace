@@ -52,3 +52,10 @@ export function watch(target, callback) {
   };
   return new Proxy(target, handler);
 }
+
+export function protect(obj) {
+  return watch(obj, (target, key, value) => {
+    console.log("target", target, "key", key, "value", value);
+    throw new Error("Attempted to modify protected object");
+  });
+}

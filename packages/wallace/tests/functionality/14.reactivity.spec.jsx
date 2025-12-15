@@ -1,5 +1,5 @@
 import { testMount } from "../utils";
-import { watch } from "wallace";
+import { watch, protect } from "wallace";
 
 test("Can make a component reactive", () => {
   const MyComponent = ({ checked }) => (
@@ -79,5 +79,20 @@ describe("Watch", () => {
     reactive[0] = { a: 2 };
     expect(call.key).toEqual("0");
     expect(call.value).toEqual({ a: 2 });
+  });
+});
+
+describe("Protect", () => {
+  test("Throws error when object is modified", () => {
+    const obj = { a: 1, b: 2 };
+    const reactive = protect(obj);
+    expect(() => (reactive.a = 3)).toThrow("Attempted to modify protected object");
+  });
+
+  test("Does not throw error when object is accessed", () => {
+    const obj = { a: 1, b: 2 };
+    const reactive = protect(obj);
+    const x = reactive.a;
+    expect(x).toBe(1);
   });
 });

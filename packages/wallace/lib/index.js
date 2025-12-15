@@ -1,4 +1,4 @@
-import { mount, watch } from "./utils";
+import { mount, watch, protect } from "./utils";
 import { Component } from "./component";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 import {
@@ -20,6 +20,7 @@ export {
   mount,
   nestComponent,
   onEvent,
+  protect,
   saveRef,
   SequentialRepeater,
   stashMisc,
