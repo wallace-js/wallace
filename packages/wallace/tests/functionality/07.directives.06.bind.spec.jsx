@@ -65,7 +65,7 @@ describe("Bind specification", () => {
 test("Change event updates data", () => {
   const MyComponent = ({ text }) => <input ref:tbx type="text" bind={text} />;
   MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update(), 0);
+    this.props = watch(props, () => this.update());
     this.update();
   };
   const props = { text: "foo" };

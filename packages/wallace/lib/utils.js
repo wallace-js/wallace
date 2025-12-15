@@ -23,35 +23,30 @@ export function getElement(elementOrId) {
 }
 
 /**
- * See types for docs. Set grace to 0 for testing.
+ * Returns a proxy which calls a callback when the object or its nested objects are
+ * modified.
+ *
+ * Note that proxies have property `isProxy` set to true.
  */
-export function watch(target, callback, grace) {
-  let active = false;
-  if (grace === undefined) grace = 100;
+export function watch(target, callback) {
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
       const prop = target[key];
       if (typeof prop == "undefined") return;
-      // set value as proxy if object
-      if (!prop.isProxy && typeof prop === "object")
-        target[key] = new Proxy(prop, handler);
-      return target[key];
+      if (typeof prop === "object") return new Proxy(prop, handler);
+      if (Array.isArray(target) && typeof target[key] === "function") {
+        return (...args) => {
+          const result = target[key](...args);
+          callback(target, key, args);
+          return result;
+        };
+      }
+      return prop;
     },
-
     set(target, key, value) {
       target[key] = value;
-      if (grace) {
-        if (!active) {
-          setTimeout(() => {
-            active = false;
-          }, grace);
-          active = true;
-          callback();
-        }
-      } else {
-        callback();
-      }
+      callback(target, key, value);
       return true;
     }
   };
