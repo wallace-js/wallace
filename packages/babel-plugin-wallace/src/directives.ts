@@ -9,13 +9,23 @@
 
 import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
+import {
+  EXPRESSION_SCOPE_VARIABLES,
+  WATCH_CALLBACK_ARGS,
+  SPECIAL_SYMBOLS,
+  DOM_EVENTS_LOWERCASE
+} from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
   static allowNull = true;
   static allowString = false;
   static allowQualifier = false;
+  static allowAccessTo = [
+    EXPRESSION_SCOPE_VARIABLES.component,
+    EXPRESSION_SCOPE_VARIABLES.props,
+    EXPRESSION_SCOPE_VARIABLES.element
+  ];
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
@@ -126,6 +136,12 @@ class ItemsDirective extends Directive {
 class OnEventDirective extends Directive {
   static attributeName = "on*";
   static allowString = true;
+  static allowAccessTo = [
+    EXPRESSION_SCOPE_VARIABLES.component,
+    EXPRESSION_SCOPE_VARIABLES.props,
+    EXPRESSION_SCOPE_VARIABLES.element,
+    EXPRESSION_SCOPE_VARIABLES.event
+  ];
   static help = `
     Creates an event handler:
 

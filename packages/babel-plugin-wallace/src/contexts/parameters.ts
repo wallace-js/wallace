@@ -121,16 +121,18 @@ function extractFinalPropsName(path: NodePath<Function>): PropsMap {
   return propVariableMap;
 }
 
-/**
- * Only renames if function has its own binding.
- */
-function renameExtaArgs(
-  path: NodePath<Function>,
-  extraArgMap: { [key: string]: string }
-) {
-  for (const [key, value] of Object.entries(extraArgMap)) {
+function mapAndRenameXargs(path: NodePath<Function>, component: Component) {
+  const renameMapping: { [key: string]: string } = {};
+  renameMapping[XARGS.event] = XARGS.event;
+  renameMapping[XARGS.element] = XARGS.element;
+  renameMapping[XARGS.component] = component.componentIdentifier.name;
+  renameMapping[XARGS.controller] =
+    `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;
+
+  for (const [key, value] of Object.entries(renameMapping)) {
     if (path.scope.hasOwnBinding(key)) {
       path.scope.rename(key, value);
+      component.xargMapping[value] = key;
     }
   }
 }
@@ -150,11 +152,5 @@ export function processFunctionParameters(
   checkForIllegalNamesInProps(path, propVariableMap);
   checkForIllegalNamesInExtraArgs(path);
   renamePropKeysInsideFunction(path, propVariableMap, component.propsIdentifier.name);
-  const extraArgMap = {};
-  extraArgMap[XARGS.ev] = XARGS.event;
-  extraArgMap[XARGS.el] = XARGS.element;
-  extraArgMap[XARGS.component] = component.componentIdentifier.name;
-  extraArgMap[XARGS.controller] =
-    `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;
-  renameExtaArgs(path, extraArgMap);
+  mapAndRenameXargs(path, component);
 }

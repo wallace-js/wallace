@@ -27,10 +27,18 @@ export enum XARGS {
   controller = "ctrl",
   component = "self",
   event = "event",
+  element = "element"
+}
+
+/**
+ * The scope variables that might be allowed in directive expressions.
+ * The value is not indicative of the final variable name.
+ */
+export enum EXPRESSION_SCOPE_VARIABLES {
+  component = "component",
+  props = "props",
   element = "element",
-  // These two are allowed, they just get renamed.
-  ev = "ev",
-  el = "el"
+  event = "event"
 }
 
 export enum WATCH_CALLBACK_ARGS {
@@ -48,7 +56,8 @@ export enum WATCH_AlWAYS_CALLBACK_ARGS {
 }
 
 export enum EVENT_CALLBACK_ARGS {
-  event = XARGS.event
+  event = XARGS.event,
+  element = XARGS.element
 }
 
 export enum SPECIAL_SYMBOLS {

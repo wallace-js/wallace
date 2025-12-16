@@ -41,6 +41,7 @@ export class Component {
   extractedNodes: ExtractedNode[] = [];
   propsIdentifier: Identifier;
   componentIdentifier: Identifier;
+  xargMapping: { [key: string]: string } = {};
   constructor(
     module: Module,
     propsIdentifier: Identifier,
@@ -109,7 +110,7 @@ export class Component {
       false,
       false
     );
-    path.traverse(attributeVisitors, { extractedNode });
+    path.traverse(attributeVisitors, { extractedNode, component: this });
     this.#addNode(extractedNode, path, tracker);
     path.traverse(jsxVisitors, {
       component: this,
@@ -133,7 +134,7 @@ export class Component {
       !isRepeat,
       isRepeat
     );
-    path.traverse(attributeVisitors, { extractedNode });
+    path.traverse(attributeVisitors, { extractedNode, component: this });
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
   }

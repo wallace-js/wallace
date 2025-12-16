@@ -3,12 +3,13 @@ import type { NodePath } from "@babel/core";
 import type { JSXAttribute } from "@babel/types";
 import { wallaceConfig } from "../config";
 import { DOM_EVENT_HANDLERS } from "../constants";
-import { TagNode, NodeValue } from "../models";
+import { Component, TagNode, NodeValue } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { getPlaceholderExpression } from "../ast-helpers";
 
 interface State {
   extractedNode: TagNode;
+  component: Component;
 }
 
 /**
@@ -45,7 +46,7 @@ function extractValue(path: NodePath<JSXAttribute>): NodeValue | undefined {
   } else if (t.isJSXExpressionContainer(value)) {
     const expression = getPlaceholderExpression(path, value.expression);
     if (expression) {
-      return { type: "expression", expression: expression };
+      return { type: "expression", expression: expression, path };
     }
   } else if (value === null) {
     return { type: "null" };
@@ -55,7 +56,7 @@ function extractValue(path: NodePath<JSXAttribute>): NodeValue | undefined {
 }
 
 export const attributeVisitors = {
-  JSXAttribute(path: NodePath<JSXAttribute>, { extractedNode }: State) {
+  JSXAttribute(path: NodePath<JSXAttribute>, { extractedNode, component }: State) {
     if (extractedNode.path.node !== path.parentPath.parentPath.node) {
       // We exit here as otherwise we'd traverse attributes of nested JSXElements too.
       return;
@@ -72,7 +73,7 @@ export const attributeVisitors = {
       : wallaceConfig.directives[base];
     if (directiveClass) {
       const handler = new directiveClass();
-      handler.validate(extractedNode, extractedValue, qualifier, base);
+      handler.validate(extractedNode, extractedValue, qualifier, base, component);
       handler.apply(extractedNode, extractedValue, qualifier, base);
     } else {
       const attName = qualifier ? `${base}:${qualifier}` : base;

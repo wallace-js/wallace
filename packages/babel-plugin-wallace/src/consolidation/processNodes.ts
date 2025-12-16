@@ -371,7 +371,8 @@ export function processNodes(
         [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
         [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
           `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
-        [component.propsIdentifier.name]: `${COMPONENT_BUILD_PARAMS.component}.props`
+        [component.propsIdentifier.name]: `${COMPONENT_BUILD_PARAMS.component}.props`,
+        [EVENT_CALLBACK_ARGS.element]: `${EVENT_CALLBACK_ARGS.event}.target`
       };
       node.eventListeners.forEach(listener => {
         const updatedExpression = renameVariablesInExpression(

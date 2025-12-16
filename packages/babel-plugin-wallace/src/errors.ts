@@ -24,6 +24,9 @@ export const ERROR_MESSAGES = {
   CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
     return `The "${directive}" directive may not have a qualifier.`;
   },
+  DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
+    return `The "${directive}" directive may not access scoped variable "${name}".`;
+  },
   INVALID_EVENT_NAME_IN_BIND: (badEventNameive: string) => {
     return `"${badEventNameive}" is not a valid event name. Must be lowercase without "on" prefix. E.g. bind:keyup.`;
   },
