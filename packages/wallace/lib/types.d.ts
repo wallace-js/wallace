@@ -16,7 +16,7 @@
   6. Inheritance
   7. Stubs
   8. TypeScript
-  9. Utility functions
+  9. Helpers
 
 For more detailed documentation go to https://github.com/wallace-js/wallace
 
@@ -201,11 +201,22 @@ Notes:
 
 ## 4. Directives
 
-Directives are attributes with special behaviours, as listed below. Each has more
+Directives are attributes with special behaviours. 
+
+You can see the list of available directives by hovering over any JSX element, like
+a `div`
+
+You will get more details by hovering on the directive itself, but unfortunetely the
+tool tip won't display when you use a qualifier, like `class:danger`. To see it you can
+temporarily change it to something `class x:danger`.
+
+You can define your own directives in your babel config.
+
+Each has more
 detailed information on its JSDoc, which should display as a tool tip\* when you hover
 over it in your IDE.
 
-You can also display this list by hovering over any JSX element, like `div`.
+You can also 
 
 - `apply` runs a callback to modify an element.
 - `bind` updates a value when an input is changed.
@@ -221,7 +232,6 @@ an array.
 - `style:xyz` sets a specific style property.
 - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
 
-\* The tool tip won't display when you use a qualifier, like `class:danger`. 
 
 ## 5. Controllers
 
@@ -445,7 +455,7 @@ Wallace defines some other types you may use:
     constructor, not a class)
  - `ComponentInstance<Props, Controller, Methods>` - a component instance.
 
-## Utility functions
+## 9. Helpers
 
 Each of these has their own JSDoc, we just lsit them here.
 
@@ -469,11 +479,24 @@ mount("elementId", MyComponent, props, ctrl);
 
 ### watch
 
-Returns a Proxy of an object which calls `callback` when keys are set:
+Returns a Proxy of an object which calls `callback` when it, or its nested objects are
+modified:
 
 ```
-watch(obj, () => console.log('obj modified);
+const watchedObj = watch([], () => console.log('obj modified));
+watchedObj[0] = 'foo;  // Calls callback.
 ```
+
+### protect
+
+Returns a Proxy of an object which throws an error if it, or its nested objects are
+modified.
+
+```
+const protectedObj = protect([]);
+watchedObj[0] = 'foo';  // throws error.
+```
+
 ---
 Report any issues to https://github.com/wallace-js/wallace (and please give it a ★)
 
@@ -641,8 +664,21 @@ declare module "wallace" {
   ): ComponentInstance<Props, Controller, Methods>;
 
   /**
-   * Returns a Proxy of an object which calls `callback` when keys are set, and this
-   * extends to nested objects:
+   * Returns a Proxy of an object which throws an error when it, or its nested objects
+   * are modified:
+   *
+   * ```js
+   * const protectedObj = protect([]);
+   * watchedObj[0] = 'foo';  // throws error.
+   * ```
+   */
+  export function protect<T>(target: T): T;
+
+  type WatchCallback = (target: any, key: string, value: any) => void;
+
+  /**
+   * Returns a Proxy of an object which calls `callback` when it, or its nested objects
+   * are modified:
    *
    * ```js
    * ar = watch([], callback)
@@ -654,18 +690,23 @@ declare module "wallace" {
    * obj.y = {}
    * obj.y.z = 1000
    * ```
-   * The callback does not indicate the data has changed, only that a key was set.
+   * The callback accepts parameters:
+   *
+   *  - `target` - the object which is being modified.
+   *  - `key` - the key being set.
+   *  - `value` - the value it is being set to.
+   *
+   * The callback is called after the modification has occured.
    *
    * Some methods like `Array.push` set the index and then the length immediately after,
    * so we use a timeout period to avoid calling the callback twice for what is really a
    * single operation.
    *
    * @param {*} target - Any object, including arrays.
-   * @param {*} timeout - Any value in ms. Defaults to 100.
    * @param {*} callback - A callback function.
    * @returns a Proxy of the object.
    */
-  export function watch<T>(target: T, callback: CallableFunction, timeout?: number): T;
+  export function watch<T>(target: T, callback: WatchCallback): T;
 }
 
 type MustBeExpression = Exclude<any, string>;
@@ -737,8 +778,6 @@ interface DirectiveAttributes extends AllDomEvents {
    * );
    * ```
    *
-   * Unfortunately you lose the tooltip in that format.
-   *
    * Note that destructured props are converted to member expressions, so these examples
    * work even though it looks like you're setting a local variable.
    */
@@ -758,10 +797,33 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    * <div class:danger="danger red" toggle:danger={expr}></div>
    * ```
-   *
-   * Unfortunately you lose the tooltip in that format.
    */
   class?: any;
+
+  /**
+   * ## Wallace directive: css
+   *
+   * Shorthand for `fixed:class`:
+   *
+   * ```
+   * <div css={foo} ></div>
+   * ```
+   */
+  css?: string;
+
+  /**
+   * ## Wallace directive: fixed
+   *
+   * Sets the value of an attribute from an expression at point of component definition,
+   * as such the expression may not access props or xargs. See also `css` directive.
+   *
+   * Requires a qualifer, which is the name of the attribute to set.
+   *
+   * ```
+   * <div fixed:class={foo} ></div>
+   * ```
+   */
+  fixed?: string;
 
   /** ## Wallace directive: hide
    *
@@ -874,13 +936,15 @@ declare namespace JSX {
      *   <MyComponent.nest props={singleProps} />
      *   <MyComponent.repeat items={arrayOfProps} />
      *   ```
-     * But note that repeat must not have siblings.
+     * Note that repeated components must not have siblings.
      *
      * Available Wallace directives:
      *
      * - `apply` runs a callback to modify an element.
      * - `bind` updates a value when an input is changed.
      * - `class:xyz` defines a set of classes to be toggled.
+     * - `css` shorthand for `fixed:class`.
+     * - `fixed:xyz` sets a attribute from an expression at definition.
      * - `hide` sets an element or component's hidden property.
      * - `html` Set the element's `innnerHTML` property.
      * - `if` excludes an element from the DOM.
@@ -890,9 +954,12 @@ declare namespace JSX {
      * - `ref` saves a reference to an element or nested component.
      * - `show` sets and element or component's hidden property.
      * - `style:xyz` sets a specific style property.
-     * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
+     * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
+     *   `xyz`.
      *
-     * Note the tool tip won't display when you use a qualifier, like `class:danger`.
+     * You will get more details by hovering on the directive itself, but unfortunetely
+     * the tool tip won't display when you use a qualifier, like `class:danger`. To see
+     * it you cantemporarily change it to something `class x:danger`.
      */
     [elemName: string]: DirectiveAttributes & Record<string, any>;
   }
