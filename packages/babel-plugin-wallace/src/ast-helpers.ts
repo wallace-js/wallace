@@ -41,3 +41,13 @@ export function getPlaceholderExpression(
   }
   return expression as Expression;
 }
+
+/**
+ * Builds a string concat Expression.
+ */
+export function buildConcat(parts: Expression[]): Expression {
+  return parts.reduce(
+    (left, right) => (left ? t.binaryExpression("+", left, right) : right),
+    null
+  );
+}

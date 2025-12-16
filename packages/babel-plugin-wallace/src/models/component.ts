@@ -1,4 +1,3 @@
-import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type {
   Identifier,
@@ -7,8 +6,10 @@ import type {
   JSXText,
   Expression
 } from "@babel/types";
+import { stringLiteral } from "@babel/types";
+import { HTML_SPLITTER } from "../constants";
 import { ERROR_MESSAGES, error } from "../errors";
-import { getPlaceholderExpression } from "../ast-helpers";
+import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
 import { ExtractedNode, DynamicTextNode, PlainTextNode, StubNode, TagNode } from "./node";
 import { Module } from "./module";
@@ -42,6 +43,7 @@ export class Component {
   propsIdentifier: Identifier;
   componentIdentifier: Identifier;
   xargMapping: { [key: string]: string } = {};
+  htmlExpressions: Expression[] = [];
   constructor(
     module: Module,
     propsIdentifier: Identifier,
@@ -176,5 +178,21 @@ export class Component {
       this.#addNode(extractedNode, path, tracker);
     }
     this.#exitLevel();
+  }
+  buildHTMLString(): Expression {
+    const raw = this.rootElement.outerHTML;
+    if (this.htmlExpressions.length === 0) return stringLiteral(raw);
+    let expressions = [];
+    const chunks = raw.split(HTML_SPLITTER);
+    chunks.forEach((chunk, index) => {
+      expressions.push(stringLiteral(chunk));
+      const expression = this.htmlExpressions[index];
+      // just for the last one.
+      if (expression) {
+        expressions.push(expression);
+      }
+    });
+
+    return buildConcat(expressions);
   }
 }

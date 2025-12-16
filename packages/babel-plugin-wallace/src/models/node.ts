@@ -7,7 +7,7 @@ import type {
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
-import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "../constants";
+import { HTML_SPLITTER, WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "../constants";
 
 interface Attribute {
   name: string;
@@ -243,6 +243,10 @@ export class TagNode extends ExtractedNode {
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
+  }
+  addStaticAttribute(name: string, expression: Expression) {
+    this.component.htmlExpressions.push(expression);
+    this.attributes.push({ name, value: HTML_SPLITTER });
   }
   getElement(): HTMLElement | undefined {
     if (this.isRepeatedComponent) {

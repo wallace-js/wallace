@@ -53,7 +53,6 @@ describe("Watch", () => {
     reactive[0].a = 2;
     expect(calls).toBe(1);
     obj[0].a = 3;
-    console.log(obj[0].isProxy);
     expect(calls).toBe(1);
   });
 

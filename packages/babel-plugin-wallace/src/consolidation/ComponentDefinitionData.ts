@@ -1,9 +1,4 @@
-import type {
-  Expression,
-  CallExpression,
-  FunctionExpression,
-  Identifier
-} from "@babel/types";
+import type { Expression, FunctionExpression, Identifier } from "@babel/types";
 import {
   blockStatement,
   callExpression,
@@ -21,7 +16,7 @@ import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils"
  */
 export class ComponentDefinitionData {
   component: Component;
-  html: string;
+  html: Expression;
   watches: Array<ComponentWatch> = [];
   dynamicElements: { [key: number]: Expression } = {};
   baseComponent: Expression | undefined;

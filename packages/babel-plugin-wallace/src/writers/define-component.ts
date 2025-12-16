@@ -11,16 +11,11 @@ import type {
   StringLiteral
 } from "@babel/types";
 import { identifier, objectExpression } from "@babel/types";
-import { escapeSingleQuotes, stripHtml } from "../utils";
 import { ComponentDefinitionData, consolidateComponent } from "../consolidation";
 
 // component base to inherit from. Using 0 as false.
 function buildComponentBaseArg(componentDefinition: ComponentDefinitionData): Expression {
   return componentDefinition.baseComponent || t.numericLiteral(0);
-}
-
-function buildTemplateArg(componentDefinition: ComponentDefinitionData): StringLiteral {
-  return t.stringLiteral(escapeSingleQuotes(stripHtml(componentDefinition.html)));
 }
 
 /**
@@ -114,7 +109,7 @@ function buildComponentBuildFunction(
 export function buildDefineComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
   const args: any[] = [
-    buildTemplateArg(componentDefinition),
+    componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
     buildComponentBuildFunction(componentDefinition)

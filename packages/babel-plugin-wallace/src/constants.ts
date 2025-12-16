@@ -8,6 +8,8 @@ export enum COMPONENT_METHODS {
   getStub = "_gs"
 }
 
+export const HTML_SPLITTER = "____split____";
+
 export enum IMPORTABLES {
   defineComponent = "defineComponent",
   extendComponent = "extendComponent",
@@ -35,7 +37,7 @@ export enum XARGS {
  * The value is not indicative of the final variable name.
  */
 export enum EXPRESSION_SCOPE_VARIABLES {
-  component = "component",
+  component = "self",
   props = "props",
   element = "element",
   event = "event"

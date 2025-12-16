@@ -26,7 +26,7 @@ class ApplyDirective extends Directive {
     EXPRESSION_SCOPE_VARIABLES.props,
     EXPRESSION_SCOPE_VARIABLES.element
   ];
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
 }
@@ -45,7 +45,7 @@ class BindDirective extends Directive {
 
     /h <div bind:keyup={p.count}></div>
   `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     const eventName = qualifier || "change";
     if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
       error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME_IN_BIND(eventName));
@@ -81,6 +81,23 @@ class ClassDirective extends Directive {
   }
 }
 
+class CssDirective extends Directive {
+  static attributeName = "css";
+  static allowAccessTo = [];
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.addStaticAttribute("class", value.expression);
+  }
+}
+
+class FixedDirective extends Directive {
+  static attributeName = "fixed";
+  static requireQualifier = true;
+  static allowAccessTo = [];
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.addStaticAttribute(qualifier, value.expression);
+  }
+}
+
 class HideDirective extends Directive {
   static attributeName = "hide";
   static allowOnNested = true;
@@ -90,8 +107,7 @@ class HideDirective extends Directive {
 
     /h <div hide={}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    // this.ensureValueType();
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, false, false);
   }
 }
@@ -102,7 +118,7 @@ class HtmlDirective extends Directive {
 
     /h <div html={'<div>hello</div>'}></div>
   `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.watchAttribute("innerHTML", value.expression);
   }
 }
@@ -114,7 +130,7 @@ class IfDirective extends Directive {
 
     /h <div if={}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, true, true);
   }
 }
@@ -147,7 +163,7 @@ class OnEventDirective extends Directive {
 
     /h <div onclick={alert('hello')}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, base: string) {
     if (value.type === "string") {
       node.addFixedAttribute(base, value.value);
     } else {
@@ -196,7 +212,6 @@ class ShowDirective extends Directive {
     /h <div show={}></div>
     `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    // this.ensureValueType();
     node.setVisibilityToggle(value.expression, true, false);
   }
 }
@@ -242,7 +257,7 @@ class ToggleDirective extends Directive {
 
     /h <div class:danger="red danger" toggle:danger={expr}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
     }
@@ -254,6 +269,8 @@ export const builtinDirectives = [
   ApplyDirective,
   BindDirective,
   ClassDirective,
+  CssDirective,
+  FixedDirective,
   HideDirective,
   HtmlDirective,
   IfDirective,

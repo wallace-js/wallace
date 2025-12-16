@@ -34,6 +34,6 @@ export function consolidateComponent(component: Component): ComponentDefinitionD
   processNodes(component, componentDefinition);
   processeVisibilityToggles(componentDefinition.watches);
   // This must be done after all the processing, as DOM may have changed.
-  componentDefinition.html = component.rootElement.outerHTML;
+  componentDefinition.html = component.buildHTMLString();
   return componentDefinition;
 }
