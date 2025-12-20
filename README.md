@@ -53,13 +53,15 @@ Wallace makes you more productive simply by doing less of that. A lot less. So m
 
 Not only is Wallace simple and obvious in itself, but the code you write ends up being equally simple and obvious - which is the biggest productivity asset you can get in the long run.
 
+It also has really great TypeScript support, which further boosts productivity.
+
 All this makes Wallace ideal for:
 
 - Learning and teaching.
 - People who don't touch the (front end) code very often.
 - People who prefer developing features over solving framework problems.
 
-It also has great TypeScript support, which further boosts productivity.
+But despite its simple directness, Wallace also offers far more power and flexibility in organising and reusing your code, simply by embracing OOP, so it scales far better on larger projects, while keeping bundle size in check.
 
 ### 3. Freedom
 
