@@ -30,7 +30,7 @@ const ChartCanvas = ({ label }) => (
   </div>
 );
 
-ChartCanvas.methods({
+ChartCanvas.methods = {
   render(props) {
     this.props = this.sortData(props);
     this.update();
@@ -52,7 +52,7 @@ ChartCanvas.methods({
     });
     return newData;
   }
-});
+};
 
 const ChartList = charts => (
   <div>
@@ -60,12 +60,12 @@ const ChartList = charts => (
   </div>
 );
 
-ChartList.methods({
+ChartList.methods = {
   render(props) {
     this.props = getCharts(props);
     this.update();
   }
-});
+};
 
 const getCharts = data => {
   const charts = {};

@@ -29,7 +29,7 @@ const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) 
   </div>
 );
 
-TaskList.methods({
+TaskList.methods = {
   render(tasks) {
     this.props = watch(tasks, () => this.update());
     this.update();
@@ -42,7 +42,7 @@ TaskList.methods({
       target.value = "";
     }
   }
-});
+};
 
 mount("main", TaskList, [
   { text: "Complete Wallace tutorial", done: false },

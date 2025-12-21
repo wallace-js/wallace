@@ -88,12 +88,12 @@ test("Value updates to match data", () => {
       </button>
     </div>
   );
-  MyComponent.methods({
+  MyComponent.methods = {
     btnClick() {
       data.text = "";
       this.update();
     }
-  });
+  };
   const component = testMount(MyComponent);
   const input = component.ref.tbx;
   // previous value is "foo" as that was the first value.

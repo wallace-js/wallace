@@ -3,7 +3,6 @@
  */
 import { Component } from "./component";
 import { replaceNode } from "./utils";
-import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 
 const throwAway = document.createElement("template");
 
@@ -78,23 +77,40 @@ export function defineComponent(html, watches, queries, buildFunction, inheritFr
   return ComponentDefinition;
 }
 
+/**
+ * Creates a new component definition.
+ *
+ * @param {*} base - a component definition to inherit from - defaults to Component.
+ * @returns the newly created component definition function.
+ */
 function _createConstructor(base) {
   const ComponentDefinition = function () {
     base.call(this);
   };
-  ComponentDefinition.stubs = {};
-  Object.assign(ComponentDefinition.stubs, base.stubs);
-  // This is a helper function for the user.
-  ComponentDefinition.methods = function (obj) {
-    Object.assign(ComponentDefinition.prototype, obj);
-  };
-  ComponentDefinition.prototype = Object.create(base && base.prototype, {
+  const proto = Object.create(base && base.prototype, {
     constructor: {
       value: ComponentDefinition,
       writable: true,
       configurable: true
     }
   });
-  ComponentDefinition.prototype.base = Component.prototype;
+  ComponentDefinition.prototype = proto;
+
+  // methods lets us assign to prototype without replacing it.
+  Object.defineProperty(ComponentDefinition, "methods", {
+    set: function (value) {
+      Object.assign(proto, value);
+    },
+    get: function () {
+      return proto;
+    }
+  });
+
+  // Set up stubs
+  ComponentDefinition.stubs = {};
+  Object.assign(ComponentDefinition.stubs, base.stubs);
+
+  // Helper to access base prototype.
+  proto.base = Component.prototype;
   return ComponentDefinition;
 }

@@ -39,7 +39,7 @@ export const TaskList: Uses<iTask[], Controller, TaskListMethods> = (
   </div>
 );
 
-TaskList.methods({
+TaskList.methods = {
   render(props) {
     this.ctrl = new Controller(this, props);
     this.ctrl.stateMoved();
@@ -52,4 +52,4 @@ TaskList.methods({
       target.value = "";
     }
   }
-});
+};

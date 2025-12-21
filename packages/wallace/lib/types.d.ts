@@ -71,7 +71,7 @@ The arguments are:
 3. props for the element (optional)
 4. controller (optional)
 
-`mount` returns the component instance, allowing you to call it methods:
+`mount` returns the component instance, allowing you to call its methods:
 
 ```tsx
 root.update();
@@ -100,11 +100,11 @@ places.
 
 #### Overriding
 
-You can override these methods, and add new ones using `methods` directly on the
+You can override these methods, and add new ones using `methods` property of the
 component definition:
 
 ```tsx
-MyComponent.methods({
+MyComponent.methods = {
   render(props) {
     this.ctrl = new MyController(this, props);
     this.update();
@@ -112,7 +112,7 @@ MyComponent.methods({
   getName() {
     return 'wallace';
   }
-});
+};
 ```
 
 This has the same effect as setting them on the prototype:
@@ -124,11 +124,11 @@ MyComponent.prototype.render = function () {};
 You can use `this.base` to access methods on the base `Component` class:
 
 ```tsx
-MyComponent.methods({
+MyComponent.methods = {
   render(props) {
     this.base.render.call(this, props, ctrl);
   }
-});
+};
 ```
 
 Note that `base` is not the same as `super` in classes which access the lowest override.
@@ -276,12 +276,12 @@ const TaskList = (_, {ctrl}) => (
   </div>
 );
 
-TaskList.methods({
+TaskList.methods = {
   render(_, ctrl) {
     this.ctrl = new TaskController(this, ctrl);
     this.update();
   }
-});
+};
 ```
 
 ## 6. Inheritance
@@ -402,12 +402,12 @@ const Task: Uses<null, null, TaskMethods> = (_, { self }) => (
   <div>{self.getName()}</div>
 ));
 
-Task.methods({
+Task.methods = {
   getName() { return 'wallace' },
   render(props, ctrl) {  // types are already known
     this.props = { ...props, notallowed: 1 };  // type error
   }
-});
+};
 ```
 
 The type will pass into the object passed into `methods` so it recognises custom methods
@@ -539,10 +539,8 @@ declare module "wallace" {
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
-    methods?(
-      object: ComponenMethods<Props, Controller> &
-        ThisType<ComponentInstance<Props, Controller, Methods>>
-    ): void;
+    // methods?: ComponenMethods<Props, Controller> &
+    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
     readonly prototype?: ComponenMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
