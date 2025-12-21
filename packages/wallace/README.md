@@ -3,11 +3,11 @@
 This package contains the library for the [Wallace](https://github.com/wallace-js/wallace) framework, which you import into your source files:
 
 ```jsx
-import { mount } from 'wallace';
+import { mount } from "wallace";
 
 const MyComponent = () => <div>Hello world</div>;
 
-mount('main', Component);
+mount("main", Component);
 ```
 
 It requires the [babel-plugin-wallace](https://www.npmjs.com/package/babel-plugin-wallace) to work, which is a dependency of this package, always at the same version.
