@@ -61,11 +61,11 @@ All this makes Wallace ideal for:
 - People who don't touch the (front end) code very often.
 - People who prefer developing features over solving framework problems.
 
-But despite its simple directness, Wallace also offers far more power and flexibility in organising and reusing your code, simply by embracing OOP, so it scales far better on larger projects, while keeping bundle size in check.
+But despite its simple directness, Wallace also offers far more power and flexibility in organising and reusing your code, simply by embracing OOP, so it scales far better on larger projects, while keeping your bundle size in check.
 
 ### 3. Freedom
 
-Wallace is perhaps the world's only _fully open_ framework, meaning you can override _all_ behaviour, easily and at a granular level. This gives you full freedom, which you could use to do things like:
+Wallace is perhaps the world's only _fully open_ framework, meaning you can override _all_ behaviour, easily and at a granular level. This gives you total freedom, which you could use to do things like:
 
 - Change how a component updates all or part of its DOM.
 - Run partial updates deep in the tree, cleanly and safely.
@@ -75,9 +75,9 @@ Wallace is perhaps the world's only _fully open_ framework, meaning you can over
 
 No other framework offers this. In fact most restrict you so severely that a minor curve ball could cause a performance bottleneck you can't solve, at least without your productivity and code quality taking a hit.
 
-Though you many not need it often, freedom protects your performance and your productivity. And the problem with freedom is that you often don't realise you gave it away until you need it back, by which time it's too late.
+Though you many not need it often, freedom protects your performance and your productivity. The thing about freedom is that you often don't realise you gave it away until you need it back, by which time it's too late.
 
-This unique feature gives Wallace its name, after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it tricky for people in Scotland to say "freedom" too many times at the risk of someone spontaneously reenacting this scene:
+This unique feature gives Wallace its name, after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it impossible for people in Scotland to say "freedom" without the risk of someone spontaneously reenacting this scene:
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
@@ -166,7 +166,7 @@ const CounterList = ( counters ) => (
 );
 ```
 
-And *directives*, which are attributes with special behaviour:
+And *directives*, which are attributes with special behaviour, like `if`:
 
 ```tsx
 const Counter = ({ count }) => (
@@ -177,7 +177,7 @@ const Counter = ({ count }) => (
 );
 ```
 
-There are 15 directives, but you don't need to memorise them as JSX element display a tool tip which lists them all:
+There are 15 directives, but you don't need to memorise them as the tool tip for  JSX elements lists them all:
 
 ![Tool tip on JSX element](./assets/div-tooltip.jpg)
 
@@ -199,7 +199,7 @@ function (event) {
 
 ### TypeScript
 
-You get amazing TypeScript support with the `Uses` type, which defines the data a component expects, and more as we'll see later:
+You get amazing TypeScript support with the `Uses` type, which defines the data a component expects:
 
 ```tsx
 import { mount, Uses } from "wallace";
@@ -242,20 +242,20 @@ const Counter = (props: iCounter) => (
 );
 ```
 
-You will get type support on the props in that function, but not on props passed when nesting or mounting, whereas `Uses` takes care of all of that.
+It will work for props in that function, but when nesting or mounting the component - whereas `Uses` takes care of all of those, and a lot more as we'll see later.
 
 ### Rendering
 
 For present purposes, the `render` method we've been calling does this:
 
 ```tsx
-Component.prototype.render = function (props) {
+function render (props) {
   this.props = props;
   this.update();
-};
+}
 ```
 
-That code tells us we could do this:
+That code tells us we could update the DOM by doing this:
 
 ```jsx
 const component = mount("main", CounterList, [{ count: 0 }, { count: 0 }]);
@@ -263,18 +263,27 @@ component.props.pop();
 component.update();
 ```
 
-Which may seem unsafe, but firstly we can protect data that shouldn't be modified, which we could do in `mount` or in a custom (or "overridden") `render` method:
+Which may seem unwise, but don't worry:
+
+1. You can protect yourself from unwanted data changes.
+2. You only do this on certain kinds of components.
+
+To protect data that shouldn't be modified, use  the `protect` helper function, which you can use before passing the counters to `mount` or inside a custom `render` method:
 
 ```tsx
 import { protect } from 'wallace';
 
-CounterList.prototype.render = function (props) {
-  this.props = protect(props);
-  this.update();
-};
+CounterList.methods({
+  render(props) {
+    this.props = protect(props);
+    this.update();
+  }
+});
 ```
 
 > Clicking on buttons now throws an error, as they modify the object in place.
+
+If you're confused by prototypes, this gist explains it in 5 minutes.
 
 And secondly it makes working with data that should be modified really easy:
 
