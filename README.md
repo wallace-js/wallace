@@ -278,27 +278,10 @@ component.update();
 
 Which may seem unwise, but don't worry:
 
-1. You can protect yourself from unwanted data changes.
-2. You only do this on certain kinds of components.
+1. You only do this in specific situations.
+2. You can protect yourself from unwanted data changes.
 
-To protect data that shouldn't be modified, use the `protect` helper function, which you can use before passing the counters to `mount` or inside a custom `render` method:
-
-```tsx
-import { protect } from "wallace";
-
-CounterList.methods = {
-  render(props) {
-    this.props = protect(props);
-    this.update();
-  }
-};
-```
-
-> Clicking on buttons now throws an error, as they modify the object in place.
-
-If you're confused by prototypes, this gist explains it in 5 minutes.
-
-And secondly it makes working with data that should be modified really easy:
+One such situation is our example, where we want the `CounterList` to update whenever the `Counter` buttons are clicked. We can do this by overriding the `render` method to add a callback to each prop:
 
 ```tsx
 CounterList.methods = {
@@ -310,7 +293,7 @@ CounterList.methods = {
 };
 ```
 
-The `Counter` can now `update` the `CounterList` without calling `render`:
+The `Counter` can use this callback to `update` the `CounterList` without calling `render`:
 
 ```tsx
 const Counter: Uses<iCounter> = ({ count, update }) => (
@@ -320,7 +303,47 @@ const Counter: Uses<iCounter> = ({ count, update }) => (
 );
 ```
 
-This is really ugly (and introduces a subtle behaviour change) and we'll be looking at better ways shortly. The point is to understand the relationship between `render`, `update` and `props` before moving on to new concepts.
+> Clicking on buttons now updates the display.
+
+Of course there are much cleaner ways to do this, which we'll look at soon. The point is to understand the relationship between `render`, `update` and `props` before moving on to new concepts.
+
+##### About methods
+
+What we've been calling "methods" are actually functions on the prototype, so we could override them like this:
+
+```tsx
+CounterList.prototype.render = function () {/*...*/}
+```
+
+The `methods` property is a proxy of `prototype` so you could do this:
+```tsx
+CounterList.methods.render = function () {/*...*/}
+```
+
+Wallace provides it because it reads better, and because it lets you do this:
+
+```tsx
+CounterList.methods = {
+  anotherMethod () {/*...*/}
+}
+```
+
+Whereas assigning to `prototype` would replace the object and break things. So stick to the above format.
+
+##### Protecting data
+
+To protect data that shouldn't be modified, use the `protect` helper function:
+
+```tsx
+import { protect } from "wallace";
+
+const component = mount("main", CounterList, protect([
+  { count: 0 },
+  { count: 0 }
+]));
+```
+
+> Clicking on buttons now throws an error, as they modify the protected object.
 
 ##### Important
 
@@ -541,7 +564,7 @@ const CounterList: Uses<iCounterList> = (
   </div>
 );
 
-CounterList.methods({
+CounterList.methods = {
   render(counters) {
     this.tmpThings = "";
     this.props = watch({ counters, things: "bananas" }, () =>
@@ -555,7 +578,7 @@ CounterList.methods({
     this.tmpThings = "";
     this.props.things = newthings;
   }
-});
+};
 ```
 
 There's a lot of new bits:
@@ -564,10 +587,31 @@ There's a lot of new bits:
    1. `self` which is the component instance (we can't use `this` in arrow functions).
    2. `event` which refers to the DOM event and can only be used in event callbacks. You use the same variable in each callback
    3. like `element` adapts to mean the event in that callback, so you could use them in multiple places and they would point to different things. Remember this isn't a real function with real arguments.
-2. We used `CounterList.methods` which is just a nicer way of setting keys on `CounterList.prototype`.
-3. We put `tmpThings` on the component instead of the props, because we don't want to update the component every time it changes. It is reset during render so it's pretty safe.
+2. We put `tmpThings` on the component instead of the props, because we don't want to update the component every time it changes. It is reset during render so it's pretty safe.
 
-Add interface
+Getting type support for methods is a bit more long-winded than for controllers. You need to create an interface listing your additional methods, then pass that into the 3rd slot for `Uses` :
+
+```tsx
+interface CounterListMethods {
+  componentMethod(): string;
+}
+
+class Controller {
+  ctrlMethod(): string;
+}
+
+const CounterList: Uses<iCounterList, Controller, CounterListMethods> (
+  _, { self, ctrl }
+) => (
+  <div>{self.componentMethod() + ctrl.ctrlMethod()} </div>
+);
+```
+
+If you are not using props or a controller, then the corresponding slot should be set to `null`:
+
+```tsx
+ Uses<iCounterList, null, CounterListMethods>
+```
 
 ##### Important
 
@@ -592,7 +636,7 @@ import { extendComponent } from "wallace";
 
 const SpecialCounterList = extendComponent(CounterList);
 
-SpecialCounterList.methods({
+SpecialCounterList.methods = {
   thingsKeyUp(event) {
     if (event.key !== "Enter" || !this.isThingsValid()) return;
     const newthings = this.tmpThings;
@@ -602,7 +646,7 @@ SpecialCounterList.methods({
   isThingsValid() {
     return this.tmpThings.length > 2;
   }
-});
+};
 ```
 
 > This inherits the `render` method as `CounterList`.
@@ -623,30 +667,33 @@ const HighestCounterList = extendComponent(
 );
 ```
 
-TypeScript will only let an extended component use a compatible controller (which extends the base controller).
+By default the new component definition will use the same props, controller and method types as the base, but you can specify new ones:
 
-TODO: types
+```tsx
+const MyComponent = extendComponent<Props, Controller, Methods>(Base);
+```
+
+TypeScript will only let you specify types which are compatible with (or extend) the corresponding type for its base.
 
 ##### Important
 
-Mention compiler.
-
-Only use it like this:
+The Babel plugin modifies the `extendComponent` call if you specify the 2nd argument, so you must put the JSX directly in the 2nd argument:
 
 ```jsx
 extendComponent(CounterList, () => <div></div>);
 ```
 
-And **not** like this:
+And not elsewhere like so:
 
 ```jsx
+// WRONG
 const Foo = () => <div></div>;
 extendComponent(CounterList, Foo);
 ```
 
 ### Stubs
 
-But if you're planning on allowing that, you can use stubs:
+Stubs let you implement parts of the DOM in derived components, or vice versa:
 
 ```tsx
 const CounterList: Uses<iCounterList> = ({ counters }) => (
@@ -693,12 +740,11 @@ BaseCounterList.stubs = {
   )
 };
 
-const CounterList = extendComponent(BaseCounterList, () => (
+const HighestCounterList = extendComponent(BaseCounterList, () => (
   <div>
     <stub:counters />
     <hr />
     <stub:highest />
-    <stub:total />
   </div>
 ));
 ```
