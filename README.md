@@ -21,42 +21,44 @@ It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/
 
 ### 1. Performance
 
-Wallace is perhaps the smallest and fastest loading framework out there. Here is the bundle size for different framework implementations of the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
+Wallace is perhaps the smallest and fastest loading framework out there. Here are the bundle sizes of some implementations of the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
 
 ![Bar chart of bundle sizes](./assets/size-compressed.jpg)
 
 This makes Wallace ideal for:
 
 - Landing pages that need to load fast.
-- Use cases where resources or connectivity are limited.
-- Large apps where you switch pages frequently (there's less need for an SPA if you have tiny bundles, especially if when combined with a PWA app skeleton).
+- Situations where resources or connectivity are limited.
+- Apps where users switch pages frequently (with bundles this small a multi-page PWA performs better than a SPA).
 
 And its DOM updates are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the benchmark app:
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.jpg)
 
-But you rarely need *fast*. You just need to avoid *slow* - which happens in more complex scenarios than benchmarks cover. And the only *real* protection against that is **freedom**, which we'll cover in a sec.
+But you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks cover. And the only _real_ protection against that is **freedom**, which we'll cover in a sec.
 
 _\* Times are taken from local runs, using non-keyed implementations where available. Will submit for an official run soon. Bundle sizes would be identical._
 
 ### 2. Productivity
 
-Wallace lets you develop faster by being:
+Wallace helps you develop faster by being:
 
 #### Sensible
 
-* No weird syntax, just JavaScript + JSX.
-* No awkward patterns like React hooks 🤢
-* No confusing magic - even reactivity is obvious.
+- No weird syntax, just JavaScript + JSX.
+- No awkward patterns like React hooks 🤢
+- No confusing magic - even reactivity is obvious!
 
 #### Powerful
 
-* Use controllers to keep your code clean and simple as you add complexity.
-* Extend and reuse components using the flexible stubs system.
+- Use controllers to keep your code clean and simple as you add complexity.
+- Extend and reuse components using the stubs system.
 
-Here's what that looks like:
+Here's what stubs looks like:
 
 ```jsx
+import { extendComponent } from "wallace";
+
 const BaseDialog = ({ title }, { ctrl }) => (
   <div>
     <button onClick={ctrl.closeDialog()}>X</button>
@@ -65,12 +67,18 @@ const BaseDialog = ({ title }, { ctrl }) => (
     <stub:buttons />
   </div>
 );
+BaseDialog.stubs.buttons = OKCancelButtons; // default, defined elsewhere.
+
+const MyDialog = extendComponent(BaseDialog);
+MyDialog.stubs.content = ({ text }) => <div>Very cool {text}</div>;
 ```
+
+> `ctrl` is just a reference that components propagate to nested components - usually an object with functions.
 
 #### Helpful
 
 - Impressive TypeScript support.
-- Tool tips everywhere.
+- Tool tips everywhere (works in every modern IDE - no plugin required).
 
 There's even a full cheat sheet on the module tool tip:
 
@@ -80,7 +88,7 @@ So you hardly ever need to leave your IDE. All this makes Wallace ideal for:
 
 - Learning and teaching.
 - People who don't touch the (front end) code very often.
-- People who prefer developing features over solving framework problems.
+- People who'd rather develop features than learn a new framework.
 
 ### 3. Freedom
 
@@ -103,7 +111,7 @@ This point alone makes it seem like madness picking a closed framework for any p
 
 #### It's all in the name
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it difficult for people in Scotland to say "freedom" without worrying that someone might spontaneously reenact this scene:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it hard to discuss freedom of any kind in Scotland without the risk of someone reenacting this scene:
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
@@ -114,7 +122,7 @@ This tour covers all of Wallace's features in enough detail for you to go forth 
 - In your browser using StackBlitz (choose [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx))
 - Locally with `npx create-wallace-app`
 
-There are also [examples](https://github.com/wallace-js/wallace/tree/master/examples) which have a link in their README to open it in [StackBlitz](https://stackblitz.com) so you can play around online, or download as a project that will run locally.
+There are also [examples](https://github.com/wallace-js/wallace/tree/master/examples) which all have a [StackBlitz](https://stackblitz.com) link in their README so you can edit it online, then download it as a fully working project.
 
 ### Compilation
 
@@ -128,13 +136,13 @@ const Counter = ({ count }) => (
 );
 ```
 
-With constructor functions that allow us to create component objects like this:
+With constructor functions that allow us to create objects like this:
 
 ```tsx
 const component = new Counter();
 ```
 
-The objects control their own DOM, which can be updated like this:
+These objects (called components) control their own DOM, which can be updated like this:
 
 ```tsx
 component.render({ count: 1 });
@@ -144,7 +152,7 @@ However you don't normally create components yourself. Instead you use `mount` w
 
 1. Creates the component.
 2. Calls its `render` method.
-3. Replaces the specified element (in this case the one with id "main") with the component's DOM
+3. Replaces the specified element with the component's DOM.
 4. Returns the component.
 
 Like so:
@@ -163,6 +171,8 @@ const component = mount("main", Counter, [
   { count: 0 }
 ]);
 ```
+
+> You can specify an actual element instead of an id string.
 
 This component will then create two `Counter` components, called their `render` method passing one `{ count: 0 }` to each, and attach their DOM at the correct location.
 
@@ -305,7 +315,7 @@ component.update();
 Which may seem unwise, but don't worry:
 
 1. You only do this in specific situations.
-2. You can protect yourself from unwanted data changes.
+2. You can protect data from unwanted data changes using the `protect` helper function.
 
 One such situation is our example, where we want the `CounterList` to update whenever the `Counter` buttons are clicked. We can do this by overriding the `render` method to add a callback to each prop:
 
@@ -319,6 +329,8 @@ CounterList.methods = {
 };
 ```
 
+> The `methods` property is just a hack for setting properties on `prototype` without accidentally wiping the other properties - so we're really setting `CounterList.prototype.render`.
+
 The `Counter` can use this callback to `update` the `CounterList` without calling `render`:
 
 ```tsx
@@ -331,51 +343,78 @@ const Counter: Uses<iCounter> = ({ count, update }) => (
 
 > Clicking on buttons now updates the display.
 
-Of course there are much cleaner ways to do this, which we'll look at soon. The point is to understand the relationship between `render`, `update` and `props` before moving on to new concepts.
-
-##### About methods
-
-What we've been calling "methods" are actually functions on the prototype, so we could override them like this:
-
-```tsx
-CounterList.prototype.render = function () {/*...*/}
-```
-
-The `methods` property is a proxy of `prototype` so you could do this:
-```tsx
-CounterList.methods.render = function () {/*...*/}
-```
-
-Wallace provides it because it reads better, and because it lets you do this:
-
-```tsx
-CounterList.methods = {
-  anotherMethod () {/*...*/}
-}
-```
-
-Whereas assigning to `prototype` would replace the object and break things. So stick to the above format.
-
-##### Protecting data
-
-To protect data that shouldn't be modified, use the `protect` helper function:
-
-```tsx
-import { protect } from "wallace";
-
-const component = mount("main", CounterList, protect([
-  { count: 0 },
-  { count: 0 }
-]));
-```
-
-> Clicking on buttons now throws an error, as they modify the protected object.
+Of course there are much nicer ways of doing this! The point is to understand the relationship between `render`, `update` and `props` before moving on to new concepts.
 
 ##### Important
 
 Using `update` means `render` is only called from above, so rather infrequently for high level components like `CounterList` (just once in our example) which makes it a good place to set things up for the life cycle of the component.
 
 You wouldn't do this for the likes of `Counter` whose `render` method is called whenever we call `update` on the `CounterList`. You move setup to the highest component possible.
+
+### Updates
+
+As for the `update` method and how components actually update the DOM, it's rather simple. The component stores references to dynamic elements, and matches them to two callbacks:
+
+- A _query_ to read a value, like `() => props.count`
+- An _action_ to apply the change, like `(el, newValue) => el.textContent = newValue`
+
+During `update`, the component:
+
+- Iterates through all these elements, and:
+  - Unless cancelled out by a visibility toggle (`show`, `hide` `if`) it:
+    - Calls the lookup, and,
+    - If the value differs from value from last update:
+      - Applies the action and stores the value for next update.
+
+The action is either:
+
+- An element manipulation.
+- An instruction to render a nested component.
+- An instruction to a repeater to patch the `childNodes` of its parent div.
+
+It's dead simple, extremely fast, and resilient: if you rearrange these elements, the component will still update them.
+
+You can use references yourself too, which is useful in certain scenarios:
+
+```tsx
+const Counter: Uses<iCounter> = ({ count }) => (
+  <div>
+    <button ref:btn onClick={count++}>
+      {count}
+    </button>
+  </div>
+);
+
+Counter.methods = {
+  update() {
+    this.refs.btn.style.color =
+      this.props.count > 2 ? "red" : "black";
+    this.base.update.call(this);
+  }
+};
+```
+
+Here we "manually" set the style, and "Wallace" sets the text of the same element, without affecting the style, because it works exactly the same way: a single operation on an element accessed by (internal) reference.
+
+Some of the few cases where you'd actually do this include:
+
+- The logic would make a mess of the JSX.
+- Libraries like [chart.js](https://www.chartjs.org/) which require the element to be attached to the DOM (which it won't be in first render) so you could use a timeout or callback.
+
+In this case it's definitely neater doing it in the JSX using the `style` directive:
+
+```tsx
+<button style:color={count > 2 ? "red" : "black"} onClick={count++}>
+  {count}
+</button>
+```
+
+##### Important
+
+If you're going to manually update the DOM, do it inside `update` not `render`, and remember that:
+
+1. The component will likely be reused with different props later.
+2. The DOM remembers its state, so avoid conditionally setting elements.
 
 ### Reactivity
 
@@ -397,9 +436,11 @@ To make it all reactive we're going to use `watch` which returns a [proxy](https
 ```tsx
 import { watch } from "wallace";
 
-CounterList.prototype.render = function (props) {
-  this.props = watch(props, () => this.update());
-  this.update();
+CounterList.methods = {
+  render(props) {
+    this.props = watch(props, () => this.update());
+    this.update();
+  }
 };
 ```
 
@@ -422,15 +463,37 @@ const CounterList = ({ counters, things }) => (
   </div>
 );
 
-CounterList.prototype.render = function (counters) {
-  this.props = watch({ counters, things: "sheep" }, () =>
-    this.update()
-  );
-  this.update();
+CounterList.methods = {
+  render(counters) {
+    this.props = watch({ counters, things: "sheep" }, () =>
+      this.update()
+    );
+    this.update();
+  }
 };
 ```
 
 > The UI displays `Total sheep: 0` but changes as you type in the input.
+
+Note that you don't have to watch the entire props object, you can watch different parts and protect others:
+
+```tsx
+import { protect, watch } from "wallace";
+
+// Must change JSX to <input type="text" bind:keyup={state.things} />
+
+CounterList.methods = {
+  render(counters) {
+    this.props = {
+      counters: protect(counters),
+      state: watch({ things: "sheep" }, () => this.update())
+    };
+    this.update();
+  }
+};
+```
+
+> Clicking on buttons now throws an error, as they modify the protected object.
 
 ##### Important
 
@@ -593,7 +656,7 @@ const CounterList: Uses<iCounterList> = (
 CounterList.methods = {
   render(counters) {
     this.tmpThings = "";
-    this.props = watch({ counters, things: "bananas" }, () =>
+    this.props = watch({ counters, things: "sheep" }, () =>
       this.update()
     );
     this.update();
@@ -636,7 +699,7 @@ const CounterList: Uses<iCounterList, Controller, CounterListMethods> (
 If you are not using props or a controller, then the corresponding slot should be set to `null`:
 
 ```tsx
- Uses<iCounterList, null, CounterListMethods>
+Uses<iCounterList, null, CounterListMethods>;
 ```
 
 ##### Important
@@ -645,7 +708,7 @@ You might be tempted to omit `bind` and `tmpThings` and just read the value from
 
 ```tsx
 thingsKeyUp(event) {
-  if (event.key !== "Enter") return;
+  if (event.key !== 'Enter') return;
   this.props.things = event.target.value;
   event.target.value = '';
 }
@@ -784,6 +847,116 @@ Stubs are a flexible way to organise reusable component skeletons or parts, whic
 A stub receives the same props as its enclosing component.
 
 ### Performance
+
+Another advantage of components being objects is that you can store references to them, so you can run more targeted updates, which is usually the first step in performance tuning.
+
+Say you had a large table displaying servers with dozens of rows dozens of a dozen columns, one of which shows the number of connected users, which updates every second. You don't want to update the whole table every second, even though there's minimal DOM change, there's still a fair bit of operations involved.
+
+Ideally we'd update just the cells which need to, which is easily done by keeping a register of those components on the controller:
+
+```tsx
+class DataGridCtrl {
+  update() {
+    this.register = []; // reset register at every full table update.
+    this.root.update();
+  }
+  updateConnectedUsersCells(freshStats) {
+    const serverIds = freshStats.map(stat => stat.serverId);
+    this.register.forEach(cell => {
+      const props = cell.props;
+      if (freshStats.hasOwnProperty(props.serverId)) {
+        cell.props.connectedUsers = freshStats[props.serverId];
+        cell.update();
+      }
+    });
+  }
+}
+
+const ServerTable = ( rows ) => (
+  <table>
+    <tbody>
+      <ServerTableRow.repeat items={rows} />
+    </tbody>
+  </table>
+);
+
+const ServerTableRow = ( serverDetails ) => (
+  <tr>
+    {# ... #}
+    <ConnectedUsersCell.nest props={serverDetails} />
+    {# ... #}
+  </tr>
+);
+
+const ConnectedUsersCell = ({ connectedUsers, serverId }) => (
+  <td>
+    <span>{connectedUsers}</span>
+    <button onClick={showUserStatsDetail(serverId)}>...</button>
+  </td>
+);
+
+ConnectedUsersCell.methods = {
+  render(props, ctrl) {
+    ctrl.register.push(this);
+    this.base.render.call(this, props, ctrl);
+  }
+};
+```
+
+You can also go a step further and target specific elements inside the components using refs:
+
+```tsx
+const ConnectedUsersCell = ({ connectedUsers, serverId }) => (
+  <div>
+    <span ref:userData></span>
+    <button onClick={showUserStatsDetail(serverId)}>...</button>
+  </div>
+);
+
+ConnectedUsersCell.methods = {
+  render(props, ctrl) {
+    ctrl.register.push(this);
+    this.base.render.call(this, props, ctrl);
+  },
+  update() {
+    this.updateConnectedUsers();
+    this.base.update.call(this);
+  },
+  updateConnectedUsers() {
+    this.refs.userData.textContent = this.props.connectedUsers;
+  }
+};
+```
+
+A ref points to the actual DOM element, so changing it updates the DOM directly.
+
+References are essentially how components update their own DOM normally. So with a simple component like this, you could even override `update` method:
+
+```tsx
+ConnectedUsersCell.methods = {
+  update() {
+    this.refs.userData.textContent = this.props.connectedUsers;
+  }
+};
+```
+
+And the component would work exactly as it did before, except it no longer checks whether `connectedUsers` has changed since last update before updating the element. It would also break if you added visibility or nested components.
+
+##### Important
+
+You need to remember that components may be be:
+
+1. Re-rendered - so you must ensure your targeted change would be preserved.
+2. Recycled - so you must ensure that renders clear any targeted changes.
+
+The simplest way to avoid problems is by:
+
+1. Doing everything via props (so functions like `updateConnectedUsers` should not accept data).
+2.
+
+If you're doing this kind of thing, you presumably have good reason to.
+
+You need to be careful not to leave the component or its DOM in a state
 
 ## Status
 
