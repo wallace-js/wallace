@@ -35,49 +35,75 @@ And its DOM updates are pretty fast too. Here is the time\* in milliseconds to c
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.jpg)
 
-Benchmarks are cute, but A UI doesn't need to be _fast_, it needs to not be _slow_. And the only way to protect your app from bottlenecks is picking a framework gives you the freedom needed to implement workarounds to the curve balls that cause them. We'll get back to that.
+But you rarely need *fast*. You just need to avoid *slow* - which happens in more complex scenarios than benchmarks cover. And the only *real* protection against that is **freedom**, which we'll cover in a sec.
 
 _\* Times are taken from local runs, using non-keyed implementations where available. Will submit for an official run soon. Bundle sizes would be identical._
 
 ### 2. Productivity
 
-Frameworks speed up certain tasks, then add their own mess of weird syntax, awkward conventions and ugly patterns which creates:
+Wallace lets you develop faster by being:
 
-1. More bits to learn.
-2. More bits that cause bugs.
-3. More bits that could have caused the bug, but didn't, but still wasted your time making you question whether it did before realising it didn't.
+#### Sensible
 
-Wallace makes you more productive simply by doing less of that. A lot less. So much less that the entire documentation fits comfortably in the tool tips (including a cheat sheet on the module itself) so you never have to leave your IDE, which also makes you more productive:
+* No weird syntax, just JavaScript + JSX.
+* No awkward patterns like React hooks 🤢
+* No confusing magic - even reactivity is obvious.
+
+#### Powerful
+
+* Use controllers to keep your code clean and simple as you add complexity.
+* Extend and reuse components using the flexible stubs system.
+
+Here's what that looks like:
+
+```jsx
+const BaseDialog = ({ title }, { ctrl }) => (
+  <div>
+    <button onClick={ctrl.closeDialog()}>X</button>
+    <h3>{title}</h3>
+    <stub:content />
+    <stub:buttons />
+  </div>
+);
+```
+
+#### Helpful
+
+- Impressive TypeScript support.
+- Tool tips everywhere.
+
+There's even a full cheat sheet on the module tool tip:
 
 ![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
-Not only is Wallace simple and obvious in itself, but the code you write ends up being equally simple and obvious - which is the biggest productivity asset you can get in the long run.
-
-It also has really great TypeScript support, which further boosts productivity.
-
-All this makes Wallace ideal for:
+So you hardly ever need to leave your IDE. All this makes Wallace ideal for:
 
 - Learning and teaching.
 - People who don't touch the (front end) code very often.
 - People who prefer developing features over solving framework problems.
 
-But despite its simple directness, Wallace also offers far more power and flexibility in organising and reusing your code, simply by embracing OOP, so it scales far better on larger projects, while keeping your bundle size in check.
-
 ### 3. Freedom
 
-Wallace is perhaps the world's only _fully open_ framework, meaning you can override _all_ behaviour, easily and at a granular level. This gives you total freedom, which you could use to do things like:
+Wallace is possibly the world's only fully open front-end framework, in that you can override all behaviour at a granular level without loss of functionality. For example, you could:
 
-- Change how a component updates all or part of its DOM.
-- Run partial updates deep in the tree, cleanly and safely.
-- Optimise further than any other framework - making Wallace the best option for performance-critical apps.
-- Solve performance bottlenecks (which can hit any framework) with relative ease - making it the safest option all round.
-- Use parts of Wallace as a skeleton for something else.
+- Modify how certain components update their DOM.
+- Interrupt the render flow and update just the components you want.
+- Update only certain elements within components, or only certain aspects (text vs style).
 
-No other framework offers this. In fact most restrict you so severely that a minor curve ball could cause a performance bottleneck you can't solve, at least without your productivity and code quality taking a hit.
+Wallace is so simple and mechanical that you can interact with it and make it do exactly what you want. And this means you can:
 
-Though you many not need it often, freedom protects your performance and your productivity. The thing about freedom is that you often don't realise you gave it away until you need it back, by which time it's too late.
+- Patch bugs/shortcomings in Wallace itself.
+- Resolve performance bottlenecks easily and cleanly.
+- Optimise further and more easily than any other framework.
+- Use the core functionality as a base to build something else, like a puzzle platform, or game engine.
 
-This unique feature gives Wallace its name, after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it impossible for people in Scotland to say "freedom" without the risk of someone spontaneously reenacting this scene:
+Freedom doesn't just let you do cool things, it also protects you. No framework performs well in all conditions, and you don't know what those are, or how much time you'll waste finding a viable workaround (if there even is one) until you're in the thick of it.
+
+This point alone makes it seem like madness picking a closed framework for any project, but then again there hasn't been a choice until now.
+
+#### It's all in the name
+
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it difficult for people in Scotland to say "freedom" without worrying that someone might spontaneously reenact this scene:
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
@@ -757,12 +783,16 @@ Stubs are a flexible way to organise reusable component skeletons or parts, whic
 
 A stub receives the same props as its enclosing component.
 
+### Performance
+
 ## Status
 
-Wallace is rather young, and hasn't been fully battle tested but:
+Wallace is still in early development, and hasn't been very widely used, however:
 
-1. You can override all behaviour at a granular level, which offers a degree of safety.
-2. It is based on previous (unreleased) frameworks used in production for years on sites like [healthmatters.io](https://healthmatters.io) and [yourstreet.org](https://www.yourstreet.org).
+1. There's not much framework at run time, and what little there is very simple, mechanical and close to the DOM.
+2. You can override any behaviour.
+
+These two points mean that you can very easily work around any situation where Wallace is either unable to do something you want, or has an error that hasn't yet been fixed.
 
 You can help make Wallace battle-ready by:
 
