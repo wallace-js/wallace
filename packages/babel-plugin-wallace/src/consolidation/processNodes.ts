@@ -199,7 +199,7 @@ export function processNodes(
         componentDefinition.wrapDynamicElementCall(
           node.elementKey,
           IMPORTABLES.stashMisc,
-          [identifier(COMPONENT_BUILD_PARAMS.component), t.objectExpression([])]
+          [identifier(COMPONENT_BUILD_PARAMS.miscStash), t.objectExpression([])]
         );
       }
 
@@ -310,7 +310,7 @@ export function processNodes(
           componentDefinition.wrapDynamicElementCall(
             node.elementKey,
             IMPORTABLES.stashMisc,
-            [identifier(COMPONENT_BUILD_PARAMS.component), poolInstance]
+            [identifier(COMPONENT_BUILD_PARAMS.miscStash), poolInstance]
           );
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
@@ -358,7 +358,7 @@ export function processNodes(
         }
         componentDefinition.collectedRefs.push(ref);
         componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.saveRef, [
-          identifier(COMPONENT_BUILD_PARAMS.component),
+          identifier(COMPONENT_BUILD_PARAMS.refs),
           stringLiteral(ref)
         ]);
       }

@@ -85,33 +85,23 @@ function buildComponentBuildFunction(
     key => componentDefinition.dynamicElements[key]
   );
 
-  const dynamicElementsAssignment = t.assignmentExpression(
-    "=",
+  const pushToElementStash = t.callExpression(
     t.memberExpression(
-      t.identifier(COMPONENT_BUILD_PARAMS.component),
-      t.identifier(SPECIAL_SYMBOLS.elementStash)
+      t.identifier(COMPONENT_BUILD_PARAMS.elementStash),
+      t.identifier("push")
     ),
-    t.arrayExpression(values)
+    values
   );
-  const statements = [dynamicElementsAssignment];
-  if (componentDefinition.collectedRefs.length > 0) {
-    statements.unshift(
-      t.assignmentExpression(
-        "=",
-        t.memberExpression(
-          t.identifier(COMPONENT_BUILD_PARAMS.component),
-          t.identifier(SPECIAL_SYMBOLS.refs)
-        ),
-        t.objectExpression([])
-      )
-    );
-  }
 
+  const statements = [pushToElementStash];
   return t.functionExpression(
     null,
     [
       t.identifier(COMPONENT_BUILD_PARAMS.component),
-      t.identifier(COMPONENT_BUILD_PARAMS.rootElement)
+      t.identifier(COMPONENT_BUILD_PARAMS.rootElement),
+      t.identifier(COMPONENT_BUILD_PARAMS.elementStash),
+      t.identifier(COMPONENT_BUILD_PARAMS.miscStash),
+      t.identifier(COMPONENT_BUILD_PARAMS.refs)
     ],
     t.blockStatement(statements.map(statement => t.expressionStatement(statement)))
   );

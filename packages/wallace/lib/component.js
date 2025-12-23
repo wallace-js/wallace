@@ -163,7 +163,7 @@ Object.defineProperty(ComponentBase.prototype, "hidden", {
  */
 export function extendComponent(base, componentDef) {
   // This function call will have been replaced if 2nd arg is a valid component func.
-  // and therefor we would not receive it.
+  // and therefore we would not receive it.
   if (componentDef)
     throw new Error("2nd arg to extendComponent must be a JSX arrow function");
   return _createConstructor(base);
@@ -183,17 +183,16 @@ export function nestComponent(rootElement, path, componentDefinition) {
 /**
  * Saves a reference to element or nested component. Returns the element.
  */
-export function saveRef(element, component, name) {
-  component.refs[name] = element;
-  return element;
+export function saveRef(element, refs, name) {
+  return (refs[name] = element);
 }
 
 /**
  * Stash something on the component. Returns the element.
  * The generated code is expected to keep track of the position.
  */
-export function stashMisc(element, component, object) {
-  component._s.push(object);
+export function stashMisc(element, stash, object) {
+  stash.push(object);
   return element;
 }
 
@@ -217,32 +216,27 @@ export function defineComponent(html, watches, queries, buildFunction, inheritFr
 /**
  * Creates a new component definition.
  *
- * @param {*} base - a component definition to inherit from.
+ * @param {*} baseComponent - a component definition to inherit from.
  * @returns the newly created component definition function.
  */
-function _createConstructor(base) {
+function _createConstructor(baseComponent) {
   const Component = function () {
-    // We initialise these for optimisation reasons.
+    const root = (this.el = this._n.cloneNode(true)),
+      dynamicElements = (this._e = []),
+      stash = (this._s = []),
+      refs = (this.refs = {});
     this.ctrl = {};
     this.props = {};
-    // Internal state objects (_e is created during build)
-    this._s = []; // A stash for misc objects like repeaters.
     this._p = {}; // The previous values for watches to compare against.
     this._r = {}; // The current values read during an update.
-    const root = this._n.cloneNode(true);
-    this.el = root;
-    this._b(this, root);
+    this._b(this, root, dynamicElements, stash, refs);
   };
 
-  const proto = Object.create(base.prototype, {
+  const proto = (Component.prototype = Object.create(baseComponent.prototype, {
     constructor: {
-      value: Component,
-      writable: true,
-      configurable: true
+      value: Component
     }
-  });
-
-  Component.prototype = proto;
+  }));
 
   // This lets us assign to prototype without replacing it.
   Object.defineProperty(Component, "methods", {
@@ -254,10 +248,7 @@ function _createConstructor(base) {
     }
   });
 
-  // Set up stubs
-  Component.stubs = {} && base.stubs;
-
-  // Helper to access base prototype.
   proto.base = ComponentBase.prototype;
+  Component.stubs = {} && baseComponent.stubs;
   return Component;
 }
