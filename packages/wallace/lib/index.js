@@ -1,5 +1,4 @@
 import { mount, watch, protect } from "./utils";
-import { Component } from "./component";
 import { KeyedRepeater, SequentialRepeater } from "./repeaters";
 import {
   extendComponent,
@@ -9,10 +8,9 @@ import {
   nestComponent,
   saveRef,
   stashMisc
-} from "./initCalls";
+} from "./component";
 
 export {
-  Component,
   defineComponent,
   extendComponent,
   findElement,
