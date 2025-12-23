@@ -225,7 +225,6 @@ function _createConstructor(base) {
     // We initialise these for optimisation reasons.
     this.ctrl = {};
     this.props = {};
-    this.ref = {};
     // Internal state objects (_e is created during build)
     this._s = []; // A stash for misc objects like repeaters.
     this._p = {}; // The previous values for watches to compare against.

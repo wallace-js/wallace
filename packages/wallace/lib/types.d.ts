@@ -144,7 +144,7 @@ Component instances have the following fields:
 - `props` the data for this component instance, stored as reference to original, not a 
 copy.
 - `ctrl` an object to help coordinate things, also stored as reference.
-- `ref` a dictionary of named elements.
+- `refs` a dictionary of named elements.
 - `el` the component instance's root element.
 
 Both `props` and `ctrl` are set during the `render` method before calling `update`.
@@ -211,27 +211,6 @@ tool tip won't display when you use a qualifier, like `class:danger`. To see it 
 temporarily change it to something `class x:danger`.
 
 You can define your own directives in your babel config.
-
-Each has more
-detailed information on its JSDoc, which should display as a tool tip\* when you hover
-over it in your IDE.
-
-You can also 
-
-- `apply` runs a callback to modify an element.
-- `bind` updates a value when an input is changed.
-- `class:xyz` defines a set of classes to be toggled.
-- `hide` sets an element or component's hidden property.
-- `html` Set the element's `innnerHTML` property.
-- `if` excludes an element from the DOM.
-- `on[EventName]` creates an event handler (note the code is copied)
-- `props` specifes props for a nested or repeated component, in which case it must be
-an array.
-- `ref` saves a reference to an element or nested component.
-- `show` sets and element or component's hidden property.
-- `style:xyz` sets a specific style property.
-- `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
-
 
 ## 5. Controllers
 
@@ -585,7 +564,7 @@ declare module "wallace" {
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
-    ref: { [key: string]: HTMLElement };
+    refs: { [key: string]: HTMLElement };
     base: Component<Props, Controller>;
   } & Component<Props, Controller> &
     Methods;
@@ -871,7 +850,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    *
    * ```
-   * component.ref.title.textContent = 'hello';
+   * component.refs.title.textContent = 'hello';
    * ```
    *
    * Requires a qualifier, but you lose the tooltip in that format.

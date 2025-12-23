@@ -36,7 +36,7 @@ ChartCanvas.methods = {
     this.update();
     // The canvas isn't attached to the DOM yet, so we use a crude timeout.
     setTimeout(() => {
-      buildChart(this.ref.canvas, this.props);
+      buildChart(this.refs.canvas, this.props);
     }, 100);
   },
   sortData(data) {

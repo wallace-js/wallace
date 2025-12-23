@@ -587,7 +587,7 @@ test("Descriptive name", () => {
     </div>
   );
   const component = load(Foo);
-  const btn = component.ref.btn;
+  const btn = component.refs.btn;
   expect(btn.disabled).toBe(false);
   disabled = true;
   component.update();

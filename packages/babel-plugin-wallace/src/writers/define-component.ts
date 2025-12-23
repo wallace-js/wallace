@@ -1,14 +1,13 @@
 import * as t from "@babel/types";
 import type { CallExpression } from "@babel/types";
 import { Component } from "../models";
-import { COMPONENT_BUILD_PARAMS, IMPORTABLES } from "../constants";
+import { COMPONENT_BUILD_PARAMS, SPECIAL_SYMBOLS, IMPORTABLES } from "../constants";
 import type {
   ArrayExpression,
   FunctionExpression,
   Expression,
   ObjectExpression,
-  ObjectProperty,
-  StringLiteral
+  ObjectProperty
 } from "@babel/types";
 import { identifier, objectExpression } from "@babel/types";
 import { ComponentDefinitionData, consolidateComponent } from "../consolidation";
@@ -80,10 +79,6 @@ function buildLookupsArg(componentDefinition: ComponentDefinitionData): ArrayExp
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData
 ): FunctionExpression {
-  // const dynamicElementsValueObject = buildObjectExpression(
-  //   componentDefinition.dynamicElements,
-  // );
-
   // TODO: clean up temp code when original is an array too.
   const keys = Object.keys(componentDefinition.dynamicElements).sort();
   const values: CallExpression[] = keys.map(
@@ -92,17 +87,33 @@ function buildComponentBuildFunction(
 
   const dynamicElementsAssignment = t.assignmentExpression(
     "=",
-    t.memberExpression(t.identifier("component"), t.identifier("_e")),
+    t.memberExpression(
+      t.identifier(COMPONENT_BUILD_PARAMS.component),
+      t.identifier(SPECIAL_SYMBOLS.elementStash)
+    ),
     t.arrayExpression(values)
   );
-  const statements = [t.expressionStatement(dynamicElementsAssignment)];
+  const statements = [dynamicElementsAssignment];
+  if (componentDefinition.collectedRefs.length > 0) {
+    statements.unshift(
+      t.assignmentExpression(
+        "=",
+        t.memberExpression(
+          t.identifier(COMPONENT_BUILD_PARAMS.component),
+          t.identifier(SPECIAL_SYMBOLS.refs)
+        ),
+        t.objectExpression([])
+      )
+    );
+  }
+
   return t.functionExpression(
     null,
     [
       t.identifier(COMPONENT_BUILD_PARAMS.component),
       t.identifier(COMPONENT_BUILD_PARAMS.rootElement)
     ],
-    t.blockStatement(statements)
+    t.blockStatement(statements.map(statement => t.expressionStatement(statement)))
   );
 }
 
