@@ -100,7 +100,6 @@ Wallace is possibly the world's only fully open front-end framework, in that you
 
 Wallace is so simple and mechanical that you can interact with it and make it do exactly what you want. And this means you can:
 
-- Patch bugs/shortcomings in Wallace itself.
 - Resolve performance bottlenecks easily and cleanly.
 - Optimise further and more easily than any other framework.
 - Use the core functionality as a base to build something else, like a puzzle platform, or game engine.
@@ -150,15 +149,24 @@ component.render({ count: 1 });
 
 However you don't normally create components yourself. Instead you use `mount` which:
 
-1. Creates the component.
-2. Calls its `render` method.
+1. Creates the root component (which creates its initial DOM).
+2. Calls its `render` method, during which it:
+   1. Updates its DOM.
+   2. Creates nested components and calls their `render` method.
+
 3. Replaces the specified element with the component's DOM.
 4. Returns the component.
 
-Like so:
+For example:
 
 ```tsx
 import { mount } from "wallace";
+
+const Counter = ({ count }) => (
+  <div>
+    <button onClick={count++}>{count}</button>
+  </div>
+);
 
 const CounterList = counters => (
   <div>
@@ -172,40 +180,21 @@ const component = mount("main", Counter, [
 ]);
 ```
 
-> You can specify an actual element instead of an id string.
-
-This component will then create two `Counter` components, called their `render` method passing one `{ count: 0 }` to each, and attach their DOM at the correct location.
-
-If you were to call render again:
-
-```tsx
-component.render([{ count: 1 }, { count: 2 }]);
-```
-
-It would reuse the two `Counter` components it created first time.
+> You can specify an actual element instead of an id string if you prefer.
 
 ##### Important
 
-The DOM is controlled entirely by components, which are normal objects. There is no hidden engine coordinating things in the background. This makes things very simple and easy to control.
+Key points to understand:
 
-The function with the JSX (aka the component definition) is read during compilation then replaced, so it never runs, because it doesn't exist at run time. Therefore its cannot contain _any_ JavaScript, only a single JSX expression which must be returned for TypeScript reasons.
+1. There is no central engine coordinating things.
+2. Components control their own DOM and manage their directly nested components.
+3. `mount` does nothing special and the root component works just like other components.
+
+This makes things very easy to *follow* and very easy to *control* - both core principles of Wallace. On that note: clicking the buttons doesn't do anything yet, because Wallace is deliberately not reactive until you tell it to be.
 
 ### JSX
 
-Instead of placing logic _around_ your JSX elements, you control it from _within_ elements using special syntax for nesting and repeating:
-
-```tsx
-const CounterList = counters => (
-  <div>
-    <Counter.nest props={counters[0]} />
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
-  </div>
-);
-```
-
-And _directives_, which are attributes with special behaviour, like `if`:
+Instead of placing logic _around_ elements, you control it from _within_ elements using directives (attributes with special behaviour) like `if` which conditionally excludes an element from the DOM:
 
 ```tsx
 const Counter = ({ count }) => (
@@ -218,11 +207,24 @@ const Counter = ({ count }) => (
 );
 ```
 
-There are 15 directives, but you don't need to memorise them as the tool tip for JSX elements lists them all:
+And special syntax for nesting and repeating:
+
+```tsx
+const CounterList = counters => (
+  <div>
+    <Counter.nest props={counters[0]} />
+    <div>
+      <Counter.repeat items={counters} />
+    </div>
+  </div>
+);
+```
+
+But you don't need to remember all this. JSX elements have a tool tip which reminds you and lists the available directives, which also have tool tips showing how to use them:
 
 ![Tool tip on JSX element](./assets/div-tooltip.jpg)
 
-This approach to JSX has several advantages over JSX mixed with JavaScript:
+This form of JSX has several advantages over JSX mixed with JavaScript:
 
 - It is much clearer and easier to read.
 - It preserves natural indentation.
@@ -230,17 +232,27 @@ This approach to JSX has several advantages over JSX mixed with JavaScript:
 
 ##### Important
 
-The only JavaScript allowed in inside JSX `{placeholders}` which gets _copied_ to other functions during compilation, with any destrutcured props reassembled. So the button click event handler ends up like this:
+The JSX and its containing function never *runs*. It is only *read* during compilation, and reassembled as something else. There is no virtual DOM at play.
+
+The functions are just placeholders for a single JSX expression, which is all that's allowed in the function body. The only JavaScript allowed anywhere inside these functions is inside JSX `{placeholders}`. 
+
+These snippets are copied during compilation, with some modification of props access. So the button click event handler ends up looking like this:
 
 ```tsx
 function (event) {
-  component.props.count++;
+  this.props.count++;
 }
+```
+
+The JSX mostly ends up as an HTML string with dynamic bits stripped out:
+
+```tsx
+html = "<div><button></button><button>X</button></div>";
 ```
 
 ### TypeScript
 
-You get amazing TypeScript support with the `Uses` type, which defines the data a component expects:
+TypeScript support comes mostly from the `Uses` type, which defines a component's props (and other things as we'll see later). You ideally want to create an interface for clarity and reuse:
 
 ```tsx
 import { mount, Uses } from "wallace";
@@ -288,7 +300,7 @@ const Counter = (props: iCounter) => (
 );
 ```
 
-It will work for props in that function, but when nesting or mounting the component - whereas `Uses` takes care of all of those, and a lot more as we'll see later.
+As that only works within that function, not when nesting or mounting the component elsewhere.
 
 ### Rendering
 
@@ -301,37 +313,36 @@ function render(props) {
 }
 ```
 
-That code tells us we could update the DOM by doing this:
+This tells us we can do things like this:
 
 ```jsx
-const component = mount("main", CounterList, [
-  { count: 0 },
-  { count: 0 }
-]);
-component.props.pop();
+const component = mount("main", Counter, { count: 0 });
+component.props.count = 1;
 component.update();
 ```
 
-Which may seem unwise, but don't worry:
+This may cause some React devs may have a seizure, but what React overlooks is that there are really two types of component:
 
-1. You only do this in specific situations.
-2. You can protect data from unwanted data changes using the `protect` helper function.
+1. **Dumb** components (like `Counter`) which only render data and fire events. In Wallace you only call `render` on these, which overwrites the props each time, so they work exactly as if they were stateless.
+2. **Coordinating** components (like `CounterList`) from which you detect changes to data or state and trigger update.
 
-One such situation is our example, where we want the `CounterList` to update whenever the `Counter` buttons are clicked. We can do this by overriding the `render` method to add a callback to each prop:
+It is in these coordinating components that React struggles and has to resort to awkward patterns like "hooks" which require hidden magic to work, which adds confusion and weird restrictions, which then wastes time and increases mistakes.
+
+With Wallace you just override the `render` method of a coordinating component, and use `update` from then on:
 
 ```tsx
 CounterList.methods = {
-  render(props) {
+  render(counters) {
     const update = () => this.update();
-    this.props = props.map(c => ({ ...c, update }));
+    this.props = counters.map(c => ({ ...c, update }));
     this.update();
   }
 };
 ```
 
-> The `methods` property is just a hack for setting properties on `prototype` without accidentally wiping the other properties - so we're really setting `CounterList.prototype.render`.
+> `methods` lets you set fields on `prototype` with less typing and less risk of accidentally deleting other fields.
 
-The `Counter` can use this callback to `update` the `CounterList` without calling `render`:
+Nested components can use this callback to update the `CounterList` without calling its `render` method:
 
 ```tsx
 const Counter: Uses<iCounter> = ({ count, update }) => (
@@ -341,17 +352,40 @@ const Counter: Uses<iCounter> = ({ count, update }) => (
 );
 ```
 
-> Clicking on buttons now updates the display.
+> Clicking on buttons now updates the display, but we can't really call it "reactive" yet.
 
-Of course there are much nicer ways of doing this! The point is to understand the relationship between `render`, `update` and `props` before moving on to new concepts.
+Of course this is a really ugly React-like way of doing things, and we'll look at nicer ways shortly. The point is to understand the relationship between `render`, `update` and `props` before continuing.
+
+If you're worried about accidentally modifying data that shouldn't be modified, you can make it immutable like this:
+
+```tsx
+import { protect } from "wallace";
+
+CounterList.methods = {
+  render(counters) {
+    this.props = protect(counters);
+    this.update();
+  }
+};
+```
+
+> Clicking on buttons now throws an error.
 
 ##### Important
+
+TODO: change
 
 Using `update` means `render` is only called from above, so rather infrequently for high level components like `CounterList` (just once in our example) which makes it a good place to set things up for the life cycle of the component.
 
 You wouldn't do this for the likes of `Counter` whose `render` method is called whenever we call `update` on the `CounterList`. You move setup to the highest component possible.
 
 ### Updates
+
+Really simple and mechanical.
+
+
+
+TODO: change
 
 As for the `update` method and how components actually update the DOM, it's rather simple. The component stores references to dynamic elements, and matches them to two callbacks:
 
