@@ -9,11 +9,11 @@ _The tiny framework that brings you FREEEDOM!!!_
 
 Wallace is a front end JavaScript framework for building:
 
-- Web apps of any kind.
+- Web apps of any size.
 - Mobile apps - using tools likes [Capacitator](https://capacitorjs.com/).
 - Desktop apps - using tools like [Tauri](https://v2.tauri.app/).
 
-It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) etc on three points:
+What sets Wallace apart from the likes of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) are its:
 
 1. **Performance**
 2. **Productivity**
@@ -21,21 +21,21 @@ It stands apart from [React](https://react.dev/), [Angular](https://angular.dev/
 
 ### 1. Performance
 
-Wallace is perhaps the smallest and fastest loading framework out there. Here are the bundle sizes of some implementations of the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
+Wallace is perhaps the smallest (and hence fastest loading) framework out there. Here are the bundle sizes of some implementations of the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
 
 ![Bar chart of bundle sizes](./assets/size-compressed.jpg)
 
 This makes Wallace ideal for:
 
 - Landing pages that need to load fast.
-- Situations where resources or connectivity are limited.
-- Apps where users switch pages frequently (with bundles this small a multi-page PWA performs better than a SPA).
+- Situations where processing power or connectivity are limited.
+- Apps where users switch pages frequently (Service worker + small bundles works better than a SPA).
 
-And its DOM updates are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the benchmark app:
+And its DOM operations are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the benchmark app:
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.jpg)
 
-But you rarely need _fast_. You just need to avoid _slow_ - which happens in more complex scenarios than benchmarks cover. And the only _real_ protection against that is **freedom**, which we'll cover in a sec.
+But you rarely need _fast_. You just need to avoid _slow_ - which creeps in on more complex scenarios than a benchmark can replicate. And the only _real_ protection against that is **freedom**.
 
 _\* Times are taken from local runs, using non-keyed implementations where available. Will submit for an official run soon. Bundle sizes would be identical._
 
@@ -45,16 +45,16 @@ Wallace helps you develop faster by being:
 
 #### Sensible
 
-- No weird syntax, just JavaScript + JSX.
+- No weird syntax, just plain JavaScript + JSX.
 - No awkward patterns like React hooks 🤢
-- No confusing magic - even reactivity is obvious!
+- No confusing magic - everything from reactivity to DOM updates is easy to *follow* and easy to *control*.
 
 #### Powerful
 
-- Use controllers to keep your code clean and simple as you add complexity.
+- Use controllers to separate display from logic and keep code clean as your app grows.
 - Extend and reuse components using the stubs system.
 
-Here's what stubs looks like:
+Here are stubs in action:
 
 ```jsx
 import { extendComponent } from "wallace";
@@ -67,24 +67,32 @@ const BaseDialog = ({ title }, { ctrl }) => (
     <stub:buttons />
   </div>
 );
-BaseDialog.stubs.buttons = OKCancelButtons; // default, defined elsewhere.
+
+BaseDialog.stubs.buttons = (_, { ctrl }) => (
+  <div>
+    <button onClick={ctrl.confirmDialog()}>OK</button>
+    <button onClick={ctrl.closeDialog()}>Cancel</button>
+  </div>
+)
 
 const MyDialog = extendComponent(BaseDialog);
 MyDialog.stubs.content = ({ text }) => <div>Very cool {text}</div>;
 ```
 
-> `ctrl` is just a reference that components propagate to nested components - usually an object with functions.
+> `MyDialog` implements its own `content` but uses the default `buttons`. `ctrl` is just an object of your making which gets passed down the tree of components.
 
 #### Helpful
 
-- Impressive TypeScript support.
+- Deep TypeScript support.
 - Tool tips everywhere (works in every modern IDE - no plugin required).
 
 There's even a full cheat sheet on the module tool tip:
 
 ![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
-So you hardly ever need to leave your IDE. All this makes Wallace ideal for:
+So you hardly ever need to leave your IDE - just hover, read and keep coding!
+
+All this makes Wallace ideal for:
 
 - Learning and teaching.
 - People who don't touch the (front end) code very often.
@@ -92,25 +100,24 @@ So you hardly ever need to leave your IDE. All this makes Wallace ideal for:
 
 ### 3. Freedom
 
-Wallace is possibly the world's only fully open front-end framework, in that you can override all behaviour at a granular level without loss of functionality. For example, you could:
+Most frameworks severely restrict your freedom (e.g. once React controls a tree of DOM, you can only update it through React) which creates two problems:
 
-- Modify how certain components update their DOM.
-- Interrupt the render flow and update just the components you want.
-- Update only certain elements within components, or only certain aspects (text vs style).
+1. You have to accept unnecessary churn (React renders entire trees to update a single DOM element, reactive frameworks fire twice the updates you actually need etc...)
+2. If the framework performs poorly, or prevents you from pulling off a useful trick (like reparenting) there might be nothing you can do about it, other than sink ever more time confirming this is the case.
 
-Wallace is so simple and mechanical that you can interact with it and make it do exactly what you want. And this means you can:
+Wallace uses a very sophisticated compiler to create very simple run time objects whose operations you can fully customise and interact with. All run time behaviour can be overridden, which possibly makes Wallace the only fully open framework that doesn't restrict your freedom.
 
-- Resolve performance bottlenecks easily and cleanly.
-- Optimise further and more easily than any other framework.
-- Use the core functionality as a base to build something else, like a puzzle platform, or game engine.
+This freedom lets you:
 
-Freedom doesn't just let you do cool things, it also protects you. No framework performs well in all conditions, and you don't know what those are, or how much time you'll waste finding a viable workaround (if there even is one) until you're in the thick of it.
+- Be more specific about which components update.
+- Update select elements/attributes inside components.
+- Change how any given component behaves (DOM updates or otherwise).
 
-This point alone makes it seem like madness picking a closed framework for any project, but then again there hasn't been a choice until now.
+This lets you cleanly achieve maximum DOM performance, and many other things. But most importantly it protects you from performance bottlenecks, and the time you'd waste trying to fix them in a more restrictive framework.
 
 #### It's all in the name
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/) who made it hard to discuss freedom of any kind in Scotland without the risk of someone reenacting this scene:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/), who made it impossible to mention freedom of any kind in Scotland without the risk of someone reenacting this scene:
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
@@ -220,7 +227,7 @@ const CounterList = counters => (
 );
 ```
 
-But you don't need to remember all this. JSX elements have a tool tip which reminds you and lists the available directives, which also have tool tips showing how to use them:
+But you don't need to remember all this. JSX elements have a tool tip which reminds you and lists the available directives, which have their own tool tips detailing their usage:
 
 ![Tool tip on JSX element](./assets/div-tooltip.jpg)
 
@@ -252,7 +259,7 @@ html = "<div><button></button><button>X</button></div>";
 
 ### TypeScript
 
-TypeScript support comes mostly from the `Uses` type, which defines a component's props (and other things as we'll see later). You ideally want to create an interface for clarity and reuse:
+TypeScript support comes mostly from the `Uses` type, which defines a component's props (and other things as we'll see later). You're best using an interface for clarity and reuse:
 
 ```tsx
 import { mount, Uses } from "wallace";
@@ -321,12 +328,12 @@ component.props.count = 1;
 component.update();
 ```
 
-This may cause some React devs may have a seizure, but what React overlooks is that there are really two types of component:
+React devs may have a seizure upon seeing this, but what React overlooks is that there are really two types of component:
 
 1. **Dumb** components (like `Counter`) which only render data and fire events. In Wallace you only call `render` on these, which overwrites the props each time, so they work exactly as if they were stateless.
-2. **Coordinating** components (like `CounterList`) from which you detect changes to data or state and trigger update.
+2. **Coordinating** components (like `CounterList`) from which you detect changes to data or state and trigger update, which is where the complexity lives and where mistakes happen.
 
-It is in these coordinating components that React struggles and has to resort to awkward patterns like "hooks" which require hidden magic to work, which adds confusion and weird restrictions, which then wastes time and increases mistakes.
+It is these coordinating components that React struggles with, having to come up with awkward patterns like "hooks" which require hidden magic which 90% of devs don't fully understand, which adds confusion and weird restrictions, which wastes time and increases mistakes.
 
 With Wallace you just override the `render` method of a coordinating component, and use `update` from then on:
 
@@ -342,7 +349,7 @@ CounterList.methods = {
 
 > `methods` lets you set fields on `prototype` with less typing and less risk of accidentally deleting other fields.
 
-Nested components can use this callback to update the `CounterList` without calling its `render` method:
+Nested components can use this callback to update the `CounterList` without calling its `render` method, which in this case works as the `Counter` also modifies the data in place:
 
 ```tsx
 const Counter: Uses<iCounter> = ({ count, update }) => (
@@ -373,32 +380,74 @@ CounterList.methods = {
 
 ##### Important
 
-TODO: change
+Wallace only calls `update` from inside the `render` method as shown. At all other times (mounting, nesting components, and updating nested components) it calls `render`. So essentially:
 
-Using `update` means `render` is only called from above, so rather infrequently for high level components like `CounterList` (just once in our example) which makes it a good place to set things up for the life cycle of the component.
+- `render` is called from *above*, passing props.
+- `update` is called *internally* without props, as they are already set.
 
-You wouldn't do this for the likes of `Counter` whose `render` method is called whenever we call `update` on the `CounterList`. You move setup to the highest component possible.
+But your code can call `update` from anywhere you like, which bypasses `render`, which makes that a good place to set things up for the life cycle of a coordinating component.
+
+It doesn't look like much, but this little arrangement goes a long way towards keeping your code easy to *follow* and easy to *control*, which lets you develop faster, with fewer mistakes.
 
 ### Updates
 
-Really simple and mechanical.
+Most frameworks keep their DOM operations hidden, probably for the best. Wallace does too, but it's actually so simple that you can follow exactly what's happening.
 
 
 
-TODO: change
+Upon creation, a component creates its initial DOM, stores references to all the dynamic elements, and matches them to two callbacks:
 
-As for the `update` method and how components actually update the DOM, it's rather simple. The component stores references to dynamic elements, and matches them to two callbacks:
-
-- A _query_ to read a value, like `() => props.count`
-- An _action_ to apply the change, like `(el, newValue) => el.textContent = newValue`
+1. A _query_ to read a value, like `() => props.count`
+2. An _action_ to apply the change, like `(el, newValue) => el.textContent = newValue`
 
 During `update`, the component:
 
-- Iterates through all these elements, and:
+- Iterates through all the dynamic elements, and:
   - Unless cancelled out by a visibility toggle (`show`, `hide` `if`) it:
-    - Calls the lookup, and,
+    - Calls the *query*, and,
     - If the value differs from value from last update:
-      - Applies the action and stores the value for next update.
+      - Applies the *action* and stores the value for next update.
+
+That's it. So if we take the following component:
+
+```tsx
+const Counter: Uses<iCounter> = ({ count }) => (
+  <div>
+    <div class="button-container">
+      <button onClick={count++}>{count}</button>
+    </div>
+    <button if={count > 2} onClick={(count = 0)}>
+      <span style:color={count > 3 ? "red" : "black"}>
+        X
+      </span>
+    </button>
+  </div>
+);
+
+const component = mount("main", Counter, {count: 3});
+component.render({count: 1});
+component.render({count: 2});
+```
+
+Here is what will happen:
+
+1. First render:
+   1. Set the first button's `textContent` to "3".
+   2. Set the 2nd button's color to "red".
+2. Second render:
+   1. Set the first button's `textContent` to "1".
+   2. Detach the 2nd button
+   3. Skip setting color as the parent is detached.
+3. Third render:
+   1. Set the first button's `textContent` to "2".
+   2. Reattach the 2nd button
+   3. Skip setting the 2nd button's color, as the query `count > 3 ? "red" : "black"` returns.
+
+
+
+
+
+
 
 The action is either:
 
@@ -508,6 +557,59 @@ CounterList.methods = {
 ```
 
 > The UI displays `Total sheep: 0` but changes as you type in the input.
+
+
+
+
+
+One issue with this is that you're updating the `Counter.repeat` at every keyup event. Although there is no DOM change, it's still unnecessary churn.
+
+Wallace makes it very easy to target updates
+
+
+
+```tsx
+import { watch } from "wallace";
+
+const CounterList = ({ counters, total, things }) => (
+  <div>
+    <span ref:things></span><span>{total}</span>
+    <div>
+      <Counter.repeat items={counters} />
+    </div>
+    <input type="text" bind:keyup={things.value} />
+  </div>
+);
+
+CounterList.methods = {
+  render(counters) {
+    this.props = {
+      total: 0,
+      counters: watch(counters, () => this.update()),
+      things: watch({ value: "sheep" }, () => this.updateThings())
+    };
+    this.update();
+  },
+  updateThings() {
+    const { refs, props } = this;
+    refs.things.textContent = `Total ${props.things.value}: `;
+  },
+  update() {
+    const { base, props } = this;
+    props.total = props.counters.reduce((t, c) => t + c.count, 0)
+    base.update.call(this);
+    this.updateThings();
+  }
+};
+```
+
+
+
+
+
+---
+
+
 
 Note that you don't have to watch the entire props object, you can watch different parts and protect others:
 
