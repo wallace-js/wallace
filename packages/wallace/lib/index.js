@@ -1,26 +1,12 @@
-import { mount, watch, protect } from "./utils";
-import { KeyedRepeater, SequentialRepeater } from "./repeaters";
-import {
-  extendComponent,
+export { mount, watch, protect } from "./utils";
+export {
   defineComponent,
+  extendComponent,
   findElement,
   onEvent,
   nestComponent,
   saveRef,
   stashMisc
 } from "./component";
-
-export {
-  defineComponent,
-  extendComponent,
-  findElement,
-  KeyedRepeater,
-  mount,
-  nestComponent,
-  onEvent,
-  protect,
-  saveRef,
-  SequentialRepeater,
-  stashMisc,
-  watch
-};
+export { SequentialRepeater } from "./repeaters/sequential";
+export { KeyedRepeater } from "./repeaters/keyed";
