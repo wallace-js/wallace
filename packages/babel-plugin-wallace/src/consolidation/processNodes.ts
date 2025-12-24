@@ -199,7 +199,7 @@ export function processNodes(
         componentDefinition.wrapDynamicElementCall(
           node.elementKey,
           IMPORTABLES.stashMisc,
-          [identifier(COMPONENT_BUILD_PARAMS.miscStash), t.objectExpression([])]
+          [identifier(COMPONENT_BUILD_PARAMS.stash), t.objectExpression([])]
         );
       }
 
@@ -310,7 +310,7 @@ export function processNodes(
           componentDefinition.wrapDynamicElementCall(
             node.elementKey,
             IMPORTABLES.stashMisc,
-            [identifier(COMPONENT_BUILD_PARAMS.miscStash), poolInstance]
+            [identifier(COMPONENT_BUILD_PARAMS.stash), poolInstance]
           );
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(

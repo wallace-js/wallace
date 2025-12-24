@@ -1,8 +1,9 @@
 export enum COMPONENT_BUILD_PARAMS {
   component = "component",
   rootElement = "root",
-  elementStash = "elements",
-  miscStash = "stash",
+  elements = "elements",
+  stash = "stash",
+  previous = "previous",
   refs = "refs"
 }
 

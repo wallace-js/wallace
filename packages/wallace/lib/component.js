@@ -10,46 +10,6 @@ const ComponentBase = {
   stubs: {},
   prototype: {
     /**
-     * Gets a stub by name.
-     */
-    _gs: function (name) {
-      return this.constructor.stubs[name];
-    },
-    /**
-     * Reads a query during update, returns an array with (oldValue, newValue, changed)
-     * and saves the old value. Must reset this._r before each run.
-     */
-    _rq: function (props, key) {
-      const run = this._r;
-      if (run[key] === undefined) {
-        let oldValue = this._p[key];
-        const newValue = this._q[key](props, this);
-        this._p[key] = newValue;
-        const rtn = [newValue, oldValue, newValue !== oldValue];
-        run[key] = rtn;
-        return rtn;
-      }
-      return run[key];
-    },
-
-    /**
-     * Applies the callbacks.
-     */
-    _ac: function (props, element, callbacks) {
-      for (let key in callbacks) {
-        let callback = callbacks[key];
-        if (key === NO_LOOKUP) {
-          callback(element, props, this);
-        } else {
-          const result = this._rq(props, key);
-          if (result[2]) {
-            callback(element, props, this, result[0]);
-          }
-        }
-      }
-    },
-
-    /**
      * The render function that gets called by parent components.
      */
     render: function (props, ctrl) {
@@ -77,17 +37,20 @@ const ComponentBase = {
         adjustedIndex,
         thisElement;
 
-      const watches = this._w;
-      const props = this.props;
-      const il = watches.length;
-      this._r = {};
+      const watches = this._w,
+        props = this.props,
+        il = watches.length,
+        previous = this._p;
       /*
       Watches is an array of objects with keys:
-        e: the element reference (string)
+        e: the element index (number)
         c: the callbacks (object)
         ?v: visibility toggle (object)
 
-      The display toggle has keys:
+      The callback is an object whose key is the lookup and value is a function which
+      applies the effect.
+
+      The visibility toggle has keys:
         q: the query key in lookup
         s: the number of watches to skip as their node is underneath
         r: reversed
@@ -102,10 +65,9 @@ const ComponentBase = {
         watch = watches[i];
         element = this._e[watch.e];
         displayToggle = watch.v;
-        i++;
         shouldBeVisible = true;
         if (displayToggle) {
-          lookupTrue = !!this._rq(props, displayToggle.q)[0];
+          lookupTrue = !!this._q[displayToggle.q](props, this);
           shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
           detacher = displayToggle.d;
           if (detacher) {
@@ -122,9 +84,8 @@ const ComponentBase = {
               parent.insertBefore(detachedElement, parent.childNodes[adjustedIndex]);
               detachedElements[index] = null;
             } else if (!shouldBeVisible && !detachedElement) {
-              thisElement = this._e[watch.e];
-              parent.removeChild(thisElement);
-              detachedElements[index] = thisElement;
+              parent.removeChild(element);
+              detachedElements[index] = element;
             }
           } else {
             element.hidden = !shouldBeVisible;
@@ -134,9 +95,36 @@ const ComponentBase = {
           }
         }
         if (shouldBeVisible) {
-          this._ac(props, element, watch.c);
+          this._ac(previous[i], props, element, watch.c);
+        }
+        i++;
+      }
+    },
+
+    /**
+     * Applies callbacks, and save values as previous.
+     *
+     */
+    _ac: function (previous, props, element, callbacks) {
+      for (let key in callbacks) {
+        if (key === NO_LOOKUP) {
+          callbacks[key](element, props, this);
+        } else {
+          const oldValue = previous[key],
+            newValue = this._q[key](props, this);
+          if (oldValue !== newValue) {
+            callbacks[key](element, props, this, newValue);
+            previous[key] = newValue;
+          }
         }
       }
+    },
+
+    /**
+     * Gets a stub by name.
+     */
+    _gs: function (name) {
+      return this.constructor.stubs[name];
     }
   }
 };
@@ -146,6 +134,57 @@ Object.defineProperty(ComponentBase.prototype, "hidden", {
     this.el.hidden = value;
   }
 });
+
+/**
+ * Creates the constructor function for a component definition.
+ *
+ * @param {*} baseComponent - a component definition to inherit from.
+ * @returns the newly created component definition function.
+ */
+function _createConstructor(baseComponent) {
+  const Component = function () {
+    const root = (this.el = this._n.cloneNode(true)),
+      dynamicElements = (this._e = []),
+      stash = (this._s = []),
+      previous = (this._p = []),
+      refs = (this.refs = {});
+    this.ctrl = {};
+    this.props = {};
+    this._b(this, root, dynamicElements, stash, previous, refs);
+  };
+
+  const proto = (Component.prototype = Object.create(baseComponent.prototype, {
+    constructor: {
+      value: Component
+    }
+  }));
+
+  // This lets us assign to prototype without replacing it.
+  Object.defineProperty(Component, "methods", {
+    set: function (value) {
+      Object.assign(proto, value);
+    },
+    get: function () {
+      return proto;
+    }
+  });
+
+  Component.stubs = {} && baseComponent.stubs;
+  return Component;
+}
+
+export function defineComponent(html, watches, queries, buildFunction, inheritFrom) {
+  const ComponentDefinition = _createConstructor(inheritFrom || ComponentBase);
+  const proto = ComponentDefinition.prototype;
+  throwAway.innerHTML = html;
+  //Ensure these do not clash with fields on the component itself.
+  proto._w = watches;
+  proto._q = queries;
+  proto._b = buildFunction;
+  proto._n = throwAway.content.firstChild;
+  proto.base = ComponentBase.prototype;
+  return ComponentDefinition;
+}
 
 /**
  * A utility function that has to be in here because it needs _createConstructor and
@@ -199,56 +238,4 @@ export function stashMisc(element, stash, object) {
 export function onEvent(element, eventName, callback) {
   element.addEventListener(eventName, callback);
   return element;
-}
-
-export function defineComponent(html, watches, queries, buildFunction, inheritFrom) {
-  const ComponentDefinition = _createConstructor(inheritFrom || ComponentBase);
-  const prototype = ComponentDefinition.prototype;
-  throwAway.innerHTML = html;
-  //Ensure these do not clash with fields on the component itself.
-  prototype._w = watches;
-  prototype._q = queries;
-  prototype._b = buildFunction;
-  prototype._n = throwAway.content.firstChild;
-  return ComponentDefinition;
-}
-
-/**
- * Creates a new component definition.
- *
- * @param {*} baseComponent - a component definition to inherit from.
- * @returns the newly created component definition function.
- */
-function _createConstructor(baseComponent) {
-  const Component = function () {
-    const root = (this.el = this._n.cloneNode(true)),
-      dynamicElements = (this._e = []),
-      stash = (this._s = []),
-      refs = (this.refs = {});
-    this.ctrl = {};
-    this.props = {};
-    this._p = {}; // The previous values for watches to compare against.
-    this._r = {}; // The current values read during an update.
-    this._b(this, root, dynamicElements, stash, refs);
-  };
-
-  const proto = (Component.prototype = Object.create(baseComponent.prototype, {
-    constructor: {
-      value: Component
-    }
-  }));
-
-  // This lets us assign to prototype without replacing it.
-  Object.defineProperty(Component, "methods", {
-    set: function (value) {
-      Object.assign(proto, value);
-    },
-    get: function () {
-      return proto;
-    }
-  });
-
-  proto.base = ComponentBase.prototype;
-  Component.stubs = {} && baseComponent.stubs;
-  return Component;
 }

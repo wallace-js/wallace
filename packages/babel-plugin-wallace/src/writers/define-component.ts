@@ -87,20 +87,28 @@ function buildComponentBuildFunction(
 
   const pushToElementStash = t.callExpression(
     t.memberExpression(
-      t.identifier(COMPONENT_BUILD_PARAMS.elementStash),
+      t.identifier(COMPONENT_BUILD_PARAMS.elements),
       t.identifier("push")
     ),
     values
   );
+  const setupPrevious = t.callExpression(
+    t.memberExpression(
+      t.identifier(COMPONENT_BUILD_PARAMS.previous),
+      t.identifier("push")
+    ),
+    componentDefinition.watches.map(watch => t.objectExpression([]))
+  );
 
-  const statements = [pushToElementStash];
+  const statements = [pushToElementStash, setupPrevious];
   return t.functionExpression(
     null,
     [
       t.identifier(COMPONENT_BUILD_PARAMS.component),
       t.identifier(COMPONENT_BUILD_PARAMS.rootElement),
-      t.identifier(COMPONENT_BUILD_PARAMS.elementStash),
-      t.identifier(COMPONENT_BUILD_PARAMS.miscStash),
+      t.identifier(COMPONENT_BUILD_PARAMS.elements),
+      t.identifier(COMPONENT_BUILD_PARAMS.stash),
+      t.identifier(COMPONENT_BUILD_PARAMS.previous),
       t.identifier(COMPONENT_BUILD_PARAMS.refs)
     ],
     t.blockStatement(statements.map(statement => t.expressionStatement(statement)))
