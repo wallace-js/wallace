@@ -9,8 +9,8 @@ test("Ref on element points to element", () => {
     </div>
   );
   const component = testMount(A);
-  expect(component.ref.a).toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.a.className).toBe("danger");
+  expect(component.refs.a).toBeInstanceOf(HTMLSpanElement);
+  expect(component.refs.a.className).toBe("danger");
 });
 
 test("Ref on nested component points to component", () => {
@@ -21,8 +21,8 @@ test("Ref on nested component points to component", () => {
     </div>
   );
   const component = testMount(B);
-  expect(component.ref.a).not.toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.a.el.className).toBe("danger");
+  expect(component.refs.a).not.toBeInstanceOf(HTMLSpanElement);
+  expect(component.refs.a.el.className).toBe("danger");
 });
 
 test("Multiple refs allowed", () => {
@@ -37,10 +37,10 @@ test("Multiple refs allowed", () => {
     </div>
   );
   const component = testMount(A);
-  expect(component.ref.a).toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.b).toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.a.className).toBe("danger");
-  expect(component.ref.b.className).toBe("warning");
+  expect(component.refs.a).toBeInstanceOf(HTMLSpanElement);
+  expect(component.refs.b).toBeInstanceOf(HTMLSpanElement);
+  expect(component.refs.a.className).toBe("danger");
+  expect(component.refs.b.className).toBe("warning");
 });
 
 test("Multiple refs with same name compiles with error", () => {

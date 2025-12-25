@@ -1,6 +1,10 @@
 export enum COMPONENT_BUILD_PARAMS {
   component = "component",
-  rootElement = "root"
+  rootElement = "root",
+  elements = "elements",
+  stash = "stash",
+  previous = "previous",
+  refs = "refs"
 }
 
 export enum COMPONENT_METHODS {
@@ -63,7 +67,9 @@ export enum EVENT_CALLBACK_ARGS {
 }
 
 export enum SPECIAL_SYMBOLS {
+  elementStash = "_e",
   objectStash = "_s",
+  refs = "refs",
   noLookup = "__",
   patch = "patch",
   ctrl = "ctrl"

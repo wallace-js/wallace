@@ -37,7 +37,7 @@ interface TaskListMethods {
   txtInputKeyUp(event: any): void;
 }
 
-TaskList.methods({
+TaskList.methods = {
   render() {
     this.ctrl = new TaskListController(this);
     this.update(); // Ensures spinner displays while loading.
@@ -49,4 +49,4 @@ TaskList.methods({
       event.target.value = "";
     }
   }
-});
+};

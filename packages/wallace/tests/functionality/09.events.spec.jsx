@@ -29,7 +29,7 @@ describe("Event directive", () => {
     const component = testMount(MyComponent, props);
     expect(component).toRender(`<div></div>`);
 
-    component.ref.target.click();
+    component.refs.target.click();
     expect(callBackArgs[0]).toBe(42);
   });
 
@@ -45,10 +45,10 @@ describe("Event directive", () => {
     );
     const component = testMount(MyComponent);
 
-    component.ref.btn.click();
+    component.refs.btn.click();
     expect(callBackArgs[0].type).toBe("click");
     expect(callBackArgs[1]).toEqual(component);
-    expect(callBackArgs[2]).toEqual(component.ref.btn);
+    expect(callBackArgs[2]).toEqual(component.refs.btn);
   });
 
   test("callback uses current props", () => {
@@ -60,10 +60,10 @@ describe("Event directive", () => {
       <div ref:target onClick={setName(event.target, props.name)}></div>
     );
     const component = testMount(MyComponent, props);
-    component.ref.target.click();
-    expect(component.ref.target.textContent).toBe("bird");
+    component.refs.target.click();
+    expect(component.refs.target.textContent).toBe("bird");
     component.render({ name: "cat" });
-    component.ref.target.click();
-    expect(component.ref.target.textContent).toBe("cat");
+    component.refs.target.click();
+    expect(component.refs.target.textContent).toBe("cat");
   });
 });

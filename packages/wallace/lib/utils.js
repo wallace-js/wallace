@@ -23,6 +23,22 @@ export function getElement(elementOrId) {
 }
 
 /**
+ * Trims the unwanted child elements from the end.
+ *
+ * @param {Node} e
+ * @param {Array} childNodes
+ * @param {Int} itemsLength
+ */
+export function trimChildren(e, childNodes, itemsLength) {
+  let lastIndex = childNodes.length - 1;
+  let keepIndex = itemsLength - 1;
+  for (let i = lastIndex; i > keepIndex; i--) {
+    e.removeChild(childNodes[i]);
+  }
+}
+
+const MUTATING_METHODS = ["push", "pop", "shift", "unshift", "splice", "reverse", "sort"];
+/**
  * Returns a proxy which calls a callback when the object or its nested objects are
  * modified.
  *
@@ -35,7 +51,11 @@ export function watch(target, callback) {
       const prop = target[key];
       if (typeof prop == "undefined") return;
       if (typeof prop === "object") return new Proxy(prop, handler);
-      if (Array.isArray(target) && typeof target[key] === "function") {
+      if (
+        Array.isArray(target) &&
+        typeof target[key] === "function" &&
+        MUTATING_METHODS.includes(key)
+      ) {
         return (...args) => {
           const result = target[key](...args);
           callback(target, key, args);

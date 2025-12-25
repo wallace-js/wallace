@@ -8,4 +8,6 @@ canvas {
   margin: 40px;
   max-width: 500px;
   max-height: 300px;
+  border: 1px solid black;
+  padding: 10px;
 }

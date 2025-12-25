@@ -14,7 +14,7 @@ test("Can make a component reactive", () => {
   };
   const component = testMount(MyComponent, { checked: false });
   expect(component).toRender(`<div><input type="checkbox"><span>nope</span></div>`);
-  const checkbox = component.ref.cbx;
+  const checkbox = component.refs.cbx;
   checkbox.click();
   expect(component).toRender(`<div><input type="checkbox"><span>yep</span></div>`);
   checkbox.click();
@@ -56,18 +56,6 @@ describe("Watch", () => {
     expect(calls).toBe(1);
   });
 
-  test("Array operations fire once", () => {
-    let calls = 0;
-    const obj = [1, 2, 3];
-    const reactive = watch(obj, () => calls++);
-    reactive.pop();
-    expect(calls).toBe(1);
-    reactive.push(4);
-    expect(calls).toBe(2);
-    reactive[0] = 5;
-    expect(calls).toBe(3);
-  });
-
   test("Callback receives expected args", () => {
     let call;
     const obj = [];
@@ -93,5 +81,47 @@ describe("Protect", () => {
     const reactive = protect(obj);
     const x = reactive.a;
     expect(x).toBe(1);
+  });
+});
+
+describe("Watch on array", () => {
+  test("Fires once when modified by method", () => {
+    let calls = 0;
+    const obj = [1, 2, 3];
+    const reactive = watch(obj, () => calls++);
+
+    reactive.pop();
+    expect(calls).toBe(1);
+    expect(obj).toStrictEqual([1, 2]);
+
+    reactive.push(4);
+    expect(calls).toBe(2);
+    expect(obj).toStrictEqual([1, 2, 4]);
+
+    reactive.shift();
+    expect(calls).toBe(3);
+    expect(obj).toStrictEqual([2, 4]);
+
+    reactive.unshift(5);
+    expect(calls).toBe(4);
+    expect(obj).toStrictEqual([5, 2, 4]);
+  });
+
+  test("Fires once when modified by setting", () => {
+    let calls = 0;
+    const obj = [1, 2, 3];
+    const reactive = watch(obj, () => calls++);
+
+    reactive[0] = 5;
+    expect(calls).toBe(1);
+    expect(obj).toStrictEqual([5, 2, 3]);
+  });
+
+  test("Doesn't break with non-modifying methods", () => {
+    let calls = 0;
+    const obj = [1, 2, 3];
+    const reactive = watch(obj, () => calls++);
+    reactive.forEach(x => x);
+    expect(calls).toStrictEqual(0);
   });
 });

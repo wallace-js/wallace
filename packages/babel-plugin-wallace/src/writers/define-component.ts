@@ -1,14 +1,13 @@
 import * as t from "@babel/types";
 import type { CallExpression } from "@babel/types";
 import { Component } from "../models";
-import { COMPONENT_BUILD_PARAMS, IMPORTABLES } from "../constants";
+import { COMPONENT_BUILD_PARAMS, SPECIAL_SYMBOLS, IMPORTABLES } from "../constants";
 import type {
   ArrayExpression,
   FunctionExpression,
   Expression,
   ObjectExpression,
-  ObjectProperty,
-  StringLiteral
+  ObjectProperty
 } from "@babel/types";
 import { identifier, objectExpression } from "@babel/types";
 import { ComponentDefinitionData, consolidateComponent } from "../consolidation";
@@ -80,29 +79,39 @@ function buildLookupsArg(componentDefinition: ComponentDefinitionData): ArrayExp
 function buildComponentBuildFunction(
   componentDefinition: ComponentDefinitionData
 ): FunctionExpression {
-  // const dynamicElementsValueObject = buildObjectExpression(
-  //   componentDefinition.dynamicElements,
-  // );
-
   // TODO: clean up temp code when original is an array too.
   const keys = Object.keys(componentDefinition.dynamicElements).sort();
   const values: CallExpression[] = keys.map(
     key => componentDefinition.dynamicElements[key]
   );
 
-  const dynamicElementsAssignment = t.assignmentExpression(
-    "=",
-    t.memberExpression(t.identifier("component"), t.identifier("_e")),
-    t.arrayExpression(values)
+  const pushToElementStash = t.callExpression(
+    t.memberExpression(
+      t.identifier(COMPONENT_BUILD_PARAMS.elements),
+      t.identifier("push")
+    ),
+    values
   );
-  const statements = [t.expressionStatement(dynamicElementsAssignment)];
+  const setupPrevious = t.callExpression(
+    t.memberExpression(
+      t.identifier(COMPONENT_BUILD_PARAMS.previous),
+      t.identifier("push")
+    ),
+    componentDefinition.watches.map(watch => t.objectExpression([]))
+  );
+
+  const statements = [pushToElementStash, setupPrevious];
   return t.functionExpression(
     null,
     [
       t.identifier(COMPONENT_BUILD_PARAMS.component),
-      t.identifier(COMPONENT_BUILD_PARAMS.rootElement)
+      t.identifier(COMPONENT_BUILD_PARAMS.rootElement),
+      t.identifier(COMPONENT_BUILD_PARAMS.elements),
+      t.identifier(COMPONENT_BUILD_PARAMS.stash),
+      t.identifier(COMPONENT_BUILD_PARAMS.previous),
+      t.identifier(COMPONENT_BUILD_PARAMS.refs)
     ],
-    t.blockStatement(statements)
+    t.blockStatement(statements.map(statement => t.expressionStatement(statement)))
   );
 }
 
