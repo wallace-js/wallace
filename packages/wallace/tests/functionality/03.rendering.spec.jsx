@@ -31,7 +31,15 @@ test("Component with nested elements renders correctly", () => {
   `);
 });
 
-// single attributes etc.
+test("Hiphenated attributes can be set", () => {
+  const MyComponent = ({ text }) => (
+    <div ref:div foo-bar={2}>
+      {text}
+    </div>
+  );
+  const component = testMount(MyComponent, { text: "walrus" });
+  expect(component).toRender(`<div foo-bar="2">walrus</div>`);
+});
 
 test("Skipping a read doesn't break render", () => {
   const MyComponent = ({ text, show }) => (
