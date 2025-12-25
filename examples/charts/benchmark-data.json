@@ -49,8 +49,8 @@
   },
   "wallace": {
     "version": "0.3.0",
-    "run1k": 59.9,
-    "size-compressed": 2.4,
-    "first-paint": 100.7
+    "run1k": 56.4,
+    "size-compressed": 2.1,
+    "first-paint": 95.9
   }
 }

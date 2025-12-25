@@ -5,36 +5,26 @@ run locally first in that repo:
 
 ```
 cd webdriver-ts
-npm run bench non-keyed/wallace non-keyed/wallace_01
+npm run bench non-keyed/lit non-keyed/wallace ...
 npm run results
 ```
 
-Usage:
+Then call this script:
+
 ```
-node scripts/benchmarks.js /code/js-framework-benchmark/webdriver-ts/results
+node scripts/benchmarks.js /code/js-framework-benchmark/webdriver-ts/results non-keyed/wallace
 ```
 
+Then run the demo to see the charts:
 
-Get results bu runing:
-
+```
+cd examples/charts
+npm start
+```
 
 */
 const path = require("path");
 const fs = require("fs");
-
-const frameworksToUse = {
-  "keyed/angular-ngfor": "angular",
-  "keyed/solid": "solid",
-  "keyed/react-hooks": "react",
-  "non-keyed/inferno": "inferno",
-  "non-keyed/lit": "lit",
-  "non-keyed/riot": "riot",
-  "non-keyed/svelte-classic": "svelte",
-  "non-keyed/vue": "vue",
-  "non-keyed/wallace04": "wallace"
-};
-
-const tests = ["run1k", "size-compressed", "first-paint"];
 
 /*
 Files look like:
@@ -69,15 +59,15 @@ Returns:
  */
 function collectData() {
   const collectedData = {};
-  const results_dir = path.resolve(process.argv[2]);
+  const results_dir = path.resolve(RESULTS_DIR);
   const files = fs.readdirSync(results_dir);
   tests.forEach(test => {
     const filenameEnd = `${test}.json`;
     const filesForTest = files.filter(file => file.endsWith(filenameEnd));
-    filesForTest.forEach(file => {
-      const frameworkInfo = extractFrameworkString(file);
-      const filename = path.join(results_dir, file);
-      const data = fs.readFileSync(filename, "utf8");
+    filesForTest.forEach(filename => {
+      const frameworkInfo = extractFrameworkString(filename);
+      const filepath = path.join(results_dir, filename);
+      const data = fs.readFileSync(filepath, "utf8");
       const json = JSON.parse(data);
       if (!collectedData.hasOwnProperty(frameworkInfo)) {
         collectedData[frameworkInfo] = {};
@@ -92,7 +82,7 @@ function collectData() {
 Returns:
 
   {
-    "non-keyed/wallace04": {
+    "non-keyed/wallace": {
       '0.3.0': { run1k: 59.9, 'size-compressed': 2.4, 'first-paint': 100.7 }
     }
     ...
@@ -116,7 +106,7 @@ function groupData(collectedData) {
 /*
 Flattens, filters and renames it to this:
 {
-  wallace04: {version: '0.3.0', 'run1k: 59.9, 'size-compressed': 2.4, 'first-paint': 100.7 }}
+  wallace: {version: '0.3.0', 'run1k: 59.9, 'size-compressed': 2.4, 'first-paint': 100.7 }}
   ...
 }
 */
@@ -138,17 +128,39 @@ function flattenAndFilter(groupedData) {
 
 function dumpData(data) {
   const filename = path.join(__dirname, "../examples/charts/benchmark-data.json");
-
   fs.writeFile(filename, JSON.stringify(data, null, 2), err => {
     if (err) throw err;
-    console.log(`File saved to ${filename}`);
+    console.log(`SUCCESS. File saved to ${filename}`);
   });
 }
+
 function main() {
   const collectedData = collectData();
   const groupedData = groupData(collectedData);
   const flattenedData = flattenAndFilter(groupedData);
+  for (const [target, framework] of Object.entries(frameworksToUse)) {
+    if (!flattenedData.hasOwnProperty(framework)) {
+      console.log(`ERROR. No data found for ${target}`);
+      process.exit(1);
+    }
+  }
   dumpData(flattenedData);
 }
+
+const RESULTS_DIR = process.argv[2];
+const WALLACE_IMPLEMENTATION = process.argv[3]; // e.g. "wallace_xyz"
+const tests = ["run1k", "size-compressed", "first-paint"];
+
+const frameworksToUse = {
+  "keyed/angular-ngfor": "angular",
+  "keyed/solid": "solid",
+  "keyed/react-hooks": "react",
+  "non-keyed/inferno": "inferno",
+  "non-keyed/lit": "lit",
+  "non-keyed/riot": "riot",
+  "non-keyed/svelte-classic": "svelte",
+  "non-keyed/vue": "vue"
+};
+frameworksToUse[WALLACE_IMPLEMENTATION] = "wallace";
 
 main();
