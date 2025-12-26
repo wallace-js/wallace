@@ -1,5 +1,5 @@
 import { Component, DynamicTextNode } from "../models";
-import { processeVisibilityToggles } from "./visibility";
+import { postProcessing } from "./postProcessing";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
 import { processNodes } from "./processNodes";
 import { getSiblings } from "./utils";
@@ -32,7 +32,7 @@ export function consolidateComponent(component: Component): ComponentDefinitionD
   const componentDefinition = new ComponentDefinitionData(component);
   hoistTextNodes(component);
   processNodes(component, componentDefinition);
-  processeVisibilityToggles(componentDefinition.watches);
+  postProcessing(componentDefinition);
   // This must be done after all the processing, as DOM may have changed.
   componentDefinition.html = component.buildHTMLString();
   return componentDefinition;

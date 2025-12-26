@@ -133,6 +133,29 @@ function addToggleCallbackStatement(
   });
 }
 
+function processRef(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  name: string
+) {
+  const otherRefs = componentDefinition.refs.map(r => r.name);
+  if (otherRefs.includes(name)) {
+    error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
+  }
+  // Note: we modify this call expression in post processing.
+  const callExpression = componentDefinition.wrapDynamicElementCall(
+    node.elementKey,
+    IMPORTABLES.saveRef,
+    [
+      identifier(COMPONENT_BUILD_PARAMS.component),
+      identifier(COMPONENT_BUILD_PARAMS.refs),
+      t.stringLiteral(name)
+    ]
+  );
+  const ref = { name, callExpression, address: node.address };
+  componentDefinition.refs.push(ref);
+}
+
 // TODO: break this up.
 export function processNodes(
   component: Component,
@@ -175,7 +198,8 @@ export function processNodes(
       repeatInstruction || // This is NOT the same as .isRepeatedComponent, which is on parent!
       stubName;
 
-    // TODO: should ref really save the element?
+    // TODO: some of these should not save the element...
+    // restructure.
     const shouldSaveElement =
       createWatch || ref || node.eventListeners.length > 0 || node.hasConditionalChildren;
 
@@ -352,16 +376,7 @@ export function processNodes(
         }
       }
 
-      if (ref) {
-        if (componentDefinition.collectedRefs.includes(ref)) {
-          error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
-        }
-        componentDefinition.collectedRefs.push(ref);
-        componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.saveRef, [
-          identifier(COMPONENT_BUILD_PARAMS.refs),
-          stringLiteral(ref)
-        ]);
-      }
+      if (ref) processRef(componentDefinition, node, ref);
 
       // TODO: improve this, as we are basically renaming things specifically for the
       // build function that have already been renamed, which can get confusing.
