@@ -12,13 +12,13 @@ describe("Toggle without target", () => {
     expect(component).toRender(`
       <div>leopard</div>
     `);
-    expect(component.refs.target.classList.contains("spotty")).toBe(false);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(false);
     spotted = true;
     component.update();
-    expect(component.refs.target.classList.contains("spotty")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(true);
     spotted = false;
     component.update();
-    expect(component.refs.target.classList.contains("spotty")).toBe(false);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(false);
   });
 
   test("Toggle leaves existing classes alone", () => {
@@ -32,16 +32,16 @@ describe("Toggle without target", () => {
     expect(component).toRender(`
       <div class="foo">leopard</div>
     `);
-    expect(component.refs.target.classList.contains("spotty")).toBe(false);
-    expect(component.refs.target.classList.contains("foo")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(false);
+    expect(component.refs.target.node.classList.contains("foo")).toBe(true);
     spotted = true;
     component.update();
-    expect(component.refs.target.classList.contains("spotty")).toBe(true);
-    expect(component.refs.target.classList.contains("foo")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(true);
+    expect(component.refs.target.node.classList.contains("foo")).toBe(true);
     spotted = false;
     component.update();
-    expect(component.refs.target.classList.contains("spotty")).toBe(false);
-    expect(component.refs.target.classList.contains("foo")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(false);
+    expect(component.refs.target.node.classList.contains("foo")).toBe(true);
   });
 });
 
@@ -64,15 +64,15 @@ describe("Toggle with target", () => {
     expect(component).toRender(`
       <div class="foo">leopard</div>
     `);
-    expect(component.refs.target.classList.contains("spotty")).toBe(false);
-    expect(component.refs.target.classList.contains("foo")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(false);
+    expect(component.refs.target.node.classList.contains("foo")).toBe(true);
     spotted = true;
     component.update();
-    expect(component.refs.target.classList.contains("spotty")).toBe(true);
-    expect(component.refs.target.classList.contains("foo")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(true);
+    expect(component.refs.target.node.classList.contains("foo")).toBe(true);
     spotted = false;
     component.update();
-    expect(component.refs.target.classList.contains("spotty")).toBe(false);
-    expect(component.refs.target.classList.contains("foo")).toBe(true);
+    expect(component.refs.target.node.classList.contains("spotty")).toBe(false);
+    expect(component.refs.target.node.classList.contains("foo")).toBe(true);
   });
 });

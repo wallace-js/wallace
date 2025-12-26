@@ -12,12 +12,12 @@ describe("Visibility controlled by `hide` directive", () => {
       </ul>
     );
     const component = testMount(MyComponent);
-    expect(component.refs.target.hidden).toBe(initalValue);
-    expect(component.refs.other.hidden).toBe(false);
+    expect(component.refs.target.node.hidden).toBe(initalValue);
+    expect(component.refs.other.node.hidden).toBe(false);
     hideTarget = !hideTarget;
     component.update();
-    expect(component.refs.target.hidden).toBe(!initalValue);
-    expect(component.refs.other.hidden).toBe(false);
+    expect(component.refs.target.node.hidden).toBe(!initalValue);
+    expect(component.refs.other.node.hidden).toBe(false);
   });
 });
 
@@ -33,12 +33,12 @@ describe("Visibility controlled by `show` directive", () => {
       </ul>
     );
     const component = testMount(MyComponent);
-    expect(component.refs.target.hidden).toBe(!initalValue);
-    expect(component.refs.other.hidden).toBe(false);
+    expect(component.refs.target.node.hidden).toBe(!initalValue);
+    expect(component.refs.other.node.hidden).toBe(false);
     showTarget = !showTarget;
     component.update();
-    expect(component.refs.target.hidden).toBe(initalValue);
-    expect(component.refs.other.hidden).toBe(false);
+    expect(component.refs.target.node.hidden).toBe(initalValue);
+    expect(component.refs.other.node.hidden).toBe(false);
   });
 });
 
@@ -90,12 +90,12 @@ describe("Nested components", () => {
       </div>
     );
     const component = testMount(AnimalList);
-    expect(component.refs.target.el.hidden).toBe(false);
-    expect(component.refs.other.el.hidden).toBe(false);
+    expect(component.refs.target.node.el.hidden).toBe(false);
+    expect(component.refs.other.node.el.hidden).toBe(false);
     showWalrus = false;
     component.update();
-    expect(component.refs.target.el.hidden).toBe(true);
-    expect(component.refs.other.el.hidden).toBe(false);
+    expect(component.refs.target.node.el.hidden).toBe(true);
+    expect(component.refs.other.node.el.hidden).toBe(false);
   });
 
   test("do not update when hidden", () => {
@@ -116,8 +116,8 @@ describe("Nested components", () => {
       </div>
     );
     const component = testMount(Counters);
-    const targetSpan = component.refs.target.refs.val;
-    const otherSpan = component.refs.other.refs.val;
+    const targetSpan = component.refs.target.node.refs.val.node;
+    const otherSpan = component.refs.other.node.refs.val.node;
 
     expect(targetSpan.textContent).toBe("1");
     expect(otherSpan.textContent).toBe("1");

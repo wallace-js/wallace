@@ -70,7 +70,7 @@ test("Change event updates data", () => {
   };
   const props = { text: "foo" };
   const component = testMount(MyComponent, props);
-  const input = component.refs.tbx;
+  const input = component.refs.tbx.node;
   expect(input.value).toBe("foo");
 
   mimicValueChange(input, "bar");
@@ -95,7 +95,7 @@ test("Value updates to match data", () => {
     }
   };
   const component = testMount(MyComponent);
-  const input = component.refs.tbx;
+  const input = component.refs.tbx.node;
   // previous value is "foo" as that was the first value.
 
   mimicValueChange(input, "bar");
@@ -103,7 +103,7 @@ test("Value updates to match data", () => {
   expect(input.value).toBe("bar");
   // previous value is still "foo" as there was no update.
 
-  component.refs.btn.click();
+  component.refs.btn.node.click();
   expect(data.text).toBe("");
   expect(input.value).toBe("");
   // previous value is now "" as that was stored in last update.
@@ -117,7 +117,7 @@ test("Value updates to match data", () => {
   // because the previous value and new value are "", so the same, so the input element
   // is not updated, and its value therefore remains "foo", which is a really annoying
   // bug to track, so this test is absolutely vital.
-  component.refs.btn.click();
+  component.refs.btn.node.click();
   expect(data.text).toBe("");
   expect(input.value).toBe("");
 });
