@@ -107,13 +107,6 @@ const ComponentBase = {
         }
         i++;
       }
-    },
-
-    /**
-     * Gets a stub by name.
-     */
-    _gs: function (name) {
-      return this.constructor.stubs[name];
     }
   }
 };

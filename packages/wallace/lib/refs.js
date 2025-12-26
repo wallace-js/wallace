@@ -1,5 +1,5 @@
-function Ref(component, element, start, end) {
-  this.element = element;
+function Ref(component, node, start, end) {
+  this.node = node;
   this._c = component;
   this._s = start;
   this._e = end;
@@ -10,9 +10,10 @@ Ref.prototype.update = function () {
 };
 
 /**
- * Saves a reference to element or nested component. Returns the element.
+ * Saves a reference to a node (element or nested component)
+ * Returns the node.
  */
-export function saveRef(element, component, refs, name, start, end) {
-  refs[name] = new Ref(component, element, start, end);
-  return element;
+export function saveRef(node, component, refs, name, start, end) {
+  refs[name] = new Ref(component, node, start, end);
+  return node;
 }

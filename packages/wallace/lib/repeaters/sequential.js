@@ -3,7 +3,7 @@ import { trimChildren } from "../utils";
 /**
  * Repeats nested components, yielding from its pool sequentially.
  *
- * @param {componentDefinition} componentDefinition - The class ComponentDefinition to create.
+ * @param {componentDefinition} componentDefinition - The ComponentDefinition to create.
  */
 export function SequentialRepeater(componentDefinition) {
   this.def = componentDefinition;

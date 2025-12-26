@@ -177,15 +177,14 @@ export function processNodes(
     }
 
     const stubName = node.getStub();
-    const stubComponentName = stubName
-      ? t.callExpression(
-          t.memberExpression(
-            t.identifier(COMPONENT_BUILD_PARAMS.component),
-            t.identifier(COMPONENT_METHODS.getStub)
-          ),
-          [t.stringLiteral(stubName)]
-        )
-      : undefined;
+    let stubExpression: t.Expression | undefined;
+    if (stubName) {
+      componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
+      stubExpression = t.callExpression(t.identifier(IMPORTABLES.getStub), [
+        t.identifier(COMPONENT_BUILD_PARAMS.component),
+        t.stringLiteral(stubName)
+      ]);
+    }
     const visibilityToggle = node.getVisibilityToggle();
     const ref = node.getRef();
     const repeatInstruction = node.getRepeatInstruction();
@@ -209,7 +208,7 @@ export function processNodes(
       const nestedComponentCls =
         node.isNestedComponent || node.isRepeatedComponent
           ? t.identifier(node.tagName)
-          : stubComponentName;
+          : stubExpression;
       node.elementKey = nestedComponentCls
         ? componentDefinition.saveNestedAsDynamicElement(node.address, nestedComponentCls)
         : componentDefinition.saveDynamicElement(node.address);
@@ -322,6 +321,7 @@ export function processNodes(
           componentDefinition.component.module.requireImport(
             IMPORTABLES.SequentialRepeater
           );
+          componentDefinition.component.module.requireImport(IMPORTABLES.stashMisc);
           const poolInstance =
             repeatInstruction.poolExpression ||
             newExpression(identifier(IMPORTABLES.SequentialRepeater), [

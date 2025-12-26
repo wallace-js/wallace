@@ -8,8 +8,7 @@ export enum COMPONENT_BUILD_PARAMS {
 }
 
 export enum COMPONENT_METHODS {
-  render = "render",
-  getStub = "_gs"
+  render = "render"
 }
 
 export const HTML_SPLITTER = "____split____";
@@ -18,6 +17,7 @@ export enum IMPORTABLES {
   defineComponent = "defineComponent",
   extendComponent = "extendComponent",
   findElement = "findElement",
+  getStub = "getStub",
   nestComponent = "nestComponent",
   saveRef = "saveRef",
   stashMisc = "stashMisc",
