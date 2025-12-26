@@ -518,8 +518,8 @@ declare module "wallace" {
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
-    // methods?: ComponenMethods<Props, Controller> &
-    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
+    methods?: ComponenMethods<Props, Controller> &
+      ThisType<ComponentInstance<Props, Controller, Methods>>;
     readonly prototype?: ComponenMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
