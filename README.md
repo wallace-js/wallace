@@ -27,15 +27,15 @@ Wallace is perhaps the smallest (and hence fastest loading) framework out there.
 
 This makes Wallace ideal for:
 
-- Landing pages that need to load fast.
+- Pages that need to load fast.
 - Situations where processing power or connectivity are limited.
-- Apps where users switch pages frequently (With service workers + small bundles you don't need an SPA).
+- Apps where users switch pages frequently (less need for SPA).
 
-And its DOM operations are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the benchmark app:
+And its DOM operations are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the same [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.png)
 
-But you rarely need _fast_. You just need to avoid _slow_ - which creeps in on more complex scenarios than a benchmark can replicate. And the only _real_ protection against that is **freedom**.
+But you rarely need _fast_. You just need to avoid _slow_ - which creeps in on more complex scenarios than what benchmarks can reasonably cover. And the only _real_ protection against that is **freedom**.
 
 _\* Times are taken from local runs, using non-keyed implementations where available. Will submit for an official run soon. Bundle sizes would be identical._
 
@@ -47,47 +47,21 @@ Wallace helps you develop faster by being:
 
 - No weird syntax, just plain JavaScript + JSX.
 - No awkward patterns like signals, hooks, context providers etc...
-- No confusing magic - everything from reactivity to DOM updates is easy to *follow* and easy to *control*.
+- No confusing magic - everything from reactivity to DOM updates are easy to *follow* and easy to *control*.
 
 #### Powerful
 
 - Use controllers to keep your code simple and clean as your app grows.
 - Easily run targeted updates for a smoother UI.
-- Extend and reuse components using the stubs system.
-
-Here are stubs in action:
-
-```jsx
-import { extendComponent } from "wallace";
-
-const BaseDialog = ({ title }, { ctrl }) => (
-  <div>
-    <button onClick={ctrl.closeDialog()}>X</button>
-    <h3>{title}</h3>
-    <stub:content />
-    <stub:buttons />
-  </div>
-);
-
-BaseDialog.stubs.buttons = (_, { ctrl }) => (
-  <div>
-    <button onClick={ctrl.confirmDialog()}>OK</button>
-    <button onClick={ctrl.closeDialog()}>Cancel</button>
-  </div>
-)
-
-const MyDialog = extendComponent(BaseDialog);
-MyDialog.stubs.content = ({ text }) => <div>Very cool {text}</div>;
-```
-
-> `MyDialog` implements its own `content` but uses the default `buttons`. `ctrl` is just an object of your making which gets passed down the tree of components.
+- Extend and override parts of components using the stubs system.
 
 #### Helpful
 
 - Deep TypeScript support.
+- Compile time error-detection system.
 - Tool tips everywhere (works in every modern IDE - no plugin required).
 
-There's even a full cheat sheet on the module tool tip so you hardly ever need to leave your IDE:
+There's even a full cheat sheet on the module tool tip so you need never need to leave your IDE:
 
 ![Tool tip showing cheat sheet](./assets/cheat-sheet.jpg)
 
@@ -95,75 +69,53 @@ All this makes Wallace ideal for:
 
 - Learning and teaching.
 - People who don't touch the (front end) code very often.
-- People who'd rather develop features than learn a new framework.
+- People who'd rather develop apps than learn a new framework.
 
 ### 3. Freedom
 
-Most frameworks severely restrict your freedom (e.g. once React controls a tree of DOM, you can only update it through React) which creates two problems:
+Most frameworks are completely closed: they work the way they work and that's that, with the only backdoor being direct DOM manipulation. This situation creates a major risk:
 
-1. You have to accept unnecessary churn (React renders entire trees to update a single DOM element, reactive frameworks fire twice the updates you actually need etc...)
-2. If the framework performs poorly, or prevents you from pulling off a useful trick (like reparenting) there might be nothing you can do about it, other than sink ever more time confirming this is the case.
+> If the framework performs poorly on a particular view, or prevents you from doing something really useful (like reparenting) you might be totally stuffed.
 
-Wallace uses a very sophisticated compiler to create very simple run time objects whose operations you can fully customise and interact with. All run time behaviour can be overridden, which possibly makes Wallace the only fully open framework that doesn't restrict your freedom.
+Of course you'll come up with some solution or other, but you pay for it in time (sometimes an awful lot of it) and code quality, which you then pay for again later on.
 
-This freedom lets you:
+Wallace doesn't have this problem for two reasons:
 
-- Be more specific about which components update.
-- Update select elements/attributes inside components.
-- Change how any given component behaves (DOM updates or otherwise).
+1. You can override all run time behaviour at a granular level (making Wallace possibly the only fully open framework of its kind).
+2. It updates DOM elements directly.
 
-This lets you cleanly achieve maximum DOM performance, and many other things. But most importantly it protects you from performance bottlenecks, and the time you'd waste trying to fix them in a more restrictive framework.
+So you effectively have total freedom to make components and the DOM do whatever you like, which can get you out of a tight spot, or help you achieve the same performance as vanilla, minus the mess.
+
+Having said that, most of the things you'd probably do with that unlimited freedom are already easy and catered for, such as:
+
+- Only updating a subset of deeply nested components.
+- Only updating certain sections within components.
+- Changing how a component updates its entire DOM, or part of it.
+
+And if you do need the backdoor, Wallace's is as clean as it gets:
+
+```tsx
+<canvas apply={doStuff(element, props)} ></canvas>
+```
 
 #### It's all in the name
 
-Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/), who made it impossible to mention freedom of any kind in Scotland without the risk of someone reenacting this scene:
+Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/), who made it impossible for people in Scotland to talk at any length about "freedom" without someone reenacting this scene:
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
 ## Tour
 
-This tour covers all of Wallace's features in enough detail for you to go forth and build awesome apps. You can code along:
+This tour covers Wallace in enough detail for you to go forth and build awesome apps. You can code along:
 
 - In your browser using StackBlitz (choose [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx))
 - Locally with `npx create-wallace-app`
 
-There are also [examples](https://github.com/wallace-js/wallace/tree/master/examples) which all have a [StackBlitz](https://stackblitz.com) link in their README so you can edit it online, then download it as a fully working project.
+There are also [examples](https://github.com/wallace-js/wallace/tree/master/examples) which all have a [StackBlitz](https://stackblitz.com) link in their README so you can play around online, then download a fully working project.
 
-### Compilation
+### Components
 
-Wallace uses its own Babel plugin to replace functions that hold JSX, like this:
-
-```tsx
-const Counter = ({ count }) => (
-  <div>
-    <button onClick={count++}>{count}</button>
-  </div>
-);
-```
-
-With constructor functions that allow us to create objects like this:
-
-```tsx
-const component = new Counter();
-```
-
-These objects (called components) control their own DOM, which can be updated like this:
-
-```tsx
-component.render({ count: 1 });
-```
-
-However you don't normally create components yourself. Instead you use `mount` which:
-
-1. Creates the component object (which immediately creates its initial DOM).
-2. Calls its `render` method, during which it:
-   1. Updates its DOM.
-   2. Creates nested components and calls their `render` method.
-
-3. Replaces the specified element with the component's DOM.
-4. Returns the component.
-
-You only mount the root component, for example:
+Wallace controls the DOM with components, which you define as functions that return JSX:
 
 ```tsx
 import { mount } from "wallace";
@@ -180,23 +132,42 @@ const CounterList = counters => (
   </div>
 );
 
-const component = mount("main", Counter, [
-  { count: 0 },
-  { count: 0 }
-]);
+const root = mount("main", CounterList, [{ count: 0 }, { count: 0 }]);
 ```
 
-> You can specify an actual element instead of an id string if you prefer.
+> The UI now displays two buttons with 0, which don't do anything yet.
 
-#### Important
+You might think these functions get called and return virtual DOM like React, but that's not the case. Wallace uses its own Babel plugin to *replace* them with very different functions that are used to create objects:
 
-Key points to understand:
+```tsx
+const component = new Counter();
+```
 
-1. Components manage their own DOM and immediate nested components.
-2. The root component works just like other components.
-3. There is no central engine coordinating things.
+These objects (called component *instances* or just *components*) have methods, like `render` which updates its DOM instantly:
 
-This makes things very easy to *follow* and very easy to *control* - a primary goal Wallace. On that note: clicking the buttons doesn't do anything yet, because Wallace is deliberately not reactive until you tell it to be.
+```tsx
+component.render({ count: 99 });
+console.log(component.el); // <div><button>99</button></div>
+```
+
+You don't normally create components yourself, instead you use `mount` which:
+
+1. Creates a component of the specified type.
+2. Calls its `render` method.
+3. Replaces the specified element (or element with specified id string) with `el` .
+4. Returns the component instance.
+
+The `render` method updates that component's DOM and mounts and render any nested components. So each component manages its own DOM and own nested components, there is no extra hidden engine coordinating them.
+
+Even the root component doesn't know its the root, and behave exactly like other components. We have a reference to it, so we can use that to update the DOM:
+
+```tsx
+root.render([{ count: 1 }, { count: 2 }, { count: 3 }]);
+```
+
+Here the `CounterList` instance reuses the existing two `Counter` instances from its own pool and creates one more to make it up to three. These pools get garbage collected when the parent component is no longer accessible, so you don't need to worry about them, however you can control pooling for performance tweaking as we'll see later.
+
+We'll see just how useful it is having real objects to work with shortly, but first, some syntax basics.
 
 ### JSX
 
@@ -226,7 +197,7 @@ const CounterList = counters => (
 );
 ```
 
-But you don't need to remember all this. JSX elements have a tool tip which reminds you and lists the available directives, which have their own tool tips detailing their usage:
+But you don't need to remember all this. JSX elements have a tool tip which reminds you of syntax rules and lists the available directives, which have their own tool tips detailing their usage:
 
 ![Tool tip on JSX element](./assets/div-tooltip.jpg)
 
@@ -236,18 +207,18 @@ This JSX format has several advantages over JSX mixed with JavaScript:
 - It preserves natural indentation.
 - It is far more compact (~40% the lines of React equivalent).
 
-And interpreting syntax during compilation as opposed to run time means:
+And the advantages of interpreting syntax during compilation over executing virtual DOM at run time are:
 
-- We can add endless directives and syntax features without affecting bundle size.
-- We can add lots of error checking and useful warnings without affecting performance, as we remove all that on production builds.
+- Much of the computation is done at compilation, leaving the bare minimum to be done at run time, making it insanely fast and efficient.
+- We can add as many new directives, syntax features, checks, warnings as we like without it affecting bundle size.
 
 #### Important
 
-The JSX and its containing function never *runs*. It is only *read* during compilation, and reassembled as something else. There is no virtual DOM at play.
+The function is just a placeholder for the JSX defining the component, and is completely replaced at compilation, so it never *runs*, it is only *parsed*.
 
-The functions are just placeholders for a single JSX expression, which is all that's allowed in the function body. The only JavaScript allowed anywhere inside these functions is inside JSX `{placeholders}`. 
+The function body may only contain a single JSX expression, and nothing else. The only JavaScript allowed is inside JSX `{placeholders}`. These snippets are *copied* during compilation, with some modification of props access. 
 
-These snippets are copied during compilation, with some modification of props access. So the button click event handler ends up looking like this:
+So the button click event handler ends up looking something like this:
 
 ```tsx
 function (event) {
@@ -255,15 +226,9 @@ function (event) {
 }
 ```
 
-The JSX ends up as an HTML string with dynamic bits stripped out:
-
-```tsx
-html = "<div><button></button><button>reset</button></div>";
-```
-
 ### TypeScript
 
-TypeScript support comes mostly from the `Uses` type, which defines a component's props (and other things as we'll see later). You're best using an interface for clarity and reuse:
+The `Uses` type specifies a component's props (and other things as we'll see later) which are best defined as a separate an interface for clarity and reuse:
 
 ```tsx
 import { mount, Uses } from "wallace";
@@ -287,11 +252,11 @@ const CounterList: Uses<iCounter[]> = counters => (
   </div>
 );
 
-const component = mount("main", CounterList, [
+const root = mount("main", CounterList, [
   { count: 0 },
   { count: 0 }
 ]);
-component.render([{ count: 0 }, { count: 1 }]);
+root.render([{ count: 0 }, { count: 1 }]);
 ```
 
 TypeScript now warns you if you attempt to pass incorrect props at any point.
@@ -308,7 +273,7 @@ const Counter = (props: iCounter) => (
 );
 ```
 
-As that only works within that function, not when nesting or mounting the component elsewhere.
+As that only works within that function, but not when nesting or mounting the component elsewhere.
 
 ### Rendering
 
@@ -321,7 +286,7 @@ function render(props) {
 }
 ```
 
-This tells us we can do things like this:
+So instead of calling `render` with props we could just modify props in place, then call `update`:
 
 ```jsx
 const component = mount("main", Counter, { count: 0 });
@@ -329,14 +294,19 @@ component.props.count = 1;
 component.update();
 ```
 
-React devs may have a seizure upon seeing this, but what React overlooks is that there are really two types of component:
+React tells us components should be stateless, but what React overlooks is that there are really two kinds of component:
 
-1. **Dumb** components (like `Counter`) which only render data and fire events. In Wallace you only call `render` on these, which overwrites the props each time, so they work exactly as if they were stateless.
-2. **Coordinating** components (like `CounterList`) from which you detect changes to data or state and trigger update, which is where the complexity lives and where mistakes happen.
+1. **Dumb** components (like `Counter`) which only display data and fire events. These should be stateless.
+2. **Coordinating** components (like `CounterList`) from which we coordinate updating of nested components based on changes to state/data. These turn messy if you force them to be stateless.
 
-It is these coordinating components that React struggles with, having to come up with awkward patterns like "hooks" which require hidden magic which 90% of devs don't fully understand, which adds confusion and weird restrictions, which wastes time and increases mistakes.
+Working with state in stateless components requires awkward hacks like hooks, which require hidden magic (90% of React devs don't understand how they work) which creates more scope for mistakes.
 
-With Wallace you just override the `render` method of a coordinating component, and use `update` from then on:
+With Wallace you get the best of both worlds:
+
+- If you only ever call `render` (as you would for dumb components) then the component is as good as stateless.
+- With coordinating components you override the `render` method to set things up for its life cycle, and use `update` from then on.
+
+Here is a very ugly React-like way of creating a callback which nested components can use to update the coordinating component:
 
 ```tsx
 CounterList.methods = {
@@ -364,7 +334,7 @@ const Counter: Uses<iCounter> = ({ count, update }) => (
 
 Of course this is a really ugly React-like way of doing things, and we'll look at nicer ways shortly. The point is to understand the relationship between `render`, `update` and `props` before continuing.
 
-If you're worried about accidentally modifying data that shouldn't be modified, you can make it immutable like this:
+If you're worried about accidentally modifying data that shouldn't be modified, you can make it immutable using `protect`:
 
 ```tsx
 import { protect } from "wallace";
@@ -380,6 +350,7 @@ CounterList.methods = {
 > Clicking on buttons now throws an error.
 
 #### Important
+
 
 Wallace only calls `update` from inside the `render` method as shown. At all other times (mounting, nesting components, and updating nested components) it calls `render`. So essentially:
 
@@ -405,7 +376,7 @@ const CounterList: Uses<iCounter[]> = counters => (
 );
 ```
 
-To make it all reactive we just need to update the `CounterList` object whenever the data is modified, which we can do like this:
+We make things reactive by telling the coordinating component to `update` whenever the props (or some other object) is modified, which we can do with `watch`:
 
 ```tsx
 import { watch } from "wallace";
@@ -653,6 +624,8 @@ CounterList.methods = {
 > Clicking on buttons now throws an error, as they modify the protected object.
 
 - 
+
+### Xargs
 
 ### Controllers
 
@@ -997,20 +970,6 @@ Stubs are a flexible way to organise reusable component skeletons or parts, whic
 ##### Important
 
 A stub receives the same props as its enclosing component.
-
-
-
-### DOM
-
-
-
-If you do want to access an element, you most likely want to do something with it during an update, and are better of using the `apply` directive:
-
-```
-
-```
-
-
 
 ## Status
 
