@@ -133,6 +133,29 @@ function addToggleCallbackStatement(
   });
 }
 
+function processRef(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  name: string
+) {
+  const otherRefs = componentDefinition.refs.map(r => r.name);
+  if (otherRefs.includes(name)) {
+    error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
+  }
+  // Note: we modify this call expression in post processing.
+  const callExpression = componentDefinition.wrapDynamicElementCall(
+    node.elementKey,
+    IMPORTABLES.saveRef,
+    [
+      identifier(COMPONENT_BUILD_PARAMS.component),
+      identifier(COMPONENT_BUILD_PARAMS.refs),
+      t.stringLiteral(name)
+    ]
+  );
+  const ref = { name, callExpression, address: node.address };
+  componentDefinition.refs.push(ref);
+}
+
 // TODO: break this up.
 export function processNodes(
   component: Component,
@@ -154,15 +177,14 @@ export function processNodes(
     }
 
     const stubName = node.getStub();
-    const stubComponentName = stubName
-      ? t.callExpression(
-          t.memberExpression(
-            t.identifier(COMPONENT_BUILD_PARAMS.component),
-            t.identifier(COMPONENT_METHODS.getStub)
-          ),
-          [t.stringLiteral(stubName)]
-        )
-      : undefined;
+    let stubExpression: t.Expression | undefined;
+    if (stubName) {
+      componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
+      stubExpression = t.callExpression(t.identifier(IMPORTABLES.getStub), [
+        t.identifier(COMPONENT_BUILD_PARAMS.component),
+        t.stringLiteral(stubName)
+      ]);
+    }
     const visibilityToggle = node.getVisibilityToggle();
     const ref = node.getRef();
     const repeatInstruction = node.getRepeatInstruction();
@@ -175,7 +197,8 @@ export function processNodes(
       repeatInstruction || // This is NOT the same as .isRepeatedComponent, which is on parent!
       stubName;
 
-    // TODO: should ref really save the element?
+    // TODO: some of these should not save the element...
+    // restructure.
     const shouldSaveElement =
       createWatch || ref || node.eventListeners.length > 0 || node.hasConditionalChildren;
 
@@ -185,7 +208,7 @@ export function processNodes(
       const nestedComponentCls =
         node.isNestedComponent || node.isRepeatedComponent
           ? t.identifier(node.tagName)
-          : stubComponentName;
+          : stubExpression;
       node.elementKey = nestedComponentCls
         ? componentDefinition.saveNestedAsDynamicElement(node.address, nestedComponentCls)
         : componentDefinition.saveDynamicElement(node.address);
@@ -298,6 +321,7 @@ export function processNodes(
           componentDefinition.component.module.requireImport(
             IMPORTABLES.SequentialRepeater
           );
+          componentDefinition.component.module.requireImport(IMPORTABLES.stashMisc);
           const poolInstance =
             repeatInstruction.poolExpression ||
             newExpression(identifier(IMPORTABLES.SequentialRepeater), [
@@ -352,16 +376,7 @@ export function processNodes(
         }
       }
 
-      if (ref) {
-        if (componentDefinition.collectedRefs.includes(ref)) {
-          error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
-        }
-        componentDefinition.collectedRefs.push(ref);
-        componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.saveRef, [
-          identifier(COMPONENT_BUILD_PARAMS.refs),
-          stringLiteral(ref)
-        ]);
-      }
+      if (ref) processRef(componentDefinition, node, ref);
 
       // TODO: improve this, as we are basically renaming things specifically for the
       // build function that have already been renamed, which can get confusing.

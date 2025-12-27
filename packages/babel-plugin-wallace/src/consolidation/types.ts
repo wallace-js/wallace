@@ -1,4 +1,4 @@
-import type { FunctionExpression } from "@babel/types";
+import type { CallExpression, FunctionExpression } from "@babel/types";
 
 export type NodeAddress = Array<number>;
 
@@ -20,4 +20,10 @@ export interface ComponentWatch {
   shieldInfo?: ShieldInfo | undefined;
   callbacks: { [key: string | number]: FunctionExpression };
   address: NodeAddress;
+}
+
+export interface Ref {
+  callExpression: CallExpression;
+  address: NodeAddress;
+  name: string;
 }

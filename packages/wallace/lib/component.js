@@ -1,8 +1,3 @@
-/**
- * Everything in here is used by or modified by the Babel plugin.
- */
-import { replaceNode } from "./utils";
-
 const throwAway = document.createElement("template");
 const NO_LOOKUP = "__";
 
@@ -19,12 +14,14 @@ const ComponentBase = {
     },
 
     /**
-     * Updates the DOM.
-     * Loops over watches, skipping n watches if elements are hidden.
+     * Updates the DOM and renders nested components.
      */
     update: function () {
-      let i = 0,
-        watch,
+      this._u(0, this._l);
+    },
+
+    _u: function (i, il) {
+      let watch,
         element,
         parent,
         displayToggle,
@@ -34,12 +31,10 @@ const ComponentBase = {
         detachedElements,
         detachedElement,
         index,
-        adjustedIndex,
-        thisElement;
+        adjustedIndex;
 
       const watches = this._w,
         props = this.props,
-        il = watches.length,
         previous = this._p;
       /*
       Watches is an array of objects with keys:
@@ -95,36 +90,23 @@ const ComponentBase = {
           }
         }
         if (shouldBeVisible) {
-          this._ac(previous[i], props, element, watch.c);
+          const prev = previous[i],
+            callbacks = watch.c;
+          for (let key in callbacks) {
+            if (key === NO_LOOKUP) {
+              callbacks[key](element, props, this);
+            } else {
+              const oldValue = prev[key],
+                newValue = this._q[key](props, this);
+              if (oldValue !== newValue) {
+                callbacks[key](element, props, this, newValue);
+                prev[key] = newValue;
+              }
+            }
+          }
         }
         i++;
       }
-    },
-
-    /**
-     * Applies callbacks, and save values as previous.
-     *
-     */
-    _ac: function (previous, props, element, callbacks) {
-      for (let key in callbacks) {
-        if (key === NO_LOOKUP) {
-          callbacks[key](element, props, this);
-        } else {
-          const oldValue = previous[key],
-            newValue = this._q[key](props, this);
-          if (oldValue !== newValue) {
-            callbacks[key](element, props, this, newValue);
-            previous[key] = newValue;
-          }
-        }
-      }
-    },
-
-    /**
-     * Gets a stub by name.
-     */
-    _gs: function (name) {
-      return this.constructor.stubs[name];
     }
   }
 };
@@ -141,7 +123,7 @@ Object.defineProperty(ComponentBase.prototype, "hidden", {
  * @param {*} baseComponent - a component definition to inherit from.
  * @returns the newly created component definition function.
  */
-function _createConstructor(baseComponent) {
+export function createConstructor(baseComponent) {
   const Component = function () {
     const root = (this.el = this._n.cloneNode(true)),
       dynamicElements = (this._e = []),
@@ -150,6 +132,7 @@ function _createConstructor(baseComponent) {
       refs = (this.refs = {});
     this.ctrl = {};
     this.props = {};
+    this._l = this._w.length;
     this._b(this, root, dynamicElements, stash, previous, refs);
   };
 
@@ -174,7 +157,7 @@ function _createConstructor(baseComponent) {
 }
 
 export function defineComponent(html, watches, queries, buildFunction, inheritFrom) {
-  const ComponentDefinition = _createConstructor(inheritFrom || ComponentBase);
+  const ComponentDefinition = createConstructor(inheritFrom || ComponentBase);
   const proto = ComponentDefinition.prototype;
   throwAway.innerHTML = html;
   //Ensure these do not clash with fields on the component itself.
@@ -184,58 +167,4 @@ export function defineComponent(html, watches, queries, buildFunction, inheritFr
   proto._n = throwAway.content.firstChild;
   proto.base = ComponentBase.prototype;
   return ComponentDefinition;
-}
-
-/**
- * A utility function that has to be in here because it needs _createConstructor and
- * we'd otherwise get cirular inmports.
- *
- * Calls to this function which provide the 2nd argument:
- *
- *   const Foo = extendComponent(Bar, () => <div></div>))
- *
- * Are modified by the Babel plugin to become this:
- *
- *   const Foo = defineComponent(,,,,Bar);
- *
- * So it should never be called with 2nd arg in real life.
- */
-export function extendComponent(base, componentDef) {
-  // This function call will have been replaced if 2nd arg is a valid component func.
-  // and therefore we would not receive it.
-  if (componentDef)
-    throw new Error("2nd arg to extendComponent must be a JSX arrow function");
-  return _createConstructor(base);
-}
-
-export function findElement(rootElement, path) {
-  return path.reduce((acc, index) => acc.childNodes[index], rootElement);
-}
-
-export function nestComponent(rootElement, path, componentDefinition) {
-  const el = findElement(rootElement, path),
-    child = new componentDefinition();
-  replaceNode(el, child.el);
-  return child;
-}
-
-/**
- * Saves a reference to element or nested component. Returns the element.
- */
-export function saveRef(element, refs, name) {
-  return (refs[name] = element);
-}
-
-/**
- * Stash something on the component. Returns the element.
- * The generated code is expected to keep track of the position.
- */
-export function stashMisc(element, stash, object) {
-  stash.push(object);
-  return element;
-}
-
-export function onEvent(element, eventName, callback) {
-  element.addEventListener(eventName, callback);
-  return element;
 }

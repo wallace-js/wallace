@@ -1,4 +1,9 @@
-import type { Expression, FunctionExpression, Identifier } from "@babel/types";
+import type {
+  Expression,
+  CallExpression,
+  FunctionExpression,
+  Identifier
+} from "@babel/types";
 import {
   blockStatement,
   callExpression,
@@ -8,7 +13,7 @@ import {
 } from "@babel/types";
 import { Component } from "../models";
 import { IMPORTABLES } from "../constants";
-import { ComponentWatch, NodeAddress } from "./types";
+import { ComponentWatch, NodeAddress, Ref } from "./types";
 import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils";
 
 /**
@@ -21,7 +26,7 @@ export class ComponentDefinitionData {
   dynamicElements: { [key: number]: Expression } = {};
   baseComponent: Expression | undefined;
   lookups: { [key: string]: FunctionExpression } = {};
-  collectedRefs: Array<string> = [];
+  refs: Array<Ref> = [];
   #dynamicElementKey: number = -1;
   #miscStashKey: number = 0;
   #lookupKeys: Array<String> = [];
@@ -75,11 +80,11 @@ export class ComponentDefinitionData {
     key: number,
     functionName: IMPORTABLES,
     remainingArgs: Expression[]
-  ) {
-    this.dynamicElements[key] = callExpression(this.getFunctionIdentifier(functionName), [
-      this.dynamicElements[key],
-      ...remainingArgs
-    ]);
+  ): CallExpression {
+    return (this.dynamicElements[key] = callExpression(
+      this.getFunctionIdentifier(functionName),
+      [this.dynamicElements[key], ...remainingArgs]
+    ));
   }
   getNextmiscStashKey() {
     this.#miscStashKey++;

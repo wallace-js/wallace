@@ -23,13 +23,13 @@ describe("Nested components", () => {
   };
   const component = testMount(Bar);
   test("has its controller set initially", () => {
-    expect(component.refs.foo.ctrl).toBe(8);
+    expect(component.refs.foo.node.ctrl).toBe(8);
   });
 
   test("has its controller updated", () => {
     component.ctrl = 10;
     component.update();
-    expect(component.refs.foo.ctrl).toBe(10);
+    expect(component.refs.foo.node.ctrl).toBe(10);
   });
 });
 

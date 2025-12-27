@@ -141,10 +141,9 @@ so use `self` from the **xargs** in component functions.
 
 Component instances have the following fields:
 
-- `props` the data for this component instance, stored as reference to original, not a 
-copy.
-- `ctrl` an object to help coordinate things, also stored as reference.
-- `refs` a dictionary of named elements.
+- `props` the data for this component instance.
+- `ctrl` the controller object.
+- `refs` an object with references to node.
 - `el` the component instance's root element.
 
 Both `props` and `ctrl` are set during the `render` method before calling `update`.
@@ -518,8 +517,8 @@ declare module "wallace" {
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
-    // methods?: ComponenMethods<Props, Controller> &
-    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
+    methods?: ComponenMethods<Props, Controller> &
+      ThisType<ComponentInstance<Props, Controller, Methods>>;
     readonly prototype?: ComponenMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
@@ -553,6 +552,11 @@ declare module "wallace" {
     Methods extends object = {}
   > = ComponentFunction<Props, Controller, Methods>;
 
+  export interface Ref {
+    node: HTMLElement | ComponentInstance;
+    update(): void;
+  }
+
   /**
    * The type for a component instance.
    */
@@ -564,7 +568,7 @@ declare module "wallace" {
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
-    refs: { [key: string]: HTMLElement };
+    refs: { [key: string]: Ref };
     base: Component<Props, Controller>;
   } & Component<Props, Controller> &
     Methods;
@@ -843,19 +847,25 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: ref
    *
-   * Saves a reference to the element on the component, allowing it to be accessed.
+   * Saves a reference to a node allowing you to:
+   *
+   * 1. Access the element or component as `ref.node`
+   * 2. Update the all nested elements using `ref.update()`.
    *
    * ```
-   * <div ref:title></div>
+   * <div ref:title>
+   *   {name}
+   * </div>
    * ```
    *
    * ```
-   * component.refs.title.textContent = 'hello';
+   * component.refs.title.update();
+   * component.refs.title.node.textContent = 'hello';
    * ```
    *
    * Requires a qualifier, but you lose the tooltip in that format.
    */
-  ref?: string;
+  ref?: null;
 
   /** ## Wallace directive: show
    *
@@ -928,7 +938,7 @@ declare namespace JSX {
      * - `items` set items for repeated component, must be an array of props.
      * - `on[EventName]` creates an event handler (note the code is copied)
      * - `props` specifes props for a nested components.
-     * - `ref` saves a reference to an element or nested component.
+     * - `ref:xyz` saves a reference to node, allowing partial updates or access to element/component.
      * - `show` sets and element or component's hidden property.
      * - `style:xyz` sets a specific style property.
      * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
