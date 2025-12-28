@@ -1,19 +1,19 @@
+![Wallace logo](./assets/wallace-tags.png)
+
+[![nmp](https://img.shields.io/badge/npm-wallace-blue)](https://npmjs.com/package/wallace) [![npm](https://img.shields.io/npm/v/wallace.svg)](https://npmjs.com/package/wallace) [![npm](https://img.shields.io/npm/dt/wallace.svg)](https://npmjs.com/package/wallace) ![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg) [![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
+
 # Wallace
 
 _The tiny framework that brings you FREEEDOM!!!_
-
-[![nmp](https://img.shields.io/badge/npm-wallace-blue)](https://npmjs.com/package/wallace) [![npm](https://img.shields.io/npm/v/wallace.svg)](https://npmjs.com/package/wallace) [![npm](https://img.shields.io/npm/dt/wallace.svg)](https://npmjs.com/package/wallace)
-![workflow](https://github.com/wallace-js/wallace/actions/workflows/node.js.yml/badge.svg) [![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)
-
 ## About
 
-Wallace is a front end JavaScript framework for building:
+Wallace is a brand new front end framework for building:
 
 - Web apps of any size.
 - Mobile apps - using tools likes [Capacitator](https://capacitorjs.com/).
 - Desktop apps - using tools like [Tauri](https://v2.tauri.app/).
 
-What sets Wallace apart from the likes of [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [Solid](https://www.solidjs.com/) are its:
+It outperforms popular frameworks like [React](https://react.dev/), [Angular](https://angular.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/) and [Lit](https://lit.dev/) on three points:
 
 1. **Performance**
 2. **Productivity**
@@ -29,15 +29,15 @@ This makes Wallace ideal for:
 
 - Pages that need to load fast.
 - Situations where processing power or connectivity are limited.
-- Apps where users switch pages frequently (less need for SPA).
+- Apps where users switch pages frequently (less need for an SPA, especially with PWA technology).
 
-And its DOM operations are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the same [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
+And its DOM operations are pretty fast too. Here is the time\* in milliseconds to create 1000 rows on the [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark) app:
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.png)
 
-But you rarely need _fast_. You just need to avoid _slow_ - which creeps in on more complex scenarios than what benchmarks can reasonably cover. And the only _real_ protection against that is **freedom**.
+But you rarely need _fast_. You just need to avoid _slow_ - which creeps in on more complex scenarios than benchmark apps. And the only _real_ protection against that is **freedom**.
 
-_\* Times are taken from local runs, using non-keyed implementations where available. Will submit for an official run soon. Bundle sizes would be identical._
+_\* Times are taken from local runs tested on v0.6.0, using non-keyed implementations of other frameworks where available. Will submit for an official run soon, which might change results slightly, but bundle sizes would be identical._
 
 ### 2. Productivity
 
@@ -73,30 +73,17 @@ All this makes Wallace ideal for:
 
 ### 3. Freedom
 
-Most frameworks are completely closed: they work the way they work and that's that, with the only backdoor being direct DOM manipulation. This situation creates a major risk:
+Wallace is potentially the only fully open framework which lets you override all run time behaviour at a granular level. 
 
-> If the framework performs poorly on a particular view, or prevents you from doing something really useful (like reparenting) you might be totally stuffed.
+This gives you complete freedom to step out of the framework any time you like and take control without making a mess.
 
-Of course you'll come up with some solution or other, but you pay for it in time (sometimes an awful lot of it) and code quality, which you then pay for again later on.
+And this protects you from losing velocity in those sticky situations which frameworks don't handle well, which are often exacerbated by how difficult the framework makes finding a clean solution, leaving you with:
 
-Wallace doesn't have this problem for two reasons:
+- A compromise on performance or features.
+- A messy hack that yields more bugs every time something changes.
+- A lot of time wasted looking for ways to avoid the above.
 
-1. You can override all run time behaviour at a granular level (making Wallace possibly the only fully open framework of its kind).
-2. It updates DOM elements directly.
-
-So you effectively have total freedom to make components and the DOM do whatever you like, which can get you out of a tight spot, or help you achieve the same performance as vanilla, minus the mess.
-
-Having said that, most of the things you'd probably do with that unlimited freedom are already easy and catered for, such as:
-
-- Only updating a subset of deeply nested components.
-- Only updating certain sections within components.
-- Changing how a component updates its entire DOM, or part of it.
-
-And if you do need the backdoor, Wallace's is as clean as it gets:
-
-```tsx
-<canvas apply={doStuff(element, props)} ></canvas>
-```
+You might get lucky and never encounter these, but that's the thing about freedom: its easy to give it away thinking you'll never need it, until its too late.
 
 #### It's all in the name
 
@@ -856,22 +843,20 @@ Stubs are a flexible way to organise reusable component skeletons or parts, whic
 
 Wallace is still in early development, and hasn't been very widely used, however:
 
-1. There's not much framework at run time, and what little there is very simple, mechanical and close to the DOM.
-2. You can override any behaviour.
+1. There's not much framework at run time, and it's all simple, mechanical and close to the DOM.
+2. You can override all behaviour.
 
-These two points mean that you can very easily work around any situation where Wallace is either unable to do something you want, or has an error that hasn't yet been fixed.
+This offers some degree of safety as you can hotfix errors in Wallace and remove that when its patched.
 
 You can help make Wallace battle-ready by:
 
 1. Using it ✔️
 2. Filing bugs 🐞
-3. Giving it a ★\*
-
-_\* Every ★ brings us closer to a world no longer dominated by 2 frameworks from corporations that steal our focus and sell our data. Go star [Svelte](https://svelte.dev/) and [Solid](https://www.solidjs.com/) while you're at it._
+3. Giving it a ★
 
 ## Issues
 
-Please open a ticket for any issue, including usage questions, as everything should be documented in tool tips and I'd want to know if its not.
+Please open a ticket for any issue, including usage questions, as everything should ideally be documented in tool tips.
 
 ## License
 
