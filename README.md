@@ -89,7 +89,7 @@ You might get lucky and never encounter these, but that's the thing about freedo
 
 Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_Wallace) - or rather his fictional portrayal in the film [Braveheart](https://www.imdb.com/title/tt0112573/), who made it impossible for people in Scotland to talk at any length about "freedom" without someone reenacting this scene:
 
-![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
+![Mel Gibson shouting FREEDOM in Braveheart](./assets/braveheart-1.jpg)
 
 ## Usage
 
@@ -206,7 +206,7 @@ const CounterList = counters => (
 
 But you don't need to remember all this. JSX elements have a tool tip which reminds you of syntax rules and lists the available directives, which have their own tool tips detailing their usage:
 
-![Tool tip on JSX element](/code/wallace/assets/div-tooltip.jpg)
+![Tool tip on JSX element](./assets/div-tooltip.jpg)
 
 ### TypeScript
 
