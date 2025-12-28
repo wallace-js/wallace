@@ -104,18 +104,68 @@ Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_W
 
 ![Mel Gibson shouting FREEDOM in Braveheart](https://thecinematicexperiance.wordpress.com/wp-content/uploads/2016/04/braveheart-1.jpg)
 
-## Tour
+## Usage
 
-This tour covers Wallace in enough detail for you to go forth and build awesome apps. You can code along:
+Assuming you're comfortable with ES6, you can probably learn Wallace in around 25 minutes, after which you can rely entirely on the tool tips.
 
-- In your browser using StackBlitz (choose [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx))
-- Locally with `npx create-wallace-app`
+### Installation
 
-There are also [examples](https://github.com/wallace-js/wallace/tree/master/examples) which all have a [StackBlitz](https://stackblitz.com) link in their README so you can play around online, then download a fully working project.
+You can create an empty project with this script:
+
+```
+npx create-wallace-app
+```
+
+Or spin up a quick StackBlitz (choose [TypeScript](https://stackblitz.com/edit/wallace-ts?file=src%2Findex.tsx) or [JavaScript](https://stackblitz.com/edit/wallace-js?file=src%2Findex.jsx)). There are also [examples](https://github.com/wallace-js/wallace/tree/master/examples) which all have a [StackBlitz](https://stackblitz.com) link in their README so you can play around online, then download a fully working project.
+
+To install into an existing project run:
+
+```
+npm i wallace -D
+```
+
+This also installs `babel-plugin-wallace` which you need to add to your **babel.config.cjs** or equivalent like so:
+
+```js
+module.exports = {
+  plugins: ["babel-plugin-wallace", "@babel/plugin-syntax-jsx"]
+}
+```
+
+Then configure your bundler to apply those to jsx/tsx files. The [examples](https://github.com/wallace-js/wallace/tree/master/examples) all use webpack, so you can copy from there.
 
 ### Components
 
 Wallace controls the DOM with components, which you define as functions that return JSX:
+
+```tsx
+const Counter = ({ count }) => (
+  <div>
+    <button onClick={count++}>{count}</button>
+  </div>
+);
+```
+
+During compilation the Babel plugin replaces such functions with generated functions which are used as constructors to create objects:
+
+```tsx
+const component = new Counter();
+```
+
+These objects (called component *instances* or just *components*) have methods, like `render` which updates its DOM instantly:
+
+```tsx
+component.render({ count: 99 });
+console.log(component.el); // <div><button>99</button></div>
+```
+
+You won't see anything on the page as `el` is not attached to the document.
+
+Note that the function you see in your source code no longer exists at run time, so it never *runs*. It is just a placeholder for JSX, which gets *parsed* during compilation. The function may only contain one JSX expression, and nothing else.
+
+### Mounting
+
+You don't create component objects yourself, instead you mount the component at the root of your tree, which then creates and mounts any nested components:
 
 ```tsx
 import { mount } from "wallace";
@@ -132,46 +182,16 @@ const CounterList = counters => (
   </div>
 );
 
-const root = mount("main", CounterList, [{ count: 0 }, { count: 0 }]);
+mount("main", CounterList, [{ count: 0 }, { count: 0 }]);
 ```
 
-> The UI now displays two buttons with 0, which don't do anything yet.
+> You should now see two buttons on the page, but clicking them doesn't do anything yet.
 
-You might think these functions get called and return virtual DOM like React, but that's not the case. Wallace uses its own Babel plugin to *replace* them with very different functions that are used to create objects:
-
-```tsx
-const component = new Counter();
-```
-
-These objects (called component *instances* or just *components*) have methods, like `render` which updates its DOM instantly:
-
-```tsx
-component.render({ count: 99 });
-console.log(component.el); // <div><button>99</button></div>
-```
-
-You don't normally create components yourself, instead you use `mount` which:
-
-1. Creates a component of the specified type.
-2. Calls its `render` method.
-3. Replaces the specified element (or element with specified id string) with `el` .
-4. Returns the component instance.
-
-The `render` method updates that component's DOM and mounts and render any nested components. So each component manages its own DOM and own nested components, there is no extra hidden engine coordinating them.
-
-Even the root component doesn't know its the root, and behave exactly like other components. We have a reference to it, so we can use that to update the DOM:
-
-```tsx
-root.render([{ count: 1 }, { count: 2 }, { count: 3 }]);
-```
-
-Here the `CounterList` instance reuses the existing two `Counter` instances from its own pool and creates one more to make it up to three. These pools get garbage collected when the parent component is no longer accessible, so you don't need to worry about them, however you can control pooling for performance tweaking as we'll see later.
-
-We'll see just how useful it is having real objects to work with shortly, but first, some syntax basics.
+The `mount` helper function simply creates the root component, calls its `render` method, attaches it and returns it. Once it's done there's only components left, which manage their own DOM and nested components. There is no separate engine coordinating things, just components, which are normal objects.
 
 ### JSX
 
-Instead of placing logic _around_ elements, you control it from _within_ elements using directives (attributes with special behaviour) like `if` which conditionally excludes an element from the DOM:
+Instead of placing logic _around_ elements, you control structure from _within_ elements using directives (attributes with special behaviour) like `if`:
 
 ```tsx
 const Counter = ({ count }) => (
@@ -199,32 +219,7 @@ const CounterList = counters => (
 
 But you don't need to remember all this. JSX elements have a tool tip which reminds you of syntax rules and lists the available directives, which have their own tool tips detailing their usage:
 
-![Tool tip on JSX element](./assets/div-tooltip.jpg)
-
-This JSX format has several advantages over JSX mixed with JavaScript:
-
-- It is much clearer and easier to read.
-- It preserves natural indentation.
-- It is far more compact (~40% the lines of React equivalent).
-
-And the advantages of interpreting syntax during compilation over executing virtual DOM at run time are:
-
-- Much of the computation is done at compilation, leaving the bare minimum to be done at run time, making it insanely fast and efficient.
-- We can add as many new directives, syntax features, checks, warnings as we like without it affecting bundle size.
-
-#### Important
-
-The function is just a placeholder for the JSX defining the component, and is completely replaced at compilation, so it never *runs*, it is only *parsed*.
-
-The function body may only contain a single JSX expression, and nothing else. The only JavaScript allowed is inside JSX `{placeholders}`. These snippets are *copied* during compilation, with some modification of props access. 
-
-So the button click event handler ends up looking something like this:
-
-```tsx
-function (event) {
-  this.props.count++;
-}
-```
+![Tool tip on JSX element](/code/wallace/assets/div-tooltip.jpg)
 
 ### TypeScript
 
@@ -259,11 +254,7 @@ const root = mount("main", CounterList, [
 root.render([{ count: 0 }, { count: 1 }]);
 ```
 
-TypeScript now warns you if you attempt to pass incorrect props at any point.
-
-#### Important
-
-Don't annotate the props like this:
+TypeScript now warns you if you attempt to pass incorrect props at any point. Don't annotate the props like this:
 
 ```tsx
 const Counter = (props: iCounter) => (
@@ -286,84 +277,51 @@ function render(props) {
 }
 ```
 
-So instead of calling `render` with props we could just modify props in place, then call `update`:
+So `props` is stored on the component instance, and gets reset every `render`, which seems pointless - except that components are used in two ways:
 
-```jsx
-const component = mount("main", Counter, { count: 0 });
-component.props.count = 1;
-component.update();
-```
+##### Dumb components
 
-React tells us components should be stateless, but what React overlooks is that there are really two kinds of component:
+Components like `Counter` only display data and fire events, and should be stateless. So long as you only call their `render` method they are as good as stateless.
 
-1. **Dumb** components (like `Counter`) which only display data and fire events. These should be stateless.
-2. **Coordinating** components (like `CounterList`) from which we coordinate updating of nested components based on changes to state/data. These turn messy if you force them to be stateless.
+##### Controlling components
 
-Working with state in stateless components requires awkward hacks like hooks, which require hidden magic (90% of React devs don't understand how they work) which creates more scope for mistakes.
+Components like `CounterList` are used to coordinate updates following changes to state/data, and making these stateless (as they are in React) means you need to use awful patterns like hooks to do anything.
 
-With Wallace you get the best of both worlds:
-
-- If you only ever call `render` (as you would for dumb components) then the component is as good as stateless.
-- With coordinating components you override the `render` method to set things up for its life cycle, and use `update` from then on.
-
-Here is a very ugly React-like way of creating a callback which nested components can use to update the coordinating component:
+With Wallace you simply override the render method and create a callback which updates that instance, and pass that wherever it's needed:
 
 ```tsx
-CounterList.methods = {
-  render(counters) {
-    const update = () => this.update();
-    this.props = counters.map(c => ({ ...c, update }));
-    this.update();
-  }
+CounterList.prototype.render = function (props) {
+  const callback = () => this.update(); // pass this to where it's needed.
+  this.props = props;
+  this.update();
 };
 ```
 
-> `methods` lets you set fields on `prototype` with less typing and less risk of accidentally deleting other fields.
-
-Nested components can use this callback to update the `CounterList` without calling its `render` method, which in this case works as the `Counter` also modifies the data in place:
+You *could* modify the props to add that callback to each counter:
 
 ```tsx
-const Counter: Uses<iCounter> = ({ count, update }) => (
-  <div>
-    <button onClick={(count++, update())}>{count}</button>
-  </div>
-);
+this.props = watch(props, () => this.update());
 ```
 
-> Clicking on buttons now updates the display, but we can't really call it "reactive" yet.
+But that's a really ugly React style pattern which involves changing the props interface. Wallace has much cleaner approach as we'll see later.
 
-Of course this is a really ugly React-like way of doing things, and we'll look at nicer ways shortly. The point is to understand the relationship between `render`, `update` and `props` before continuing.
-
-If you're worried about accidentally modifying data that shouldn't be modified, you can make it immutable using `protect`:
+There's also a neater and safer way to set properties on the prototype, which has the added bonus of not accidentally deleting other properties:
 
 ```tsx
-import { protect } from "wallace";
-
 CounterList.methods = {
-  render(counters) {
-    this.props = protect(counters);
+  render(props) {
+    this.props = props;
     this.update();
-  }
+  },
+  otherMethod () {...}
 };
 ```
 
-> Clicking on buttons now throws an error.
-
-#### Important
-
-
-Wallace only calls `update` from inside the `render` method as shown. At all other times (mounting, nesting components, and updating nested components) it calls `render`. So essentially:
-
-- `render` is called from *above*, passing props.
-- `update` is called *internally* without props, as they are already set.
-
-But your code can call `update` from anywhere you like, which bypasses `render`, which makes that a good place to set things up for the life cycle of a coordinating component.
-
-It doesn't look like much, but this little arrangement goes a long way towards keeping your code easy to *follow* and easy to *control*, which lets you develop faster, with fewer mistakes.
+> If you did `CounterList.prototype = {...}` you'd delete `update`.
 
 ### Reactivity
 
-To better demonstrate reactivity, let's add a display of the total across all counters:
+To see reactivity working more clearly, let's display the total across all counters:
 
 ```tsx
 const CounterList: Uses<iCounter[]> = counters => (
@@ -376,7 +334,7 @@ const CounterList: Uses<iCounter[]> = counters => (
 );
 ```
 
-We make things reactive by telling the coordinating component to `update` whenever the props (or some other object) is modified, which we can do with `watch`:
+To make it "reactive" we use `watch` to replace the props with a [proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) which calls a callback whenever it, or any nested object, is modified:
 
 ```tsx
 import { watch } from "wallace";
@@ -389,25 +347,23 @@ CounterList.methods = {
 };
 ```
 
-> Our example is now reactive: clicking on a button updates its count and the total.
+> Clicking on a button updates its count and the total.
 
-The `watch` function simply returns a [proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) of the provided object (arrays are objects too) which fires a callback whenever it, or any nested object, is modified. It's that simple.
+Some frameworks bake reactivity into the framework, or hide how it works. Wallace deliberately doesn't do this, because:
 
-#### Notes
+1. Once your app uses real data, you only need reactivity in very few places.
+2. Its incredibly easy to cause unintended behaviour with reactivity (in all frameworks).
 
-Reactive behaviour (especially with two-way binding) yields a whole new category of bugs and confusion. Frameworks which hide the mechanism (or worse, bake it into the framework) might look impressive, but that _always_ comes back to bite you.
+Wallace's explicit approach helps you:
 
-Wallace forces you to do it in a more manual way, but this has advantages:
+- See exactly how it works.
+- Control exactly what it updates.
 
-- You can clearly see why and when your component updates,
-- It is separate. you know that the "watching" part has nothing to do with components, compilation or the "framework" as such. This will save you a lot of headaches.
-- It is very easy to make the callback do something else, whether that's debugging, accessing services or updating a distant component.
+And this will save you many headaches further down the line.
 
 ### Binding
 
-Reactivity often involves inputs, which we can `bind` to a value, which will be set when the input's `change` event is fired, but we can specify a different event with a "qualifier" like `bind:keyup`.
-
-Let's show this by naming the things we're counting:
+In reactive components we often want to bind data to inputs. To show this let's add a text box to name the things we're counting.
 
 ```tsx
 interface iCounterList {
@@ -427,8 +383,6 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
   </div>
 );
 
-CounterList.methods = {/* as before */};
-
 mount("main", CounterList, {
   things: 'sheep',
   counters: [
@@ -437,17 +391,19 @@ mount("main", CounterList, {
 ]});
 ```
 
-> The UI displays `Total sheep: 0` but changes as you type in the input.
+> The UI displays `Total sheep: 0` and changes as you type in the input.
 
-#### Notes
+The `bind` directive normally responds to the `change` event, but we used a qualifier to change it to `keyup` so you don't need to leave the text box to see the change.
 
-There's a slight problem with our design: the entire `CounterList` updates after every `keyup` event the text box. Although each update only results in a small DOM change, that's still unnecessary churn as it renders every counter.
+But there's an issue: the entire component updates every time you type in the text box. Even though there's no DOM change in the counters, that's still a load of unnecessary churn. You'd never notice it in a small demo, but might in a larger app.
 
-Unwanted updates are a recurring issue with reactivity in any framework, and prickly one: its not exactly a bug, you wouldn't notice it in small examples, but it might be noticeable (or at least drain the battery faster than it should) with more components and if updates fire in rapid succession - as they would when typing.
+Fortunately, this is very easy to resolve in Wallace, thanks to refs.
 
 ### Refs
 
-You might expect "refs" to give you direct access to DOM elements, which they do, but they also do something far smarter: they let you update all the dynamic elements underneath them. This lets you update part of a component, and overcome the problem we had with keyup:
+Wallace "refs" are more sophisticated than React's. As well as giving you direct access to DOM elements, you can use them to update sections of a component.
+
+We're going to combine this with reading the arguments passed to the `watch` callback to only update the `span` as we type in the text box:
 
 ```tsx
 const CounterList: Uses<iCounterList> = ({ counters, things }) => (
@@ -471,165 +427,106 @@ CounterList.methods = {
 };
 ```
 
-> Typing in the text box updates the span with things, but not the rest of the component.
+> Typing in the text box only updates the span with things.
 
-You can access the raw DOM element:
+You can also access the raw DOM element:
 
 ```
 this.refs.things.element
 ```
 
-However, you probably don't want to do that. If you do need to access the DOM element (and there are a handful of reasons you might want to) then you are better using the `apply` directive:
+However, you probably don't want to do that. If you do need to access an element (for the handful of valid reasons you might want to) then you are better using the `apply` directive:
 
 ```tsx
 const Counter: Uses<iCounter> = ({ count }, { element }) => (
   <div>
-    <button apply={btnApply(element, count)} onClick={count++}>
+    <button apply={modifyBtn(element, count)} onClick={count++}>
       {count}
     </button>
   </div>
 );
 
-const btnApply = (element, count) => element.disabled = count > 3;
+const modifyBtn = (element, count) => element.disabled = count > 3;
 ```
 
-Explain xargs....
+The callback edits the button's `disabled` property, leaving its `textContent` to be managed by the component. The reason they don't clash is because this is exactly how the component updates components internally during `update`.
 
-The advantage of using `apply` instead of doing this in the `render` with a ref is that it runs during `update` and won't fire if the element is not visible due to `if`, `show` or `hide`.
-
-Refs are not aware of their parent node's visibility, if you tell them to update, they will update.
-
-Apply explains how Wallace works internally.
-
-
-
-
-
-```tsx
-import { watch } from "wallace";
-
-interface iCounterList {
-  counters: iCounter[];
-  things: { value: string };
-}
-
-const CounterList: Uses<iCounterList> = ({ counters, things }) => (
-  <div>
-    <span ref:things>Total {things.value}: </span>
-    <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
-    <input type="text" bind:keyup={things.value} />
-  </div>
-);
-
-CounterList.methods = {
-  render({ counters, things }) {
-    this.props = {
-      counters: watch(counters, () => this.update()),
-      things: watch(things, () => this.refs.things.update())
-    };
-    this.update();
-  }
-};
-
-mount("main", CounterList, {
-  things: {value: 'sheep'},
-  counters: [
-  { count: 0 },
-  { count: 0 }
-]});
-
-
-/// Or
-
-
-```
-
-
-
-
-
-
-
-Old
-
-```tsx
-import { watch } from "wallace";
-
-interface iCounterList {
-  counters: iCounter[];
-  things: { value: string };
-}
-
-const CounterList: Uses<iCounterList> = ({ counters, things }) => (
-  <div>
-    <span>
-      Total <span ref:things></span>: {counters.reduce((t, c) => t + c.count, 0)}
-    </span>
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
-    <input type="text" bind:keyup={things.value} />
-  </div>
-);
-
-CounterList.methods = {
-  render({ counters, things }) {
-    this.props = {
-      counters: watch(counters, () => this.update()),
-      things: watch(things, () => this.updateThings())
-    };
-    this.update();
-  },
-  updateThings() {
-    const { refs, props } = this;
-    refs.things.textContent = props.things.value;
-  },
-  update() {
-    const { base, props } = this;
-    base.update.call(this);
-    this.updateThings();
-  }
-};
-```
-
-
-
-
-
----
-
-
-
-Note that you don't have to watch the entire props object, you can watch different parts and protect others:
-
-```tsx
-import { protect, watch } from "wallace";
-
-// Must change JSX to <input type="text" bind:keyup={state.things} />
-
-CounterList.methods = {
-  render(counters) {
-    this.props = {
-      counters: protect(counters),
-      state: watch({ things: "sheep" }, () => this.update())
-    };
-    this.update();
-  }
-};
-```
-
-> Clicking on buttons now throws an error, as they modify the protected object.
-
-- 
+The reference to `element` came from an optional extra argument, known as xargs.
 
 ### Xargs
 
+Remember: these functions aren't real, they are dismantled during compilation, so the arguments aren't real either. Wallace treats the first argument as the props, and uses the second argument to provide several useful variables:
+
+##### self
+
+A reference to the component instance, useful for accessing methods:
+
+```tsx
+const Counter = ({ count }, { self }) => (
+  <div>
+    <button onClick={self.foo()}>{count}</button>
+  </div>
+);
+
+Counter.methods.foo = function(count) {
+  this.update()
+};
+```
+
+Unfortunately we can't use `this` in arrow functions, but have to use `this` in methods.
+
+##### element
+
+A reference to the element in a callback that allows it. If you use it in multiple callbacks, it points to a different element in each:
+
+```tsx
+const Counter = (_, { element }) => (
+  <div>
+    <button apply={console.log(typeof element)}>+</button>
+    <span apply={console.log(typeof element)}></span>
+  </div>
+);
+```
+
+##### event
+
+A reference to the event in a callback that allows it. Like element, it points to different event in each callback. Both `event` and `element` can be type-coerced in place if the callback needs it:
+
+```tsx
+const Counter = (_, { event }) => (
+  <div>
+    <button onClick={foo(event as ClickEvent)}>+</button>
+    <input onKeyUp={bar(event as KeyUpEvent)} />
+  </div>
+);
+
+const foo = (event: ClickEvent) => {};
+const bar = (event: KeyUpEvent) => {};
+```
+
+##### props
+
+The props object, because you might want the destructured version for a callback or something:
+
+```tsx
+const Counter = ({count, id}, { props }) => (
+  <div>
+    <button apply={foo(props)}>
+      {count}
+    </button>
+  </div>
+);
+```
+
+Of course you could equally access it as `self.props` but it's free to add so why not.
+
+##### ctrl
+
+The controller, up next.
+
 ### Controllers
 
-We lied about the `render` function earlier. It actually looks like this:
+The `render` function *actually* looks like this:
 
 ```tsx
 function render (props, ctrl) {
@@ -639,278 +536,253 @@ function render (props, ctrl) {
 };
 ```
 
-This `ctrl` field is intended for a "controller" which can be any object. You can set it in `mount`:
+You can provide a value for `ctrl` in the 4th argument to `mount`:
 
 ```tsx
 const ctrl = {};
 mount("main", CounterList, [], ctrl);
 ```
 
-But it is more common to set it in `render` as the controller often needs a reference to the component:
+But you tend to set it in `render` instead, as it can access the component more easily, which is usually what you want:
 
 ```tsx
-CounterList.prototype.render = function (counters) {
-  this.props = watch({ counters, things: "sheep" }, () =>
-    this.update()
-  );
-  this.ctrl = {
-    setAllCountersTo: (count) => {
-      counters.forEach(c => (c.count = count));
-      this.update();
+CounterList.methods = {
+  render(props) {
+    this.props = watch(/*...*/);
+    this.ctrl = {
+      applyToAll: count => this.props.forEach(c => (c.count = count))
     };
-  };
-  this.update();
-}
+    this.update();
+  }
+};
 ```
 
-During `update`, a component calls `render(props, this.ctrl)` on all nested components, effectively propagating the `ctrl` field down the tree.
-
-The component definition function uses a special 2nd argument which gives easy access to `ctrl` and other bits as we'll see later:
+A component passes its own value as 2nd argument `render` on nested components, and they do the same, meaning the whole tree has access to the same object:
 
 ```tsx
 const Counter: Uses<iCounter> = ({ count }, { ctrl }) => (
   <div>
     <button onClick={count++}>{count}</button>
-    <button onClick={ctrl.setAllCountersTo(count)}>...</button>
+    <button onClick={ctrl.applyToAll(count)}>...</button>
   </div>
 );
 ```
 
-> Clicking the button with "..." updates all other counters to the value of this counter.
+> Clicking the 2nd button sets all counters to the value of this counter.
 
-This is a lot cleaner than shoehorning a function or hook into the props which requires:
+This lets you call functions deep in the tree without having to shoehorn functions into props at every step (and then repeat when you need a 2nd function etc...) which keeps things clean. In Wallace you use props for data, and the controller for everything else.
 
-- Making a mess of the `iCounter` interface.
-- Running a `map` over the counters.
+It also helps performance as there's less mapping of arrays to shoehorn extra bits into each item.
 
-In Wallace you use props for data, and the controller for everything else. In fact you are encouraged to move most of the logic, calculations and props formatting into the controller, leaving the component to contain the bare minimum:
+### Controllers II
 
-At this point it's easier using class syntax:
+If `ctrl` is a plain object you'll need create an interface to get type support for it, which you pass into the second slot of `Uses`:
+
+```tsx
+interface Controller {
+  applyToAll: (number) => void;
+}
+
+const Counter: Uses<iCounter, Controller> = ({ count }, { ctrl }) => ();
+const CounterList: Uses<iCounterList, Controller> = ({ count }) => ();
+```
+
+> We don't access `ctrl` in the `CounterList` JSX so could skip setting it, but if the type carries through to `this.ctrl` which we access in `render`, so that helps.
+
+However, you don't need an interface if you turn your controller into a class. So let's do that and move all the logic over while we're at it:
 
 ```tsx
 import { ComponentInstance, watch } from "wallace";
 
 class Controller {
+  root: ComponentInstance<iCounterList>;
+  constructor(
+    root: ComponentInstance<iCounterList>,
+    props: iCounterList
+  ) {
+    this.root = root;
+    root.props = watch(props, (target, key) => {
+      key === "things" ? root.refs.things.update() : root.update();
+    });
+  }
+  applyToAll(count) {
+    this.root.props.counters.forEach(c => (c.count = count));
+  }
+}
+
+CounterList.methods = {
+  render(props) {
+    this.ctrl = new Controller(this, props);
+    this.update();
+  }
+};
+```
+
+The advantages of moving all your logic to controllers are:
+
+1. Your component ends up so simple that it is unlikely to conceal errors.
+2. Your logic is all inside non-framework code.
+3. You can organise, inherit, inject or compose controllers or services whichever way you please, as its all normal JavaScript.
+
+Point 2 matters because your brain assumes a framework has some "magic" to it, so when things go wrong and you can't tell why, you often suspect it relates to the framework. Having your logic in plain JavaScript separate from any framework code eliminates that possibility, meaning you'll debug quicker. Wallace spent a lot of time thinking about these things.
+
+> Although `watch` comes from Wallace it has nothing to do with components or compilation, so there's less unknown. And if there is, you just add some logging to the callback.
+>
+> In fact, if you do that right now you'll find we've got another reactivity blip: `applyToAll` will update the `CounterList` once for every item in `counters`!
+
+To fix this we can work with the original object, which doesn't trigger an update, then call `update` when we're done:
+
+```tsx
+class Controller {
+  root: ComponentInstance<iCounterList>;
   counters: iCounter[];
   constructor(
     root: ComponentInstance<iCounterList>,
-    counters: iCounter[]
+    props: iCounterList
   ) {
-	root.props = watch({ counters, things: "sheep" }, () =>
-      root.update()
-    );
+    this.root = root;
+    this.counters = props.counters;
+    root.props = watch(/*...*/);
   }
-  setAllCountersTo(count) {
-    this.props.counters.forEach(c => (c.count = count));
+  applyToAll(count) {
+    this.counters.forEach(c => (c.count = count));
+    this.root.update();
   }
 }
 ```
 
-> Using `Component<iCounterList>` gives us type support when setting `root.props`.
-
-And here is all we need in the `render` method:
+Another thing we can do is watch different parts of the props with different callbacks:
 
 ```tsx
-CounterList.prototype.render = function (counters) {
-  this.ctrl = new Controller(this, counters);
-  this.update();
-};
+class Controller {
+  /*...*/
+  constructor(
+    root: ComponentInstance<iCounterList>,
+    props: iCounterList
+  ) {
+    this.root = root;
+    this.counters = props.counters;
+    root.props = {
+      counters: watch(this.counters, () => root.update()),
+      things: watch(props.things, () => root.refs.things.update())
+    }
+  }
+  /*...*/
+}
 ```
 
-A nice advantage of using a class is that it defines its own type, which you can pass into the 2nd slot in `Uses` which then adds type support for `ctrl`:
+Although this requires you to change the shape of `things` as you can only watch an object, not a string:
 
 ```tsx
-const Counter: Uses<iCounter, Controller> = ({ count }, { ctrl }) => (
-  <div>
-    <button onClick={count++}>{count}</button>
-    <button onClick={ctrl.setAllCountersTo(count)}>...</button>
-  </div>
-);
+interface iCounterList {
+  counters: iCounter[];
+  things: { value: string };
+}
 ```
 
-So controllers help:
+You would need to change how `things` are passed in `mount` and used in `CounterList`.
 
-- Coordinate event callbacks across the whole tree.
-- Keep your data in its original format.
-- Keep your components simple.
-- Move your logic away from the framework.
+### Immutability
 
-That last point it really interesting, because we all make mistakes. But when the mistake happens in code that's close the framework, our brains naturally suspect that we made a framework-related mistake, or that the framework itself has a bug.
-
-Simply moving your logic to a class which clearly has nothing to do with the framework removes that suspicion, and helps you identify the problem quicker.
-
-The components and the controllers are also easier to test.
-
-
-
-
-
-##### Important
-
-The whole point of controllers is to move all your logic out of components (which are framework constructs) into classes (which are normal JavaScript - nothing to do with the framework) because:
-
-1. Your components end up so dumb and simple that they're hard to break, easy to test and unlikely to hide bugs.
-2. All your logic sits in plain JavaScript classes that are nothing to do with the framework, meaning:
-   1. You won't suspect framework interference when things go wrong (no matter how mechanical the framework, your mind still thinks there's magic, and it readily suspects it).
-   2. You have total freedom in how you compose, extend, inject and organise your controllers, so you get less duplication, which means fewer bugs and lighter bundles.
-
-### Methods
-
-Some things do belong on the component, not the controller, such as DOM related stuff. Let's revisit our example with the text input, and change it to only update `things` when we hit enter:
+So far we've covered reactivity where we change the data in place, but once you're working with real data you don't want the UI changing it. You can protect data from accidental modification using the `protect` helper:
 
 ```tsx
-const CounterList: Uses<iCounterList> = (
-  { counters, things },
-  { self, event }
-) => (
+import { protect, watch, ComponentInstance } from "wallace";
+
+class Controller {
+  /*...*/
+  constructor(
+    root: ComponentInstance<iCounterList>,
+    props: iCounterList
+  ) {
+    this.root = root;
+    this.counters = props.counters;
+    root.props = {
+      counters: protect(this.counters),
+      things: watch(props.things, () => root.refs.things.update())
+    }
+  }
+  /*...*/
+}
+```
+
+> Clicking on the buttons now throws an error.
+
+You would then change the buttons in `Counter` to call methods on the `Controller` which save the data to the API before updating the component, which we won't show here.
+
+### Extending
+
+To better illustrate extending components, let's pull the total calculation out to a method on the component. It should be moved to the controller, but it helps our case for now:
+
+```tsx
+interface Methods {
+  total: () => number;
+}
+
+const CounterList: Uses<iCounterList, Controller, Methods> = 
+  ({ counters, things }, { self }) => (
   <div>
-    <span>
-      Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
-    </span>
+    <span ref:things>Total {things.value}: </span>
+    <span>{self.total()}</span>
     <div>
       <Counter.repeat items={counters} />
     </div>
-    <input
-      type="text"
-      bind={self.tmpThings}
-      onKeyUp={self.thingsKeyUp(event as KeyboardEvent)}
-    />
+    <input type="text" bind:keyup={things.value} />
   </div>
 );
 
 CounterList.methods = {
-  render(counters) {
-    this.tmpThings = "";
-    this.props = watch({ counters, things: "sheep" }, () =>
-      this.update()
-    );
+  render(props) {
+    this.ctrl = new Controller(this, props);
     this.update();
   },
-  thingsKeyUp(event: KeyboardEvent) {
-    if (event.key !== "Enter") return;
-    const newthings = this.tmpThings;
-    this.tmpThings = "";
-    this.props.things = newthings;
+  total() {
+    return this.props.counters.reduce((t, c) => t + c.count, 0)
   }
 };
 ```
 
-There's a lot of new bits:
+There's no escaping the need for an interface with component methods, but at least you don't need to add `render` and `update` as they are added in by `Uses`.
 
-1. We access two new variables in xargs:
-   1. `self` which is the component instance (we can't use `this` in arrow functions).
-   2. `event` which refers to the DOM event and can only be used in event callbacks. You use the same variable in each callback
-   3. like `element` adapts to mean the event in that callback, so you could use them in multiple places and they would point to different things. Remember this isn't a real function with real arguments.
-2. We put `tmpThings` on the component instead of the props, because we don't want to update the component every time it changes. It is reset during render so it's pretty safe.
-
-Getting type support for methods is a bit more long-winded than for controllers. You need to create an interface listing your additional methods, then pass that into the 3rd slot for `Uses` :
-
-```tsx
-interface CounterListMethods {
-  componentMethod(): string;
-}
-
-class Controller {
-  ctrlMethod(): string;
-}
-
-const CounterList: Uses<iCounterList, Controller, CounterListMethods> (
-  _, { self, ctrl }
-) => (
-  <div>{self.componentMethod() + ctrl.ctrlMethod()} </div>
-);
-```
-
-If you are not using props or a controller, then the corresponding slot should be set to `null`:
-
-```tsx
-Uses<iCounterList, null, CounterListMethods>;
-```
-
-##### Important
-
-You might be tempted to omit `bind` and `tmpThings` and just read the value from the element:
-
-```tsx
-thingsKeyUp(event) {
-  if (event.key !== 'Enter') return;
-  this.props.things = event.target.value;
-  event.target.value = '';
-}
-```
-
-Which works, but you run into problems if you re-use or re-render the component before hitting enter, as the value remains attached to the element. So it's best to always `bind` an input to a value which gets reset on render.
-
-### Extending
-
-You can extend a component definition, which creates a new component definition that inherits the base component's methods, which you can redefine or add to:
+We can extend the `CounterList` using the `extendComponent` helper, which inherits the base's methods, and lets us override them if needed:
 
 ```tsx
 import { extendComponent } from "wallace";
 
 const SpecialCounterList = extendComponent(CounterList);
 
-SpecialCounterList.methods = {
-  thingsKeyUp(event) {
-    if (event.key !== "Enter" || !this.isThingsValid()) return;
-    const newthings = this.tmpThings;
-    this.tmpThings = "";
-    this.props.things = newthings;
-  },
-  isThingsValid() {
-    return this.tmpThings.length > 2;
-  }
-};
+SpecialCounterList.methods.render = function () {
+  this.ctrl = new DifferentController(this, props);
+  this.update();
+}              
 ```
 
-> This inherits the `render` method as `CounterList`.
-
-You can also specify a new DOM structure, perhaps to display the highest counter instead of the total:
+You can also specify a new component definition function as the 2nd argument:
 
 ```tsx
-const HighestCounterList = extendComponent(
-  CounterList,
-  ({ counters }) => (
+const SpecialCounterList = extendComponent(
+  CounterList, 
+ ({ counters, things }, { self }) => (
+  <div>
     <div>
-      <span>Highest: {Math.max(...counters.map(c => c.count))}</span>
-      <div>
-        <Counter.repeat items={counters} />
-      </div>
+      <Counter.repeat items={counters} />
     </div>
+    <span>Total: {self.total()}</span>
+  </div>
   )
-);
+); 
 ```
 
-By default the new component definition will use the same props, controller and method types as the base, but you can specify new ones:
+> The plugin treats this as a special case, so stick to this exact format, e.g. don't pass a variable as the 2nd argument.
 
-```tsx
-const MyComponent = extendComponent<Props, Controller, Methods>(Base);
-```
-
-TypeScript will only let you specify types which are compatible with (or extend) the corresponding type for its base.
-
-##### Important
-
-The Babel plugin modifies the `extendComponent` call if you specify the 2nd argument, so you must put the JSX directly in the 2nd argument:
-
-```jsx
-extendComponent(CounterList, () => <div></div>);
-```
-
-And not elsewhere like so:
-
-```jsx
-// WRONG
-const Foo = () => <div></div>;
-extendComponent(CounterList, Foo);
-```
+You still inherit the methods, like `total` as before. But if you're going to do this kind of thing, you might want to use stubs.
 
 ### Stubs
 
 Stubs let you implement parts of the DOM in derived components, or vice versa:
 
 ```tsx
-const CounterList: Uses<iCounterList> = ({ counters }) => (
+const CounterList: Uses<iCounterList, Controller> = () => (
   <div>
     <stub:stats />
     <stub:counters />
@@ -918,8 +790,8 @@ const CounterList: Uses<iCounterList> = ({ counters }) => (
 );
 
 CounterList.stubs = {
-  stats: ({ counters }) => (
-    <span>Total: {counters.reduce((t, c) => t + c.count, 0)}</span>
+  stats: ({ counters }, { self }) => (
+    <span>Total: {self.total()}</span>
   ),
   counters: ({ counters }) => (
     <div>
@@ -931,8 +803,12 @@ CounterList.stubs = {
 const HighestCounterList = extendComponent(CounterList);
 
 HighestCounterList.stubs.stats = ({ counters }) => (
-  <span>Highest: {Math.max(...counters.map(c => c.count))}</span>
+  <span>Highest: {self.highest()}</span>
 );
+
+HighestCounterList.methods.highest = function () {
+  return Math.max(...this.props.counters.map(c => c.count))
+}
 ```
 
 Component definitions inherit stubs much like prototype methods, and can override them, so `HighestCounterList` gets the same `counters` stub, but overrides the `stats` stub.
@@ -945,14 +821,23 @@ A base component may also implement stubs it doesn't reference, and leave it to 
 const BaseCounterList = () => <div>OVERRIDE ME</div>;
 
 BaseCounterList.stubs = {
-  highest: ({ counters, highest }) => <span>Highest: {highest}</span>,
-  total: ({ counters, total }) => <span>Total: {total}</span>,
+  highest: ({ counters }, { self }) => <span>Highest: {self.highest()}</span>,
+  total: ({ counters }, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
     <div>
       <Counter.repeat items={counters} />
     </div>
   )
 };
+
+BaseCounterList.methods = {
+  total() {
+    return this.props.counters.reduce((t, c) => t + c.count, 0)
+  },
+  highest () {
+    return Math.max(...this.props.counters.map(c => c.count))
+  }
+}
 
 const HighestCounterList = extendComponent(BaseCounterList, () => (
   <div>
@@ -966,10 +851,6 @@ const HighestCounterList = extendComponent(BaseCounterList, () => (
 > So long as the final component definition has an implementation (its own or inherited) for each stub it references, it will work.
 
 Stubs are a flexible way to organise reusable component skeletons or parts, which again, helps reduce duplication, errors and bundle size.
-
-##### Important
-
-A stub receives the same props as its enclosing component.
 
 ## Status
 
