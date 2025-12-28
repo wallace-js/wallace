@@ -44,8 +44,6 @@ function extractValue(json, test) {
       return json.values.total.median;
     case "size-compressed":
       return json.values.DEFAULT.median;
-    case "first-paint":
-      return json.values.DEFAULT.median;
   }
 }
 
@@ -53,7 +51,7 @@ function extractValue(json, test) {
 Returns:
 
   { 
-    'non-keyed/wallace-v0.0.7': { run1k: 62, 'size-compressed': 2.5, 'first-paint': 119.2 },
+    'non-keyed/wallace-v0.0.7': { run1k: 62, 'size-compressed': 2.5},
     ...
   }
  */
@@ -83,7 +81,7 @@ Returns:
 
   {
     "non-keyed/wallace": {
-      '0.3.0': { run1k: 59.9, 'size-compressed': 2.4, 'first-paint': 100.7 }
+      '0.3.0': { run1k: 59.9, 'size-compressed': 2.4 }
     }
     ...
   }
@@ -106,7 +104,7 @@ function groupData(collectedData) {
 /*
 Flattens, filters and renames it to this:
 {
-  wallace: {version: '0.3.0', 'run1k: 59.9, 'size-compressed': 2.4, 'first-paint': 100.7 }}
+  wallace: {version: '0.3.0', 'run1k: 59.9, 'size-compressed': 2.4}}
   ...
 }
 */
@@ -149,7 +147,7 @@ function main() {
 
 const RESULTS_DIR = process.argv[2];
 const WALLACE_IMPLEMENTATION = process.argv[3]; // e.g. "wallace_xyz"
-const tests = ["run1k", "size-compressed", "first-paint"];
+const tests = ["run1k", "size-compressed"];
 
 const frameworksToUse = {
   "keyed/angular-ngfor": "angular",
