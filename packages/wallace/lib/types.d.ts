@@ -47,9 +47,11 @@ const MyComponent = ({title}, {ctrl, event}) => (
 
 The **xargs** contains:
 
-- `ctrl` a reference to a controller object.
-- `self` a reference to the component instance (as `this` is not allowed).
-- `event` for use in event callbacks, signifies the event.
+- `ctrl` refers to the controller.
+- `props` refers to the props, in case you want the non-destructured version too.
+- `self` refers to the component instance (as `this` is not allowed).
+- `event` refers to the event in an event callback.
+- `element` refers to the element in an event callback, or in `apply`.
 
 The function will be replaced by a very different one during compilation, therefore:
 
@@ -494,6 +496,7 @@ declare module "wallace" {
       props: Props,
       xargs?: {
         ctrl: Controller;
+        props: Props;
         self: ComponentInstance<Props, Controller, Methods>;
         event: Event;
         element: HTMLElement;

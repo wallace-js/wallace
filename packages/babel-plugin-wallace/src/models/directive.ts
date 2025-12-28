@@ -1,8 +1,8 @@
 import type { NodePath } from "@babel/core";
-import type { Expression, JSXAttribute } from "@babel/types";
+import type { Expression } from "@babel/types";
 import { TagNode } from "./node";
 import { Component } from "../models";
-import { EXPRESSION_SCOPE_VARIABLES, XARGS } from "../constants";
+import { EXPRESSION_SCOPE_VARIABLES } from "../constants";
 import { ERROR_MESSAGES, error } from "../errors";
 
 export interface NodeValue {

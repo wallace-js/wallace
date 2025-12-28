@@ -6,6 +6,9 @@ import { diff } from "jest-diff";
 import { Component, mount } from "../lib/index";
 import * as ts from "typescript";
 
+// Big old issue with Jest confusing output from previous tests
+const WRONG_CODE_WARNING = "\n\nIGNORE THE CODE BELOW IT MAY BE FROM PREVIOUS OUTPUT";
+
 /**
  * Run the source code through tsc to find type errors.
  *
@@ -127,7 +130,7 @@ expect.extend({
       });
       return (
         this.utils.matcherHint(".toRender") +
-        (diffString ? `\n\nDifference:\n\n${diffString}` : "")
+        (diffString ? `\n\nDifference:\n\n${diffString}${WRONG_CODE_WARNING}` : "")
       );
     };
     const message = pass ? passMessage : failMessage;
@@ -153,7 +156,7 @@ expect.extend({
       return (
         this.utils.matcherHint(".toCompileWithoutError") +
         `\n\Expected to compile with no error, but got error:\n\n    ${errorMessage}` +
-        "\n\nIGNORE WHAT FOLLOWS - JEST OFTEN POINTS TO CODE FROM PREVIOUS TEST"
+        WRONG_CODE_WARNING
       );
     };
     const message = pass ? passMessage : failMessage;

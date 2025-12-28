@@ -125,6 +125,7 @@ function mapAndRenameXargs(path: NodePath<Function>, component: Component) {
   const renameMapping: { [key: string]: string } = {};
   renameMapping[XARGS.event] = XARGS.event;
   renameMapping[XARGS.element] = XARGS.element;
+  renameMapping[XARGS.props] = component.propsIdentifier.name;
   renameMapping[XARGS.component] = component.componentIdentifier.name;
   renameMapping[XARGS.controller] =
     `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;

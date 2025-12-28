@@ -32,6 +32,7 @@ export enum IMPORTABLES {
 export enum XARGS {
   controller = "ctrl",
   component = "self",
+  props = "props",
   event = "event",
   element = "element"
 }
