@@ -8,6 +8,8 @@
     {
       "files": "**/*.md",
       "options": {
+        "arrowParens": "always",
+        "singleQuote": true,
         "printWidth": 70
       }
     }
