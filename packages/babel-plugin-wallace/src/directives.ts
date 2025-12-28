@@ -9,23 +9,14 @@
 
 import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import {
-  EXPRESSION_SCOPE_VARIABLES,
-  WATCH_CALLBACK_ARGS,
-  SPECIAL_SYMBOLS,
-  DOM_EVENTS_LOWERCASE
-} from "./constants";
+import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
   static allowNull = true;
   static allowString = false;
   static allowQualifier = false;
-  static allowAccessTo = [
-    EXPRESSION_SCOPE_VARIABLES.component,
-    EXPRESSION_SCOPE_VARIABLES.props,
-    EXPRESSION_SCOPE_VARIABLES.element
-  ];
+  static mayAccessElement = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
@@ -83,7 +74,7 @@ class ClassDirective extends Directive {
 
 class CssDirective extends Directive {
   static attributeName = "css";
-  static allowAccessTo = [];
+  static mayAccessComponent = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addStaticAttribute("class", value.expression);
   }
@@ -92,7 +83,7 @@ class CssDirective extends Directive {
 class FixedDirective extends Directive {
   static attributeName = "fixed";
   static requireQualifier = true;
-  static allowAccessTo = [];
+  static mayAccessComponent = false;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.addStaticAttribute(qualifier, value.expression);
   }
@@ -152,12 +143,8 @@ class ItemsDirective extends Directive {
 class OnEventDirective extends Directive {
   static attributeName = "on*";
   static allowString = true;
-  static allowAccessTo = [
-    EXPRESSION_SCOPE_VARIABLES.component,
-    EXPRESSION_SCOPE_VARIABLES.props,
-    EXPRESSION_SCOPE_VARIABLES.element,
-    EXPRESSION_SCOPE_VARIABLES.event
-  ];
+  static mayAccessElement = true;
+  static mayAccessEvent = true;
   static help = `
     Creates an event handler:
 

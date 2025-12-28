@@ -21,7 +21,8 @@ import {
   IMPORTABLES,
   SPECIAL_SYMBOLS,
   WATCH_CALLBACK_ARGS,
-  WATCH_AlWAYS_CALLBACK_ARGS
+  WATCH_AlWAYS_CALLBACK_ARGS,
+  XARGS
 } from "../constants";
 import { ComponentWatch } from "./types";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
@@ -386,9 +387,13 @@ export function processNodes(
         [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
         [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
           `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
-        [component.propsIdentifier.name]: `${COMPONENT_BUILD_PARAMS.component}.props`,
-        [EVENT_CALLBACK_ARGS.element]: `${EVENT_CALLBACK_ARGS.event}.target`
+        [component.propsIdentifier.name]: `${COMPONENT_BUILD_PARAMS.component}.props`
+        // [EVENT_CALLBACK_ARGS.element]: `${EVENT_CALLBACK_ARGS.event}.target`
       };
+      if (component.xargMapping.hasOwnProperty(XARGS.element)) {
+        eventVariableMapping[EVENT_CALLBACK_ARGS.element] =
+          `${EVENT_CALLBACK_ARGS.event}.target`;
+      }
       node.eventListeners.forEach(listener => {
         const updatedExpression = renameVariablesInExpression(
           listener.callback,

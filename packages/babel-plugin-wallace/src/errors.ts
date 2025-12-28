@@ -61,10 +61,6 @@ export const ERROR_MESSAGES = {
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",
   TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",
-  ILLEGAL_NAMES_IN_PROPS: (names: string[]) =>
-    `Illegal names in props: ${names
-      .map(name => `"${name}"`)
-      .join(", ")} - these are reserved for extra args.`,
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
   ILLEGAL_XARG: (name: string) =>
     `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`

@@ -37,17 +37,6 @@ export enum XARGS {
   element = "element"
 }
 
-/**
- * The scope variables that might be allowed in directive expressions.
- * The value is not indicative of the final variable name.
- */
-export enum EXPRESSION_SCOPE_VARIABLES {
-  component = "self",
-  props = "props",
-  element = "element",
-  event = "event"
-}
-
 export enum WATCH_CALLBACK_ARGS {
   newValue = "n",
   oldValue = "o",

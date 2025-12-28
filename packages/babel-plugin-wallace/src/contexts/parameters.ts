@@ -29,22 +29,6 @@ function expandNameToMemberExpression(name: string): t.MemberExpression | t.Iden
   return t.memberExpression(expandNameToMemberExpression(rest), t.identifier(end));
 }
 
-function checkForIllegalNamesInProps(
-  path: NodePath<Function>,
-  propVariableMap: { [key: string]: string }
-) {
-  const illegalNamesFound = [];
-  for (let name in XARGS) {
-    const variable = XARGS[name];
-    if (propVariableMap.hasOwnProperty(variable)) {
-      illegalNamesFound.push(variable);
-    }
-  }
-  if (illegalNamesFound.length > 0) {
-    error(path, ERROR_MESSAGES.ILLEGAL_NAMES_IN_PROPS(illegalNamesFound));
-  }
-}
-
 function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
   const extraArg = path.node.params[1];
   if (extraArg === undefined) {
@@ -150,7 +134,6 @@ export function processFunctionParameters(
     return;
   }
   const propVariableMap = extractFinalPropsName(path);
-  checkForIllegalNamesInProps(path, propVariableMap);
   checkForIllegalNamesInExtraArgs(path);
   renamePropKeysInsideFunction(path, propVariableMap, component.propsIdentifier.name);
   mapAndRenameXargs(path, component);

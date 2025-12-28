@@ -52,16 +52,19 @@ describe("Fixed specification", () => {
     );
   });
 
-  test.each(["self", "element", "event"])("disallows access to %s", xarg => {
-    const code = `
+  test.each(["self", "element", "event", "ctrl", "props"])(
+    "disallows access to %s",
+    xarg => {
+      const code = `
       const Foo = (_, {${xarg}}) => (
         <div fixed:class={${xarg}} />
       )
     `;
-    expect(code).toCompileWithError(
-      `The "fixed" directive may not access scoped variable "${xarg}".`
-    );
-  });
+      expect(code).toCompileWithError(
+        `The "fixed" directive may not access scoped variable "${xarg}".`
+      );
+    }
+  );
 });
 
 describe("Fixed directive", () => {
