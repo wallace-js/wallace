@@ -5,6 +5,7 @@ export { nestComponent } from "./nest";
 export { saveRef } from "./refs";
 export { KeyedRepeater } from "./repeaters/keyed";
 export { SequentialRepeater } from "./repeaters/sequential";
+export { Router } from "./router";
 export { getStub } from "./stubs";
 export { findElement, onEvent, stashMisc } from "./utils";
 export { watch, protect } from "./watch";

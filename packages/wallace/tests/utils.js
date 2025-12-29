@@ -6,8 +6,11 @@ import { diff } from "jest-diff";
 import { Component, mount } from "../lib/index";
 import * as ts from "typescript";
 
-// Big old issue with Jest confusing output from previous tests
-const WRONG_CODE_WARNING = "\n\nIGNORE THE CODE BELOW IT MAY BE FROM PREVIOUS OUTPUT";
+// Big old issue with Jest confusing output from previous tests. Will switch to vitest or so.
+const WRONG_CODE_WARNING = `\n\n WARNING: JEST MAY SHOW OUTPUT FROM A PREVIOUS TEST, INCLUDING STACK TRACE.
+ USE test.only TO SEE RELIABLE OUTPUT.`;
+
+console.log(WRONG_CODE_WARNING);
 
 /**
  * Run the source code through tsc to find type errors.
@@ -120,7 +123,7 @@ expect.extend({
    * @param {string} expectedHtml The expected HTML.
    *
    */
-  toRender(component, expectedHtml) {
+  async toRender(component, expectedHtml) {
     const received = tidyHTML(component.el.outerHTML);
     const expected = tidyHTML(expectedHtml);
     const pass = received === expected;
