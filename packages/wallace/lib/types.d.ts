@@ -526,6 +526,7 @@ declare module "wallace" {
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
+    create?(props: Props): ComponentInstance<Props, Controller, Methods>;
   }
 
   type ComponenMethods<Props, Controller> = {
@@ -580,7 +581,6 @@ declare module "wallace" {
    * The component constructor function (typed as a class, but isn't).
    */
   export class Component<Props = any, Controller = any> {
-    render(props: Props, ctrl?: Controller): void;
     /**
      * The base render method looks like this:
      *

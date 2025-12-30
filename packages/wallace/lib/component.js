@@ -151,7 +151,11 @@ export function createConstructor(baseComponent) {
       return proto;
     }
   });
-
+  Component.create = function (props, ctrl) {
+    const component = new Component();
+    component.render(props, ctrl);
+    return component;
+  };
   Component.stubs = {} && baseComponent.stubs;
   return Component;
 }
