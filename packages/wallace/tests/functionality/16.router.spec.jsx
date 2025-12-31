@@ -6,7 +6,7 @@ Due to async functions:
 
  There are no checks on duplicate routes or args.
 */
-import { Router, extendComponent } from "wallace";
+import { Router, route, extendComponent } from "wallace";
 import { testMount } from "../utils";
 
 /**
@@ -31,10 +31,7 @@ test("Test setHash helper", () => {
 
 describe("Routing basics", () => {
   const props = {
-    routes: [
-      ["/page1", Page1],
-      ["/page2", Page2]
-    ]
+    routes: [route("/page1", Page1), route("/page2", Page2)]
   };
 
   test("Initial render", async () => {
@@ -82,8 +79,13 @@ describe("Router customisation", () => {
     const cleanup = jest.fn();
     const props = {
       routes: [
-        ["/page1", Page1, x => x, route => cleanup(route)],
-        ["/page2", Page2]
+        route(
+          "/page1",
+          Page1,
+          x => x,
+          route => cleanup(route)
+        ),
+        route("/page2", Page2)
       ]
     };
     const component = testMount(Router, props);
@@ -116,7 +118,7 @@ describe("Router customisation", () => {
       </div>
     ));
     MyRouter.methods = {
-      apply(component) {
+      mount(component) {
         const div = this.refs.div;
         div.node.innerHTML = "";
         div.node.appendChild(component.el);
@@ -125,7 +127,7 @@ describe("Router customisation", () => {
 
     const props = {
       foo: "bar",
-      routes: [["/page2", Page2]]
+      routes: [route("/page2", Page2)]
     };
 
     const component = testMount(MyRouter, props);
@@ -146,8 +148,8 @@ describe("Route props conversion", () => {
   test("Works with promise and normal function", async () => {
     const props = {
       routes: [
-        ["/page1/{foo}", Page, ({ args }) => ({ foo: args.foo + 1 })],
-        ["/page2/{foo}", Page, ({ args }) => Promise.resolve({ foo: args.foo + 2 })]
+        route("/page1/{foo}", Page, ({ args }) => ({ foo: args.foo + 1 })),
+        route("/page2/{foo}", Page, ({ args }) => Promise.resolve({ foo: args.foo + 2 }))
       ]
     };
     const component = testMount(Router, props);
@@ -157,16 +159,27 @@ describe("Route props conversion", () => {
     expect(component).toRender("<div><div>b2</div></div>");
   });
 
+  test("Can read url", async () => {
+    const props = {
+      routes: [
+        route("/page1", Page, ({ url }) => ({
+          foo: url
+        }))
+      ]
+    };
+    const component = testMount(Router, props);
+    await setHash("/page1?name=Jonathan%20Smith&age=18");
+    expect(component).toRender(
+      "<div><div>/page1?name=Jonathan%20Smith&amp;age=18</div></div>"
+    );
+  });
+
   test("Can read params", async () => {
     const props = {
       routes: [
-        [
-          "/page1",
-          Page,
-          ({ params }) => ({
-            foo: params.get("name")
-          })
-        ]
+        route("/page1", Page, ({ params }) => ({
+          foo: params.get("name")
+        }))
       ]
     };
     const component = testMount(Router, props);
@@ -180,13 +193,9 @@ describe("Route args conversion", () => {
   let args;
   const props = {
     routes: [
-      [
-        "/page1/{x:int}/{y:float}/{z:date}",
-        Page,
-        path => {
-          args = path.args;
-        }
-      ]
+      route("/page1/{x:int}/{y:float}/{z:date}", Page, path => {
+        args = path.args;
+      })
     ]
   };
 

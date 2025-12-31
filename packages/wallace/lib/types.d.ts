@@ -691,6 +691,32 @@ declare module "wallace" {
    * @returns a Proxy of the object.
    */
   export function watch<T>(target: T, callback: WatchCallback): T;
+
+  export type RouteData = {
+    args: { [key: string]: any };
+    params: URLSearchParams;
+    url: string;
+  };
+
+  export function route<Props>(
+    path: string,
+    componentDef: ComponentFunction<Props>,
+    converter: RouteConverter<Props>
+  ): Route<Props>;
+
+  type RouteConverter<Props> = (routedata: RouteData) => Props;
+
+  export type Route<Props> = [string, ComponentFunction<Props>, RouteConverter<Props>?];
+  export type RouterProps = {
+    routes: readonly Route<unknown>[];
+    atts?: Record<string, unknown>;
+    error?: (error: Error, router: Router) => void;
+  };
+
+  export class Router extends Component {
+    static nest?({ props }: { props?: RouterProps }): JSX.Element;
+    mount(component: Component<any>): void;
+  }
 }
 
 type MustBeExpression = Exclude<any, string>;

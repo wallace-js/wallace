@@ -1,30 +1,13 @@
 /*
-How it works:
+The Router is a component which mounts other components based on hash (URL bit after #).
 
-  http://localhost:8080/#/route1
+It currently expects the route to be made of chunks separated by / which are either
+text or placeholders:
 
+  /todos/detail/{id:int}/notes
 
-  mount `Router` with the config as props.
-  Router listens to changes to URL, tries match to a Route.
-  Matching Route gets to resolve, but maybe it should do it by itself.
+It performs no validation yet, and may change to use regex in future.
 */
-
-/*
- * A route.
- * The path is used for matching and extracting args & params.
- * The path is made of chunks separated by "/" e.g. /todos/detail/{id}
- * Chunks are strings or argument descriptors
- * A url matches a route if all the string chunks match e.g.
- * Route path: /todos/detail/{id}
- * Urls:
- *   /todos/detail/001           (yes)
- *   /todos/detail/001?name=joe  (yes, as everything after ? are params)
- *   /todos/001/detail           (no, as chunk[1] != 'detail')
- *   /todos/detail/001/next      (no, as it has more chunks than expected)
- *
- * Args and params may specify a type, in which case they are converted.
- * resolve gets called with {args, params, url} and returns the props for the component.
- */
 
 const events = ["load", "hashchange"];
 const noMod = x => x;
@@ -34,6 +17,10 @@ const converters = {
   date: v => new Date(v)
 };
 
+export function route(path, componentDef, converter, cleanup) {
+  return new Route(path, componentDef, converter, cleanup);
+}
+
 export const Router = () => <div></div>;
 
 Router.methods = {
@@ -41,28 +28,27 @@ Router.methods = {
     const defaultError = (error, router) => (router.el.innerHTML = error.message);
     this.error = props.error || defaultError;
     this.current = null;
-    this.routes = props.routes.map(c => new Route(c[0], c[1], c[2], c[3]));
     events.forEach(e => window.addEventListener(e, () => this.onHashChange()));
     if (props.atts) {
       Object.keys(props.atts).forEach(k => {
         this.el.setAttribute(k, props.atts[k]);
       });
     }
-    // Needed in case user extends Router.
     this.base.render.call(this, props, ctrl);
   },
   async onHashChange() {
     const path = location.hash.slice(1) || "",
-      len = this.routes.length;
+      routes = this.props.routes,
+      len = routes.length;
     let i = 0,
       routeData;
     try {
       while (i < len) {
-        let route = this.routes[i];
+        let route = routes[i];
         if ((routeData = route.match(path))) {
           const component = await route.getComponent(routeData, this.ctrl);
           this.current && this.current.cleanup();
-          this.apply(component);
+          this.mount(component);
           this.current = route;
           return;
         }
@@ -73,7 +59,7 @@ Router.methods = {
       this.error(error, this);
     }
   },
-  apply(component) {
+  mount(component) {
     this.el.innerHTML = "";
     this.el.appendChild(component.el);
   }

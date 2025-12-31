@@ -839,6 +839,45 @@ const HighestCounterList = extendComponent(BaseCounterList, () => (
 
 Stubs are a flexible way to organise reusable component skeletons or parts, which again, helps reduce duplication, errors and bundle size.
 
+### Router
+
+Wallace comes with a very basic built-in Router which detects changes to the URL hash. It is mounted like a component and configured by props.
+
+```tsx
+import { mount, Router, route } from "wallace";
+
+const routes = [
+  route("/counter/{start:int}", Counter, ({ args }) => (count: args.start))
+]
+mount("main", Router, {routes});
+```
+
+> Going to http://localhost:8080/#/counter/5 will display a counter set to 5.
+
+The 3rd argument to `route` is optional and converts the `RouteData` to props, which if omitted, will pass the object as-is. Here is `RouteData`:
+
+```tsx 
+interface RouteData {
+  args: { [key: string]: any };  // args extracted from the hash
+  params: URLSearchParams;       // Native URLSearchParams.
+  url: string;
+}
+```
+
+`route` also accepts a 4th argument which is a cleanup function that gets called when we navigate away from the page.
+
+You can also configure attributes for the `div` and a custom error handler for not found pages etc:
+
+```tsx
+const Error (message) => <div class="error">{message}</div>;
+
+mount("main", Router, {
+  atts: { id: "router", class: "danger" },
+  error: (error, router) => (router.mount(Error.create(error.message)),
+  routes: []
+});
+```
+
 ## Status
 
 Wallace is still in early development, and hasn't been very widely used, however:
