@@ -156,7 +156,7 @@ export function createConstructor(baseComponent) {
     component.render(props, ctrl);
     return component;
   };
-  Component.stubs = {} && baseComponent.stubs;
+  Component.stubs = Object.assign({}, baseComponent.stubs);
   return Component;
 }
 
