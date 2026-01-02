@@ -526,7 +526,10 @@ declare module "wallace" {
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
-    create?(props: Props): ComponentInstance<Props, Controller, Methods>;
+    create?(
+      props?: Props,
+      ctrl?: Controller
+    ): ComponentInstance<Props, Controller, Methods>;
   }
 
   type ComponenMethods<Props, Controller> = {
