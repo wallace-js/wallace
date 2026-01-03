@@ -1,4 +1,4 @@
-import { createConstructor } from "./component";
+import { initConstructor } from "./component";
 
 /**
  * Calls to this function which provide the 2nd argument:
@@ -16,5 +16,7 @@ export function extendComponent(base, componentDef) {
   // and therefore we would not receive it.
   if (componentDef)
     throw new Error("2nd arg to extendComponent must be a JSX arrow function");
-  return createConstructor(base);
+  return initConstructor(function () {
+    base.call(this);
+  }, base);
 }

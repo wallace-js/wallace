@@ -20,6 +20,8 @@ import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils"
  * An object with all the consolidated data for writing.
  */
 export class ComponentDefinitionData {
+  needsTempThis = false;
+  needsStash = false;
   component: Component;
   html: Expression;
   watches: Array<ComponentWatch> = [];
@@ -87,6 +89,7 @@ export class ComponentDefinitionData {
     ));
   }
   getNextmiscStashKey() {
+    this.needsStash = true;
     this.#miscStashKey++;
     return this.#miscStashKey - 1;
   }
