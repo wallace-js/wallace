@@ -15,8 +15,7 @@ import { codeToNode } from "../utils";
 import { Component, ExtractedNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
-  COMPONENT_BUILD_PARAMS,
-  COMPONENT_METHODS,
+  COMPONENT_PROPERTIES,
   EVENT_CALLBACK_ARGS,
   IMPORTABLES,
   SPECIAL_SYMBOLS,
@@ -147,11 +146,7 @@ function processRef(
   const callExpression = componentDefinition.wrapDynamicElementCall(
     node.elementKey,
     IMPORTABLES.saveRef,
-    [
-      identifier(COMPONENT_BUILD_PARAMS.component),
-      identifier(COMPONENT_BUILD_PARAMS.refs),
-      t.stringLiteral(name)
-    ]
+    [t.thisExpression(), identifier(COMPONENT_PROPERTIES.refs), t.stringLiteral(name)]
   );
   const ref = { name, callExpression, address: node.address };
   componentDefinition.refs.push(ref);
@@ -182,7 +177,7 @@ export function processNodes(
     if (stubName) {
       componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
       stubExpression = t.callExpression(t.identifier(IMPORTABLES.getStub), [
-        t.identifier(COMPONENT_BUILD_PARAMS.component),
+        t.thisExpression(),
         t.stringLiteral(stubName)
       ]);
     }
@@ -223,7 +218,7 @@ export function processNodes(
         componentDefinition.wrapDynamicElementCall(
           node.elementKey,
           IMPORTABLES.stashMisc,
-          [identifier(COMPONENT_BUILD_PARAMS.stash), t.objectExpression([])]
+          [identifier(COMPONENT_PROPERTIES.stash), t.objectExpression([])]
         );
       }
 
@@ -256,7 +251,7 @@ export function processNodes(
           const props = node.getProps();
           const ctrlArg = memberExpression(
             component.componentIdentifier,
-            identifier(SPECIAL_SYMBOLS.ctrl)
+            identifier(COMPONENT_PROPERTIES.ctrl)
           );
           const args = props ? [props, ctrlArg] : [identifier("undefined"), ctrlArg];
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
@@ -264,7 +259,7 @@ export function processNodes(
               callExpression(
                 memberExpression(
                   identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-                  identifier(COMPONENT_METHODS.render)
+                  identifier(COMPONENT_PROPERTIES.render)
                 ),
                 args
               )
@@ -283,13 +278,13 @@ export function processNodes(
                 memberExpression(
                   // In this case "element" is in fact the nested component.
                   identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-                  identifier(COMPONENT_METHODS.render)
+                  identifier(COMPONENT_PROPERTIES.render)
                 ),
                 [
                   component.propsIdentifier,
                   memberExpression(
                     component.componentIdentifier,
-                    identifier(SPECIAL_SYMBOLS.ctrl)
+                    identifier(COMPONENT_PROPERTIES.ctrl)
                   )
                 ]
               )
@@ -335,7 +330,7 @@ export function processNodes(
           componentDefinition.wrapDynamicElementCall(
             node.elementKey,
             IMPORTABLES.stashMisc,
-            [identifier(COMPONENT_BUILD_PARAMS.stash), poolInstance]
+            [identifier(COMPONENT_PROPERTIES.stash), poolInstance]
           );
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
@@ -344,7 +339,7 @@ export function processNodes(
                   memberExpression(
                     memberExpression(
                       component.componentIdentifier,
-                      identifier(SPECIAL_SYMBOLS.objectStash)
+                      identifier(COMPONENT_PROPERTIES.stash)
                     ),
                     numericLiteral(miscStashKey),
                     true
@@ -356,7 +351,7 @@ export function processNodes(
                   repeatInstruction.expression,
                   memberExpression(
                     component.componentIdentifier,
-                    identifier(SPECIAL_SYMBOLS.ctrl)
+                    identifier(COMPONENT_PROPERTIES.ctrl)
                   )
                 ]
               )
@@ -379,36 +374,46 @@ export function processNodes(
 
       if (ref) processRef(componentDefinition, node, ref);
 
-      // TODO: improve this, as we are basically renaming things specifically for the
-      // build function that have already been renamed, which can get confusing.
-      // It also needs to rename ctrl and props explicitly as it doesn't seem to
-      // rename component when it's a member expression.
-      const eventVariableMapping: { [key: string]: string } = {
-        [component.componentIdentifier.name]: COMPONENT_BUILD_PARAMS.component,
-        [component.componentIdentifier.name + "." + SPECIAL_SYMBOLS.ctrl]:
-          `${COMPONENT_BUILD_PARAMS.component}.${SPECIAL_SYMBOLS.ctrl}`,
-        [component.propsIdentifier.name]: `${COMPONENT_BUILD_PARAMS.component}.props`
-        // [EVENT_CALLBACK_ARGS.element]: `${EVENT_CALLBACK_ARGS.event}.target`
-      };
-      if (component.xargMapping.hasOwnProperty(XARGS.element)) {
-        eventVariableMapping[EVENT_CALLBACK_ARGS.element] =
-          `${EVENT_CALLBACK_ARGS.event}.target`;
+      if (node.eventListeners.length > 0) {
+        processEventListeners(componentDefinition, component, node);
       }
-      node.eventListeners.forEach(listener => {
-        const updatedExpression = renameVariablesInExpression(
-          listener.callback,
-          eventVariableMapping
-        );
-
-        componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.onEvent, [
-          stringLiteral(listener.eventName),
-          functionExpression(
-            null,
-            [identifier(EVENT_CALLBACK_ARGS.event)],
-            blockStatement([expressionStatement(updatedExpression)])
-          )
-        ]);
-      });
     }
+  });
+}
+
+function processEventListeners(
+  componentDefinition: ComponentDefinitionData,
+  component: Component,
+  node: ExtractedNode
+) {
+  componentDefinition.needsTempThis = true;
+  // TODO: improve this, as we are basically renaming things specifically for the
+  // build function that have already been renamed, which can get confusing.
+  // It also needs to rename ctrl and props explicitly as it doesn't seem to
+  // rename component when it's a member expression.
+  const eventVariableMapping: { [key: string]: string } = {
+    [component.componentIdentifier.name]: COMPONENT_PROPERTIES.tmpThis,
+    [component.componentIdentifier.name + "." + COMPONENT_PROPERTIES.ctrl]:
+      `${COMPONENT_PROPERTIES.tmpThis}.${COMPONENT_PROPERTIES.ctrl}`,
+    [component.propsIdentifier.name]:
+      `${COMPONENT_PROPERTIES.tmpThis}.${COMPONENT_PROPERTIES.props}`
+  };
+  if (component.xargMapping.hasOwnProperty(XARGS.element)) {
+    eventVariableMapping[EVENT_CALLBACK_ARGS.element] =
+      `${EVENT_CALLBACK_ARGS.event}.target`;
+  }
+  node.eventListeners.forEach(listener => {
+    const updatedExpression = renameVariablesInExpression(
+      listener.callback,
+      eventVariableMapping
+    );
+    componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.onEvent, [
+      stringLiteral(listener.eventName),
+      functionExpression(
+        null,
+        [identifier(EVENT_CALLBACK_ARGS.event)],
+        blockStatement([expressionStatement(updatedExpression)])
+      )
+    ]);
   });
 }

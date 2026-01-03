@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { Function, Identifier } from "@babel/types";
 import { Component } from "../models";
-import { XARGS, SPECIAL_SYMBOLS } from "../constants";
+import { XARGS, COMPONENT_PROPERTIES } from "../constants";
 import { error, ERROR_MESSAGES } from "../errors";
 
 interface PropsMap {
@@ -112,7 +112,7 @@ function mapAndRenameXargs(path: NodePath<Function>, component: Component) {
   renameMapping[XARGS.props] = component.propsIdentifier.name;
   renameMapping[XARGS.component] = component.componentIdentifier.name;
   renameMapping[XARGS.controller] =
-    `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;
+    `${component.componentIdentifier.name}.${COMPONENT_PROPERTIES.ctrl}`;
 
   for (const [key, value] of Object.entries(renameMapping)) {
     if (path.scope.hasOwnBinding(key)) {

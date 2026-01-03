@@ -1,16 +1,3 @@
-export enum COMPONENT_BUILD_PARAMS {
-  component = "component",
-  rootElement = "root",
-  elements = "elements",
-  stash = "stash",
-  previous = "previous",
-  refs = "refs"
-}
-
-export enum COMPONENT_METHODS {
-  render = "render"
-}
-
 export const HTML_SPLITTER = "____split____";
 
 export enum IMPORTABLES {
@@ -56,9 +43,26 @@ export enum EVENT_CALLBACK_ARGS {
   element = XARGS.element
 }
 
+export enum COMPONENT_PROPERTIES {
+  ctrl = "ctrl",
+  props = "props",
+  refs = "refs",
+  root = "el",
+  elements = "_e",
+  watchLength = "_l",
+  stash = "_s",
+  previous = "_p",
+  template = "_t",
+  watches = "_w",
+  render = "render",
+  tmpThis = "_this"
+}
+
 export enum SPECIAL_SYMBOLS {
   elementStash = "_e",
   objectStash = "_s",
+  previous = "_p",
+  template = "_t",
   refs = "refs",
   noLookup = "__",
   patch = "patch",

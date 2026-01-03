@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type { CallExpression } from "@babel/types";
 import { Component } from "../models";
-import { COMPONENT_BUILD_PARAMS, SPECIAL_SYMBOLS, IMPORTABLES } from "../constants";
+import { COMPONENT_PROPERTIES, IMPORTABLES } from "../constants";
 import type {
   ArrayExpression,
   FunctionExpression,
@@ -11,11 +11,6 @@ import type {
 } from "@babel/types";
 import { identifier, objectExpression } from "@babel/types";
 import { ComponentDefinitionData, consolidateComponent } from "../consolidation";
-
-// component base to inherit from. Using 0 as false.
-function buildComponentBaseArg(componentDefinition: ComponentDefinitionData): Expression {
-  return componentDefinition.baseComponent || t.numericLiteral(0);
-}
 
 /**
  * Creates an ObjectExpression from an object.
@@ -70,48 +65,114 @@ function buildWatchesArg(componentDefinition: ComponentDefinitionData): ArrayExp
 }
 
 function buildLookupsArg(componentDefinition: ComponentDefinitionData): ArrayExpression {
-  // TODO: clean up temp code when original is an array too.
+  // TODO: clean up temp code when original on componentDefinition is an array too.
   const keys = Object.keys(componentDefinition.lookups).sort();
   const values: FunctionExpression[] = keys.map(key => componentDefinition.lookups[key]);
   return t.arrayExpression(values);
 }
 
-function buildComponentBuildFunction(
+function getDynamicElements(componentDefinition): CallExpression[] {
+  // TODO: clean up temp code when original on componentDefinition is an array too.
+  const keys = Object.keys(componentDefinition.dynamicElements).sort();
+  return keys.map(key => componentDefinition.dynamicElements[key]);
+}
+
+function buildConstructor(
   componentDefinition: ComponentDefinitionData
 ): FunctionExpression {
-  // TODO: clean up temp code when original is an array too.
-  const keys = Object.keys(componentDefinition.dynamicElements).sort();
-  const values: CallExpression[] = keys.map(
-    key => componentDefinition.dynamicElements[key]
-  );
+  const emptyObject = () => t.objectExpression([]);
+  const assignThis = (field: COMPONENT_PROPERTIES, expr: Expression) =>
+    t.assignmentExpression(
+      "=",
+      t.memberExpression(t.thisExpression(), t.identifier(field)),
+      expr
+    );
 
-  const pushToElementStash = t.callExpression(
-    t.memberExpression(
-      t.identifier(COMPONENT_BUILD_PARAMS.elements),
-      t.identifier("push")
-    ),
-    values
-  );
-  const setupPrevious = t.callExpression(
-    t.memberExpression(
-      t.identifier(COMPONENT_BUILD_PARAMS.previous),
-      t.identifier("push")
-    ),
-    componentDefinition.watches.map(watch => t.objectExpression([]))
-  );
+  const assignAndDeclare = (field: COMPONENT_PROPERTIES, expr: Expression) =>
+    t.variableDeclarator(
+      t.identifier(field),
+      t.assignmentExpression(
+        "=",
+        t.memberExpression(t.thisExpression(), t.identifier(field)),
+        expr
+      )
+    );
 
-  const statements = [pushToElementStash, setupPrevious];
+  const chainedConstExpressions = [
+    assignAndDeclare(COMPONENT_PROPERTIES.elements, t.arrayExpression([])),
+    assignAndDeclare(
+      COMPONENT_PROPERTIES.root,
+      t.callExpression(
+        t.memberExpression(
+          t.memberExpression(
+            t.thisExpression(),
+            t.identifier(COMPONENT_PROPERTIES.template)
+          ),
+          t.identifier("cloneNode")
+        ),
+        [t.booleanLiteral(true)]
+      )
+    )
+  ];
+
+  if (componentDefinition.refs.length > 0) {
+    chainedConstExpressions.push(
+      assignAndDeclare(COMPONENT_PROPERTIES.refs, emptyObject())
+    );
+  }
+
+  if (componentDefinition.needsTempThis) {
+    chainedConstExpressions.push(
+      t.variableDeclarator(t.identifier(COMPONENT_PROPERTIES.tmpThis), t.thisExpression())
+    );
+  }
+
+  if (componentDefinition.needsStash) {
+    chainedConstExpressions.push(
+      assignAndDeclare(COMPONENT_PROPERTIES.stash, t.arrayExpression([]))
+    );
+  }
+
+  const expressions: any[] = [
+    assignThis(COMPONENT_PROPERTIES.props, emptyObject()),
+    assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()),
+    assignThis(
+      COMPONENT_PROPERTIES.watchLength,
+      t.memberExpression(
+        t.memberExpression(
+          t.thisExpression(),
+          t.identifier(COMPONENT_PROPERTIES.watches)
+        ),
+        t.identifier("length")
+      )
+    ),
+    assignThis(
+      COMPONENT_PROPERTIES.previous,
+      t.arrayExpression(componentDefinition.watches.map(watch => t.objectExpression([])))
+    )
+  ];
+
+  const dynamicElementCalls = getDynamicElements(componentDefinition);
+
+  if (dynamicElementCalls.length > 0) {
+    expressions.push(
+      t.callExpression(
+        t.memberExpression(
+          t.identifier(COMPONENT_PROPERTIES.elements),
+          t.identifier("push")
+        ),
+        dynamicElementCalls
+      )
+    );
+  }
+
   return t.functionExpression(
     null,
-    [
-      t.identifier(COMPONENT_BUILD_PARAMS.component),
-      t.identifier(COMPONENT_BUILD_PARAMS.rootElement),
-      t.identifier(COMPONENT_BUILD_PARAMS.elements),
-      t.identifier(COMPONENT_BUILD_PARAMS.stash),
-      t.identifier(COMPONENT_BUILD_PARAMS.previous),
-      t.identifier(COMPONENT_BUILD_PARAMS.refs)
-    ],
-    t.blockStatement(statements.map(statement => t.expressionStatement(statement)))
+    [],
+    t.blockStatement([
+      t.variableDeclaration("const", chainedConstExpressions),
+      ...expressions.map(expr => t.expressionStatement(expr))
+    ])
   );
 }
 
@@ -121,10 +182,10 @@ export function buildDefineComponentCall(component: Component): CallExpression {
     componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildComponentBuildFunction(componentDefinition)
+    buildConstructor(componentDefinition)
   ];
   if (componentDefinition.baseComponent) {
-    args.push(buildComponentBaseArg(componentDefinition));
+    args.push(componentDefinition.baseComponent);
   }
   return t.callExpression(t.identifier(IMPORTABLES.defineComponent), args);
 }
