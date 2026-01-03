@@ -3,9 +3,11 @@
   "private": true,
   "scripts": {
     "test": "npm test -w wallace",
+    "test:canary": "cd canary && npm test",
     "build": "npm run build -w babel-plugin-wallace",
     "check": "babel $@",
     "prettier": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --write",
+    "prettier:check": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --check",
     "publish": "npm whoami && lerna publish --no-private"
   },
   "workspaces": [

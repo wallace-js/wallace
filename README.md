@@ -477,7 +477,7 @@ A reference to the component instance, useful for accessing methods:
 ```tsx
 const Counter = ({ count }, { self }) => (
   <div>
-    <button onClick={(count ++, self.update())}>{count}</button>
+    <button onClick={(count++, self.update())}>{count}</button>
   </div>
 );
 ```
@@ -536,7 +536,7 @@ CounterList.methods = {
 };
 ```
 
-A component passes its own value as 2nd argument when calling `render` on nested components, which assuming they don't then set it to something else, means they all point  to the same object, allowing them to call its functions:
+A component passes its own value as 2nd argument when calling `render` on nested components, which assuming they don't then set it to something else, means they all point to the same object, allowing them to call its functions:
 
 ```tsx
 const Counter: Uses<iCounter> = ({ count }, { ctrl }) => (
@@ -804,12 +804,8 @@ A base component may also implement stubs it doesn't reference, and leave it to 
 const BaseCounterList = () => <div>OVERRIDE ME</div>;
 
 BaseCounterList.stubs = {
-  highest: (_, { self }) => (
-    <span>Highest: {self.highest()}</span>
-  ),
-  total: (_, { self }) => (
-    <span>Total: {self.total()}</span>
-  ),
+  highest: (_, { self }) => <span>Highest: {self.highest()}</span>,
+  total: (_, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
     <div>
       <Counter.repeat items={counters} />
@@ -856,10 +852,10 @@ mount("main", Router, {routes});
 
 The 3rd argument to `route` is optional and converts the `RouteData` to props, which if omitted, will pass the object as-is. Here is `RouteData`:
 
-```tsx 
+```tsx
 interface RouteData {
-  args: { [key: string]: any };  // args extracted from the hash
-  params: URLSearchParams;       // Native URLSearchParams.
+  args: { [key: string]: any }; // args extracted from the hash
+  params: URLSearchParams; // Native URLSearchParams.
   url: string;
 }
 ```
