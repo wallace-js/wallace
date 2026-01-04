@@ -20,15 +20,16 @@ export function SequentialRepeater(componentDefinition) {
  * @param {any} ctrl - The parent item's controller.
  */
 SequentialRepeater.prototype.patch = function (e, items, ctrl) {
-  const pool = this.pool;
-  const componentDefinition = this.def;
-  const childNodes = e.childNodes;
-  const itemsLength = items.length;
-  let component,
-    poolCount = pool.length,
+  const pool = this.pool,
+    componentDefinition = this.def,
+    childNodes = e.childNodes,
+    itemsLength = items.length,
     childElementCount = this.count;
+  let i = 0,
+    component,
+    poolCount = pool.length;
 
-  for (let i = 0; i < itemsLength; i++) {
+  while (i < itemsLength) {
     if (i < poolCount) {
       component = pool[i];
     } else {
@@ -40,6 +41,7 @@ SequentialRepeater.prototype.patch = function (e, items, ctrl) {
     if (i >= childElementCount) {
       e.appendChild(component.el);
     }
+    i++;
   }
   this.count = itemsLength;
   trimChildren(e, childNodes, itemsLength);

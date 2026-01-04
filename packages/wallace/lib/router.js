@@ -60,7 +60,7 @@ Router.methods = {
     }
   },
   mount(component) {
-    this.el.innerHTML = "";
+    this.el.textContent = "";
     this.el.appendChild(component.el);
   }
 };
