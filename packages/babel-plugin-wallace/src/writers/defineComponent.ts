@@ -99,7 +99,6 @@ function buildConstructor(
     );
 
   const chainedConstExpressions = [
-    assignAndDeclare(COMPONENT_PROPERTIES.elements, t.arrayExpression([])),
     assignAndDeclare(
       COMPONENT_PROPERTIES.root,
       t.callExpression(
@@ -156,12 +155,13 @@ function buildConstructor(
 
   if (dynamicElementCalls.length > 0) {
     expressions.push(
-      t.callExpression(
+      t.assignmentExpression(
+        "=",
         t.memberExpression(
-          t.identifier(COMPONENT_PROPERTIES.elements),
-          t.identifier("push")
+          t.thisExpression(),
+          t.identifier(COMPONENT_PROPERTIES.elements)
         ),
-        dynamicElementCalls
+        t.arrayExpression(dynamicElementCalls)
       )
     );
   }
