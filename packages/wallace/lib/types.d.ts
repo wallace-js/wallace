@@ -526,10 +526,6 @@ declare module "wallace" {
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
-    create?(
-      props?: Props,
-      ctrl?: Controller
-    ): ComponentInstance<Props, Controller, Methods>;
   }
 
   type ComponenMethods<Props, Controller> = {
@@ -621,6 +617,18 @@ declare module "wallace" {
   }
 
   /**
+   * Creates a component instance and renders it.
+   * @param def
+   * @param props
+   * @param ctrl
+   */
+  export function createComponent<Props, Controller, Methods extends object = {}>(
+    def: ComponentFunction<Props, Controller, Methods>,
+    props?: Props,
+    ctrl?: Controller
+  ): ComponentInstance<Props, Controller, Methods>;
+
+  /**
    * Use to define a new component which extends another component, meaning it will
    * inherit its prototye and stubs.
    *
@@ -634,9 +642,9 @@ declare module "wallace" {
     Controller = any,
     Methods extends object = {}
   >(
-    base: Uses<Props, Controller, Methods>,
+    base: ComponentFunction<Props, Controller, Methods>,
     componentFunc?: ComponentFunction<Props, Controller, Methods>
-  ): Uses<Props, Controller, Methods>;
+  ): ComponentFunction<Props, Controller, Methods>;
 
   /**
    * *Replaces* element with an instance of componentDefinition and renders it.
@@ -645,7 +653,7 @@ declare module "wallace" {
    */
   export function mount<Props = any, Controller = any, Methods extends object = {}>(
     element: string | HTMLElement,
-    componentDefinition: Uses<Props, Controller, Methods>,
+    componentDefinition: ComponentFunction<Props, Controller, Methods>,
     props?: Props,
     ctrl?: Controller
   ): ComponentInstance<Props, Controller, Methods>;

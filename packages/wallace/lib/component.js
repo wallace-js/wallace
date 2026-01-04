@@ -142,11 +142,6 @@ export function initConstructor(ComponentFunction, BaseComponentFunction) {
       return proto;
     }
   });
-  ComponentFunction.create = function (props, ctrl) {
-    const component = new ComponentFunction();
-    component.render(props, ctrl);
-    return component;
-  };
   ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
   return ComponentFunction;
 }

@@ -1,7 +1,8 @@
 export { defineComponent } from "./component";
 export { extendComponent } from "./extend";
 export { mount } from "./mount";
-export { nestComponent } from "./nest";
+export { createComponent } from "./createComponent";
+export { nestComponent } from "./nestComponent";
 export { saveRef } from "./refs";
 export { KeyedRepeater } from "./repeaters/keyed";
 export { SequentialRepeater } from "./repeaters/sequential";
