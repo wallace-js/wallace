@@ -159,6 +159,22 @@ class OnEventDirective extends Directive {
   }
 }
 
+class PartDirective extends Directive {
+  static attributeName = "part";
+  static allowOnNested = true;
+  static allowNull = true;
+  static allowExpression = false;
+  static requireQualifier = true;
+  static help = `
+    Saves a reference to a part of a component which can be updated.
+
+    /h <div part:title></div>
+    `;
+  apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.setPart(qualifier);
+  }
+}
+
 class PropsDirective extends Directive {
   static attributeName = "props";
   static allowOnNested = true;
@@ -263,6 +279,7 @@ export const builtinDirectives = [
   IfDirective,
   ItemsDirective,
   OnEventDirective,
+  PartDirective,
   PropsDirective,
   RefDirective,
   ShowDirective,

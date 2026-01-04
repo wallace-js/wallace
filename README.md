@@ -383,16 +383,14 @@ But there's an issue: the entire component updates every time you type in the te
 
 Fortunately, this is very easy to resolve in Wallace, thanks to refs.
 
-### Refs
+### Parts
 
-Wallace "refs" are more sophisticated than React's. As well as giving you direct access to DOM elements, you can use them to update sections of a component.
-
-We're going to combine this with reading the arguments passed to the `watch` callback to only update the `span` as we type in the text box:
+Parts let you update sections of a component. Let's combine this with reading the arguments passed to the `watch` callback to only update the `span` as we type in the text box:
 
 ```tsx
 const CounterList: Uses<iCounterList> = ({ counters, things }) => (
   <div>
-    <span ref:things>Total {things}: </span>
+    <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
     <div>
       <Counter.repeat items={counters} />
@@ -404,7 +402,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
 CounterList.methods = {
   render(props) {
     this.props = watch(props, (target, key) => {
-      key === 'things' ? this.refs.things.update() : this.update();
+      key === 'things' ? this.part.things.update() : this.update();
     });
     this.update();
   }
@@ -413,10 +411,10 @@ CounterList.methods = {
 
 > Typing in the text box only updates the span with things.
 
-You can also access the raw DOM element, or nested component:
+You can also access the raw DOM element, or nested component using `ref`:
 
 ```
-this.refs.things.node
+<span ref:things>
 ```
 
 However, you probably don't want to do access the DOM element this way. If you do need to access the element (for the handful of valid reasons you might want to) then you are better using the `apply` directive:
@@ -705,7 +703,7 @@ const CounterList: Uses<iCounterList, Controller, Methods> = (
   { self }
 ) => (
   <div>
-    <span ref:things>Total {things.value}: </span>
+    <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
     <div>
       <Counter.repeat items={counters} />

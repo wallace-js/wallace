@@ -145,8 +145,12 @@ Component instances have the following fields:
 
 - `props` the data for this component instance.
 - `ctrl` the controller object.
-- `refs` an object with references to node.
 - `el` the component instance's root element.
+
+Optionally:
+
+- `ref` an object containing named elements or nested components.
+- `part` an object containing named parts.
 
 Both `props` and `ctrl` are set during the `render` method before calling `update`.
 There are no restrictions on types but typically:
@@ -555,8 +559,7 @@ declare module "wallace" {
     Methods extends object = {}
   > = ComponentFunction<Props, Controller, Methods>;
 
-  export interface Ref {
-    node: HTMLElement | ComponentInstance;
+  export interface Part {
     update(): void;
   }
 
@@ -571,7 +574,8 @@ declare module "wallace" {
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
-    refs: { [key: string]: Ref };
+    ref: { [key: string]: HTMLElement | ComponentInstance };
+    part: { [key: string]: Part };
     base: Component<Props, Controller>;
   } & Component<Props, Controller> &
     Methods;
@@ -877,6 +881,23 @@ interface DirectiveAttributes extends AllDomEvents {
   items?: MustBeExpression;
 
   /**
+   * ## Wallace directive: part
+   *
+   * Saves a reference to part of a component allowing you to update it independently.
+   *
+   * ```
+   * <div part:title>
+   *   {name}
+   * </div>
+   * ```
+   *
+   * ```
+   * component.part.title.update();
+   * ```
+   */
+  part?: null;
+
+  /**
    * ## Wallace directive: props
    *
    * Specifies props for a nested component.
@@ -887,10 +908,7 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: ref
    *
-   * Saves a reference to a node allowing you to:
-   *
-   * 1. Access the element or component as `ref.node`
-   * 2. Update the all nested elements using `ref.update()`.
+   * Saves a reference to an element or nested component.
    *
    * ```
    * <div ref:title>
@@ -899,11 +917,8 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    *
    * ```
-   * component.refs.title.update();
-   * component.refs.title.node.textContent = 'hello';
+   * component.ref.title.textContent = 'hello';
    * ```
-   *
-   * Requires a qualifier, but you lose the tooltip in that format.
    */
   ref?: null;
 
@@ -977,8 +992,9 @@ declare namespace JSX {
      * - `if` excludes an element from the DOM.
      * - `items` set items for repeated component, must be an array of props.
      * - `on[EventName]` creates an event handler (note the code is copied)
+     * - `part:xyz` saves a reference to part of a component so it can be updated
      * - `props` specifes props for a nested components.
-     * - `ref:xyz` saves a reference to node, allowing partial updates or access to element/component.
+     * - `ref:xyz` saves a reference to an element or nested omponent.
      * - `show` sets and element or component's hidden property.
      * - `style:xyz` sets a specific style property.
      * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class

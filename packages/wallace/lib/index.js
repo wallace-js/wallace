@@ -4,6 +4,7 @@ export { mount } from "./mount";
 export { createComponent } from "./createComponent";
 export { nestComponent } from "./nestComponent";
 export { saveRef } from "./refs";
+export { savePart } from "./part";
 export { KeyedRepeater } from "./repeaters/keyed";
 export { SequentialRepeater } from "./repeaters/sequential";
 export { Router, route } from "./router";

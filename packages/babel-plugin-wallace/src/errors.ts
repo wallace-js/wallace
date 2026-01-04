@@ -46,6 +46,7 @@ export const ERROR_MESSAGES = {
   VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
     "Can only define one visibility toggle on element.",
   REF_ALREADY_DEFINED: "Ref already defined on element.",
+  PART_ALREADY_DEFINED: "Part already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
   PROPS_ALREADY_DEFINED: "Props already defined on element.",
   ITEMS_ALREADY_DEFINED: "Items already defined on element.",
@@ -53,6 +54,8 @@ export const ERROR_MESSAGES = {
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
   NO_ATTRIBUTES_ON_NESTED_CLASS: "Attributes not allowed on nested class elements.",
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
+  PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
+    "Parts must be unique within each component.",
   REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",
   REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
   REPEAT_NOT_ALLOWED_ON_ROOT: "Repeated component not allowed on root element.",

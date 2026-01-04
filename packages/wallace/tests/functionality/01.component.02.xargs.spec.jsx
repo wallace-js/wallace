@@ -80,7 +80,7 @@ describe("Xargs", () => {
         <button>Test</button>
       </div>`
     );
-    component.refs.btn.node.click();
+    component.ref.btn.click();
     expect(args).toEqual([4, 3]);
   });
 });
@@ -152,7 +152,7 @@ describe("Xargs point to correct objects", () => {
     );
     testMount(Foo);
     const component = testMount(Foo);
-    component.refs.btn.node.click();
+    component.ref.btn.click();
     expect(String(e)).toBe("[object HTMLButtonElement]");
   });
 
@@ -166,7 +166,7 @@ describe("Xargs point to correct objects", () => {
       </div>
     );
     const component = testMount(Foo);
-    component.refs.btn.node.click();
+    component.ref.btn.click();
     expect(String(e)).toBe("[object MouseEvent]");
   });
 

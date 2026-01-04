@@ -82,6 +82,7 @@ export class ExtractedNode {
   #stubName: string | undefined;
   #visibilityToggle: VisibilityToggle | undefined;
   #ref: string | undefined;
+  #part: string | undefined;
   #props: Expression | undefined;
   #forExpression: Expression | undefined;
   #forVariable: string | undefined;
@@ -155,6 +156,15 @@ export class ExtractedNode {
   }
   getRef(): string | undefined {
     return this.#ref;
+  }
+  setPart(name: string) {
+    if (this.#part) {
+      error(this.path, ERROR_MESSAGES.PART_ALREADY_DEFINED);
+    }
+    this.#part = name;
+  }
+  getPart(): string | undefined {
+    return this.#part;
   }
   setRepeatExpression(expression: Expression) {
     if (this.#repeatExpression) {
