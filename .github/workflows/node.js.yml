@@ -24,5 +24,5 @@ jobs:
       - run: npm ci
       - run: npm run prettier:check
       - run: npm run build --if-present
-      - run: npm test:canary
-      - run: npm test
+      - run: npm run test:canary
+      - run: npm run test
