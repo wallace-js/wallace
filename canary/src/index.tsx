@@ -1,4 +1,4 @@
-import { mount, Uses } from "wallace";
+import { mount, Uses, Router } from "wallace";
 
 interface iGreeting {
   msg: string;
@@ -11,4 +11,5 @@ const Greeting: Uses<iGreeting> = ({ msg, name }) => (
   </div>
 );
 
+console.log(Router);
 mount("main", Greeting, { msg: "hello", name: "Wallace" });
