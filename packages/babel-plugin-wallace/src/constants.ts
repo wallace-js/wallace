@@ -61,14 +61,8 @@ export enum COMPONENT_PROPERTIES {
 }
 
 export enum SPECIAL_SYMBOLS {
-  elementStash = "_e",
-  objectStash = "_s",
-  previous = "_p",
-  template = "_t",
-  refs = "refs",
   noLookup = "__",
-  patch = "patch",
-  ctrl = "ctrl"
+  patch = "patch"
 }
 
 export const DOM_EVENTS = [
