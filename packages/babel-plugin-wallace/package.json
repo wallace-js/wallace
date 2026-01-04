@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-wallace",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "author": "Andrew Buchan",
   "description": "The babel plugin for wallace",
   "license": "ISC",
