@@ -1,3 +1,4 @@
+import { createComponent } from "wallace";
 import { testMount } from "../utils";
 
 describe("Component create", () => {
@@ -11,7 +12,8 @@ describe("Component create", () => {
     );
     const component = testMount(Foo);
     const ctrl = { name: "Wallace" };
-    component.el.innerHTML = Bar.create({ name: "William" }, ctrl).el.innerHTML;
+    const child = createComponent(Bar, { name: "William" }, ctrl);
+    component.el.innerHTML = child.el.innerHTML;
     expect(component).toRender(`<div><span>William</span><span>Wallace</span></div>`);
   });
 });

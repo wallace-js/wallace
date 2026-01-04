@@ -865,11 +865,13 @@ interface RouteData {
 You can also configure attributes for the `div` and a custom error handler for not found pages etc:
 
 ```tsx
+import { createComponent } from 'wallace';
+
 const Error (message) => <div class="error">{message}</div>;
 
 mount("main", Router, {
   atts: { id: "router", class: "danger" },
-  error: (error, router) => (router.mount(Error.create(error.message)),
+  error: (error, router) => (router.mount(createComponent(Error, error.message)),
   routes: []
 });
 ```
