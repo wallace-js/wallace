@@ -116,7 +116,13 @@ function buildConstructor(
 
   if (componentDefinition.refs.length > 0) {
     chainedConstExpressions.push(
-      assignAndDeclare(COMPONENT_PROPERTIES.refs, emptyObject())
+      assignAndDeclare(COMPONENT_PROPERTIES.ref, emptyObject())
+    );
+  }
+
+  if (componentDefinition.parts.length > 0) {
+    chainedConstExpressions.push(
+      assignAndDeclare(COMPONENT_PROPERTIES.part, emptyObject())
     );
   }
 

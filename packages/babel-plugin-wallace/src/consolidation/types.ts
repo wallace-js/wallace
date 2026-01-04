@@ -22,7 +22,7 @@ export interface ComponentWatch {
   address: NodeAddress;
 }
 
-export interface Ref {
+export interface Part {
   callExpression: CallExpression;
   address: NodeAddress;
   name: string;

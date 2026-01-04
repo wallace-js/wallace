@@ -7,6 +7,7 @@ export enum IMPORTABLES {
   getStub = "getStub",
   nestComponent = "nestComponent",
   saveRef = "saveRef",
+  savePart = "savePart",
   stashMisc = "stashMisc",
   onEvent = "onEvent",
   SequentialRepeater = "SequentialRepeater"
@@ -46,7 +47,8 @@ export enum EVENT_CALLBACK_ARGS {
 export enum COMPONENT_PROPERTIES {
   ctrl = "ctrl",
   props = "props",
-  refs = "refs",
+  ref = "ref",
+  part = "part",
   root = "el",
   elements = "_e",
   watchLength = "_l",

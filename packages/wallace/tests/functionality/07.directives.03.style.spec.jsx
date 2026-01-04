@@ -12,10 +12,10 @@ describe("Style directive", () => {
     expect(component).toRender(`
       <div style="color: red;">leopard</div>
     `);
-    expect(component.refs.target.node.style.color).toBe("red");
+    expect(component.ref.target.style.color).toBe("red");
     color = "green";
     component.update();
-    expect(component.refs.target.node.style.color).toBe("green");
+    expect(component.ref.target.style.color).toBe("green");
   });
 
   test("leaves existing styles alone", () => {
@@ -29,11 +29,11 @@ describe("Style directive", () => {
     expect(component).toRender(`
       <div style="width: 100px; color: red;">leopard</div>
     `);
-    expect(component.refs.target.node.style.color).toBe("red");
-    expect(component.refs.target.node.style.width).toBe("100px");
+    expect(component.ref.target.style.color).toBe("red");
+    expect(component.ref.target.style.width).toBe("100px");
     color = "green";
     component.update();
-    expect(component.refs.target.node.style.width).toBe("100px");
+    expect(component.ref.target.style.width).toBe("100px");
   });
 
   // TODO: allow this?
@@ -45,6 +45,6 @@ describe("Style directive", () => {
   //     </div>
   //   );
   //   const component = testMount(Leopard);
-  //   expect(component.refs.target.node.style.color).toBe("red");
+  //   expect(component.ref.target.style.color).toBe("red");
   // });
 });

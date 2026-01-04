@@ -123,7 +123,7 @@ expect.extend({
    * @param {string} expectedHtml The expected HTML.
    *
    */
-  async toRender(component, expectedHtml) {
+  toRender(component, expectedHtml) {
     const received = tidyHTML(component.el.outerHTML);
     const expected = tidyHTML(expectedHtml);
     const pass = received === expected;

@@ -13,7 +13,7 @@ import {
 } from "@babel/types";
 import { Component } from "../models";
 import { IMPORTABLES } from "../constants";
-import { ComponentWatch, NodeAddress, Ref } from "./types";
+import { ComponentWatch, NodeAddress, Part } from "./types";
 import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils";
 
 /**
@@ -28,7 +28,8 @@ export class ComponentDefinitionData {
   dynamicElements: { [key: number]: Expression } = {};
   baseComponent: Expression | undefined;
   lookups: { [key: string]: FunctionExpression } = {};
-  refs: Array<Ref> = [];
+  refs: string[] = [];
+  parts: Array<Part> = [];
   #dynamicElementKey: number = -1;
   #miscStashKey: number = 0;
   #lookupKeys: Array<String> = [];

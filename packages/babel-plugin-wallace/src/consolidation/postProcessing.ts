@@ -8,7 +8,7 @@ import { ComponentDefinitionData } from "./ComponentDefinitionData";
  * Must be done after processing watches as we need to know how many watches to skip.
  */
 export function postProcessing(componentDefinition: ComponentDefinitionData) {
-  const { watches, refs } = componentDefinition;
+  const { watches, parts } = componentDefinition;
   const nestedCounts = {};
   watches.forEach((watch, index) => {
     nestedCounts[index] = watches
@@ -20,12 +20,15 @@ export function postProcessing(componentDefinition: ComponentDefinitionData) {
       watch.shieldInfo.skipCount = nestedCounts[index];
     }
   });
-  refs.forEach(ref => {
-    // need to find start and end, bearing in mind the ref may not have a watch.
+  parts.forEach(part => {
+    // need to find start and end, bearing in mind the part may not have a watch.
     const covered = w =>
-      ref.address == w.address || arrayStartsWith(ref.address, w.address);
+      part.address == w.address || arrayStartsWith(part.address, w.address);
     const start = watches.findIndex(covered) || 0;
     const end = watches.filter(covered).length + start;
-    ref.callExpression.arguments.push(t.numericLiteral(start), t.numericLiteral(end));
+    part.callExpression.arguments.push(
+      t.numericLiteral(start || 0),
+      t.numericLiteral(end || 0)
+    );
   });
 }

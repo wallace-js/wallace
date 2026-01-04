@@ -119,9 +119,9 @@ describe("Router customisation", () => {
     ));
     MyRouter.methods = {
       mount(component) {
-        const div = this.refs.div;
-        div.node.innerHTML = "";
-        div.node.appendChild(component.el);
+        const div = this.ref.div;
+        div.innerHTML = "";
+        div.appendChild(component.el);
       }
     };
 

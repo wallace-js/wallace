@@ -133,23 +133,39 @@ function addToggleCallbackStatement(
   });
 }
 
+function processPart(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  name: string
+) {
+  const otherParts = componentDefinition.parts.map(r => r.name);
+  if (otherParts.includes(name)) {
+    error(node.path, ERROR_MESSAGES.PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
+  }
+  // Note: we modify this call expression in post processing.
+  const callExpression = componentDefinition.wrapDynamicElementCall(
+    node.elementKey,
+    IMPORTABLES.savePart,
+    [t.thisExpression(), identifier(COMPONENT_PROPERTIES.part), t.stringLiteral(name)]
+  );
+  const part = { name, callExpression, address: node.address };
+  componentDefinition.parts.push(part);
+}
+
 function processRef(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
   name: string
 ) {
-  const otherRefs = componentDefinition.refs.map(r => r.name);
-  if (otherRefs.includes(name)) {
+  if (componentDefinition.refs.includes(name)) {
     error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
   }
   // Note: we modify this call expression in post processing.
-  const callExpression = componentDefinition.wrapDynamicElementCall(
-    node.elementKey,
-    IMPORTABLES.saveRef,
-    [t.thisExpression(), identifier(COMPONENT_PROPERTIES.refs), t.stringLiteral(name)]
-  );
-  const ref = { name, callExpression, address: node.address };
-  componentDefinition.refs.push(ref);
+  componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.saveRef, [
+    identifier(COMPONENT_PROPERTIES.ref),
+    t.stringLiteral(name)
+  ]);
+  componentDefinition.refs.push(name);
 }
 
 // TODO: break this up.
@@ -183,6 +199,7 @@ export function processNodes(
     }
     const visibilityToggle = node.getVisibilityToggle();
     const ref = node.getRef();
+    const part = node.getPart();
     const repeatInstruction = node.getRepeatInstruction();
     const createWatch =
       node.watches.length > 0 ||
@@ -196,7 +213,11 @@ export function processNodes(
     // TODO: some of these should not save the element...
     // restructure.
     const shouldSaveElement =
-      createWatch || ref || node.eventListeners.length > 0 || node.hasConditionalChildren;
+      createWatch ||
+      ref ||
+      part ||
+      node.eventListeners.length > 0 ||
+      node.hasConditionalChildren;
 
     ensureToggleTargetsHaveTriggers(node);
 
@@ -373,6 +394,7 @@ export function processNodes(
       }
 
       if (ref) processRef(componentDefinition, node, ref);
+      if (part) processPart(componentDefinition, node, part);
 
       if (node.eventListeners.length > 0) {
         processEventListeners(componentDefinition, component, node);
