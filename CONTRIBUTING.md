@@ -1,5 +1,7 @@
 # Contributor docs
 
+Note that these get out of date very quickly.
+
 ## Quick start
 
 ### Installation
@@ -32,6 +34,9 @@ npm test
 
 However this runs all the tests, and during development you may want to restrict this. See the section on tests below.
 
+There's currently an issue with jest leaking output from previous tests, which apparently
+isn't fixable, so the best option may be to switch to vitest or something.
+
 ### Using the playground
 
 The **playground** package allows you to experiment without committing changes, as its **src** directory is gitignored.
@@ -52,7 +57,10 @@ User projects requires two packages to work:
 - **wallace** - the library with definitions you import into a project.
 - **babel-plugin-wallace** - the babel plugin which transforms the source code.
 
-Note that `wallace` always requires `babel-plugin-wallace` at the exact same version, so a user project would only need to require `wallace`
+Note that:
+
+1.  `wallace` requires `babel-plugin-wallace` so a user project would only specify `wallace` in their **package.json** file.
+2.  `wallace` may end up some versions ahead of `babel-plugin-wallace`, but Lerna ensures `wallace` gets updated if `babel-plugin-wallace` changes.
 
 ```bash
 npm i wallace@0.0.7
@@ -587,7 +595,7 @@ test('Descriptive name', () => {
     </div>
   );
   const component = load(Foo);
-  const btn = component.refs.btn;
+  const btn = component.ref.btn;
   expect(btn.disabled).toBe(false);
   disabled = true;
   component.update();

@@ -381,7 +381,7 @@ The `bind` directive normally responds to the `change` event, but we used a qual
 
 But there's an issue: the entire component updates every time you type in the text box. Even though there's no DOM change in the counters, that's still a load of unnecessary churn. You'd never notice it in a small demo, but might in a larger app.
 
-Fortunately, this is very easy to resolve in Wallace, thanks to refs.
+Fortunately, this is very easy to resolve in Wallace, thanks to parts.
 
 ### Parts
 
@@ -579,7 +579,7 @@ class Controller {
   ) {
     this.root = root;
     root.props = watch(props, (target, key) => {
-      key === 'things' ? root.refs.things.update() : root.update();
+      key === 'things' ? root.part.things.update() : root.update();
     });
   }
   applyToAll(count) {
@@ -643,7 +643,7 @@ class Controller {
     this.counters = props.counters;
     root.props = {
       counters: watch(this.counters, () => root.update()),
-      things: watch(props.things, () => root.refs.things.update())
+      things: watch(props.things, () => root.part.things.update())
     };
   }
   /*...*/
@@ -678,7 +678,7 @@ class Controller {
     this.counters = props.counters;
     root.props = {
       counters: protect(this.counters),
-      things: watch(props.things, () => root.refs.things.update())
+      things: watch(props.things, () => root.part.things.update())
     };
   }
   /*...*/
