@@ -36,9 +36,9 @@ And its DOM operations are pretty fast too. Here is the time\* in milliseconds t
 
 ![Bar chart of times to create 1000 rows](./assets/run1k.png)
 
-But you rarely need _fast_. You just need to avoid _slow_ - which creeps in on more complex scenarios than benchmark apps. And the only _real_ protection against that is **freedom**.
+But benchmarks aren't always indicative of real-world performance, which is really limited by how much control you have over operations - and that's where Wallace really shines (see **freedom** below).
 
-_\* Times are taken from local runs tested on v0.6.0, using non-keyed implementations of other frameworks where available. Will submit for an official run soon, which might change results slightly, but bundle sizes would be identical._
+_\* Times are taken from local runs using non-keyed implementations of other frameworks where available. Will submit for an official run soon, which might change results slightly, but bundle sizes would be identical._
 
 ### 2. Productivity
 
@@ -273,25 +273,19 @@ Components like `Counter` only display data and fire events, and should be state
 
 Components like `CounterList` are used to coordinate updates following changes to state/data, and making these stateless (as they are in React) means you need to use awful patterns like hooks to do anything.
 
-With Wallace you simply override the render method and create a callback which updates that instance, and pass that wherever it's needed:
+With Wallace you simply override the render method and create a callback which updates that instance, and pass that wherever it's needed, for example:
 
 ```tsx
 CounterList.prototype.render = function (props) {
-  const callback = () => this.update(); // pass this to where it's needed.
-  this.props = props;
+  const update = () => this.update();
+  this.props = props.map(c => {...c, update});
   this.update();
 };
 ```
 
-You _could_ modify the props to add that callback to each counter:
+But that's a really ugly React-like approach which involves mutating props and their interface. Wallace has much cleaner approach using a "controller" as we'll see later.
 
-```tsx
-this.props = watch(props, () => this.update());
-```
-
-But that's a really ugly React style pattern which involves changing the props interface. Wallace has much cleaner approach as we'll see later.
-
-There's also a neater and safer way to set properties on the prototype, which has the added bonus of not accidentally deleting other properties:
+Wallace also provides a neater and safer way to set properties on the prototype:
 
 ```tsx
 CounterList.methods = {
@@ -299,11 +293,12 @@ CounterList.methods = {
     this.props = props;
     this.update();
   },
-  otherMethod () {...}
+  otherMethod () {}
 };
-```
 
-> If you did `CounterList.prototype = {...}` you'd delete `update`.
+// Doesn't delete existing properties
+typeof CounterList.methods.update; // function
+```
 
 ### Reactivity
 
