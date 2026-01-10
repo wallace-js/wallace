@@ -4,7 +4,7 @@
 
 # Wallace
 
-_The tiny framework that brings you FREEEDOM!!!_
+An <strong><i>insanely</i></strong> small, fast, intuitive and extendable framework for the front end.
 
 ## About
 
@@ -293,7 +293,7 @@ CounterList.methods = {
     this.props = props;
     this.update();
   },
-  otherMethod () {}
+  otherMethod() {}
 };
 
 // Doesn't delete existing properties
