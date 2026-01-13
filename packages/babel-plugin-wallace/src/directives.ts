@@ -140,6 +140,23 @@ class ItemsDirective extends Directive {
   }
 }
 
+class KeyDirective extends Directive {
+  static attributeName = "key";
+  static allowString = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  static help = `
+    Specifies the key for a repeated node. Can either specify a function:
+    /h <Foo.repeat props={} key={(x) => x.id}></div>
+    Or a string:
+    /h <Foo.repeat props={} key="id"></div>
+    If specifying a key, you may not specify a pool.
+    `;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    node.setRepeatKey(value.expression || value.value);
+  }
+}
+
 class OnEventDirective extends Directive {
   static attributeName = "on*";
   static allowString = true;
@@ -278,6 +295,7 @@ export const builtinDirectives = [
   HtmlDirective,
   IfDirective,
   ItemsDirective,
+  KeyDirective,
   OnEventDirective,
   PartDirective,
   PropsDirective,

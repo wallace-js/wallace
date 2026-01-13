@@ -1,20 +1,5 @@
 import { trimChildren } from "../utils";
 
-/*
- * Gets a component from the pool.
- */
-function getComponent(pool, componentDefinition, ctrl, key, props) {
-  let component;
-  if (pool.hasOwnProperty(key)) {
-    component = pool[key];
-  } else {
-    component = new componentDefinition();
-    pool[key] = component;
-  }
-  component.render(props, ctrl);
-  return component;
-}
-
 /**
  * Pulls an item forward in an array, to replicate insertBefore.
  * @param {Array} arr
@@ -49,7 +34,11 @@ const proto = KeyedRepeater.prototype;
  * @param {Object} item - The item which will be passed as props.
  */
 proto.getOne = function (item, ctrl) {
-  return getComponent(this.pool, this.def, ctrl, this.keyFn(item), item);
+  const key = this.keyFn(item),
+    pool = this.pool;
+  component = pool[key] || (pool[key] = new this.def());
+  component.render(item, ctrl);
+  return component;
 };
 
 /**
@@ -60,15 +49,13 @@ proto.getOne = function (item, ctrl) {
  * @param {Array} items - Array of items which will be passed as props.
  */
 proto.patch = function (e, items, ctrl) {
-  // Attempt to speed up by reducing lookups. Does this even do anything?
-  // Does webpack undo this/do it for for me? Does the engine?
-  const pool = this.pool;
-  const componentDefinition = this.def;
-  const keyFn = this.keyFn;
-  const childNodes = e.childNodes;
-  const itemsLength = items.length;
-  const oldKeySequence = this.keys;
-  const newKeys = [];
+  const pool = this.pool,
+    componentDefinition = this.def,
+    keyFn = this.keyFn,
+    childNodes = e.childNodes,
+    itemsLength = items.length,
+    oldKeySequence = this.keys,
+    newKeys = [];
   let item,
     key,
     component,
@@ -76,7 +63,8 @@ proto.patch = function (e, items, ctrl) {
   for (let i = 0; i < itemsLength; i++) {
     item = items[i];
     key = keyFn(item);
-    component = getComponent(pool, componentDefinition, ctrl, key, item);
+    component = pool[key] || (pool[key] = new componentDefinition());
+    component.render(item, ctrl);
     newKeys.push(key);
     if (i > childElementCount) {
       e.appendChild(component.el);
