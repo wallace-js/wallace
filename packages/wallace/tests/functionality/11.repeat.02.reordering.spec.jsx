@@ -47,12 +47,24 @@ describe.each([
     `);
   });
 
-  test("Removing items works", () => {
+  test("Removing items from start works", () => {
     const component = testMount(Container, [{ i: 5 }, { i: 2 }, { i: 3 }, { i: 8 }]);
     component.render([{ i: 2 }, { i: 8 }]);
     expect(component).toRender(`
       <div>
         <div>2</div>
+        <div>8</div>
+      </div>
+    `);
+  });
+
+  test("Removing items inside works", () => {
+    const component = testMount(Container, [{ i: 5 }, { i: 2 }, { i: 3 }, { i: 8 }]);
+    component.render([{ i: 5 }, { i: 3 }, { i: 8 }]);
+    expect(component).toRender(`
+      <div>
+        <div>5</div>
+        <div>3</div>
         <div>8</div>
       </div>
     `);
@@ -89,9 +101,9 @@ describe.each([
       { i: 44 },
       { i: 6 },
       { i: 2 },
-      { i: 8 },
-      { i: 5 },
-      { i: 6 }
+      { i: 18 },
+      { i: 83 },
+      { i: 48 }
     ]);
     component.render([{ i: 2 }, { i: 7 }, { i: 11 }, { i: 8 }, { i: 23 }]);
     expect(component).toRender(`

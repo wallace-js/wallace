@@ -1,18 +1,3 @@
-import { trimChildren } from "../utils";
-
-/**
- * Pulls an item forward in an array, to replicate insertBefore.
- * @param {Array} arr
- * @param {any} item
- * @param {Int} to
- */
-function pull(arr, item, to) {
-  const position = arr.indexOf(item);
-  if (position != to) {
-    arr.splice(to, 0, arr.splice(position, 1)[0]);
-  }
-}
-
 /**
  * Repeats nested components, reusing items based on key.
  *
@@ -22,8 +7,8 @@ function pull(arr, item, to) {
 export function KeyedRepeater(componentDefinition, keyFn) {
   this.def = componentDefinition;
   this.keyFn = keyFn;
-  this.keys = []; // keys
-  this.pool = {}; // pool of component instances
+  this.keys = []; // array of keys as last set.
+  this.pool = {}; // pool of component instances.
 }
 const proto = KeyedRepeater.prototype;
 
@@ -47,6 +32,7 @@ proto.getOne = function (item, ctrl) {
  *
  * @param {DOMElement} e - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
+ * @param {any} ctrl - The parent item's controller.
  */
 proto.patch = function (e, items, ctrl) {
   const pool = this.pool,
@@ -54,25 +40,35 @@ proto.patch = function (e, items, ctrl) {
     keyFn = this.keyFn,
     childNodes = e.childNodes,
     itemsLength = items.length,
-    oldKeySequence = this.keys,
-    newKeys = [];
+    previousKeys = this.keys,
+    offset = previousKeys.length - itemsLength,
+    newKeys = [],
+    toRemove = new Set(previousKeys);
   let item,
+    el,
     key,
     component,
-    childElementCount = oldKeySequence.length + 1;
-  for (let i = 0; i < itemsLength; i++) {
+    anchor = null,
+    i = itemsLength - 1;
+  // Working backwards saves us having to track moves.
+  while (i >= 0) {
     item = items[i];
     key = keyFn(item);
+    newKeys.push(key);
+    toRemove.delete(key);
     component = pool[key] || (pool[key] = new componentDefinition());
     component.render(item, ctrl);
-    newKeys.push(key);
-    if (i > childElementCount) {
-      e.appendChild(component.el);
-    } else if (key !== oldKeySequence[i]) {
-      e.insertBefore(component.el, childNodes[i]);
-      pull(oldKeySequence, key, i);
+    el = component.el;
+    if (key !== previousKeys[i + offset]) {
+      e.insertBefore(el, anchor);
     }
+    anchor = el;
+    i--;
   }
-  this.keys = newKeys;
-  trimChildren(e, childNodes, itemsLength);
+  let toStrip = toRemove.size;
+  while (toStrip > 0) {
+    e.removeChild(childNodes[0]);
+    toStrip--;
+  }
+  this.keys = newKeys.reverse();
 };
