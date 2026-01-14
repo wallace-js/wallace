@@ -1,4 +1,4 @@
-import { mount, watch } from "wallace";
+import { mount } from "wallace";
 
 const buildChart = (ctx, data) => {
   new Chart(ctx, {
@@ -36,7 +36,7 @@ ChartCanvas.methods = {
     this.update();
     // The canvas isn't attached to the DOM yet, so we use a crude timeout.
     setTimeout(() => {
-      buildChart(this.refs.canvas.node, this.props);
+      buildChart(this.ref.canvas, this.props);
     }, 100);
   },
   sortData(data) {
@@ -62,6 +62,7 @@ const ChartList = charts => (
 
 ChartList.methods = {
   render(props) {
+    console.log(888);
     this.props = getCharts(props);
     this.update();
   }
@@ -80,11 +81,13 @@ const getCharts = data => {
       }
     }
   }
+  console.log(6666);
   return Object.values(charts);
 };
 
 fetch("benchmark-data.json")
   .then(res => res.json())
   .then(data => {
+    console.log(data);
     mount("main", ChartList, data);
   });
