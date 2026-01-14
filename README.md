@@ -205,6 +205,25 @@ const CounterList = (counters) => (
 );
 ```
 
+
+This form reuses components sequentially, which may cause issues with CSS animations
+and focus, in which case you should use a keyed repeater by passing `key` which can
+be a string or a function:
+
+```tsx
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} key="id"/>
+  </div>
+);
+
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} key={(x) => x.id}/>
+  </div>
+);
+```
+
 But you don't need to remember all this. JSX elements have a tool tip which reminds you of syntax rules and lists the available directives, which have their own tool tips detailing their usage:
 
 ![Tool tip on JSX element](./assets/div-tooltip.jpg)
