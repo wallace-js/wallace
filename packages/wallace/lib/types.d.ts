@@ -11,12 +11,13 @@
   1. Components
   2. JSX
   3. Nesting
-  4. Directives
-  5. Controllers
-  6. Inheritance
-  7. Stubs
-  8. TypeScript
-  9. Helpers
+  4. Repeating
+  5. Directives
+  6. Controllers
+  7. Inheritance
+  8. Stubs
+  9. TypeScript
+ 10. Helpers
 
 For more detailed documentation go to https://github.com/wallace-js/wallace
 
@@ -179,7 +180,7 @@ Other than that, its standard JSX, except for three special cases:
 
 ## 3. Nesting
 
-To nest or repeat components use its name followed by `.nest` or `.repeat`:
+To nest a component use its name followed by `.nest` and pass `props` if needed:
 
 ```tsx
 const Task = (task) => (<div></div>);
@@ -200,11 +201,46 @@ const TaskList = (tasks) => (
 
 Notes:
 
- - You cannot use nest or repeat on the root element.
- - Repeat must be the only child element under its parent.
- - The `props` expects an array on repeat (See **TypeScript** below) 
+ - You cannot use nest on the root element.
 
-## 4. Directives
+## 4. Repeating
+
+To repeat a component use its name followed by `.repeat` and pass `items`:
+
+```tsx
+const Task = (task) => (<div></div>);
+
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} />
+  </div>
+);
+```
+
+This form reuses components sequentially, which may cause issues with CSS animations
+and focus, in which case you should use a keyed repeater by passing `key` which can
+be a string or a function:
+
+```tsx
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} key="id"/>
+  </div>
+);
+
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} key={(x) => x.id}/>
+  </div>
+);
+```
+
+Notes:
+
+ - You cannot repeat on the root element.
+ - Repeat must be the only child element under its parent.
+
+## 5. Directives
 
 Directives are attributes with special behaviours. 
 
@@ -217,7 +253,7 @@ temporarily change it to something `class x:danger`.
 
 You can define your own directives in your babel config.
 
-## 5. Controllers
+## 6. Controllers
 
 A controller is just an object you create which gets passed down to every nested
 component, making it a convenient place to handle:
@@ -268,7 +304,7 @@ TaskList.methods = {
 };
 ```
 
-## 6. Inheritance
+## 7. Inheritance
 
 You can creat new component defintion by extending another one, either preserving the
 base's structure, or overriding it:
@@ -284,7 +320,7 @@ const Child2 = extendComponent(Parent, ({name}) => <h3>{name}</h3>);
 
 Either way the new component definition inherits the parent *prototype* and *stubs*.
 
-## 7. Stubs
+## 8. Stubs
 
 Stubs are named placeholders for nested components which are requested in the JSX:
 
@@ -317,7 +353,7 @@ Notes:
  - Stubs are separate components, so cannot access methods on the containing component
    through `self` (use the controller for that kind of thing).
 
-## 8. TypeScript
+## 9. TypeScript
 
 The main type is `Uses` which must be placed right after the comonent name:
 
@@ -341,7 +377,7 @@ const Task: Uses<null> = () => <div>Hello</div>;
 
 ### Props
 
-TypeScript will ensure you pass correct props during mounting or nesting:
+TypeScript will ensure you pass correct props during mounting, nesting and repeating:
 
 ```
 const TaskList: Uses<iTask[]> = (tasks) => (
@@ -353,6 +389,8 @@ const TaskList: Uses<iTask[]> = (tasks) => (
     </div>
   </div>
 );
+
+mount("main", TaskList, [{test: 'foo'}]);
 ```
 
 ### Controller
@@ -439,7 +477,7 @@ Wallace defines some other types you may use:
     constructor, not a class)
  - `ComponentInstance<Props, Controller, Methods>` - a component instance.
 
-## 9. Helpers
+## 10. Helpers
 
 Each of these has their own JSDoc, we just lsit them here.
 
@@ -517,10 +555,12 @@ declare module "wallace" {
     }): JSX.Element;
     repeat?({
       items,
+      key,
       show,
       hide
     }: {
       items: Array<Props>;
+      key: string | ((item: Props) => any);
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
@@ -880,6 +920,15 @@ interface DirectiveAttributes extends AllDomEvents {
    */
   items?: MustBeExpression;
 
+  /** ## Wallace directive: key
+   *
+   * Specifies a key for repeated components, creating an association between the key
+   * and the nested component.
+   *
+   * You can specify a property as a string or a function.
+   */
+  key?: any;
+
   /**
    * ## Wallace directive: part
    *
@@ -977,8 +1026,10 @@ declare namespace JSX {
      *   ```
      *   <MyComponent.nest props={singleProps} />
      *   <MyComponent.repeat items={arrayOfProps} />
+     *   <MyComponent.repeat items={arrayOfProps} key="id"/>
+     *   <MyComponent.repeat items={arrayOfProps} key={(i) => i.id}/>
      *   ```
-     * Note that repeated components must not have siblings.
+     * Note that repeated components may not have siblings.
      *
      * Available Wallace directives:
      *
@@ -990,6 +1041,7 @@ declare namespace JSX {
      * - `hide` sets an element or component's hidden property.
      * - `html` Set the element's `innnerHTML` property.
      * - `if` excludes an element from the DOM.
+     * - `key` specifies a key for repeated items.
      * - `items` set items for repeated component, must be an array of props.
      * - `on[EventName]` creates an event handler (note the code is copied)
      * - `part:xyz` saves a reference to part of a component so it can be updated
