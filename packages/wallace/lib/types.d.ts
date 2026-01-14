@@ -560,7 +560,7 @@ declare module "wallace" {
       hide
     }: {
       items: Array<Props>;
-      key: string | ((item: Props) => any);
+      key?: string | ((item: Props) => any);
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
