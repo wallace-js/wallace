@@ -10,21 +10,6 @@ export function KeyedRepeater(componentDefinition, keyFn) {
   this.keys = []; // array of keys as last set.
   this.pool = {}; // pool of component instances.
 }
-const proto = KeyedRepeater.prototype;
-
-/**
- * Retrieves a single component. Though not used in wallace itself, it may
- * be used elsewhere, such as in the router.
- *
- * @param {Object} item - The item which will be passed as props.
- */
-proto.getOne = function (item, ctrl) {
-  const key = this.keyFn(item),
-    pool = this.pool;
-  component = pool[key] || (pool[key] = new this.def());
-  component.render(item, ctrl);
-  return component;
-};
 
 /**
  * Updates the element's childNodes to match the items.
@@ -34,41 +19,61 @@ proto.getOne = function (item, ctrl) {
  * @param {Array} items - Array of items which will be passed as props.
  * @param {any} ctrl - The parent item's controller.
  */
-proto.patch = function (e, items, ctrl) {
+KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   const pool = this.pool,
     componentDefinition = this.def,
     keyFn = this.keyFn,
     childNodes = e.childNodes,
     itemsLength = items.length,
     previousKeys = this.keys,
-    offset = previousKeys.length - itemsLength,
+    previousKeysLength = previousKeys.length,
     newKeys = [],
-    toRemove = new Set(previousKeys);
+    previousKeysSet = new Set(previousKeys);
   let item,
     el,
     key,
     component,
     anchor = null,
+    fragAnchor = null,
+    untouched = true,
+    append = false,
+    offset = previousKeysLength - itemsLength,
     i = itemsLength - 1;
+
   // Working backwards saves us having to track moves.
+  const frag = document.createDocumentFragment();
   while (i >= 0) {
     item = items[i];
     key = keyFn(item);
-    newKeys.push(key);
-    toRemove.delete(key);
     component = pool[key] || (pool[key] = new componentDefinition());
     component.render(item, ctrl);
     el = component.el;
-    if (key !== previousKeys[i + offset]) {
-      e.insertBefore(el, anchor);
+    if (untouched && !previousKeysSet.has(key)) {
+      frag.insertBefore(el, fragAnchor);
+      fragAnchor = el;
+      append = true;
+      offset++;
+    } else {
+      if (key !== previousKeys[i + offset]) {
+        e.insertBefore(el, anchor);
+        untouched = false;
+      }
+      anchor = el;
     }
-    anchor = el;
+    newKeys.push(key);
+    previousKeysSet.delete(key);
     i--;
   }
-  let toStrip = toRemove.size;
+
+  if (append) {
+    e.appendChild(frag);
+  }
+
+  let toStrip = previousKeysSet.size;
   while (toStrip > 0) {
     e.removeChild(childNodes[0]);
     toStrip--;
   }
+
   this.keys = newKeys.reverse();
 };
