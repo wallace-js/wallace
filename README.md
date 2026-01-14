@@ -205,7 +205,6 @@ const CounterList = (counters) => (
 );
 ```
 
-
 This form reuses components sequentially, which may cause issues with CSS animations
 and focus, in which case you should use a keyed repeater by passing `key` which can
 be a string or a function:
@@ -213,13 +212,13 @@ be a string or a function:
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} key="id"/>
+    <Task.repeat items={tasks} key="id" />
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} key={(x) => x.id}/>
+    <Task.repeat items={tasks} key={(x) => x.id} />
   </div>
 );
 ```
