@@ -1,15 +1,24 @@
 import { testMount } from "../utils";
 
-describe("Repeat reordering", () => {
-  const Container = data => (
-    <div>
-      <Child.repeat items={data} />
-    </div>
-  );
-  const Child = data => <div>{data}</div>;
+const Child = ({ i }) => <div>{i}</div>;
+const NonKeyed = data => (
+  <div>
+    <Child.repeat items={data} />
+  </div>
+);
 
+const Keyed = data => (
+  <div>
+    <Child.repeat items={data} key="i" />
+  </div>
+);
+
+describe.each([
+  ["NonKeyed", NonKeyed],
+  ["Keyed", Keyed]
+])("%s", (_, Container) => {
   test("on initial testMount", () => {
-    const component = testMount(Container, [1, 5, 2, 6]);
+    const component = testMount(Container, [{ i: 1 }, { i: 5 }, { i: 2 }, { i: 6 }]);
     expect(component).toRender(`
       <div>
         <div>1</div>
@@ -21,14 +30,14 @@ describe("Repeat reordering", () => {
   });
 
   test("Adding items works", () => {
-    const component = testMount(Container, [5, 2]);
+    const component = testMount(Container, [{ i: 5 }, { i: 2 }]);
     expect(component).toRender(`
       <div>
         <div>5</div>
         <div>2</div>
       </div>
     `);
-    component.render([5, 2, 6]);
+    component.render([{ i: 5 }, { i: 2 }, { i: 6 }]);
     expect(component).toRender(`
       <div>
         <div>5</div>
@@ -38,9 +47,9 @@ describe("Repeat reordering", () => {
     `);
   });
 
-  test("Removing items works", () => {
-    const component = testMount(Container, [5, 2, 3, 8]);
-    component.render([2, 8]);
+  test("Removing items from start works", () => {
+    const component = testMount(Container, [{ i: 5 }, { i: 2 }, { i: 3 }, { i: 8 }]);
+    component.render([{ i: 2 }, { i: 8 }]);
     expect(component).toRender(`
       <div>
         <div>2</div>
@@ -49,9 +58,21 @@ describe("Repeat reordering", () => {
     `);
   });
 
+  test("Removing items inside works", () => {
+    const component = testMount(Container, [{ i: 5 }, { i: 2 }, { i: 3 }, { i: 8 }]);
+    component.render([{ i: 5 }, { i: 3 }, { i: 8 }]);
+    expect(component).toRender(`
+      <div>
+        <div>5</div>
+        <div>3</div>
+        <div>8</div>
+      </div>
+    `);
+  });
+
   test("Complete replacement", () => {
-    const component = testMount(Container, [5, 2, 3, 8]);
-    component.render([22, 18]);
+    const component = testMount(Container, [{ i: 5 }, { i: 2 }, { i: 3 }, { i: 8 }]);
+    component.render([{ i: 22 }, { i: 18 }]);
     expect(component).toRender(`
       <div>
         <div>22</div>
@@ -61,8 +82,8 @@ describe("Repeat reordering", () => {
   });
 
   test("Reshuffle", () => {
-    const component = testMount(Container, [7, 5, 6, 2]);
-    component.render([5, 2, 6, 7]);
+    const component = testMount(Container, [{ i: 7 }, { i: 5 }, { i: 6 }, { i: 2 }]);
+    component.render([{ i: 5 }, { i: 2 }, { i: 6 }, { i: 7 }]);
     expect(component).toRender(`
       <div>
         <div>5</div>
@@ -74,8 +95,17 @@ describe("Repeat reordering", () => {
   });
 
   test("Multiple add and remove shorter", () => {
-    const component = testMount(Container, [7, 5, 44, 6, 2, 8, 5, 6]);
-    component.render([2, 7, 11, 8, 23]);
+    const component = testMount(Container, [
+      { i: 7 },
+      { i: 5 },
+      { i: 44 },
+      { i: 6 },
+      { i: 2 },
+      { i: 18 },
+      { i: 83 },
+      { i: 48 }
+    ]);
+    component.render([{ i: 2 }, { i: 7 }, { i: 11 }, { i: 8 }, { i: 23 }]);
     expect(component).toRender(`
       <div>
         <div>2</div>
@@ -88,8 +118,8 @@ describe("Repeat reordering", () => {
   });
 
   test("Multiple add and remove longer", () => {
-    const component = testMount(Container, [7, 5, 8]);
-    component.render([2, 7, 11, 8, 5, 23]);
+    const component = testMount(Container, [{ i: 7 }, { i: 5 }, { i: 8 }]);
+    component.render([{ i: 2 }, { i: 7 }, { i: 11 }, { i: 8 }, { i: 5 }, { i: 23 }]);
     expect(component).toRender(`
       <div>
         <div>2</div>
@@ -103,7 +133,7 @@ describe("Repeat reordering", () => {
   });
 
   test("Clear", () => {
-    const component = testMount(Container, [5, 2, 3, 8]);
+    const component = testMount(Container, [{ i: 2 }, { i: 5 }, { i: 8 }]);
     component.render([]);
     expect(component).toRender(`
       <div>

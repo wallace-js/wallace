@@ -1,5 +1,3 @@
-import { trimChildren } from "../utils";
-
 /**
  * Repeats nested components, yielding from its pool sequentially.
  *
@@ -44,5 +42,9 @@ SequentialRepeater.prototype.patch = function (e, items, ctrl) {
     i++;
   }
   this.count = itemsLength;
-  trimChildren(e, childNodes, itemsLength);
+  let lastIndex = childNodes.length - 1;
+  let keepIndex = itemsLength - 1;
+  for (let i = lastIndex; i > keepIndex; i--) {
+    e.removeChild(childNodes[i]);
+  }
 };

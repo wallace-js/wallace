@@ -19,10 +19,11 @@ interface Watch {
   callback: string | Expression;
 }
 
-interface RepeatInstruction {
+export interface RepeatInstruction {
   expression: Expression;
   componentCls: string;
-  poolExpression: Expression | undefined;
+  repeatKey: Expression | string | undefined;
+  // poolExpression: Expression | undefined;
 }
 
 interface EventListener {
@@ -62,6 +63,7 @@ export class ExtractedNode {
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
   repeatNode: ExtractedNode | undefined;
+  repeatKey: Expression | string | undefined;
   address: Array<number>;
   path: NodePath<ValidElementType>;
   parent: TagNode;
@@ -70,7 +72,7 @@ export class ExtractedNode {
   bindInstructions: BindInstruction[] = [];
   hasConditionalChildren: boolean = false;
   #repeatExpression: Expression | undefined;
-  poolExpression: Expression | undefined;
+  // poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
    */
@@ -174,6 +176,9 @@ export class ExtractedNode {
     this.#repeatExpression = expression;
     this.parent.repeatNode = this;
   }
+  setRepeatKey(expression: Expression | string) {
+    this.repeatKey = expression;
+  }
   /**
    * Called on the parent of a repeat.
    */
@@ -182,7 +187,8 @@ export class ExtractedNode {
       ? {
           expression: this.repeatNode.#repeatExpression,
           componentCls: this.repeatNode.tagName,
-          poolExpression: this.repeatNode.poolExpression
+          repeatKey: this.repeatNode.repeatKey
+          // poolExpression: this.repeatNode.poolExpression
         }
       : undefined;
   }

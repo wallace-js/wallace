@@ -1,33 +1,3 @@
-import { trimChildren } from "../utils";
-
-/*
- * Gets a component from the pool.
- */
-function getComponent(pool, componentDefinition, ctrl, key, props) {
-  let component;
-  if (pool.hasOwnProperty(key)) {
-    component = pool[key];
-  } else {
-    component = new componentDefinition();
-    pool[key] = component;
-  }
-  component.render(props, ctrl);
-  return component;
-}
-
-/**
- * Pulls an item forward in an array, to replicate insertBefore.
- * @param {Array} arr
- * @param {any} item
- * @param {Int} to
- */
-function pull(arr, item, to) {
-  const position = arr.indexOf(item);
-  if (position != to) {
-    arr.splice(to, 0, arr.splice(position, 1)[0]);
-  }
-}
-
 /**
  * Repeats nested components, reusing items based on key.
  *
@@ -37,20 +7,9 @@ function pull(arr, item, to) {
 export function KeyedRepeater(componentDefinition, keyFn) {
   this.def = componentDefinition;
   this.keyFn = keyFn;
-  this.keys = []; // keys
-  this.pool = {}; // pool of component instances
+  this.keys = []; // array of keys as last set.
+  this.pool = {}; // pool of component instances.
 }
-const proto = KeyedRepeater.prototype;
-
-/**
- * Retrieves a single component. Though not used in wallace itself, it may
- * be used elsewhere, such as in the router.
- *
- * @param {Object} item - The item which will be passed as props.
- */
-proto.getOne = function (item, ctrl) {
-  return getComponent(this.pool, this.def, ctrl, this.keyFn(item), item);
-};
 
 /**
  * Updates the element's childNodes to match the items.
@@ -58,33 +17,63 @@ proto.getOne = function (item, ctrl) {
  *
  * @param {DOMElement} e - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
+ * @param {any} ctrl - The parent item's controller.
  */
-proto.patch = function (e, items, ctrl) {
-  // Attempt to speed up by reducing lookups. Does this even do anything?
-  // Does webpack undo this/do it for for me? Does the engine?
-  const pool = this.pool;
-  const componentDefinition = this.def;
-  const keyFn = this.keyFn;
-  const childNodes = e.childNodes;
-  const itemsLength = items.length;
-  const oldKeySequence = this.keys;
-  const newKeys = [];
+KeyedRepeater.prototype.patch = function (e, items, ctrl) {
+  const pool = this.pool,
+    componentDefinition = this.def,
+    keyFn = this.keyFn,
+    childNodes = e.childNodes,
+    itemsLength = items.length,
+    previousKeys = this.keys,
+    previousKeysLength = previousKeys.length,
+    newKeys = [],
+    previousKeysSet = new Set(previousKeys);
   let item,
+    el,
     key,
     component,
-    childElementCount = oldKeySequence.length + 1;
-  for (let i = 0; i < itemsLength; i++) {
+    anchor = null,
+    fragAnchor = null,
+    untouched = true,
+    append = false,
+    offset = previousKeysLength - itemsLength,
+    i = itemsLength - 1;
+
+  // Working backwards saves us having to track moves.
+  const frag = document.createDocumentFragment();
+  while (i >= 0) {
     item = items[i];
     key = keyFn(item);
-    component = getComponent(pool, componentDefinition, ctrl, key, item);
-    newKeys.push(key);
-    if (i > childElementCount) {
-      e.appendChild(component.el);
-    } else if (key !== oldKeySequence[i]) {
-      e.insertBefore(component.el, childNodes[i]);
-      pull(oldKeySequence, key, i);
+    component = pool[key] || (pool[key] = new componentDefinition());
+    component.render(item, ctrl);
+    el = component.el;
+    if (untouched && !previousKeysSet.has(key)) {
+      frag.insertBefore(el, fragAnchor);
+      fragAnchor = el;
+      append = true;
+      offset++;
+    } else {
+      if (key !== previousKeys[i + offset]) {
+        e.insertBefore(el, anchor);
+        untouched = false;
+      }
+      anchor = el;
     }
+    newKeys.push(key);
+    previousKeysSet.delete(key);
+    i--;
   }
-  this.keys = newKeys;
-  trimChildren(e, childNodes, itemsLength);
+
+  if (append) {
+    e.appendChild(frag);
+  }
+
+  let toStrip = previousKeysSet.size;
+  while (toStrip > 0) {
+    e.removeChild(childNodes[0]);
+    toStrip--;
+  }
+
+  this.keys = newKeys.reverse();
 };

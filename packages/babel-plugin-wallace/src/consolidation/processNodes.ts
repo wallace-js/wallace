@@ -2,6 +2,7 @@ import type { Identifier, Statement } from "@babel/types";
 import {
   blockStatement,
   callExpression,
+  Expression,
   expressionStatement,
   functionExpression,
   identifier,
@@ -12,7 +13,7 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { codeToNode } from "../utils";
-import { Component, ExtractedNode } from "../models";
+import { Component, ExtractedNode, RepeatInstruction } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_PROPERTIES,
@@ -131,6 +132,78 @@ function addToggleCallbackStatement(
       )
     ]);
   });
+}
+
+function getKeyFunction(repeatKey: Expression | string | undefined) {
+  if (typeof repeatKey === "string") {
+    const param = t.identifier("x");
+    return t.functionExpression(
+      null,
+      [param],
+      t.blockStatement([
+        t.returnStatement(t.memberExpression(param, t.identifier(repeatKey)))
+      ])
+    );
+  }
+  return repeatKey;
+}
+
+function processRepeater(
+  component: Component,
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  repeatInstruction: RepeatInstruction,
+  addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void
+) {
+  let repeaterInstance, repeaterClass;
+  if (repeatInstruction.repeatKey) {
+    repeaterClass = IMPORTABLES.KeyedRepeater;
+    repeaterInstance = newExpression(identifier(repeaterClass), [
+      identifier(repeatInstruction.componentCls),
+      getKeyFunction(repeatInstruction.repeatKey)
+    ]);
+  } else {
+    repeaterClass = IMPORTABLES.SequentialRepeater;
+    repeaterInstance = newExpression(identifier(repeaterClass), [
+      identifier(repeatInstruction.componentCls)
+    ]);
+  }
+
+  componentDefinition.component.module.requireImport(repeaterClass);
+  componentDefinition.component.module.requireImport(IMPORTABLES.stashMisc);
+
+  // TODO: couple the stash index with the call to save - if possible?
+  // Or make it an object and pass the key when saving.
+  const miscStashKey = componentDefinition.getNextmiscStashKey();
+  componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.stashMisc, [
+    identifier(COMPONENT_PROPERTIES.stash),
+    repeaterInstance
+  ]);
+  addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
+    expressionStatement(
+      callExpression(
+        memberExpression(
+          memberExpression(
+            memberExpression(
+              component.componentIdentifier,
+              identifier(COMPONENT_PROPERTIES.stash)
+            ),
+            numericLiteral(miscStashKey),
+            true
+          ),
+          identifier(SPECIAL_SYMBOLS.patch)
+        ),
+        [
+          identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+          repeatInstruction.expression,
+          memberExpression(
+            component.componentIdentifier,
+            identifier(COMPONENT_PROPERTIES.ctrl)
+          )
+        ]
+      )
+    )
+  ]);
 }
 
 function processPart(
@@ -335,49 +408,13 @@ export function processNodes(
         }
 
         if (repeatInstruction) {
-          componentDefinition.component.module.requireImport(
-            IMPORTABLES.SequentialRepeater
+          processRepeater(
+            component,
+            componentDefinition,
+            node,
+            repeatInstruction,
+            addCallbackStatement
           );
-          componentDefinition.component.module.requireImport(IMPORTABLES.stashMisc);
-          const poolInstance =
-            repeatInstruction.poolExpression ||
-            newExpression(identifier(IMPORTABLES.SequentialRepeater), [
-              identifier(repeatInstruction.componentCls)
-            ]);
-
-          // TODO: couple the stash index with the call to save - if possible?
-          // Or make it an object and pass the key when saving.
-          const miscStashKey = componentDefinition.getNextmiscStashKey();
-          componentDefinition.wrapDynamicElementCall(
-            node.elementKey,
-            IMPORTABLES.stashMisc,
-            [identifier(COMPONENT_PROPERTIES.stash), poolInstance]
-          );
-          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
-            expressionStatement(
-              callExpression(
-                memberExpression(
-                  memberExpression(
-                    memberExpression(
-                      component.componentIdentifier,
-                      identifier(COMPONENT_PROPERTIES.stash)
-                    ),
-                    numericLiteral(miscStashKey),
-                    true
-                  ),
-                  identifier(SPECIAL_SYMBOLS.patch)
-                ),
-                [
-                  identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-                  repeatInstruction.expression,
-                  memberExpression(
-                    component.componentIdentifier,
-                    identifier(COMPONENT_PROPERTIES.ctrl)
-                  )
-                ]
-              )
-            )
-          ]);
         }
 
         for (const key in _callbacks) {
