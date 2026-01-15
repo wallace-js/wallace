@@ -4,11 +4,11 @@
 
 # Wallace
 
-An <strong><i>insanely</i></strong> small, fast, intuitive and extendable framework for the front end.
+An <strong><i>insanely</i></strong> small, fast, intuitive and extendable front-end framework.
 
 ## About
 
-Wallace is a brand new front end framework for building:
+Wallace is a brand new (2026) front end framework for building:
 
 - Web apps of any size.
 - Mobile apps - using tools likes [Capacitator](https://capacitorjs.com/).
