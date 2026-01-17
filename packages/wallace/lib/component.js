@@ -115,9 +115,12 @@ Object.defineProperty(ComponentPrototype, "hidden", {
 });
 
 const ComponentBase = {
-  stubs: {},
   prototype: ComponentPrototype
 };
+
+if (wallaceConfig.flags.useStubs) {
+  ComponentBase.stubs = {};
+}
 
 /**
  *
@@ -134,15 +137,22 @@ export function initConstructor(ComponentFunction, BaseComponentFunction) {
       }
     }
   ));
-  Object.defineProperty(ComponentFunction, "methods", {
-    set: function (value) {
-      Object.assign(proto, value);
-    },
-    get: function () {
-      return proto;
-    }
-  });
-  ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
+
+  if (wallaceConfig.flags.useMethods) {
+    Object.defineProperty(ComponentFunction, "methods", {
+      set: function (value) {
+        Object.assign(proto, value);
+      },
+      get: function () {
+        return proto;
+      }
+    });
+  }
+
+  if (wallaceConfig.flags.useStubs) {
+    ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
+  }
+
   return ComponentFunction;
 }
 
