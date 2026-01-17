@@ -348,7 +348,7 @@ export function processNodes(
         });
 
         if (node.isNestedComponent) {
-          const callbackArgs = [node.getProps() || identifier("undefined")];
+          const callbackArgs = [node.getProps() || t.objectExpression([])];
           if (wallaceConfig.flags.useControllers) {
             callbackArgs.push(
               memberExpression(
