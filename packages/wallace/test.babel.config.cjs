@@ -28,9 +28,14 @@ module.exports = {
     [
       "babel-plugin-wallace",
       {
-        directives: [TestDirectiveInConfig],
-      },
+        flags: {
+          useControllers: true,
+          useStubs: true,
+          useMethods: true
+        },
+        directives: [TestDirectiveInConfig]
+      }
     ],
-    "@babel/plugin-syntax-jsx",
-  ],
+    "@babel/plugin-syntax-jsx"
+  ]
 };
