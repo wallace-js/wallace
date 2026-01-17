@@ -12,6 +12,7 @@ import {
   stringLiteral
 } from "@babel/types";
 import * as t from "@babel/types";
+import { wallaceConfig } from "../config";
 import { codeToNode } from "../utils";
 import { Component, ExtractedNode, RepeatInstruction } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
@@ -179,6 +180,18 @@ function processRepeater(
     identifier(COMPONENT_PROPERTIES.stash),
     repeaterInstance
   ]);
+  const callbackArgs = [
+    identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+    repeatInstruction.expression
+  ];
+  if (wallaceConfig.flags.useControllers) {
+    callbackArgs.push(
+      memberExpression(
+        component.componentIdentifier,
+        identifier(COMPONENT_PROPERTIES.ctrl)
+      )
+    );
+  }
   addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
     expressionStatement(
       callExpression(
@@ -193,14 +206,7 @@ function processRepeater(
           ),
           identifier(SPECIAL_SYMBOLS.patch)
         ),
-        [
-          identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-          repeatInstruction.expression,
-          memberExpression(
-            component.componentIdentifier,
-            identifier(COMPONENT_PROPERTIES.ctrl)
-          )
-        ]
+        callbackArgs
       )
     )
   ]);
@@ -342,12 +348,16 @@ export function processNodes(
         });
 
         if (node.isNestedComponent) {
-          const props = node.getProps();
-          const ctrlArg = memberExpression(
-            component.componentIdentifier,
-            identifier(COMPONENT_PROPERTIES.ctrl)
-          );
-          const args = props ? [props, ctrlArg] : [identifier("undefined"), ctrlArg];
+          const callbackArgs = [node.getProps() || identifier("undefined")];
+          if (wallaceConfig.flags.useControllers) {
+            callbackArgs.push(
+              memberExpression(
+                component.componentIdentifier,
+                identifier(COMPONENT_PROPERTIES.ctrl)
+              )
+            );
+          }
+
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
@@ -355,7 +365,7 @@ export function processNodes(
                   identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
                   identifier(COMPONENT_PROPERTIES.render)
                 ),
-                args
+                callbackArgs
               )
             )
           ]);
@@ -366,6 +376,15 @@ export function processNodes(
         }
 
         if (stubName) {
+          const callbackArgs: any[] = [component.propsIdentifier];
+          if (wallaceConfig.flags.useControllers) {
+            callbackArgs.push(
+              memberExpression(
+                component.componentIdentifier,
+                identifier(COMPONENT_PROPERTIES.ctrl)
+              )
+            );
+          }
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
               callExpression(
@@ -374,13 +393,7 @@ export function processNodes(
                   identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
                   identifier(COMPONENT_PROPERTIES.render)
                 ),
-                [
-                  component.propsIdentifier,
-                  memberExpression(
-                    component.componentIdentifier,
-                    identifier(COMPONENT_PROPERTIES.ctrl)
-                  )
-                ]
+                callbackArgs
               )
             )
           ]);

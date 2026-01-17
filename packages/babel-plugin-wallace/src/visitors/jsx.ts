@@ -1,4 +1,3 @@
-import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { JSXElement, JSXExpressionContainer, JSXText } from "@babel/types";
 import { getJSXElementName } from "../ast-helpers";

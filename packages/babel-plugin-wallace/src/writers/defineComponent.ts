@@ -1,6 +1,7 @@
 import * as t from "@babel/types";
 import type { CallExpression } from "@babel/types";
 import { Component } from "../models";
+import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES, IMPORTABLES } from "../constants";
 import type {
   ArrayExpression,
@@ -140,7 +141,6 @@ function buildConstructor(
 
   const expressions: any[] = [
     assignThis(COMPONENT_PROPERTIES.props, emptyObject()),
-    assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()),
     assignThis(
       COMPONENT_PROPERTIES.watchLength,
       t.memberExpression(
@@ -156,6 +156,10 @@ function buildConstructor(
       t.arrayExpression(componentDefinition.watches.map(watch => t.objectExpression([])))
     )
   ];
+
+  if (wallaceConfig.flags.useControllers) {
+    expressions.unshift(assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()));
+  }
 
   const dynamicElementCalls = getDynamicElements(componentDefinition);
 
