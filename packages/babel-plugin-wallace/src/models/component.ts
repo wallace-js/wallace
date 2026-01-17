@@ -44,6 +44,7 @@ export class Component {
   componentIdentifier: Identifier;
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
+  unique: boolean = false;
   constructor(
     module: Module,
     propsIdentifier: Identifier,

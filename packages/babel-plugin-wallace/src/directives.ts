@@ -285,6 +285,15 @@ class ToggleDirective extends Directive {
   }
 }
 
+class UniqueDirective extends Directive {
+  static attributeName = "unique";
+  static allowExpression = false;
+  static allowNull = true;
+  apply(node: TagNode, _value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.component.unique = true;
+  }
+}
+
 export const builtinDirectives = [
   ApplyDirective,
   BindDirective,
@@ -302,5 +311,6 @@ export const builtinDirectives = [
   RefDirective,
   ShowDirective,
   StyleDirective,
-  ToggleDirective
+  ToggleDirective,
+  UniqueDirective
 ];
