@@ -1,4 +1,27 @@
 import { mount } from "wallace";
+// import { Chart } from "chart/auto";
+import {
+  Chart,
+  BarElement,
+  BarController,
+  CategoryScale,
+  LinearScale,
+  Filler,
+  Legend,
+  Title,
+  Tooltip
+} from "chart.js";
+
+Chart.register(
+  BarElement,
+  BarController,
+  CategoryScale,
+  Filler,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip
+);
 
 const buildChart = (ctx, data) => {
   new Chart(ctx, {
@@ -10,7 +33,8 @@ const buildChart = (ctx, data) => {
           label: data.label,
           data: data.values,
           borderWidth: 1,
-          maxBarThickness: 40
+          maxBarThickness: 40,
+          backgroundColor: "blue"
         }
       ]
     },
@@ -62,7 +86,6 @@ const ChartList = charts => (
 
 ChartList.methods = {
   render(props) {
-    console.log(888);
     this.props = getCharts(props);
     this.update();
   }
@@ -81,13 +104,11 @@ const getCharts = data => {
       }
     }
   }
-  console.log(6666);
   return Object.values(charts);
 };
 
 fetch("benchmark-data.json")
   .then(res => res.json())
   .then(data => {
-    console.log(data);
     mount("main", ChartList, data);
   });
