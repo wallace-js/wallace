@@ -3,6 +3,7 @@
   "version": "0.10.0",
   "author": "Andrew Buchan",
   "description": "An insanely small, fast, intuitive and extendable front-end framework",
+  "homepage": "https://wallace.js.org",
   "license": "ISC",
   "main": "lib/index.js",
   "files": [

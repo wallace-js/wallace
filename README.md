@@ -6,6 +6,8 @@
 
 An <strong><i>insanely</i></strong> small, fast, intuitive and extendable front-end framework.
 
+The docs are in the process of being moved to the new homepage at https://wallace.js.org.
+
 ## About
 
 Wallace is a brand new (2026) front end framework for building:
@@ -121,6 +123,37 @@ module.exports = {
 ```
 
 Then configure your bundler to apply those to jsx/tsx files. The [examples](https://github.com/wallace-js/wallace/tree/master/examples) all use webpack, so you can copy from there.
+
+### Configuration
+
+You need to set flags in your babel config to use certain features:
+
+1.  useControllers - enables use of `ctrl` in components.
+2.  useMethods - adds the `methods` helper to components.
+3.  useStubs - enables the use of stubs.
+
+The types (and therefore tool tips) are unaffected by these flags, and will treat them
+all as being true.
+
+```tsx
+module.exports = {
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        flags: {
+          useControllers: true,
+          useMethods: true,
+          useStubs: true
+        },
+        directives: [...]
+      }
+    ],
+    "@babel/plugin-syntax-jsx"
+  ],
+  presets: ["@babel/preset-typescript", ...]
+};
+```
 
 ### Components
 
