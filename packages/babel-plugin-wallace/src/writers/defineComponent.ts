@@ -99,10 +99,9 @@ function buildConstructor(
       )
     );
 
-  const chainedConstExpressions = [
-    assignAndDeclare(
-      COMPONENT_PROPERTIES.root,
-      t.callExpression(
+  const createRootExpression = componentDefinition.component.unique
+    ? t.memberExpression(t.thisExpression(), t.identifier(COMPONENT_PROPERTIES.template))
+    : t.callExpression(
         t.memberExpression(
           t.memberExpression(
             t.thisExpression(),
@@ -111,8 +110,10 @@ function buildConstructor(
           t.identifier("cloneNode")
         ),
         [t.booleanLiteral(true)]
-      )
-    )
+      );
+
+  const chainedConstExpressions = [
+    assignAndDeclare(COMPONENT_PROPERTIES.root, createRootExpression)
   ];
 
   if (componentDefinition.refs.length > 0) {

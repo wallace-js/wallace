@@ -8,6 +8,7 @@
 
 ### Contents
 
+  0. Configuration
   1. Components
   2. JSX
   3. Nesting
@@ -20,6 +21,40 @@
  10. Helpers
 
 For more detailed documentation go to https://github.com/wallace-js/wallace
+
+
+## 0. Configuration
+
+You need to set flags in your babel config to use certain features:
+
+ 1. useControllers - enables use of `ctrl` in components.
+ 2. useMethods - adds the `methods` helper to components.
+ 3. useStubbs - enables the use of stubbs.
+
+The types (and terhefore tool tips) are unaffected by these flags, and will treat them
+all as being true.
+
+```
+module.exports = {
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        flags: {
+          useControllers: true,
+          useMethods: true,
+          useStubs: true
+        },
+        directives: [...]
+      }
+    ],
+    "@babel/plugin-syntax-jsx"
+  ],
+  presets: ["@babel/preset-typescript", ...]
+};
+```
+
+The `directives` option lets you override or define new directives. See main docs.
 
 ## 1. Components
 
@@ -1012,9 +1047,11 @@ interface DirectiveAttributes extends AllDomEvents {
   toggle?: string;
 
   /**
-   * Foo
+   * ## Wallace directive: unique
+   *
+   * Performance optimisation that can be applied to a component which is only used once.
    */
-  "class-a"?: string;
+  unique?: boolean;
 }
 
 declare namespace JSX {
@@ -1051,6 +1088,7 @@ declare namespace JSX {
      * - `style:xyz` sets a specific style property.
      * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
      *   `xyz`.
+     * - `unique` can be set on components which only used once for better performance.
      *
      * You will get more details by hovering on the directive itself, but unfortunetely
      * the tool tip won't display when you use a qualifier, like `class:danger`. To see
