@@ -65,6 +65,8 @@ export const ERROR_MESSAGES = {
   TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
+  NOT_ALLOWED_CTRL:
+    "You must set `useControllers = true` in config to acess `ctrl` in extra args.",
   ILLEGAL_XARG: (name: string) =>
     `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`
 };
