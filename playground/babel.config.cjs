@@ -8,7 +8,7 @@
  * See `playground/package.json` and `babel-plugin-wallace/README.md`.
  */
 
-const { customDirectives } = require("./src/custom-directives.js");
+const { directives, flags } = require("./src/config.js");
 
 function flag(name) {
   const value = process.env[name];
@@ -42,7 +42,8 @@ module.exports = {
     [
       "babel-plugin-wallace",
       {
-        directives: customDirectives
+        directives,
+        flags
       }
     ],
     "@babel/plugin-syntax-jsx"

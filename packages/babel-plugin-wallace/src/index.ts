@@ -9,6 +9,7 @@ import { wallaceConfig } from "./config";
 import { Directive, NodeValue } from "./models";
 import { Module } from "./models/module";
 import { programVisitors } from "./visitors/program";
+import { removeCtrl } from "./visitors/library";
 
 // The general pattern involves visting high-level nodes where we instantiate models
 // which are passed to traverse calls with sets of visitors for low-level nodes,
@@ -26,6 +27,13 @@ export default function wallacePlugin({ types: t }: Babel): PluginObj {
         enter(path: NodePath<Program>, pluginPass: PluginPass) {
           wallaceConfig.applyOptions(pluginPass.opts);
           const module = new Module(path);
+          //@ts-ignore
+          const filename = path.hub.file.opts.filename as string;
+          if (filename.includes("/wallace/lib/")) {
+            if (!wallaceConfig.flags.useControllers) {
+              path.traverse(removeCtrl, { module });
+            }
+          }
           path.traverse(programVisitors, { module });
           module.addMissingImports();
         }
