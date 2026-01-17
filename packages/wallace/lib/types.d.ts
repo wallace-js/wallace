@@ -20,7 +20,7 @@
   9. TypeScript
  10. Helpers
 
-For more detailed documentation go to https://github.com/wallace-js/wallace
+For more detailed documentation go to https://wallace.js.org/docs/
 
 
 ## 0. Configuration
@@ -29,12 +29,12 @@ You need to set flags in your babel config to use certain features:
 
  1. useControllers - enables use of `ctrl` in components.
  2. useMethods - adds the `methods` helper to components.
- 3. useStubbs - enables the use of stubbs.
+ 3. useStubs - enables the use of stubs.
 
-The types (and terhefore tool tips) are unaffected by these flags, and will treat them
+The types (and therefore tool tips) are unaffected by these flags, and will treat them
 all as being true.
 
-```
+```tsx
 module.exports = {
   plugins: [
     [

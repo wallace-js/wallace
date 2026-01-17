@@ -1,6 +1,6 @@
 # Wallace
 
-This package contains the library for the [Wallace](https://github.com/wallace-js/wallace) framework, which you import into your source files:
+This package contains the library for the [Wallace](https://wallace.js.org) framework, which you import into your source files:
 
 ```jsx
 import { mount } from 'wallace';
@@ -26,4 +26,4 @@ npx create-wallace-app
 
 As that sets up your babel and webpack configurations for you.
 
-For more detailed documentation see the [Wallace repository on github](https://github.com/wallace-js/wallace).
+For more detailed documentation see the [Wallace repository on github](https://wallace.js.org/docs/).
