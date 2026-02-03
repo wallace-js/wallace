@@ -27,6 +27,9 @@ export const ERROR_MESSAGES = {
   DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
     return `The "${directive}" directive may not access scoped variable "${name}".`;
   },
+  FLAG_REQUIRED: (flag: string) => {
+    return `Flag "${flag}" must be set to true in the config for this feature.`;
+  },
   INVALID_EVENT_NAME_IN_BIND: (badEventNameive: string) => {
     return `"${badEventNameive}" is not a valid event name. Must be lowercase without "on" prefix. E.g. bind:keyup.`;
   },
@@ -65,8 +68,6 @@ export const ERROR_MESSAGES = {
   TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
-  NOT_ALLOWED_CTRL:
-    "You must set `useControllers = true` in config to acess `ctrl` in extra args.",
   ILLEGAL_XARG: (name: string) =>
     `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`
 };

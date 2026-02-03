@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { Function, Identifier } from "@babel/types";
-import { wallaceConfig } from "../config";
+import { wallaceConfig, FlagValue } from "../config";
 import { Component } from "../models";
 import { XARGS, COMPONENT_PROPERTIES } from "../constants";
 import { error, ERROR_MESSAGES } from "../errors";
@@ -44,9 +44,7 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
         if (t.isIdentifier(prop.value) && t.isIdentifier(prop.key)) {
           const name = prop.key.name;
           if (name === COMPONENT_PROPERTIES.ctrl) {
-            if (!wallaceConfig.flags.useControllers) {
-              error(path, ERROR_MESSAGES.NOT_ALLOWED_CTRL);
-            }
+            wallaceConfig.ensureFlagIstrue(path, FlagValue.useControllers);
           }
           if (!allowed.includes(name)) {
             error(path, ERROR_MESSAGES.ILLEGAL_XARG(name));
