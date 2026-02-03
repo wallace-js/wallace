@@ -189,6 +189,24 @@ export function defineComponent(html, watches, queries, contructor, inheritFrom)
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;
-  proto.base = ComponentPrototype;
+  if (wallaceConfig.flags.useBase) {
+    proto.base = ComponentPrototype;
+  } else {
+    if (process.env.NODE_ENV !== "production") {
+      Object.defineProperty(proto, "base", {
+        set: function (value) {
+          throw new Error(
+            'Flag "useBase" must be set to true in the config for this feature.'
+          );
+        },
+        get: function () {
+          throw new Error(
+            'Flag "useBase" must be set to true in the config for this feature.'
+          );
+        }
+      });
+    }
+  }
+
   return ComponentDefinition;
 }
