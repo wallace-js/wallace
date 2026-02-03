@@ -158,6 +158,21 @@ export function initConstructor(ComponentFunction, BaseComponentFunction) {
         return proto;
       }
     });
+  } else {
+    if (process.env.NODE_ENV !== "production") {
+      Object.defineProperty(ComponentFunction, "name", {
+        set: function (value) {
+          throw new Error(
+            'Flag "useMethods" must be set to true in the config for this feature.'
+          );
+        },
+        get: function () {
+          throw new Error(
+            'Flag "useMethods" must be set to true in the config for this feature.'
+          );
+        }
+      });
+    }
   }
 
   if (wallaceConfig.flags.useStubs) {
