@@ -126,15 +126,15 @@ Then configure your bundler to apply those to jsx/tsx files. The [examples](http
 
 ### Configuration
 
-You need to set flags in your babel config to use certain features:
+You can toggle flags in your babel config to disable certain features for cutting edge performance and bundle size:
 
-1.  useControllers - enables use of `ctrl` in components.
-2.  useMethods - adds the `methods` helper to components.
-3.  useParts - enables use of parts.
-4.  useStubs - enables the use of stubs.
+1.  `useBase` - enables use of `base` in components.
+2.  `useControllers` - enables use of `ctrl` in components.
+3.  `useMethods` - adds the `methods` helper to components.
+4.  `useParts` - enables use of parts.
+5.  `useStubs` - enables the use of stubs.
 
-The types (and therefore tool tips) are unaffected by these flags, and will treat them
-all as being true.
+These flags default to true, unless you specify `flags` in the plugin config, in which case they default to false and you need to explicitly enable those you want:
 
 ```tsx
 module.exports = {
@@ -144,11 +144,8 @@ module.exports = {
       {
         flags: {
           useControllers: true,
-          useMethods: true,
-          useParts: true,
-          useStubs: true
+          useStubs: false
         },
-        directives: [...]
       }
     ],
     "@babel/plugin-syntax-jsx"
@@ -156,6 +153,9 @@ module.exports = {
   presets: ["@babel/preset-typescript", ...]
 };
 ```
+
+The types (and therefore tool tips) are unaffected by these flags, and will treat them
+all as being true.
 
 ### Components
 
