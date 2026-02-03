@@ -81,6 +81,22 @@ class CssDirective extends Directive {
   }
 }
 
+class CtrlDirective extends Directive {
+  static attributeName = "ctrl";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  static help: `
+  Specify ctrl for a nested component:
+  
+  /h <NestedComponent.nest ctrl={self.ctrl1} />
+  `;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.useControllers);
+    node.setCtrl(value.expression);
+  }
+}
+
 class FixedDirective extends Directive {
   static attributeName = "fixed";
   static requireQualifier = true;
@@ -301,6 +317,7 @@ export const builtinDirectives = [
   BindDirective,
   ClassDirective,
   CssDirective,
+  CtrlDirective,
   FixedDirective,
   HideDirective,
   HtmlDirective,
