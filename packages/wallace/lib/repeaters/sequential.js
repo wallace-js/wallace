@@ -43,7 +43,7 @@ SequentialRepeater.prototype.patch = function (e, items, ctrl) {
   }
   this.count = itemsLength;
   let lastIndex = childNodes.length - 1;
-  let keepIndex = itemsLength - 1;
+  const keepIndex = itemsLength - 1;
   for (let i = lastIndex; i > keepIndex; i--) {
     e.removeChild(childNodes[i]);
   }

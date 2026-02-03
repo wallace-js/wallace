@@ -1,4 +1,4 @@
-//@16 error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { items: Props[]; key?: string | ((item: Props) => any); show?: boolean; hide?: boolean; }'.
+//@16 error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { items: Props[]; ctrl?: any; key?: string | ((item: Props) => any); show?: boolean; hide?: boolean; }'.
 import { mount, Uses } from "wallace";
 
 interface Props {

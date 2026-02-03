@@ -1,6 +1,8 @@
 # Contributor docs
 
-Note that these get out of date very quickly.
+This contains documentation for contributors.
+
+Several things may be out of date.
 
 ## Quick start
 
@@ -733,7 +735,7 @@ cd webdriver-ts
 npm run bench non-keyed/vanillajs non-keyed/wallace non-keyed/vue non-keyed/svelte-classic non-keyed/lit non-keyed/inferno
 # Or just some benchmarks
 npm run bench -- --benchmark 01_ 02_ --framework keyed/vanillajs keyed/react-hooks
-# Optionally nspect results
+# Optionally inspect results
 cat results/vanillajs-keyed_01_run1k.json
 ```
 

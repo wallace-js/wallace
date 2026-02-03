@@ -1,4 +1,4 @@
-import "source-map-support/register"; // ensures correct line numbers in stack traces.
+import "source-map-support/register.js"; // Ensures correct line numbers in stack traces.
 
 import type { NodePath, PluginObj, PluginPass } from "@babel/core";
 import type { Program } from "@babel/types";
