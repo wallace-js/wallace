@@ -129,7 +129,7 @@ export class ExtractedNode {
   }
   setCtrl(expression: Expression) {
     if (this.#ctrl) {
-      error(this.path, ERROR_MESSAGES.CTRL_ALREADY_DEFINED);
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("ctrl"));
     }
     this.#ctrl = expression;
   }
@@ -138,7 +138,7 @@ export class ExtractedNode {
   }
   setProps(expression: Expression) {
     if (this.#props) {
-      error(this.path, ERROR_MESSAGES.PROPS_ALREADY_DEFINED);
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("props"));
     }
     this.#props = expression;
   }
@@ -162,7 +162,7 @@ export class ExtractedNode {
   }
   setRef(name: string) {
     if (this.#ref) {
-      error(this.path, ERROR_MESSAGES.REF_ALREADY_DEFINED);
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("ref"));
     }
     this.#ref = name;
   }
@@ -171,7 +171,7 @@ export class ExtractedNode {
   }
   setPart(name: string) {
     if (this.#part) {
-      error(this.path, ERROR_MESSAGES.PART_ALREADY_DEFINED);
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("part"));
     }
     this.#part = name;
   }
@@ -180,7 +180,7 @@ export class ExtractedNode {
   }
   setRepeatExpression(expression: Expression) {
     if (this.#repeatExpression) {
-      error(this.path, ERROR_MESSAGES.ITEMS_ALREADY_DEFINED);
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("items"));
     }
     this.isRepeatedComponent = true;
     this.#repeatExpression = expression;
@@ -228,12 +228,6 @@ export class ExtractedNode {
   //     return { expression: this.#forExpression, variable: this.#forVariable };
   //   }
   // }
-  setBaseComponent(expression: Expression) {
-    if (this.component.baseComponent) {
-      error(this.path, ERROR_MESSAGES.BASE_COMPONENT_ALREADY_DEFINED);
-    }
-    this.component.baseComponent = expression;
-  }
 }
 
 export class TagNode extends ExtractedNode {

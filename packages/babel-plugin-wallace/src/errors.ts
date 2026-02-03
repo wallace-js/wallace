@@ -24,6 +24,9 @@ export const ERROR_MESSAGES = {
   CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
     return `The "${directive}" directive may not have a qualifier.`;
   },
+  DIRECTIVE_ALREADY_DEFINED: (directive: string) => {
+    return `The "${directive}" directive has already been defined on this node.`;
+  },
   DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
     return `The "${directive}" directive may not access scoped variable "${name}".`;
   },
@@ -48,12 +51,7 @@ export const ERROR_MESSAGES = {
   UNSUPPORTED_ATTRIBUTE_VALUE: "Attribute value must be a string or expression.",
   VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
     "Can only define one visibility toggle on element.",
-  REF_ALREADY_DEFINED: "Ref already defined on element.",
-  PART_ALREADY_DEFINED: "Part already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
-  CTRL_ALREADY_DEFINED: "Ctrl already defined on element.",
-  PROPS_ALREADY_DEFINED: "Props already defined on element.",
-  ITEMS_ALREADY_DEFINED: "Items already defined on element.",
   NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT: "Nested component not allowed on root element.",
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
   NO_ATTRIBUTES_ON_NESTED_CLASS: "Attributes not allowed on nested class elements.",

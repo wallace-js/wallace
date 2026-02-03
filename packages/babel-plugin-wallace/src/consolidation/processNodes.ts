@@ -86,6 +86,13 @@ function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
   });
 }
 
+function getCtrlExpression(node: ExtractedNode, component: Component) {
+  return (
+    node.getCtrl() ||
+    memberExpression(component.componentIdentifier, identifier(COMPONENT_PROPERTIES.ctrl))
+  );
+}
+
 function extractCssClasses(value: string | t.Expression) {
   if (typeof value == "string") {
     return value
@@ -171,13 +178,7 @@ function processRepeater(
     repeatInstruction.expression
   ];
   if (wallaceConfig.flags.useControllers) {
-    const ctrlExpression =
-      node.getCtrl() ||
-      memberExpression(
-        component.componentIdentifier,
-        identifier(COMPONENT_PROPERTIES.ctrl)
-      );
-    callbackArgs.push(ctrlExpression);
+    callbackArgs.push(getCtrlExpression(node, component));
   }
   addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
     expressionStatement(
@@ -337,13 +338,7 @@ export function processNodes(
         if (node.isNestedComponent) {
           const callbackArgs = [node.getProps() || t.objectExpression([])];
           if (wallaceConfig.flags.useControllers) {
-            const ctrlExpression =
-              node.getCtrl() ||
-              memberExpression(
-                component.componentIdentifier,
-                identifier(COMPONENT_PROPERTIES.ctrl)
-              );
-            callbackArgs.push(ctrlExpression);
+            callbackArgs.push(getCtrlExpression(node, component));
           }
 
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
@@ -366,13 +361,7 @@ export function processNodes(
         if (stubName) {
           const callbackArgs: any[] = [component.propsIdentifier];
           if (wallaceConfig.flags.useControllers) {
-            const ctrlExpression =
-              node.getCtrl() ||
-              memberExpression(
-                component.componentIdentifier,
-                identifier(COMPONENT_PROPERTIES.ctrl)
-              );
-            callbackArgs.push(ctrlExpression);
+            callbackArgs.push(getCtrlExpression(node, component));
           }
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
