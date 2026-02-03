@@ -86,6 +86,7 @@ export class ExtractedNode {
   #ref: string | undefined;
   #part: string | undefined;
   #props: Expression | undefined;
+  #ctrl: Expression | undefined;
   #forExpression: Expression | undefined;
   #forVariable: string | undefined;
   constructor(address: Array<number>, path: NodePath<ValidElementType>, parent: TagNode) {
@@ -125,6 +126,15 @@ export class ExtractedNode {
       expression,
       `${WATCH_CALLBACK_ARGS.element}.textContent = ${WATCH_CALLBACK_ARGS.newValue}`
     );
+  }
+  setCtrl(expression: Expression) {
+    if (this.#ctrl) {
+      error(this.path, ERROR_MESSAGES.CTRL_ALREADY_DEFINED);
+    }
+    this.#ctrl = expression;
+  }
+  getCtrl(): Expression {
+    return this.repeatNode ? this.repeatNode.getCtrl() : this.#ctrl;
   }
   setProps(expression: Expression) {
     if (this.#props) {

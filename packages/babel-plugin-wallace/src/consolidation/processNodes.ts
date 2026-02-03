@@ -185,12 +185,13 @@ function processRepeater(
     repeatInstruction.expression
   ];
   if (wallaceConfig.flags.useControllers) {
-    callbackArgs.push(
+    const ctrlExpression =
+      node.getCtrl() ||
       memberExpression(
         component.componentIdentifier,
         identifier(COMPONENT_PROPERTIES.ctrl)
-      )
-    );
+      );
+    callbackArgs.push(ctrlExpression);
   }
   addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
     expressionStatement(
@@ -350,12 +351,13 @@ export function processNodes(
         if (node.isNestedComponent) {
           const callbackArgs = [node.getProps() || t.objectExpression([])];
           if (wallaceConfig.flags.useControllers) {
-            callbackArgs.push(
+            const ctrlExpression =
+              node.getCtrl() ||
               memberExpression(
                 component.componentIdentifier,
                 identifier(COMPONENT_PROPERTIES.ctrl)
-              )
-            );
+              );
+            callbackArgs.push(ctrlExpression);
           }
 
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
@@ -378,12 +380,13 @@ export function processNodes(
         if (stubName) {
           const callbackArgs: any[] = [component.propsIdentifier];
           if (wallaceConfig.flags.useControllers) {
-            callbackArgs.push(
+            const ctrlExpression =
+              node.getCtrl() ||
               memberExpression(
                 component.componentIdentifier,
                 identifier(COMPONENT_PROPERTIES.ctrl)
-              )
-            );
+              );
+            callbackArgs.push(ctrlExpression);
           }
           addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
             expressionStatement(
