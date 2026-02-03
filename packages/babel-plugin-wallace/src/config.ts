@@ -4,6 +4,7 @@ import { Directive } from "./models";
 import { builtinDirectives } from "./directives";
 
 export enum FlagValue {
+  useBase = "useBase",
   useControllers = "useControllers",
   useMethods = "useMethods",
   useParts = "useParts",
@@ -18,6 +19,7 @@ interface WallaceOptions {
 }
 
 const DefaultFlagValues: Flag = {
+  useBase: true,
   useControllers: true,
   useMethods: true,
   useParts: true,
@@ -25,6 +27,7 @@ const DefaultFlagValues: Flag = {
 };
 
 const DefaultFlagOverrideValues: Flag = {
+  useBase: false,
   useControllers: false,
   useMethods: false,
   useParts: false,
