@@ -1,10 +1,12 @@
+import type { NodePath } from "@babel/core";
+import { ERROR_MESSAGES, error } from "./errors";
 import { Directive } from "./models";
 import { builtinDirectives } from "./directives";
 
-enum FlagValue {
+export enum FlagValue {
   useControllers = "useControllers",
-  useStubs = "useStubs",
-  useMethods = "useMethods"
+  useMethods = "useMethods",
+  useStubs = "useStubs"
 }
 
 type Flag = Record<FlagValue, boolean>;
@@ -16,8 +18,8 @@ interface WallaceOptions {
 
 const DefaultFlags: Flag = {
   useControllers: false,
-  useStubs: false,
-  useMethods: false
+  useMethods: false,
+  useStubs: false
 };
 
 class WallaceConfig {
@@ -57,6 +59,11 @@ class WallaceConfig {
       }
     }
     this.flags = Object.assign({}, DefaultFlags, suppliedFlags);
+  }
+  ensureFlagIstrue(path: NodePath<any>, flag: FlagValue) {
+    if (!this.flags[flag]) {
+      error(path, ERROR_MESSAGES.FLAG_REQUIRED(String(flag)));
+    }
   }
 }
 

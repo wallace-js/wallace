@@ -1,6 +1,7 @@
 import type { NodePath } from "@babel/core";
 import type { JSXElement, JSXExpressionContainer, JSXText } from "@babel/types";
 import { getJSXElementName } from "../ast-helpers";
+import { wallaceConfig, FlagValue } from "../config";
 import { Component, WalkTracker } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { isCapitalized } from "../utils";
@@ -40,6 +41,7 @@ export const jsxVisitors = {
       } else if (namespace === "stub") {
         // TODO: ensure there is nothing inside and no other attributes.
         // alternatively, allow attributes to control the stub.
+        wallaceConfig.ensureFlagIstrue(path, FlagValue.useStubs);
         component.processStub(path, name, tracker);
       } else {
         error(path, ERROR_MESSAGES.UNSUPPORTED_NAMESPACE);
