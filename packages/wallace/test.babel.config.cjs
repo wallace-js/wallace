@@ -28,12 +28,6 @@ module.exports = {
     [
       "babel-plugin-wallace",
       {
-        flags: {
-          useControllers: true,
-          useMethods: true,
-          useParts: true,
-          useStubs: true
-        },
         directives: [TestDirectiveInConfig]
       }
     ],
