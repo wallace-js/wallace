@@ -461,7 +461,6 @@ function processEventListeners(
   component: Component,
   node: ExtractedNode
 ) {
-  componentDefinition.needsTempThis = true;
   // TODO: improve this, as we are basically renaming things specifically for the
   // build function that have already been renamed, which can get confusing.
   // It also needs to rename ctrl and props explicitly as it doesn't seem to

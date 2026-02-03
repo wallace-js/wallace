@@ -20,7 +20,6 @@ import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils"
  * An object with all the consolidated data for writing.
  */
 export class ComponentDefinitionData {
-  needsTempThis = false;
   needsStash = false;
   component: Component;
   html: Expression;
