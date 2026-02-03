@@ -95,7 +95,6 @@ export const flattenUpdate = {
             const functionDef = path.node.value as FunctionExpression;
             functionDef.params = [];
             const varDeclation = functionDef.body.body[0] as VariableDeclaration;
-            console.log(varDeclation);
             varDeclation.declarations.push(
               t.variableDeclarator(t.identifier("i"), t.numericLiteral(0)),
               t.variableDeclarator(

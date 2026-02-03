@@ -585,6 +585,7 @@ declare module "wallace" {
       hide
     }: {
       props?: Props;
+      ctrl?: any;
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
@@ -595,6 +596,7 @@ declare module "wallace" {
       hide
     }: {
       items: Array<Props>;
+      ctrl?: any;
       key?: string | ((item: Props) => any);
       show?: boolean;
       hide?: boolean;
@@ -751,7 +753,7 @@ declare module "wallace" {
   type WatchCallback = (target: any, key: string, value: any) => void;
 
   /**
-   * Returns a Proxy of an object which calls `callback` when it, or its nested objects
+   * Returns a Proxy of the target which calls `callback` when it, or its nested objects
    * are modified:
    *
    * ```js
@@ -764,6 +766,9 @@ declare module "wallace" {
    * obj.y = {}
    * obj.y.z = 1000
    * ```
+   *
+   * The original object is also modified.
+   *
    * The callback accepts parameters:
    *
    *  - `target` - the object which is being modified.
@@ -771,10 +776,6 @@ declare module "wallace" {
    *  - `value` - the value it is being set to.
    *
    * The callback is called after the modification has occured.
-   *
-   * Some methods like `Array.push` set the index and then the length immediately after,
-   * so we use a timeout period to avoid calling the callback twice for what is really a
-   * single operation.
    *
    * @param {*} target - Any object, including arrays.
    * @param {*} callback - A callback function.
@@ -910,6 +911,17 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    */
   css?: string;
+
+  /**
+   * ## Wallace directive: ctrl
+   *
+   * Specifies ctrl for nested/repeated components.
+   *
+   * ```
+   * <MyComponent.nest ctrl={aController} />
+   * ```
+   */
+  ctrl?: any;
 
   /**
    * ## Wallace directive: fixed
@@ -1074,21 +1086,22 @@ declare namespace JSX {
      * - `bind` updates a value when an input is changed.
      * - `class:xyz` defines a set of classes to be toggled.
      * - `css` shorthand for `fixed:class`.
+     * - `ctrl` specifies ctrl for nested/repeated components.
      * - `fixed:xyz` sets a attribute from an expression at definition.
      * - `hide` sets an element or component's hidden property.
      * - `html` Set the element's `innnerHTML` property.
      * - `if` excludes an element from the DOM.
      * - `key` specifies a key for repeated items.
      * - `items` set items for repeated component, must be an array of props.
-     * - `on[EventName]` creates an event handler (note the code is copied)
-     * - `part:xyz` saves a reference to part of a component so it can be updated
-     * - `props` specifes props for a nested components.
-     * - `ref:xyz` saves a reference to an element or nested omponent.
+     * - `on[EventName]` creates an event handler (note the code is copied).
+     * - `part:xyz` saves a reference to part of a component so it can be updated.
+     * - `props` specifies props for a nested components.
+     * - `ref:xyz` saves a reference to an element or nested component.
      * - `show` sets and element or component's hidden property.
      * - `style:xyz` sets a specific style property.
      * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
      *   `xyz`.
-     * - `unique` can be set on components which only used once for better performance.
+     * - `unique` can be set on components which are only used once for better performance.
      *
      * You will get more details by hovering on the directive itself, but unfortunetely
      * the tool tip won't display when you use a qualifier, like `class:danger`. To see

@@ -130,7 +130,8 @@ You need to set flags in your babel config to use certain features:
 
 1.  useControllers - enables use of `ctrl` in components.
 2.  useMethods - adds the `methods` helper to components.
-3.  useStubs - enables the use of stubs.
+3.  useParts - enables use of parts.
+4.  useStubs - enables the use of stubs.
 
 The types (and therefore tool tips) are unaffected by these flags, and will treat them
 all as being true.
@@ -144,6 +145,7 @@ module.exports = {
         flags: {
           useControllers: true,
           useMethods: true,
+          useParts: true,
           useStubs: true
         },
         directives: [...]
