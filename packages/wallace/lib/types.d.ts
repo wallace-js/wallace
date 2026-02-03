@@ -8,7 +8,6 @@
 
 ### Contents
 
-  0. Configuration
   1. Components
   2. JSX
   3. Nesting
@@ -19,42 +18,10 @@
   8. Stubs
   9. TypeScript
  10. Helpers
+ 11. Flags
 
 For more detailed documentation go to https://wallace.js.org/docs/
 
-
-## 0. Configuration
-
-You need to set flags in your babel config to use certain features:
-
- 1. useControllers - enables use of `ctrl` in components.
- 2. useMethods - adds the `methods` helper to components.
- 3. useStubs - enables the use of stubs.
-
-The types (and therefore tool tips) are unaffected by these flags, and will treat them
-all as being true.
-
-```tsx
-module.exports = {
-  plugins: [
-    [
-      "babel-plugin-wallace",
-      {
-        flags: {
-          useControllers: true,
-          useMethods: true,
-          useStubs: true
-        },
-        directives: [...]
-      }
-    ],
-    "@babel/plugin-syntax-jsx"
-  ],
-  presets: ["@babel/preset-typescript", ...]
-};
-```
-
-The `directives` option lets you override or define new directives. See main docs.
 
 ## 1. Components
 
@@ -553,6 +520,42 @@ modified.
 const protectedObj = protect([]);
 watchedObj[0] = 'foo';  // throws error.
 ```
+
+## 11. Flags
+
+You can toggle flags in your babel config to disable certain features for cutting edge
+performance and bundle size:
+
+1.  useBase - enables use of `base` in components.
+2.  useControllers - enables use of `ctrl` in components.
+3.  useMethods - adds the `methods` helper to components.
+4.  useParts - enables use of parts.
+5.  useStubs - enables the use of stubs.
+
+These flags default to true, unless you specify `flags` in the plugin config, in which
+case they default to false and you need to explicitly enable those you want:
+
+
+```tsx
+module.exports = {
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        flags: {
+          useControllers: true,
+          useStubs: false
+        },
+      }
+    ],
+    "@babel/plugin-syntax-jsx"
+  ],
+  presets: ["@babel/preset-typescript", ...]
+};
+```
+
+The types (and therefore tool tips) are unaffected by these flags, and will treat them
+all as being true.
 
 ---
 Report any issues to https://github.com/wallace-js/wallace (and please give it a ★)
