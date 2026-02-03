@@ -588,21 +588,18 @@ declare module "wallace" {
       hide
     }: {
       props?: Props;
-      ctrl?: any;
+      ctrl?: Controller;
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
     repeat?({
       items,
-      key,
-      show,
-      hide
+      ctrl,
+      key
     }: {
       items: Array<Props>;
-      ctrl?: any;
+      ctrl?: Controller;
       key?: string | ((item: Props) => any);
-      show?: boolean;
-      hide?: boolean;
     }): JSX.Element;
     methods?: ComponenMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
