@@ -2,22 +2,33 @@ const throwAway = document.createElement("template");
 const NO_LOOKUP = "__";
 
 const ComponentPrototype = {
-  /**
-   * The render function that gets called by parent components.
-   */
+  /*
+  COMPILER_MODS:
+    if useController is false:
+     - param `ctrl` is removed.
+     - `this.ctrl = ctrl` is removed.
+  */
   render: function (props, ctrl) {
     this.props = props;
     this.ctrl = ctrl;
     this.update();
   },
 
-  /**
-   * Updates the DOM and renders nested components.
-   */
+  /*
+  COMPILER_MODS:
+    if useFlags is false this is deleted.
+  */
   update: function () {
     this._u(0, this._l);
   },
 
+  /*
+  COMPILER_MODS:
+  if useFlags is false:
+    - gets renamed to `update`
+    - parameters are removed
+    - add `i = 0, il = this._l` to variable declarator.
+  */
   _u: function (i, il) {
     let watch,
       element,

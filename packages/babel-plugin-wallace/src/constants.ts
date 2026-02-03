@@ -58,7 +58,9 @@ export enum COMPONENT_PROPERTIES {
   template = "_t",
   watches = "_w",
   render = "render",
-  tmpThis = "_this"
+  tmpThis = "_this",
+  update = "update",
+  updateInner = "_u"
 }
 
 export enum SPECIAL_SYMBOLS {

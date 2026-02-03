@@ -30,8 +30,9 @@ module.exports = {
       {
         flags: {
           useControllers: true,
-          useStubs: true,
-          useMethods: true
+          useMethods: true,
+          useParts: true,
+          useStubs: true
         },
         directives: [TestDirectiveInConfig]
       }

@@ -7,6 +7,7 @@
  * changes here be sure to update that file.
  */
 
+import { wallaceConfig, FlagValue } from "./config";
 import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
@@ -188,6 +189,7 @@ class PartDirective extends Directive {
     /h <div part:title></div>
     `;
   apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.useParts);
     node.setPart(qualifier);
   }
 }

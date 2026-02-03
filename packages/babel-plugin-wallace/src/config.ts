@@ -6,6 +6,7 @@ import { builtinDirectives } from "./directives";
 export enum FlagValue {
   useControllers = "useControllers",
   useMethods = "useMethods",
+  useParts = "useParts",
   useStubs = "useStubs"
 }
 
@@ -19,6 +20,7 @@ interface WallaceOptions {
 const DefaultFlags: Flag = {
   useControllers: false,
   useMethods: false,
+  useParts: false,
   useStubs: false
 };
 
