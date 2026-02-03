@@ -17,7 +17,14 @@ interface WallaceOptions {
   flags?: Flag;
 }
 
-const DefaultFlags: Flag = {
+const DefaultFlagValues: Flag = {
+  useControllers: true,
+  useMethods: true,
+  useParts: true,
+  useStubs: true
+};
+
+const DefaultFlagOverrideValues: Flag = {
   useControllers: false,
   useMethods: false,
   useParts: false,
@@ -55,12 +62,14 @@ class WallaceConfig {
   applyFlags(suppliedFlags: Flag | undefined) {
     if (suppliedFlags) {
       for (const [flag, value] of Object.entries(suppliedFlags)) {
-        if (!DefaultFlags.hasOwnProperty(flag)) {
+        if (!DefaultFlagValues.hasOwnProperty(flag)) {
           throw new Error(`Unknown flag ${flag} in supplied flags.`);
         }
       }
+      this.flags = Object.assign({}, DefaultFlagOverrideValues, suppliedFlags);
+    } else {
+      this.flags = Object.assign({}, DefaultFlagValues, suppliedFlags);
     }
-    this.flags = Object.assign({}, DefaultFlags, suppliedFlags);
   }
   ensureFlagIstrue(path: NodePath<any>, flag: FlagValue) {
     if (!this.flags[flag]) {
