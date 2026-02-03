@@ -6,6 +6,7 @@ export { nestComponent } from "./nestComponent";
 export { saveRef } from "./refs";
 export { savePart } from "./part";
 export { KeyedRepeater } from "./repeaters/keyed";
+export { KeyedFnRepeater } from "./repeaters/keyedFn";
 export { SequentialRepeater } from "./repeaters/sequential";
 export { Router, route } from "./router";
 export { getStub } from "./stubs";
