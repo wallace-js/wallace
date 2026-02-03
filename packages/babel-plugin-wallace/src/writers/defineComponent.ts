@@ -72,7 +72,9 @@ function buildLookupsArg(componentDefinition: ComponentDefinitionData): ArrayExp
   return t.arrayExpression(values);
 }
 
-function getDynamicElements(componentDefinition): CallExpression[] {
+function getDynamicElements(
+  componentDefinition: ComponentDefinitionData
+): CallExpression[] {
   // TODO: clean up temp code when original on componentDefinition is an array too.
   const keys = Object.keys(componentDefinition.dynamicElements).sort();
   return keys.map(key => componentDefinition.dynamicElements[key]);
@@ -81,38 +83,29 @@ function getDynamicElements(componentDefinition): CallExpression[] {
 function buildConstructor(
   componentDefinition: ComponentDefinitionData
 ): FunctionExpression {
+  const tmpThis = t.identifier(COMPONENT_PROPERTIES.tmpThis);
   const emptyObject = () => t.objectExpression([]);
   const assignThis = (field: COMPONENT_PROPERTIES, expr: Expression) =>
-    t.assignmentExpression(
-      "=",
-      t.memberExpression(t.thisExpression(), t.identifier(field)),
-      expr
-    );
+    t.assignmentExpression("=", t.memberExpression(tmpThis, t.identifier(field)), expr);
 
   const assignAndDeclare = (field: COMPONENT_PROPERTIES, expr: Expression) =>
     t.variableDeclarator(
       t.identifier(field),
-      t.assignmentExpression(
-        "=",
-        t.memberExpression(t.thisExpression(), t.identifier(field)),
-        expr
-      )
+      t.assignmentExpression("=", t.memberExpression(tmpThis, t.identifier(field)), expr)
     );
 
   const createRootExpression = componentDefinition.component.unique
-    ? t.memberExpression(t.thisExpression(), t.identifier(COMPONENT_PROPERTIES.template))
+    ? t.memberExpression(tmpThis, t.identifier(COMPONENT_PROPERTIES.template))
     : t.callExpression(
         t.memberExpression(
-          t.memberExpression(
-            t.thisExpression(),
-            t.identifier(COMPONENT_PROPERTIES.template)
-          ),
+          t.memberExpression(tmpThis, t.identifier(COMPONENT_PROPERTIES.template)),
           t.identifier("cloneNode")
         ),
         [t.booleanLiteral(true)]
       );
 
   const chainedConstExpressions = [
+    t.variableDeclarator(tmpThis, t.thisExpression()),
     assignAndDeclare(COMPONENT_PROPERTIES.root, createRootExpression)
   ];
 
@@ -128,12 +121,6 @@ function buildConstructor(
     );
   }
 
-  if (componentDefinition.needsTempThis) {
-    chainedConstExpressions.push(
-      t.variableDeclarator(t.identifier(COMPONENT_PROPERTIES.tmpThis), t.thisExpression())
-    );
-  }
-
   if (componentDefinition.needsStash) {
     chainedConstExpressions.push(
       assignAndDeclare(COMPONENT_PROPERTIES.stash, t.arrayExpression([]))
@@ -145,10 +132,7 @@ function buildConstructor(
     assignThis(
       COMPONENT_PROPERTIES.watchLength,
       t.memberExpression(
-        t.memberExpression(
-          t.thisExpression(),
-          t.identifier(COMPONENT_PROPERTIES.watches)
-        ),
+        t.memberExpression(tmpThis, t.identifier(COMPONENT_PROPERTIES.watches)),
         t.identifier("length")
       )
     ),
@@ -168,10 +152,7 @@ function buildConstructor(
     expressions.push(
       t.assignmentExpression(
         "=",
-        t.memberExpression(
-          t.thisExpression(),
-          t.identifier(COMPONENT_PROPERTIES.elements)
-        ),
+        t.memberExpression(tmpThis, t.identifier(COMPONENT_PROPERTIES.elements)),
         t.arrayExpression(dynamicElementCalls)
       )
     );
