@@ -4,11 +4,11 @@
  * Repeats nested components, reusing items based on key.
  *
  * @param {function} componentDefinition - The ComponentDefinition to create.
- * @param {string} keyName - The name of the key property.
+ * @param {function} keyFn - A function which obtains the key.
  */
-export function KeyedRepeater(componentDefinition, keyName) {
+export function KeyedFnRepeater(componentDefinition, keyFn) {
   this.def = componentDefinition;
-  this.keyName = keyName;
+  this.keyFn = keyFn;
   this.keys = []; // array of keys as last set.
   this.pool = {}; // pool of component instances.
 }
@@ -21,10 +21,10 @@ export function KeyedRepeater(componentDefinition, keyName) {
  * @param {Array} items - Array of items which will be passed as props.
  * @param {any} ctrl - The parent item's controller.
  */
-KeyedRepeater.prototype.patch = function (e, items, ctrl) {
+KeyedFnRepeater.prototype.patch = function (e, items, ctrl) {
   const pool = this.pool,
     componentDefinition = this.def,
-    keyName = this.keyName,
+    keyFn = this.keyFn,
     childNodes = e.childNodes,
     itemsLength = items.length,
     previousKeys = this.keys,
@@ -46,7 +46,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   const frag = document.createDocumentFragment();
   while (i >= 0) {
     item = items[i];
-    key = item[keyName];
+    key = keyFn(item);
     component = pool[key] || (pool[key] = new componentDefinition());
     component.render(item, ctrl);
     el = component.el;

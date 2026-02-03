@@ -135,20 +135,6 @@ function addToggleCallbackStatement(
   });
 }
 
-function getKeyFunction(repeatKey: Expression | string | undefined) {
-  if (typeof repeatKey === "string") {
-    const param = t.identifier("x");
-    return t.functionExpression(
-      null,
-      [param],
-      t.blockStatement([
-        t.returnStatement(t.memberExpression(param, t.identifier(repeatKey)))
-      ])
-    );
-  }
-  return repeatKey;
-}
-
 function processRepeater(
   component: Component,
   componentDefinition: ComponentDefinitionData,
@@ -156,20 +142,20 @@ function processRepeater(
   repeatInstruction: RepeatInstruction,
   addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void
 ) {
-  let repeaterInstance, repeaterClass;
+  let repeaterClass;
+  const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
   if (repeatInstruction.repeatKey) {
-    repeaterClass = IMPORTABLES.KeyedRepeater;
-    repeaterInstance = newExpression(identifier(repeaterClass), [
-      identifier(repeatInstruction.componentCls),
-      getKeyFunction(repeatInstruction.repeatKey)
-    ]);
+    if (typeof repeatInstruction.repeatKey === "string") {
+      repeaterClass = IMPORTABLES.KeyedRepeater;
+      repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
+    } else {
+      repeaterClass = IMPORTABLES.KeyedFnRepeater;
+      repeaterArgs.push(repeatInstruction.repeatKey);
+    }
   } else {
     repeaterClass = IMPORTABLES.SequentialRepeater;
-    repeaterInstance = newExpression(identifier(repeaterClass), [
-      identifier(repeatInstruction.componentCls)
-    ]);
   }
-
+  const repeaterInstance = newExpression(identifier(repeaterClass), repeaterArgs);
   componentDefinition.component.module.requireImport(repeaterClass);
   componentDefinition.component.module.requireImport(IMPORTABLES.stashMisc);
 
