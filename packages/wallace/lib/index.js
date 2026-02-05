@@ -1,4 +1,5 @@
 export { defineComponent } from "./component";
+export { Detacher } from "./detacher";
 export { extendComponent } from "./extend";
 export { mount } from "./mount";
 export { createComponent } from "./createComponent";

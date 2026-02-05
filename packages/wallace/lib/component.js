@@ -30,21 +30,12 @@ const ComponentPrototype = {
     - add `i = 0, il = this._l` to variable declarator.
   */
   _u: function (i, il) {
-    let watch,
-      element,
-      parent,
-      displayToggle,
-      detacher,
-      lookupTrue,
-      shouldBeVisible,
-      detachedElements,
-      detachedElement,
-      index,
-      adjustedIndex;
+    let watch, element, displayToggle, detacher, lookupTrue, shouldBeVisible;
 
     const watches = this._w,
       props = this.props,
-      previous = this._p;
+      previous = this._p,
+      elements = this._e;
     /*
       Watches is an array of objects with keys:
         e: the element index (number)
@@ -59,15 +50,10 @@ const ComponentPrototype = {
         s: the number of watches to skip as their node is underneath
         r: reversed
         ?d: detacher 
-
-      The detacher has keys:
-        i: the initial element index
-        s: the stash key of the detacher (plain object)
-        e: the parent element key
       */
     while (i < il) {
       watch = watches[i];
-      element = this._e[watch.e];
+      element = elements[watch.e];
       displayToggle = watch.v;
       shouldBeVisible = true;
       if (displayToggle) {
@@ -75,22 +61,7 @@ const ComponentPrototype = {
         shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
         detacher = displayToggle.d;
         if (detacher) {
-          index = detacher.i;
-          parent = this._e[detacher.e];
-          detachedElements = this._s[detacher.s];
-          detachedElement = detachedElements[index];
-          if (shouldBeVisible && detachedElement) {
-            adjustedIndex =
-              index -
-              Object.keys(detachedElements).filter(function (k) {
-                return k < index && detachedElements[k];
-              }).length;
-            parent.insertBefore(detachedElement, parent.childNodes[adjustedIndex]);
-            detachedElements[index] = null;
-          } else if (!shouldBeVisible && !detachedElement) {
-            parent.removeChild(element);
-            detachedElements[index] = element;
-          }
+          detacher.apply(element, shouldBeVisible, elements, this._s);
         } else {
           element.hidden = !shouldBeVisible;
         }

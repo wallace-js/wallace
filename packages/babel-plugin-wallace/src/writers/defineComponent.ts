@@ -52,11 +52,11 @@ function buildWatchesArg(componentDefinition: ComponentDefinitionData): ArrayExp
       };
       if (watch.shieldInfo.detacher) {
         const detacher = watch.shieldInfo.detacher;
-        visibilityToggle["d"] = buildObjectExpression({
-          i: t.numericLiteral(detacher.index),
-          s: t.numericLiteral(detacher.stashKey),
-          e: t.numericLiteral(detacher.parentKey)
-        });
+        visibilityToggle["d"] = t.newExpression(t.identifier(IMPORTABLES.detacher), [
+          t.numericLiteral(detacher.index),
+          t.numericLiteral(detacher.parentKey),
+          t.numericLiteral(detacher.stashKey)
+        ]);
       }
       watchArg["v"] = buildObjectExpression(visibilityToggle);
     }

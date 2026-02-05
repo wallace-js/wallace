@@ -2,6 +2,7 @@ export const HTML_SPLITTER = "____split____";
 
 export enum IMPORTABLES {
   defineComponent = "defineComponent",
+  detacher = "Detacher",
   extendComponent = "extendComponent",
   findElement = "findElement",
   getStub = "getStub",

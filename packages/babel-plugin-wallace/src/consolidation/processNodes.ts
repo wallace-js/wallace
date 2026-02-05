@@ -390,6 +390,7 @@ export function processNodes(
             if (node.parent.detacherStashKey === undefined) {
               throw new Error("Parent node was not given a stash key");
             }
+            component.module.requireImport(IMPORTABLES.detacher);
             componentWatch.shieldInfo.detacher = {
               index: node.address[node.address.length - 1],
               stashKey: node.parent.detacherStashKey,
