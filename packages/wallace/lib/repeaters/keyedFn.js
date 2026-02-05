@@ -30,7 +30,8 @@ KeyedFnRepeater.prototype.patch = function (e, items, ctrl) {
     previousKeys = this.keys,
     previousKeysLength = previousKeys.length,
     newKeys = [],
-    previousKeysSet = new Set(previousKeys);
+    previousKeysSet = new Set(previousKeys),
+    frag = document.createDocumentFragment();
   let item,
     el,
     key,
@@ -43,7 +44,6 @@ KeyedFnRepeater.prototype.patch = function (e, items, ctrl) {
     i = itemsLength - 1;
 
   // Working backwards saves us having to track moves.
-  const frag = document.createDocumentFragment();
   while (i >= 0) {
     item = items[i];
     key = keyFn(item);

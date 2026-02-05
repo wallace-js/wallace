@@ -887,7 +887,7 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: class
    *
-   * Without a qualifer this acts as a normal attribute:
+   * Without a qualifier this acts as a normal attribute:
    *
    * ```
    * <div class={foo} ></div>
@@ -915,10 +915,10 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: ctrl
    *
-   * Specifies ctrl for nested/repeated components.
+   * Specifies alternative `ctrl` for nested or repeated components.
    *
    * ```
-   * <MyComponent.nest ctrl={aController} />
+   * <MyComponent.nest ctrl={altController} />
    * ```
    */
   ctrl?: any;
