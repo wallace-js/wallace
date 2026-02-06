@@ -71,6 +71,7 @@ export class ExtractedNode {
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
   hasConditionalChildren: boolean = false;
+  hasRepeatedChildren: boolean = false;
   #repeatExpression: Expression | undefined;
   // poolExpression: Expression | undefined;
   /**
@@ -184,7 +185,7 @@ export class ExtractedNode {
     }
     this.isRepeatedComponent = true;
     this.#repeatExpression = expression;
-    this.parent.repeatNode = this;
+    // this.parent.repeatNode = this;
   }
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
@@ -193,14 +194,22 @@ export class ExtractedNode {
    * Called on the parent of a repeat.
    */
   getRepeatInstruction(): RepeatInstruction | undefined {
-    return this.repeatNode
-      ? {
-          expression: this.repeatNode.#repeatExpression,
-          componentCls: this.repeatNode.tagName,
-          repeatKey: this.repeatNode.repeatKey
-          // poolExpression: this.repeatNode.poolExpression
-        }
-      : undefined;
+    if (this.isRepeatedComponent) {
+      return {
+        expression: this.#repeatExpression,
+        componentCls: this.tagName,
+        repeatKey: this.repeatKey
+        // poolExpression: this.repeatNode.poolExpression
+      };
+    }
+    // return this.repeatNode
+    //   ? {
+    //       expression: this.repeatNode.#repeatExpression,
+    //       componentCls: this.repeatNode.tagName,
+    //       repeatKey: this.repeatNode.repeatKey
+    //       // poolExpression: this.repeatNode.poolExpression
+    //     }
+    //   : undefined;
   }
   setStub(name: string) {
     if (!this.parent) {
@@ -260,6 +269,9 @@ export class TagNode extends ExtractedNode {
         error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
       }
     }
+    if (this.isRepeatedComponent) {
+      this.parent.hasRepeatedChildren = true;
+    }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
@@ -268,9 +280,9 @@ export class TagNode extends ExtractedNode {
     this.component.htmlExpressions.push(expression);
     this.attributes.push({ name, value: HTML_SPLITTER });
   }
-  getElement(): HTMLElement | undefined {
+  getElement(): HTMLElement | Text {
     if (this.isRepeatedComponent) {
-      return undefined;
+      return undefined; //createElement("div"); //createTextNode("X");
     }
     const element = createElement(this.tagName);
     this.attributes.forEach(({ name, value }) => {

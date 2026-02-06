@@ -147,7 +147,8 @@ function processRepeater(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
   repeatInstruction: RepeatInstruction,
-  addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void
+  addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void,
+  detacherInfo?: { index: number; stashKey: number }
 ) {
   let repeaterClass;
   const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
@@ -238,15 +239,16 @@ export function processNodes(
     if (node.isRepeatedComponent) {
       // The watch should already have been added to the parent node, which is already
       // processed. All we do here is run some extra checks.
-      const siblings = getSiblings(node, component.extractedNodes);
-      if (siblings.length > 0) {
-        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
-      }
+      // const siblings = getSiblings(node, component.extractedNodes);
+      // if (siblings.length > 0) {
+      //   error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
+      // }
       const children = getChildren(node, component.extractedNodes);
       if (children.length > 0) {
         error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
       }
-      return;
+      // TODO: check it has items too?
+      // return;
     }
 
     const stubName = node.getStub();
@@ -268,7 +270,7 @@ export function processNodes(
       node.toggleTriggers.length > 0 ||
       visibilityToggle ||
       node.isNestedComponent ||
-      repeatInstruction || // This is NOT the same as .isRepeatedComponent, which is on parent!
+      repeatInstruction ||
       stubName;
 
     // TODO: some of these should not save the element...
@@ -278,9 +280,10 @@ export function processNodes(
       ref ||
       part ||
       node.eventListeners.length > 0 ||
+      node.hasRepeatedChildren ||
       node.hasConditionalChildren;
 
-    if (node.hasConditionalChildren) {
+    if (node.hasConditionalChildren || node.hasRepeatedChildren) {
       node.detacherStashKey = componentDefinition.stashItem(t.objectExpression([]));
     }
 
@@ -291,7 +294,8 @@ export function processNodes(
         node.isNestedComponent || node.isRepeatedComponent
           ? t.identifier(node.tagName)
           : stubExpression;
-      node.elementKey = nestedComponentCls
+
+      node.elementKey = node.isNestedComponent
         ? componentDefinition.saveNestedAsDynamicElement(node.address, nestedComponentCls)
         : componentDefinition.saveDynamicElement(node.address);
 
@@ -394,8 +398,13 @@ export function processNodes(
             componentDefinition,
             node,
             repeatInstruction,
-            addCallbackStatement
+            addCallbackStatement,
+            {
+              index: node.address[node.address.length - 1],
+              stashKey: node.parent.detacherStashKey
+            }
           );
+          componentWatch.elementKey = node.parent.elementKey;
         }
 
         for (const key in _callbacks) {
