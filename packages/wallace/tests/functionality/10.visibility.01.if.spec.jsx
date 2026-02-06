@@ -90,6 +90,7 @@ describe("Multiple conditional elements under same element", () => {
     <div>
       <span if={showA}>A</span>
       <span if={showB}>B</span>
+      <hr />
       <span if={showC}>C</span>
       <span if={showD}>D</span>
     </div>
@@ -100,6 +101,7 @@ describe("Multiple conditional elements under same element", () => {
     expect(component).toRender(`
       <div>
         <span>A</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -113,6 +115,7 @@ describe("Multiple conditional elements under same element", () => {
       <div>
         <span>A</span>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -128,6 +131,7 @@ describe("Multiple conditional elements under same element", () => {
     expect(component).toRender(`
       <div>
         <span>B</span>
+        <hr>
         <span>D</span>
       </div>
     `);
@@ -136,6 +140,7 @@ describe("Multiple conditional elements under same element", () => {
     expect(component).toRender(`
       <div>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -146,6 +151,7 @@ describe("Multiple conditional elements under same element", () => {
       <div>
         <span>A</span>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -160,6 +166,7 @@ describe("Multiple conditional elements under same element", () => {
     component.update();
     expect(component).toRender(`
       <div>
+        <hr>
       </div>
     `);
     showA = true;
@@ -171,6 +178,7 @@ describe("Multiple conditional elements under same element", () => {
       <div>
         <span>A</span>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
