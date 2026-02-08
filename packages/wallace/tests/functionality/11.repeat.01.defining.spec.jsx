@@ -53,19 +53,20 @@ describe("Repeat compiles with error when", () => {
     expect(code).toCompileWithError("Repeated component not allowed on root element.");
   });
 
-  test("element has siblings", () => {
-    const code = `
-      const Parent = () => (
-        <div>
-          <div>signling</div>
-          <Child.repeat items={items} />
-        </div>
-      );
-    `;
-    expect(code).toCompileWithError(
-      "Repeat may only be used when the parent node has no other children."
-    );
-  });
+  // TODO: add flag condition
+  // test("element has siblings", () => {
+  //   const code = `
+  //     const Parent = () => (
+  //       <div>
+  //         <div>signling</div>
+  //         <Child.repeat items={items} />
+  //       </div>
+  //     );
+  //   `;
+  //   expect(code).toCompileWithError(
+  //     "Repeat may only be used when the parent node has no other children."
+  //   );
+  // });
 
   // We already catch an error for the nested component having child nodes.
   test("Repeat with child nodes", () => {

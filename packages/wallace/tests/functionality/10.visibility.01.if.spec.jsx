@@ -235,3 +235,87 @@ describe("Multiple conditional elements under different elements", () => {
     `);
   });
 });
+
+test("Conditional nodes after repeat", () => {
+  let show = "ab";
+  const Bar = i => <div>{i}</div>;
+  let items = [];
+  const Foo = () => (
+    <div>
+      <Bar.repeat items={items} />
+      <div if={show.includes("a")}>a</div>
+      <div if={show.includes("b")}>b</div>
+    </div>
+  );
+
+  const component = testMount(Foo);
+  expect(component).toRender(`
+    <div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+  `);
+
+  show = "b";
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>b</div>
+    </div>
+    `);
+
+  show = "ab";
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+
+  items.push("fish", "chips");
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>chips</div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+
+  items.pop();
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+
+  show = "b";
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>b</div>
+    </div>
+    `);
+
+  show = "ab";
+  items.push("salad");
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>salad</div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+});

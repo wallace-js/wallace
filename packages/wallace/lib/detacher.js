@@ -14,7 +14,6 @@ Detacher.prototype.apply = function (element, shouldBeVisible, elements, stash) 
     parent = elements[this.e],
     detachedElementCache = stash[this.s];
   let offset = detachedElementCache[index] || 0;
-  console.log("fff", index, shouldBeVisible, element, detachedElementInfo);
   if (shouldBeVisible && offset === -1) {
     adjustedIndex = countAdjustments(detachedElementCache, index);
     console.log("inserting", adjustedIndex, element, parent.childNodes[adjustedIndex]);
