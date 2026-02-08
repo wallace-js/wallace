@@ -1,5 +1,9 @@
 export function findElement(rootElement, path) {
-  return path.reduce((acc, index) => acc.childNodes[index], rootElement);
+  let node = rootElement;
+  for (let i = 0; i < path.length; i++) {
+    node = node.childNodes[path[i]];
+  }
+  return node;
 }
 
 export function replaceNode(nodeToReplace, newNode) {
