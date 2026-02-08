@@ -1,7 +1,9 @@
 export function countAdjustments(detachedElementCache, index) {
-  var adjustment = 0;
-  for (var key in detachedElementCache) {
-    if (key < index) adjustment += detachedElementCache[key].a;
+  var i = 0,
+    adjustment = 0;
+  while (i < index) {
+    adjustment += detachedElementCache[i] || 0;
+    i++;
   }
   return index + adjustment;
 }
