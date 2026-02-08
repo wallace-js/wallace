@@ -385,7 +385,7 @@ export function processNodes(
             }
             component.module.requireImport(IMPORTABLES.detacher);
             componentWatch.shieldInfo.detacher = {
-              index: node.address[node.address.length - 1],
+              originalIndex: node.initialIndex,
               stashKey: node.parent.detacherStashKey,
               parentKey: node.parent.elementKey
             };
@@ -400,7 +400,7 @@ export function processNodes(
             repeatInstruction,
             addCallbackStatement,
             {
-              index: node.address[node.address.length - 1],
+              index: node.initialIndex,
               stashKey: node.parent.detacherStashKey
             }
           );

@@ -53,7 +53,7 @@ function buildWatchesArg(componentDefinition: ComponentDefinitionData): ArrayExp
       if (watch.shieldInfo.detacher) {
         const detacher = watch.shieldInfo.detacher;
         visibilityToggle["d"] = t.newExpression(t.identifier(IMPORTABLES.detacher), [
-          t.numericLiteral(detacher.index),
+          t.numericLiteral(detacher.originalIndex),
           t.numericLiteral(detacher.parentKey),
           t.numericLiteral(detacher.stashKey)
         ]);

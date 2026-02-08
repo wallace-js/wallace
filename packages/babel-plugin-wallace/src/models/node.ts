@@ -65,6 +65,7 @@ export class ExtractedNode {
   repeatNode: ExtractedNode | undefined;
   repeatKey: Expression | string | undefined;
   address: Array<number>;
+  initialIndex: number;
   path: NodePath<ValidElementType>;
   parent: TagNode;
   watches: Watch[] = [];
@@ -90,9 +91,15 @@ export class ExtractedNode {
   #ctrl: Expression | undefined;
   #forExpression: Expression | undefined;
   #forVariable: string | undefined;
-  constructor(address: Array<number>, path: NodePath<ValidElementType>, parent: TagNode) {
-    this.path = path;
+  constructor(
+    path: NodePath<ValidElementType>,
+    address: Array<number>,
+    initialIndex: number,
+    parent: TagNode
+  ) {
     this.address = address;
+    this.initialIndex = initialIndex;
+    this.path = path;
     this.parent = parent;
   }
   getElement(): HTMLElement | Text {
@@ -248,18 +255,17 @@ export class TagNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
+    initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
     tagName: string,
     isNestedComponent: boolean,
     isRepeatedComponent: boolean
   ) {
-    super(address, path, parent);
-    this.path = path;
-    this.address = address;
+    console.log("TagNode", tagName, address);
+    super(path, address, initialIndex, parent);
     this.component = component;
     this.tagName = tagName;
-    this.parent = parent;
     this.isNestedComponent = isNestedComponent;
     this.isRepeatedComponent = isRepeatedComponent;
     if (!this.parent) {
@@ -297,10 +303,11 @@ export class StubNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
+    initialIndex: number,
     parent: TagNode,
     name: string
   ) {
-    super(address, path, parent);
+    super(path, address, initialIndex, parent);
     this.setStub(name);
   }
   getElement(): HTMLElement | Text {
@@ -313,10 +320,11 @@ export class DynamicTextNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXExpressionContainer>,
     address: Array<number>,
+    initialIndex: number,
     parent: TagNode,
     expression: Expression
   ) {
-    super(address, path, parent);
+    super(path, address, initialIndex, parent);
     this.watchText(expression);
   }
   getElement(): HTMLElement | Text {
@@ -326,8 +334,13 @@ export class DynamicTextNode extends ExtractedNode {
 }
 
 export class PlainTextNode extends ExtractedNode {
-  constructor(path: NodePath<JSXText>, address: Array<number>, parent: TagNode) {
-    super(address, path, parent);
+  constructor(
+    path: NodePath<JSXText>,
+    address: Array<number>,
+    initialIndex: number,
+    parent: TagNode
+  ) {
+    super(path, address, initialIndex, parent);
   }
   getElement(): HTMLElement | Text {
     // @ts-ignore

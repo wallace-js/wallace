@@ -1,3 +1,4 @@
+import { countAdjustments } from "../adjuster";
 // WARNING: Code here is near duplicated in keyedFn.
 
 /**
@@ -6,9 +7,16 @@
  * @param {function} componentDefinition - The ComponentDefinition to create.
  * @param {string} keyName - The name of the key property.
  */
-export function KeyedRepeater(componentDefinition, keyName) {
+export function KeyedRepeater(
+  componentDefinition,
+  keyName,
+  adjustmentTracker,
+  initialIndex
+) {
   this.def = componentDefinition;
   this.keyName = keyName;
+  this.at = adjustmentTracker;
+  this.ii = initialIndex;
   this.keys = []; // array of keys as last set.
   this.pool = {}; // pool of component instances.
 }
@@ -31,17 +39,33 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     previousKeysLength = previousKeys.length,
     newKeys = [],
     previousKeysSet = new Set(previousKeys),
+    adjustmentTracker = this.at,
+    initialIndex = this.ii,
     frag = document.createDocumentFragment();
+
   let item,
     el,
     key,
     component,
+    endOfRange,
+    endAnchor,
+    adjustment,
     anchor = null,
     fragAnchor = null,
     untouched = true,
     append = false,
     offset = previousKeysLength - itemsLength,
     i = itemsLength - 1;
+
+  if (adjustmentTracker) {
+    // The repeat element has siblings
+    adjustment = countAdjustments(adjustmentTracker, initialIndex);
+    console.log(adjustment, adjustmentTracker);
+    endOfRange = previousKeysLength + adjustment;
+    endAnchor = childNodes[endOfRange] || null;
+    anchor = endAnchor;
+    untouched = false;
+  }
 
   // Working backwards saves us having to track moves.
   while (i >= 0) {
@@ -68,14 +92,17 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   }
 
   if (append) {
-    e.appendChild(frag);
+    e.insertBefore(frag, endAnchor);
   }
 
   let toStrip = previousKeysSet.size;
   while (toStrip > 0) {
-    e.removeChild(childNodes[0]);
+    e.removeChild(childNodes[adjustment]);
     toStrip--;
   }
 
   this.keys = newKeys.reverse();
+  if (adjustmentTracker) {
+    adjustmentTracker[initialIndex] = { a: itemsLength - 1 };
+  }
 };

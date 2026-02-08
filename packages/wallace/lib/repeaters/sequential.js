@@ -6,6 +6,7 @@ export function SequentialRepeater(componentDefinition, adjustmentTracker, initi
   this.def = componentDefinition;
   this.at = adjustmentTracker;
   this.ii = initialIndex;
+  console.log(`ssi`, initialIndex);
   this.pool = []; // pool of component instances
   this.cc = 0; // Child count
 }
@@ -38,6 +39,7 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     offset = countAdjustments(adjustmentTracker, initialIndex);
     endOfRange += offset;
     nextElement = childNodes[endOfRange] || null;
+    console.log("sequ", initialIndex, endOfRange, endOfRange, nextElement);
   }
 
   while (i < itemsLength) {
@@ -62,6 +64,6 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     parent.removeChild(childNodes[i]);
   }
   if (adjustmentTracker) {
-    adjustmentTracker[initialIndex] = { a: itemsLength };
+    adjustmentTracker[initialIndex] = { a: itemsLength - 1 };
   }
 };
