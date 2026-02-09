@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-wallace",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "author": "Andrew Buchan",
   "description": "The babel plugin for wallace",
   "homepage": "https://wallace.js.org",
