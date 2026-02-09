@@ -162,17 +162,11 @@ function processRepeater(
   } else {
     repeaterClass = IMPORTABLES.SequentialRepeater;
   }
-  const repeaterInstance = newExpression(identifier(repeaterClass), repeaterArgs);
   componentDefinition.component.module.requireImport(repeaterClass);
-  componentDefinition.component.module.requireImport(IMPORTABLES.stashMisc);
 
-  // TODO: couple the stash index with the call to save - if possible?
-  // Or make it an object and pass the key when saving.
-  const miscStashKey = componentDefinition.getNextmiscStashKey();
-  componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.stashMisc, [
-    identifier(COMPONENT_PROPERTIES.stash),
-    repeaterInstance
-  ]);
+  const stashKey = componentDefinition.stashItem(
+    newExpression(identifier(repeaterClass), repeaterArgs)
+  );
   const callbackArgs = [
     identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
     repeatInstruction.expression
@@ -189,7 +183,7 @@ function processRepeater(
               component.componentIdentifier,
               identifier(COMPONENT_PROPERTIES.stash)
             ),
-            numericLiteral(miscStashKey),
+            numericLiteral(stashKey),
             true
           ),
           identifier(SPECIAL_SYMBOLS.patch)
@@ -286,6 +280,10 @@ export function processNodes(
       node.eventListeners.length > 0 ||
       node.hasConditionalChildren;
 
+    if (node.hasConditionalChildren) {
+      node.detacherStashKey = componentDefinition.stashItem(t.objectExpression([]));
+    }
+
     ensureToggleTargetsHaveTriggers(node);
 
     if (shouldSaveElement) {
@@ -299,15 +297,6 @@ export function processNodes(
 
       if (node.bindInstructions.length) {
         addBindInstruction(node);
-      }
-
-      if (node.hasConditionalChildren) {
-        node.detacherStashKey = componentDefinition.getNextmiscStashKey();
-        componentDefinition.wrapDynamicElementCall(
-          node.elementKey,
-          IMPORTABLES.stashMisc,
-          [identifier(COMPONENT_PROPERTIES.stash), t.objectExpression([])]
-        );
       }
 
       if (createWatch) {

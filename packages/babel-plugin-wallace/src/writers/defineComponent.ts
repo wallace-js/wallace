@@ -121,12 +121,6 @@ function buildConstructor(
     );
   }
 
-  if (componentDefinition.needsStash) {
-    chainedConstExpressions.push(
-      assignAndDeclare(COMPONENT_PROPERTIES.stash, t.arrayExpression([]))
-    );
-  }
-
   const expressions: any[] = [
     assignThis(COMPONENT_PROPERTIES.props, emptyObject()),
     assignThis(
@@ -141,6 +135,11 @@ function buildConstructor(
       t.arrayExpression(componentDefinition.watches.map(watch => t.objectExpression([])))
     )
   ];
+  if (componentDefinition.stash.length > 0) {
+    expressions.push(
+      assignThis(COMPONENT_PROPERTIES.stash, t.arrayExpression(componentDefinition.stash))
+    );
+  }
 
   if (wallaceConfig.flags.useControllers) {
     expressions.unshift(assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()));

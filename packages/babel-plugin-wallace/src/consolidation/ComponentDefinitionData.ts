@@ -20,7 +20,7 @@ import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils"
  * An object with all the consolidated data for writing.
  */
 export class ComponentDefinitionData {
-  needsStash = false;
+  stash: Array<Expression> = [];
   component: Component;
   html: Expression;
   watches: Array<ComponentWatch> = [];
@@ -30,7 +30,6 @@ export class ComponentDefinitionData {
   refs: string[] = [];
   parts: Array<Part> = [];
   #dynamicElementKey: number = -1;
-  #miscStashKey: number = 0;
   #lookupKeys: Array<String> = [];
   constructor(component: Component) {
     this.component = component;
@@ -88,9 +87,8 @@ export class ComponentDefinitionData {
       [this.dynamicElements[key], ...remainingArgs]
     ));
   }
-  getNextmiscStashKey() {
-    this.needsStash = true;
-    this.#miscStashKey++;
-    return this.#miscStashKey - 1;
+  stashItem(expression: Expression): number {
+    this.stash.push(expression);
+    return this.stash.length - 1;
   }
 }
