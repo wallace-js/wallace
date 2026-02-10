@@ -121,6 +121,12 @@ function buildConstructor(
     );
   }
 
+  componentDefinition.detachers.forEach((detacher, i) => {
+    chainedConstExpressions.push(
+      t.variableDeclarator(t.identifier(componentDefinition.getDetacherId(i)), detacher)
+    );
+  });
+
   const expressions: any[] = [
     assignThis(COMPONENT_PROPERTIES.props, emptyObject()),
     assignThis(

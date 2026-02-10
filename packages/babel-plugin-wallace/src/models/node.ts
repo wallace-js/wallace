@@ -58,22 +58,24 @@ export class ExtractedNode {
   component: any;
   tagName: string;
   element: HTMLElement | Text | undefined;
-  elementKey: number | undefined;
-  detacherStashKey: number | undefined;
+  elementKey?: number;
+  detacherVariable?: string;
+  detacherStashKey?: number;
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
-  repeatNode: ExtractedNode | undefined;
+  repeatNode?: ExtractedNode;
   repeatKey: Expression | string | undefined;
   address: Array<number>;
   initialIndex: number;
   path: NodePath<ValidElementType>;
   parent: TagNode;
+  children: Array<ExtractedNode> = [];
   watches: Watch[] = [];
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction[] = [];
   hasConditionalChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
-  #repeatExpression: Expression | undefined;
+  #repeatExpression?: Expression;
   // poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
@@ -101,6 +103,9 @@ export class ExtractedNode {
     this.initialIndex = initialIndex;
     this.path = path;
     this.parent = parent;
+    if (parent) {
+      parent.children.push(this);
+    }
   }
   getElement(): HTMLElement | Text {
     throw new Error("Not implemented");

@@ -148,7 +148,7 @@ function processRepeater(
   node: ExtractedNode,
   repeatInstruction: RepeatInstruction,
   addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void,
-  detacherInfo?: { index: number; stashKey: number }
+  detacherInfo?: { index: number; detacherVariable: string }
 ) {
   let repeaterClass;
   const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
@@ -164,7 +164,12 @@ function processRepeater(
     repeaterClass = IMPORTABLES.SequentialRepeater;
   }
   componentDefinition.component.module.requireImport(repeaterClass);
-
+  if (detacherInfo) {
+    repeaterArgs.push(
+      t.identifier(detacherInfo.detacherVariable),
+      numericLiteral(detacherInfo.index)
+    );
+  }
   const stashKey = componentDefinition.stashItem(
     newExpression(identifier(repeaterClass), repeaterArgs)
   );
@@ -283,8 +288,26 @@ export function processNodes(
       node.hasRepeatedChildren ||
       node.hasConditionalChildren;
 
-    if (node.hasConditionalChildren || node.hasRepeatedChildren) {
-      node.detacherStashKey = componentDefinition.stashItem(t.objectExpression([]));
+    // Note the detacher is associated with the parent node of conditionally displayed
+    // or repeated nodes.
+
+    const needsDetacher =
+      node.hasConditionalChildren ||
+      (node.hasRepeatedChildren && node.children.length > 1);
+
+    console.log("DETACHER", node.tagName, node.children.length, needsDetacher);
+    if (needsDetacher) {
+      const detacherObject = t.objectExpression([]);
+      if (node.hasRepeatedChildren) {
+        // We must save it to a variable so we can reference it when creating the
+        // repeater.
+        node.detacherVariable = componentDefinition.createDetacher(detacherObject);
+        node.detacherStashKey = componentDefinition.stashItem(
+          t.identifier(node.detacherVariable)
+        );
+      } else {
+        node.detacherStashKey = componentDefinition.stashItem(detacherObject);
+      }
     }
 
     ensureToggleTargetsHaveTriggers(node);
@@ -399,10 +422,12 @@ export function processNodes(
             node,
             repeatInstruction,
             addCallbackStatement,
-            {
-              index: node.initialIndex,
-              stashKey: node.parent.detacherStashKey
-            }
+            node.parent.detacherVariable
+              ? {
+                  index: node.initialIndex,
+                  detacherVariable: node.parent.detacherVariable
+                }
+              : undefined
           );
           componentWatch.elementKey = node.parent.elementKey;
         }

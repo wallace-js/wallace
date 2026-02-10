@@ -21,6 +21,7 @@ import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils"
  */
 export class ComponentDefinitionData {
   stash: Array<Expression> = [];
+  detachers: Array<Expression> = [];
   component: Component;
   html: Expression;
   watches: Array<ComponentWatch> = [];
@@ -90,5 +91,12 @@ export class ComponentDefinitionData {
   stashItem(expression: Expression): number {
     this.stash.push(expression);
     return this.stash.length - 1;
+  }
+  createDetacher(expression: Expression): string {
+    this.detachers.push(expression);
+    return this.getDetacherId(this.detachers.length - 1);
+  }
+  getDetacherId(index: number): string {
+    return `detacher${index}`;
   }
 }

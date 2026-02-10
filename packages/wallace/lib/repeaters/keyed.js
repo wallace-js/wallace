@@ -49,7 +49,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     component,
     endOfRange,
     endAnchor,
-    adjustment,
+    adjustment = 0,
     anchor = null,
     fragAnchor = null,
     untouched = true,
@@ -105,4 +105,5 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   if (adjustmentTracker) {
     adjustmentTracker[initialIndex] = itemsLength - 1;
   }
+  console.log("Keyed");
 };
