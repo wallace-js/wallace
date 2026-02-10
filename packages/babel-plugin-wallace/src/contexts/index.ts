@@ -1,2 +1,1 @@
-import { identifyContextToBeHandled } from "./handlers";
-export { identifyContextToBeHandled as getJsxFunctionHandler };
+export { identifyContextToBeHandled } from "./handlers";

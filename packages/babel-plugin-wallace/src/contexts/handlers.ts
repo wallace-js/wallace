@@ -152,28 +152,33 @@ class JsxFunctionInObjectMethod extends AbstractContextHandler {
   }
 }
 
+class AnyJsxFunction extends AbstractContextHandler {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (functionReturnsOnlyJSX(path)) {
+      this.initialiseComponent();
+    }
+  }
+}
+
 const contextClasses = [
+  JsxFunctionInObjectMethod,
   JsxFunctionInExtendComponentCall,
-  AssignedJsxFunction,
-  JsxFunctionAssignedToMember,
-  JsxFunctionInProperty,
-  JsxFunctionInObjectMethod
+  AnyJsxFunction
+  // AssignedJsxFunction,
+  // JsxFunctionAssignedToMember,
+  // JsxFunctionInProperty,
+  // JsxFunctionInObjectMethod
 ];
 
 export function identifyContextToBeHandled(
   path: NodePath<AnyFunction>,
   module: Module
 ): AbstractContextHandler | undefined {
-  const contexts = [];
-  contextClasses.forEach(contextClass => {
-    contexts.push(new contextClass(path, module));
-  });
-  const matches = contexts.filter(context => context.isMatch);
-  if (matches.length > 1) {
-    throw new Error(
-      "Function matches more than one context. This is an error with the plugin."
-    );
-  } else if (matches.length === 1) {
-    return matches[0];
+  for (const contextClass of contextClasses) {
+    const context = new contextClass(path, module);
+    if (context.isMatch) {
+      return context;
+    }
   }
 }
