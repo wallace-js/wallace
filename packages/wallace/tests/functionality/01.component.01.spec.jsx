@@ -54,7 +54,7 @@ test("JSX not allowed in expressions", () => {
   expect(code).toCompileWithError("JSX elements are not allowed in expressions.");
 });
 
-test("JSX ignores comments and empty expressiosn", () => {
+test("JSX ignores comments and empty expressions", () => {
   const code = `
     const Foo = () => (
       <div>
