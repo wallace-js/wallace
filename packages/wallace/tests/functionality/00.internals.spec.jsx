@@ -63,3 +63,54 @@ describe("Lookups", () => {
     expect(Object.keys(Dog.prototype._q).length).toBe(1);
   });
 });
+
+test.only("No accidental string coercion", () => {
+  /**
+   * Watches, lookups and previous can easily get muddled between objects
+   * and Maps and strings and numbers, which can cause 11 > 2 bugs which
+   * you only detected once you go over 10.
+   */
+  let v1 = "v1",
+    v2 = "v2",
+    v3 = "v3",
+    v4 = "v4",
+    v5 = "v5",
+    v6 = "v6",
+    v7 = "v7",
+    v8 = "v8",
+    v9 = "v9",
+    v10 = "v10",
+    v11 = "v11",
+    v12 = "v12";
+
+  const Foo = (_, { self }) => (
+    <div>
+      <div
+        ref:div
+        v1={v1}
+        v2={v2}
+        v3={v3}
+        v4={v4}
+        v5={v5}
+        v6={v6}
+        v7={v7}
+        v8={v8}
+        v9={v9}
+        v10={v10}
+        v11={v11}
+        v12={v12}
+      >
+        OK
+      </div>
+    </div>
+  );
+  const component = testMount(Foo);
+  const div = component.ref.div;
+  expect(div["v1"]).toBe("v1");
+  expect(div["v9"]).toBe("v9");
+  v1 = "x";
+  v9 = "y";
+  component.update();
+  expect(div["v1"]).toBe("x");
+  expect(div["v9"]).toBe("y");
+});

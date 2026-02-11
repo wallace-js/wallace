@@ -99,6 +99,6 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
 
   this.keys = newKeys.reverse();
   if (adjustmentTracker) {
-    adjustmentTracker[initialIndex] = itemsLength - 1;
+    adjustmentTracker.set(initialIndex, itemsLength - 1);
   }
 };

@@ -66,18 +66,10 @@ function buildWatchesArg(componentDefinition: ComponentDefinitionData): ArrayExp
 }
 
 function buildLookupsArg(componentDefinition: ComponentDefinitionData): ArrayExpression {
-  // TODO: clean up temp code when original on componentDefinition is an array too.
-  const keys = Object.keys(componentDefinition.lookups).sort();
-  const values: FunctionExpression[] = keys.map(key => componentDefinition.lookups[key]);
-  return t.arrayExpression(values);
-}
-
-function getDynamicElements(
-  componentDefinition: ComponentDefinitionData
-): CallExpression[] {
-  // TODO: clean up temp code when original on componentDefinition is an array too.
-  const keys = Object.keys(componentDefinition.dynamicElements).sort();
-  return keys.map(key => componentDefinition.dynamicElements[key]);
+  // watch out for keys turning into strings!
+  const lookups = componentDefinition.lookups;
+  const keys = [...lookups.keys()].sort((a, b) => a - b);
+  return t.arrayExpression(keys.map(key => lookups.get(key)));
 }
 
 function buildConstructor(
@@ -151,14 +143,14 @@ function buildConstructor(
     expressions.unshift(assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()));
   }
 
-  const dynamicElementCalls = getDynamicElements(componentDefinition);
+  // const dynamicElementCalls = getDynamicElements(componentDefinition);
 
-  if (dynamicElementCalls.length > 0) {
+  if (componentDefinition.dynamicElements.length > 0) {
     expressions.push(
       t.assignmentExpression(
         "=",
         t.memberExpression(tmpThis, t.identifier(COMPONENT_PROPERTIES.elements)),
-        t.arrayExpression(dynamicElementCalls)
+        t.arrayExpression(componentDefinition.dynamicElements)
       )
     );
   }

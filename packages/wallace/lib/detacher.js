@@ -13,7 +13,7 @@ Detacher.prototype.apply = function (element, shouldBeVisible, elements, stash) 
   const index = this.i,
     parent = elements[this.e],
     detachedElementCache = stash[this.s];
-  let offset = detachedElementCache[index] || 0;
+  let offset = detachedElementCache.get(index) || 0;
   if (shouldBeVisible && offset === -1) {
     adjustedIndex = countOffset(detachedElementCache, index);
     parent.insertBefore(element, parent.childNodes[adjustedIndex]);
@@ -22,5 +22,5 @@ Detacher.prototype.apply = function (element, shouldBeVisible, elements, stash) 
     parent.removeChild(element);
     offset = -1;
   }
-  detachedElementCache[index] = offset;
+  detachedElementCache.set(index, offset);
 };

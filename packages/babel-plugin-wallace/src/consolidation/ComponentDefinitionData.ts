@@ -32,33 +32,26 @@ export class ComponentDefinitionData {
   component: Component;
   html: Expression;
   watches: Array<ComponentWatch> = [];
-  dynamicElements: { [key: number]: Expression } = {};
+  dynamicElements: Expression[] = [];
   baseComponent: Expression | undefined;
-  lookups: { [key: string]: FunctionExpression } = {};
+  lookups: Map<number, FunctionExpression> = new Map();
   refs: string[] = [];
   parts: Array<Part> = [];
-  #dynamicElementKey: number = -1;
   #lookupKeys: Array<String> = [];
   constructor(component: Component) {
     this.component = component;
     this.baseComponent = component.baseComponent;
   }
+
   saveDynamicElement(address: NodeAddress) {
-    this.#dynamicElementKey++;
-    this.dynamicElements[this.#dynamicElementKey] = buildFindElementCall(
-      this.component.module,
-      address
-    );
-    return this.#dynamicElementKey;
+    this.dynamicElements.push(buildFindElementCall(this.component.module, address));
+    return this.dynamicElements.length - 1;
   }
   saveNestedAsDynamicElement(address: NodeAddress, componentCls: Expression) {
-    this.#dynamicElementKey++;
-    this.dynamicElements[this.#dynamicElementKey] = buildNestedClassCall(
-      this.component.module,
-      address,
-      componentCls
+    this.dynamicElements.push(
+      buildNestedClassCall(this.component.module, address, componentCls)
     );
-    return this.#dynamicElementKey;
+    return this.dynamicElements.length - 1;
   }
   addLookup(expression: Expression) {
     const hashExpression = expr => {
@@ -71,10 +64,13 @@ export class ComponentDefinitionData {
       this.#lookupKeys.push(hash);
     }
     const key = this.#lookupKeys.indexOf(hash);
-    this.lookups[key] = functionExpression(
-      null,
-      this.getLookupCallBackParams(),
-      blockStatement([returnStatement(expression)])
+    this.lookups.set(
+      key,
+      functionExpression(
+        null,
+        this.getLookupCallBackParams(),
+        blockStatement([returnStatement(expression)])
+      )
     );
     return key;
   }

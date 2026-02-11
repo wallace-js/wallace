@@ -62,6 +62,6 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     parent.removeChild(childNodes[i]);
   }
   if (adjustmentTracker) {
-    adjustmentTracker[initialIndex] = itemsLength - 1;
+    adjustmentTracker.set(initialIndex, itemsLength - 1);
   }
 };
