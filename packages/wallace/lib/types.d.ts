@@ -204,6 +204,7 @@ const TaskList = (tasks) => (
 Notes:
 
  - You cannot use nest on the root element.
+ - You cannot use `if` on a nested element, only `show` and `hide`.
 
 ## 4. Repeating
 
@@ -239,8 +240,8 @@ const TaskList = (tasks) => (
 
 Notes:
 
- - You cannot repeat on the root element.
- - Repeat must be the only child element under its parent.
+ - You cannot use repeat on the root element.
+ - You cannot toggle visibility on the repeat element.
 
 ## 5. Directives
 
@@ -386,9 +387,7 @@ const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
     First task:
     <Task.nest props={tasks[0]} />
-    <div>
-      <Task.repeat items={tasks.slice(1)} />
-    </div>
+    <Task.repeat items={tasks.slice(1)} />
   </div>
 );
 
@@ -1078,7 +1077,6 @@ declare namespace JSX {
      *   <MyComponent.repeat items={arrayOfProps} key="id"/>
      *   <MyComponent.repeat items={arrayOfProps} key={(i) => i.id}/>
      *   ```
-     * Note that repeated components may not have siblings.
      *
      * Available Wallace directives:
      *

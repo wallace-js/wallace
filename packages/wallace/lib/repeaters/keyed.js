@@ -1,24 +1,22 @@
 import { countOffset } from "../offsetter";
-// WARNING: Code here is near duplicated in keyedFn.
 
 /**
  * Repeats nested components, reusing items based on key.
  *
  * @param {function} componentDefinition - The ComponentDefinition to create.
- * @param {string} keyName - The name of the key property.
+ * @param {string | function} key - The name of the key property.
  */
-export function KeyedRepeater(
-  componentDefinition,
-  keyName,
-  adjustmentTracker,
-  initialIndex
-) {
+export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initialIndex) {
   this.def = componentDefinition;
-  this.keyName = keyName;
   this.at = adjustmentTracker;
   this.ii = initialIndex;
   this.keys = []; // array of keys as last set.
   this.pool = {}; // pool of component instances.
+  if (typeof key === "function") {
+    this.kf = key;
+  } else {
+    this.kn = key;
+  }
 }
 
 /**
@@ -32,7 +30,8 @@ export function KeyedRepeater(
 KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   const pool = this.pool,
     componentDefinition = this.def,
-    keyName = this.keyName,
+    keyName = this.kn,
+    keyFn = this.kf,
     childNodes = e.childNodes,
     itemsLength = items.length,
     previousKeys = this.keys,
@@ -45,7 +44,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
 
   let item,
     el,
-    key,
+    itemKey,
     component,
     endAnchor = null,
     adjustment = 0,
@@ -66,24 +65,24 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   // Working backwards saves us having to track moves.
   while (i >= 0) {
     item = items[i];
-    key = item[keyName];
-    component = pool[key] || (pool[key] = new componentDefinition());
+    itemKey = keyName ? item[keyName] : keyFn(item);
+    component = pool[itemKey] || (pool[itemKey] = new componentDefinition());
     component.render(item, ctrl);
     el = component.el;
-    if (untouched && !previousKeysSet.has(key)) {
+    if (untouched && !previousKeysSet.has(itemKey)) {
       frag.insertBefore(el, fragAnchor);
       fragAnchor = el;
       append = true;
       offset++;
     } else {
-      if (key !== previousKeys[i + offset]) {
+      if (itemKey !== previousKeys[i + offset]) {
         e.insertBefore(el, anchor);
         untouched = false;
       }
       anchor = el;
     }
-    newKeys.push(key);
-    previousKeysSet.delete(key);
+    newKeys.push(itemKey);
+    previousKeysSet.delete(itemKey);
     i--;
   }
 

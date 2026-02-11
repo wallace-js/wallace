@@ -364,11 +364,10 @@ function processRepeater(
   let repeaterClass;
   const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
   if (repeatInstruction.repeatKey) {
+    repeaterClass = IMPORTABLES.KeyedRepeater;
     if (typeof repeatInstruction.repeatKey === "string") {
-      repeaterClass = IMPORTABLES.KeyedRepeater;
       repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
     } else {
-      repeaterClass = IMPORTABLES.KeyedFnRepeater;
       repeaterArgs.push(repeatInstruction.repeatKey);
     }
   } else {

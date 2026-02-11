@@ -12,8 +12,7 @@ export enum IMPORTABLES {
   stashMisc = "stashMisc",
   onEvent = "onEvent",
   SequentialRepeater = "SequentialRepeater",
-  KeyedRepeater = "KeyedRepeater",
-  KeyedFnRepeater = "KeyedFnRepeater"
+  KeyedRepeater = "KeyedRepeater"
 }
 
 /**
