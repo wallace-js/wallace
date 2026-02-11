@@ -1,4 +1,4 @@
-import type { Identifier, Statement } from "@babel/types";
+import type { Identifier } from "@babel/types";
 import {
   blockStatement,
   callExpression,
@@ -38,6 +38,12 @@ export function processNode(
     if (children.length > 0) {
       error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
     }
+
+    // TODO: bring back with flag
+    // const siblings = getSiblings(node, component.extractedNodes);
+    // if (siblings.length > 0) {
+    //   error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
+    // }
   }
   // Need to happen first
   ensureToggleTargetsHaveTriggers(node);

@@ -75,7 +75,6 @@ export class ExtractedNode {
   bindInstructions: BindInstruction[] = [];
   hasConditionalChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
-  #repeatExpression?: Expression;
   // poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
@@ -85,6 +84,8 @@ export class ExtractedNode {
    * The triggers that cause the classes to be toggled.
    */
   classToggleTriggers: ToggleTrigger[] = [];
+  // Private to prevent being set more thant once by directives.
+  #repeatExpression?: Expression;
   #stubName?: string;
   #visibilityToggle?: VisibilityToggle;
   #ref?: string;
@@ -232,7 +233,6 @@ export class TagNode extends ExtractedNode {
   address: Array<number>;
   path: NodePath<JSXElement>;
   attributes: Attribute[] = [];
-  // directives: ExtractedDirective[] = [];
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
@@ -268,7 +268,7 @@ export class TagNode extends ExtractedNode {
   }
   getElement(): HTMLElement | Text {
     if (this.isRepeatedComponent) {
-      return undefined; //createElement("div"); //createTextNode("X");
+      return undefined;
     }
     const element = createElement(this.tagName);
     this.attributes.forEach(({ name, value }) => {

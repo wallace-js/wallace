@@ -143,8 +143,6 @@ function buildConstructor(
     expressions.unshift(assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()));
   }
 
-  // const dynamicElementCalls = getDynamicElements(componentDefinition);
-
   if (componentDefinition.dynamicElements.length > 0) {
     expressions.push(
       t.assignmentExpression(
