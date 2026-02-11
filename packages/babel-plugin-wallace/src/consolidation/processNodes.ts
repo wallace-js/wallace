@@ -171,7 +171,7 @@ function processNestedComponent(
   node: ExtractedNode
 ) {
   const callbackArgs = [node.getProps() || t.objectExpression([])];
-  if (wallaceConfig.flags.useControllers) {
+  if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, componentDefinition.component));
   }
 
@@ -221,7 +221,7 @@ function processStub(
   const component = componentDefinition.component;
   componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
   const callbackArgs: any[] = [component.propsIdentifier];
-  if (wallaceConfig.flags.useControllers) {
+  if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, component));
   }
   componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
@@ -388,7 +388,7 @@ function processRepeater(
     identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
     repeatInstruction.expression
   ];
-  if (wallaceConfig.flags.useControllers) {
+  if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, component));
   }
   componentWatch.add(SPECIAL_SYMBOLS.noLookup, [

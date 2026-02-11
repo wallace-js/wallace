@@ -139,7 +139,7 @@ function buildConstructor(
     );
   }
 
-  if (wallaceConfig.flags.useControllers) {
+  if (wallaceConfig.flags.allowCtrl) {
     expressions.unshift(assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()));
   }
 

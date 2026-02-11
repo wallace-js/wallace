@@ -16,7 +16,7 @@ const ComponentPrototype = {
 
   /*
   COMPILER_MODS:
-    if useFlags is false this is deleted.
+    if useFlags is false this is deleted, so `_u` can be renamed to `update`.
   */
   update: function () {
     this._u(0, this._l);
@@ -100,7 +100,7 @@ const ComponentBase = {
   prototype: ComponentPrototype
 };
 
-if (wallaceConfig.flags.useStubs) {
+if (wallaceConfig.flags.allowStubs) {
   ComponentBase.stubs = {};
 }
 
@@ -120,7 +120,7 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
     }
   ));
 
-  if (wallaceConfig.flags.useMethods) {
+  if (wallaceConfig.flags.allowMethods) {
     Object.defineProperty(ComponentFunction, "methods", {
       set: value => Object.assign(proto, value),
       get: () => proto
@@ -130,19 +130,19 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
       Object.defineProperty(ComponentFunction, "name", {
         set: function (value) {
           throw new Error(
-            'Flag "useMethods" must be set to true in the config for this feature.'
+            'Flag "allowMethods" must be set to true in the config for this feature.'
           );
         },
         get: function () {
           throw new Error(
-            'Flag "useMethods" must be set to true in the config for this feature.'
+            'Flag "allowMethods" must be set to true in the config for this feature.'
           );
         }
       });
     }
   }
 
-  if (wallaceConfig.flags.useStubs) {
+  if (wallaceConfig.flags.allowStubs) {
     ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
   }
 
@@ -156,19 +156,19 @@ export const defineComponent = (html, watches, queries, contructor, inheritFrom)
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;
-  if (wallaceConfig.flags.useBase) {
+  if (wallaceConfig.flags.allowBase) {
     proto.base = ComponentPrototype;
   } else {
     if (process.env.NODE_ENV !== "production") {
       Object.defineProperty(proto, "base", {
         set: function (value) {
           throw new Error(
-            'Flag "useBase" must be set to true in the config for this feature.'
+            'Flag "allowBase" must be set to true in the config for this feature.'
           );
         },
         get: function () {
           throw new Error(
-            'Flag "useBase" must be set to true in the config for this feature.'
+            'Flag "allowBase" must be set to true in the config for this feature.'
           );
         }
       });

@@ -4,12 +4,12 @@ import { Directive } from "./models";
 import { builtinDirectives } from "./directives";
 
 export enum FlagValue {
-  useBase = "useBase",
-  useControllers = "useControllers",
-  useMethods = "useMethods",
-  useParts = "useParts",
+  allowBase = "allowBase",
+  allowCtrl = "allowCtrl",
+  allowMethods = "allowMethods",
+  allowParts = "allowParts",
   allowRepeaterSiblings = "allowRepeaterSiblings",
-  useStubs = "useStubs"
+  allowStubs = "allowStubs"
 }
 
 type Flag = Record<FlagValue, boolean>;
@@ -20,21 +20,21 @@ interface WallaceOptions {
 }
 
 const DefaultFlagValues: Flag = {
-  useBase: true,
-  useControllers: true,
-  useMethods: true,
-  useParts: true,
+  allowBase: true,
+  allowCtrl: true,
+  allowMethods: true,
+  allowParts: true,
   allowRepeaterSiblings: true,
-  useStubs: true
+  allowStubs: true
 };
 
 const DefaultFlagOverrideValues: Flag = {
-  useBase: false,
-  useControllers: false,
-  useMethods: false,
-  useParts: false,
+  allowBase: false,
+  allowCtrl: false,
+  allowMethods: false,
+  allowParts: false,
   allowRepeaterSiblings: false,
-  useStubs: false
+  allowStubs: false
 };
 
 class WallaceConfig {
