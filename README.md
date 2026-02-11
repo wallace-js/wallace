@@ -233,9 +233,7 @@ And special syntax for nesting and repeating:
 const CounterList = (counters) => (
   <div>
     <Counter.nest props={counters[0]} />
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
+    <Counter.repeat items={counters} />
   </div>
 );
 ```
@@ -282,9 +280,7 @@ const Counter: Uses<iCounter> = ({ count }) => (
 const CounterList: Uses<iCounter[]> = (counters) => (
   <div>
     <Counter.nest props={counters[0]} />
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
+    <Counter.repeat items={counters} />
   </div>
 );
 
@@ -361,9 +357,7 @@ To see reactivity working more clearly, let's display the total across all count
 const CounterList: Uses<iCounter[]> = (counters) => (
   <div>
     <span>Total: {counters.reduce((t, c) => t + c.count, 0)}</span>
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
+    <Counter.repeat items={counters} />
   </div>
 );
 ```
@@ -410,9 +404,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
     <span>
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
     </span>
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
+    <Counter.repeat items={counters} />
     <input type="text" bind:keyup={things} />
   </div>
 );
@@ -440,9 +432,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
   <div>
     <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
+    <Counter.repeat items={counters} />
     <input type="text" bind:keyup={things} />
   </div>
 );
@@ -753,9 +743,7 @@ const CounterList: Uses<iCounterList, Controller, Methods> = (
   <div>
     <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
-    <div>
-      <Counter.repeat items={counters} />
-    </div>
+    <Counter.repeat items={counters} />
     <input type="text" bind:keyup={things.value} />
   </div>
 );
@@ -793,9 +781,7 @@ const SpecialCounterList = extendComponent(
   CounterList,
   ({ counters, things }, { self }) => (
     <div>
-      <div>
-        <Counter.repeat items={counters} />
-      </div>
+      <Counter.repeat items={counters} />
       <span>Total: {self.total()}</span>
     </div>
   )

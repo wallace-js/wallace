@@ -2,7 +2,8 @@ import type {
   Expression,
   CallExpression,
   FunctionExpression,
-  Identifier
+  Identifier,
+  Statement
 } from "@babel/types";
 import {
   blockStatement,
@@ -11,46 +12,46 @@ import {
   identifier,
   returnStatement
 } from "@babel/types";
-import { Component } from "../models";
-import { IMPORTABLES } from "../constants";
-import { ComponentWatch, NodeAddress, Part } from "./types";
-import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils";
+import { Component, ExtractedNode } from "../models";
+import { IMPORTABLES, SPECIAL_SYMBOLS } from "../constants";
+import { NodeAddress, Part, ShieldInfo } from "./types";
+import {
+  buildFindElementCall,
+  buildWatchCallbackParams,
+  buildNestedClassCall,
+  removeKeys
+} from "./utils";
+import { codeToNode } from "../utils";
 
 /**
  * An object with all the consolidated data for writing.
  */
 export class ComponentDefinitionData {
   stash: Array<Expression> = [];
+  detachers: Array<Expression> = [];
   component: Component;
   html: Expression;
   watches: Array<ComponentWatch> = [];
-  dynamicElements: { [key: number]: Expression } = {};
+  dynamicElements: Expression[] = [];
   baseComponent: Expression | undefined;
-  lookups: { [key: string]: FunctionExpression } = {};
+  lookups: Map<number, FunctionExpression> = new Map();
   refs: string[] = [];
   parts: Array<Part> = [];
-  #dynamicElementKey: number = -1;
   #lookupKeys: Array<String> = [];
   constructor(component: Component) {
     this.component = component;
     this.baseComponent = component.baseComponent;
   }
+
   saveDynamicElement(address: NodeAddress) {
-    this.#dynamicElementKey++;
-    this.dynamicElements[this.#dynamicElementKey] = buildFindElementCall(
-      this.component.module,
-      address
-    );
-    return this.#dynamicElementKey;
+    this.dynamicElements.push(buildFindElementCall(this.component.module, address));
+    return this.dynamicElements.length - 1;
   }
   saveNestedAsDynamicElement(address: NodeAddress, componentCls: Expression) {
-    this.#dynamicElementKey++;
-    this.dynamicElements[this.#dynamicElementKey] = buildNestedClassCall(
-      this.component.module,
-      address,
-      componentCls
+    this.dynamicElements.push(
+      buildNestedClassCall(this.component.module, address, componentCls)
     );
-    return this.#dynamicElementKey;
+    return this.dynamicElements.length - 1;
   }
   addLookup(expression: Expression) {
     const hashExpression = expr => {
@@ -63,10 +64,13 @@ export class ComponentDefinitionData {
       this.#lookupKeys.push(hash);
     }
     const key = this.#lookupKeys.indexOf(hash);
-    this.lookups[key] = functionExpression(
-      null,
-      this.getLookupCallBackParams(),
-      blockStatement([returnStatement(expression)])
+    this.lookups.set(
+      key,
+      functionExpression(
+        null,
+        this.getLookupCallBackParams(),
+        blockStatement([returnStatement(expression)])
+      )
     );
     return key;
   }
@@ -90,5 +94,65 @@ export class ComponentDefinitionData {
   stashItem(expression: Expression): number {
     this.stash.push(expression);
     return this.stash.length - 1;
+  }
+  createDetacher(expression: Expression): string {
+    this.detachers.push(expression);
+    return this.getDetacherId(this.detachers.length - 1);
+  }
+  getDetacherId(index: number): string {
+    return `detacher${index}`;
+  }
+}
+
+export class ComponentWatch {
+  shieldInfo?: ShieldInfo | undefined;
+  node: ExtractedNode;
+  componentDefinition: ComponentDefinitionData;
+  elementKey: number;
+  address: NodeAddress;
+  #tmpCallbacks: { [key: string | number]: Array<Statement> } = {};
+  callbacks: { [key: string | number]: FunctionExpression } = {};
+  constructor(
+    node: ExtractedNode,
+    componentDefinition: ComponentDefinitionData,
+    elementKey: number,
+    address: NodeAddress
+  ) {
+    this.node = node;
+    this.componentDefinition = componentDefinition;
+    this.elementKey = elementKey;
+    this.address = address;
+    if (this.elementKey === undefined) {
+      // Means we messed up shouldSaveElement vs needsWatch
+      throw "Internal Error: elementKey is undefined";
+    }
+    node.watches.forEach(watch => {
+      if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
+        this.add(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
+      } else {
+        const lookupKey = componentDefinition.addLookup(watch.expression);
+        this.add(lookupKey, codeToNode(watch.callback));
+      }
+    });
+    componentDefinition.watches.push(this);
+  }
+  add(lookupKey: string | number, statements: Statement[]) {
+    if (!this.#tmpCallbacks.hasOwnProperty(lookupKey)) {
+      this.#tmpCallbacks[lookupKey] = [];
+    }
+    this.#tmpCallbacks[lookupKey].push(...statements);
+  }
+  consolidate() {
+    for (const key in this.#tmpCallbacks) {
+      const args = buildWatchCallbackParams(
+        this.componentDefinition.component,
+        key === SPECIAL_SYMBOLS.noLookup
+      );
+      this.callbacks[key] = functionExpression(
+        null,
+        args,
+        blockStatement(this.#tmpCallbacks[key])
+      );
+    }
   }
 }

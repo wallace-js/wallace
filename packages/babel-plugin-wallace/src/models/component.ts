@@ -17,6 +17,7 @@ import { Module } from "./module";
 export interface WalkTracker {
   parent: TagNode;
   childIndex: number;
+  initialIndex: number;
 }
 
 /*
@@ -35,7 +36,7 @@ at runtime.
 </div>
 */
 export class Component {
-  _currentNodeAddress: Array<number> = [];
+  #currentNodeAddress: Array<number> = [];
   module: Module;
   baseComponent: Expression | undefined;
   rootElement: HTMLElement;
@@ -57,31 +58,35 @@ export class Component {
   #enterLevel(index: number) {
     // This skips this step for root, whose address is []
     if (this.rootElement) {
-      this._currentNodeAddress.push(index);
+      this.#currentNodeAddress.push(index);
     }
   }
   #exitLevel() {
-    this._currentNodeAddress.pop();
+    this.#currentNodeAddress.pop();
   }
   #getCurrentAddress() {
-    return this._currentNodeAddress.slice();
+    return this.#currentNodeAddress.slice();
   }
   #addElement(
     element: HTMLElement | Text | undefined,
     path: NodePath,
     tracker: WalkTracker
   ) {
+    // TODO: clean up this mess. Better way to do it.
     if (tracker.parent?.isNestedComponent) {
       error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN);
     }
     if (tracker.parent?.isRepeatedComponent) {
       error(path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
     }
+    tracker.initialIndex += 1;
     if (!element) {
+      // means it is a repeated node.
       return;
     }
+    tracker.childIndex += 1;
     if (this.rootElement) {
-      const relativePath = this._currentNodeAddress.slice(0, -1);
+      const relativePath = this.#currentNodeAddress.slice(0, -1);
       const parentNode = relativePath.reduce(
         (acc, index) => acc.childNodes[index],
         this.rootElement
@@ -91,7 +96,6 @@ export class Component {
       // @ts-ignore (TS complains this could be Text, but we know it's not.)
       this.rootElement = element;
     }
-    tracker.childIndex += 1;
   }
   #addNode(node: ExtractedNode, path: NodePath, tracker: WalkTracker) {
     this.#addElement(node.getElement(), path, tracker);
@@ -107,6 +111,7 @@ export class Component {
     const extractedNode = new TagNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent,
       this,
       tagName,
@@ -117,7 +122,7 @@ export class Component {
     this.#addNode(extractedNode, path, tracker);
     path.traverse(jsxVisitors, {
       component: this,
-      tracker: { childIndex: 0, parent: extractedNode }
+      tracker: { childIndex: 0, initialIndex: 0, parent: extractedNode }
     });
     this.#exitLevel();
   }
@@ -131,6 +136,7 @@ export class Component {
     const extractedNode = new TagNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent,
       this,
       tagName,
@@ -146,6 +152,7 @@ export class Component {
     const extractedNode = new StubNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent,
       name
     );
@@ -158,6 +165,7 @@ export class Component {
     const extractedNode = new PlainTextNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent
     );
     this.#addNode(extractedNode, path, tracker);
@@ -173,6 +181,7 @@ export class Component {
       const extractedNode = new DynamicTextNode(
         path,
         this.#getCurrentAddress(),
+        tracker.initialIndex,
         tracker.parent,
         expression
       );

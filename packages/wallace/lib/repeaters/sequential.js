@@ -1,31 +1,44 @@
+import { countOffset } from "../offsetter";
 /**
  * Repeats nested components, yielding from its pool sequentially.
- *
- * @param {componentDefinition} componentDefinition - The ComponentDefinition to create.
  */
-export function SequentialRepeater(componentDefinition) {
+export function SequentialRepeater(componentDefinition, adjustmentTracker, initialIndex) {
   this.def = componentDefinition;
+  this.at = adjustmentTracker;
+  this.ii = initialIndex;
   this.pool = []; // pool of component instances
-  this.count = 0; // Child element count
+  this.cc = 0; // Child count
 }
 
 /**
  * Updates the element's childNodes to match the items.
  * Performance is important.
  *
- * @param {DOMElement} e - The DOM element to patch.
+ * @param {DOMElement} parent - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
  * @param {any} ctrl - The parent item's controller.
  */
-SequentialRepeater.prototype.patch = function (e, items, ctrl) {
+SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
   const pool = this.pool,
     componentDefinition = this.def,
-    childNodes = e.childNodes,
+    childNodes = parent.childNodes,
     itemsLength = items.length,
-    childElementCount = this.count;
+    previousChildCount = this.cc,
+    initialIndex = this.ii,
+    adjustmentTracker = this.at;
   let i = 0,
+    offset = 0,
     component,
+    nextElement,
+    endOfRange = previousChildCount,
     poolCount = pool.length;
+
+  if (adjustmentTracker) {
+    // The repeat element has siblings
+    offset = countOffset(adjustmentTracker, initialIndex);
+    endOfRange += offset;
+    nextElement = childNodes[endOfRange] || null;
+  }
 
   while (i < itemsLength) {
     if (i < poolCount) {
@@ -36,15 +49,19 @@ SequentialRepeater.prototype.patch = function (e, items, ctrl) {
       poolCount++;
     }
     component.render(items[i], ctrl);
-    if (i >= childElementCount) {
-      e.appendChild(component.el);
+    if (i >= previousChildCount) {
+      parent.insertBefore(component.el, nextElement);
     }
     i++;
   }
-  this.count = itemsLength;
-  let lastIndex = childNodes.length - 1;
-  const keepIndex = itemsLength - 1;
-  for (let i = lastIndex; i > keepIndex; i--) {
-    e.removeChild(childNodes[i]);
+  this.cc = itemsLength;
+
+  let removeAtIndex = offset + previousChildCount - 1;
+  const stopatIndex = offset + itemsLength - 1;
+  for (let i = removeAtIndex; i > stopatIndex; i--) {
+    parent.removeChild(childNodes[i]);
+  }
+  if (adjustmentTracker) {
+    adjustmentTracker.set(initialIndex, itemsLength - 1);
   }
 };

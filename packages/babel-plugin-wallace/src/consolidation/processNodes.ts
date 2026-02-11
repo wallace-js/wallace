@@ -1,8 +1,7 @@
-import type { Identifier, Statement } from "@babel/types";
+import type { Identifier } from "@babel/types";
 import {
   blockStatement,
   callExpression,
-  Expression,
   expressionStatement,
   functionExpression,
   identifier,
@@ -13,8 +12,7 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { wallaceConfig } from "../config";
-import { codeToNode } from "../utils";
-import { Component, ExtractedNode, RepeatInstruction } from "../models";
+import { Component, ExtractedNode, RepeatInstruction, VisibilityToggle } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_PROPERTIES,
@@ -25,23 +23,229 @@ import {
   WATCH_AlWAYS_CALLBACK_ARGS,
   XARGS
 } from "../constants";
-import { ComponentWatch } from "./types";
-import { ComponentDefinitionData } from "./ComponentDefinitionData";
-import {
-  getSiblings,
-  getChildren,
-  renameVariablesInExpression,
-  buildWatchCallbackParams
-} from "./utils";
+import { ComponentDefinitionData, ComponentWatch } from "./ComponentDefinitionData";
+import { getChildren, renameVariablesInExpression } from "./utils";
 
-function addBindInstruction(node: ExtractedNode) {
+export function processNode(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode
+) {
+  if (node.isRepeatedComponent) {
+    // The watch should already have been added to the parent node, which is already
+    // processed. All we do here is run some extra checks.
+    // TODO: do this with visitor?
+    const children = getChildren(node, componentDefinition.component.extractedNodes);
+    if (children.length > 0) {
+      error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
+    }
+
+    // TODO: bring back with flag
+    // const siblings = getSiblings(node, component.extractedNodes);
+    // if (siblings.length > 0) {
+    //   error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
+    // }
+  }
+  // Need to happen first
+  ensureToggleTargetsHaveTriggers(node);
+  createEventsForBoundInputs(node);
+
+  const visibilityToggle = node.getVisibilityToggle();
+  const ref = node.getRef();
+  const part = node.getPart();
+  const repeatInstruction = node.getRepeatInstruction();
+  const hasBoundInputs = node.bindInstructions.length > 0;
+  const hasClassToggles = node.classToggleTriggers.length > 0;
+  const hasEventListeners = node.eventListeners.length > 0;
+  const hasWatches = node.watches.length > 0;
+  const isStub = node.getStubName() !== undefined;
+
+  const needsWatch =
+    hasWatches ||
+    hasBoundInputs ||
+    hasClassToggles ||
+    visibilityToggle ||
+    node.isNestedComponent ||
+    repeatInstruction ||
+    isStub;
+
+  const shouldSaveElement =
+    hasWatches ||
+    hasBoundInputs ||
+    hasClassToggles ||
+    visibilityToggle ||
+    ref ||
+    part ||
+    hasEventListeners ||
+    isStub ||
+    node.isNestedComponent ||
+    node.hasConditionalChildren ||
+    node.hasRepeatedChildren;
+
+  // Note the detacher is associated with the parent node of conditionally displayed
+  // or repeated nodes.
+  const needsDetacher =
+    node.hasConditionalChildren || (node.hasRepeatedChildren && node.children.length > 1);
+
+  if (needsDetacher) {
+    const detacherObject = t.newExpression(t.identifier("Map"), []);
+    if (node.hasRepeatedChildren) {
+      // We must save it to a variable so we can reference it when creating the
+      // repeater.
+      node.detacherVariable = componentDefinition.createDetacher(detacherObject);
+      node.detacherStashKey = componentDefinition.stashItem(
+        t.identifier(node.detacherVariable)
+      );
+    } else {
+      node.detacherStashKey = componentDefinition.stashItem(detacherObject);
+    }
+  }
+
+  if (shouldSaveElement) {
+    if (node.isNestedComponent) {
+      node.elementKey = componentDefinition.saveNestedAsDynamicElement(
+        node.address,
+        t.identifier(node.tagName)
+      );
+    } else if (isStub) {
+      const stubExpression = t.callExpression(t.identifier(IMPORTABLES.getStub), [
+        t.thisExpression(),
+        t.stringLiteral(node.getStubName())
+      ]);
+      node.elementKey = componentDefinition.saveNestedAsDynamicElement(
+        node.address,
+        stubExpression
+      );
+    } else {
+      node.elementKey = componentDefinition.saveDynamicElement(node.address);
+    }
+  }
+
+  if (needsWatch) {
+    // Must be called before watches are processed.
+    const componentWatch = new ComponentWatch(
+      node,
+      componentDefinition,
+      repeatInstruction ? node.parent.elementKey : node.elementKey,
+      node.address
+    );
+
+    if (node.isNestedComponent) {
+      processNestedComponent(componentDefinition, componentWatch, node);
+    }
+
+    if (visibilityToggle) {
+      processVisibilityToggle(
+        componentDefinition,
+        node,
+        componentWatch,
+        visibilityToggle
+      );
+    }
+
+    if (repeatInstruction) {
+      processRepeater(componentDefinition, node, repeatInstruction, componentWatch);
+    }
+
+    if (hasClassToggles) {
+      addToggleCallbackStatement(componentDefinition, node, componentWatch);
+    }
+
+    if (isStub) {
+      processStub(componentDefinition, node, componentWatch);
+    }
+
+    componentWatch.consolidate();
+  }
+
+  if (hasEventListeners) {
+    processEventListeners(componentDefinition, node);
+  }
+  if (ref) processRef(componentDefinition, node, ref);
+  if (part) processPart(componentDefinition, node, part);
+}
+
+function processNestedComponent(
+  componentDefinition: ComponentDefinitionData,
+  componentWatch: ComponentWatch,
+  node: ExtractedNode
+) {
+  const callbackArgs = [node.getProps() || t.objectExpression([])];
+  if (wallaceConfig.flags.useControllers) {
+    callbackArgs.push(getCtrlExpression(node, componentDefinition.component));
+  }
+
+  componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
+    expressionStatement(
+      callExpression(
+        memberExpression(
+          identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+          identifier(COMPONENT_PROPERTIES.render)
+        ),
+        callbackArgs
+      )
+    )
+  ]);
+}
+
+function processVisibilityToggle(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  componentWatch: ComponentWatch,
+  visibilityToggle: VisibilityToggle
+) {
+  const shieldLookupKey = componentDefinition.addLookup(visibilityToggle.expression);
+  componentWatch.shieldInfo = {
+    skipCount: 0, // gets set later once we've processed all the nodes.
+    key: shieldLookupKey,
+    reverse: visibilityToggle.reverse
+  };
+  if (visibilityToggle.detach) {
+    if (node.parent.detacherStashKey === undefined) {
+      throw new Error("Parent node was not given a stash key");
+    }
+    componentDefinition.component.module.requireImport(IMPORTABLES.detacher);
+    componentWatch.shieldInfo.detacher = {
+      originalIndex: node.initialIndex,
+      stashKey: node.parent.detacherStashKey,
+      parentKey: node.parent.elementKey
+    };
+  }
+}
+
+function processStub(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  componentWatch: ComponentWatch
+) {
+  const component = componentDefinition.component;
+  componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
+  const callbackArgs: any[] = [component.propsIdentifier];
+  if (wallaceConfig.flags.useControllers) {
+    callbackArgs.push(getCtrlExpression(node, component));
+  }
+  componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
+    expressionStatement(
+      callExpression(
+        memberExpression(
+          // In this case "element" is in fact the nested component.
+          identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+          identifier(COMPONENT_PROPERTIES.render)
+        ),
+        callbackArgs
+      )
+    )
+  ]);
+}
+
+function createEventsForBoundInputs(node: ExtractedNode) {
+  if (node.bindInstructions.length === 0) {
+    return;
+  }
   if (node.tagName.toLowerCase() == "input") {
     // @ts-ignore
     const inputType = node.element.type.toLowerCase();
     const attribute = inputType === "checkbox" ? "checked" : "value";
     node.bindInstructions.forEach(({ eventName, expression }) => {
-      // node.watchAttribute(attribute, expression);
-
       // This is the callback, which must be alwaysUpate as there's otherwise a glitch
       // caused by the fact this isn't tiggering an update, and therefore not resetting
       // the previous stored value, which eventually ends up being the same as the new
@@ -78,8 +282,8 @@ function addBindInstruction(node: ExtractedNode) {
 }
 
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
-  node.toggleTargets.forEach(target => {
-    const match = node.toggleTriggers.find(trigger => trigger.name == target.name);
+  node.classToggleTargets.forEach(target => {
+    const match = node.classToggleTriggers.find(trigger => trigger.name == target.name);
     if (!match) {
       error(node.path, ERROR_MESSAGES.TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS);
     }
@@ -104,17 +308,18 @@ function extractCssClasses(value: string | t.Expression) {
   }
 }
 
-// Notes: toggles are implemented as add/remove because:
-//  a) they allow multiple classes
-//  b) it's less brittle around truthiness
-
+/**
+ * Notes: toggles are implemented as add/remove because:
+ *  a) they allow multiple classes
+ *  b) it's less brittle around truthiness
+ */
 function addToggleCallbackStatement(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
-  addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void
+  componentWatch: ComponentWatch
 ) {
-  node.toggleTriggers.forEach(trigger => {
-    const target = node.toggleTargets.find(target => target.name == trigger.name);
+  node.classToggleTriggers.forEach(trigger => {
+    const target = node.classToggleTargets.find(target => target.name == trigger.name);
     const classesToToggle = target
       ? extractCssClasses(target.value)
       : [t.stringLiteral(trigger.name)];
@@ -132,7 +337,7 @@ function addToggleCallbackStatement(
         classesToToggle
       );
 
-    addCallbackStatement(lookupKey, [
+    componentWatch.add(lookupKey, [
       t.ifStatement(
         t.identifier(WATCH_CALLBACK_ARGS.newValue),
         blockStatement([expressionStatement(getCallback("add"))]),
@@ -143,27 +348,38 @@ function addToggleCallbackStatement(
 }
 
 function processRepeater(
-  component: Component,
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
   repeatInstruction: RepeatInstruction,
-  addCallbackStatement: (lookupKey: string | number, statements: Statement[]) => void
+  componentWatch: ComponentWatch
 ) {
+  const component = componentDefinition.component;
+  const detacherInfo = node.parent.detacherVariable
+    ? {
+        index: node.initialIndex,
+        detacherVariable: node.parent.detacherVariable
+      }
+    : undefined;
+
   let repeaterClass;
   const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
   if (repeatInstruction.repeatKey) {
+    repeaterClass = IMPORTABLES.KeyedRepeater;
     if (typeof repeatInstruction.repeatKey === "string") {
-      repeaterClass = IMPORTABLES.KeyedRepeater;
       repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
     } else {
-      repeaterClass = IMPORTABLES.KeyedFnRepeater;
       repeaterArgs.push(repeatInstruction.repeatKey);
     }
   } else {
     repeaterClass = IMPORTABLES.SequentialRepeater;
   }
   componentDefinition.component.module.requireImport(repeaterClass);
-
+  if (detacherInfo) {
+    repeaterArgs.push(
+      t.identifier(detacherInfo.detacherVariable),
+      numericLiteral(detacherInfo.index)
+    );
+  }
   const stashKey = componentDefinition.stashItem(
     newExpression(identifier(repeaterClass), repeaterArgs)
   );
@@ -174,7 +390,7 @@ function processRepeater(
   if (wallaceConfig.flags.useControllers) {
     callbackArgs.push(getCtrlExpression(node, component));
   }
-  addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
+  componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
     expressionStatement(
       callExpression(
         memberExpression(
@@ -229,203 +445,11 @@ function processRef(
   componentDefinition.refs.push(name);
 }
 
-// TODO: break this up.
-export function processNodes(
-  component: Component,
-  componentDefinition: ComponentDefinitionData
-) {
-  component.extractedNodes.forEach(node => {
-    if (node.isRepeatedComponent) {
-      // The watch should already have been added to the parent node, which is already
-      // processed. All we do here is run some extra checks.
-      const siblings = getSiblings(node, component.extractedNodes);
-      if (siblings.length > 0) {
-        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
-      }
-      const children = getChildren(node, component.extractedNodes);
-      if (children.length > 0) {
-        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
-      }
-      return;
-    }
-
-    const stubName = node.getStub();
-    let stubExpression: t.Expression | undefined;
-    if (stubName) {
-      componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
-      stubExpression = t.callExpression(t.identifier(IMPORTABLES.getStub), [
-        t.thisExpression(),
-        t.stringLiteral(stubName)
-      ]);
-    }
-    const visibilityToggle = node.getVisibilityToggle();
-    const ref = node.getRef();
-    const part = node.getPart();
-    const repeatInstruction = node.getRepeatInstruction();
-    const createWatch =
-      node.watches.length > 0 ||
-      node.bindInstructions.length > 0 ||
-      node.toggleTriggers.length > 0 ||
-      visibilityToggle ||
-      node.isNestedComponent ||
-      repeatInstruction || // This is NOT the same as .isRepeatedComponent, which is on parent!
-      stubName;
-
-    // TODO: some of these should not save the element...
-    // restructure.
-    const shouldSaveElement =
-      createWatch ||
-      ref ||
-      part ||
-      node.eventListeners.length > 0 ||
-      node.hasConditionalChildren;
-
-    if (node.hasConditionalChildren) {
-      node.detacherStashKey = componentDefinition.stashItem(t.objectExpression([]));
-    }
-
-    ensureToggleTargetsHaveTriggers(node);
-
-    if (shouldSaveElement) {
-      const nestedComponentCls =
-        node.isNestedComponent || node.isRepeatedComponent
-          ? t.identifier(node.tagName)
-          : stubExpression;
-      node.elementKey = nestedComponentCls
-        ? componentDefinition.saveNestedAsDynamicElement(node.address, nestedComponentCls)
-        : componentDefinition.saveDynamicElement(node.address);
-
-      if (node.bindInstructions.length) {
-        addBindInstruction(node);
-      }
-
-      if (createWatch) {
-        const _callbacks: { [key: string | number]: Array<Statement> } = {};
-        const addCallbackStatement = (key: string | number, statements: Statement[]) => {
-          if (!_callbacks.hasOwnProperty(key)) {
-            _callbacks[key] = [];
-          }
-          _callbacks[key].push(...statements);
-        };
-
-        const componentWatch: ComponentWatch = {
-          elementKey: node.elementKey,
-          callbacks: {},
-          address: node.address
-        };
-        componentDefinition.watches.push(componentWatch);
-
-        node.watches.forEach(watch => {
-          if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
-            addCallbackStatement(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
-          } else {
-            const lookupKey = componentDefinition.addLookup(watch.expression);
-            addCallbackStatement(lookupKey, codeToNode(watch.callback));
-          }
-        });
-
-        if (node.isNestedComponent) {
-          const callbackArgs = [node.getProps() || t.objectExpression([])];
-          if (wallaceConfig.flags.useControllers) {
-            callbackArgs.push(getCtrlExpression(node, component));
-          }
-
-          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
-            expressionStatement(
-              callExpression(
-                memberExpression(
-                  identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-                  identifier(COMPONENT_PROPERTIES.render)
-                ),
-                callbackArgs
-              )
-            )
-          ]);
-        }
-
-        if (node.toggleTriggers.length) {
-          addToggleCallbackStatement(componentDefinition, node, addCallbackStatement);
-        }
-
-        if (stubName) {
-          const callbackArgs: any[] = [component.propsIdentifier];
-          if (wallaceConfig.flags.useControllers) {
-            callbackArgs.push(getCtrlExpression(node, component));
-          }
-          addCallbackStatement(SPECIAL_SYMBOLS.noLookup, [
-            expressionStatement(
-              callExpression(
-                memberExpression(
-                  // In this case "element" is in fact the nested component.
-                  identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-                  identifier(COMPONENT_PROPERTIES.render)
-                ),
-                callbackArgs
-              )
-            )
-          ]);
-        }
-
-        if (visibilityToggle) {
-          const shieldLookupKey = componentDefinition.addLookup(
-            visibilityToggle.expression
-          );
-          componentWatch.shieldInfo = {
-            skipCount: 0, // gets set later once we've processed all the nodes.
-            key: shieldLookupKey,
-            reverse: visibilityToggle.reverse
-          };
-          if (visibilityToggle.detach) {
-            if (node.parent.detacherStashKey === undefined) {
-              throw new Error("Parent node was not given a stash key");
-            }
-            component.module.requireImport(IMPORTABLES.detacher);
-            componentWatch.shieldInfo.detacher = {
-              index: node.address[node.address.length - 1],
-              stashKey: node.parent.detacherStashKey,
-              parentKey: node.parent.elementKey
-            };
-          }
-        }
-
-        if (repeatInstruction) {
-          processRepeater(
-            component,
-            componentDefinition,
-            node,
-            repeatInstruction,
-            addCallbackStatement
-          );
-        }
-
-        for (const key in _callbacks) {
-          const args = buildWatchCallbackParams(
-            component,
-            key === SPECIAL_SYMBOLS.noLookup
-          );
-          componentWatch.callbacks[key] = functionExpression(
-            null,
-            args,
-            blockStatement(_callbacks[key])
-          );
-        }
-      }
-
-      if (ref) processRef(componentDefinition, node, ref);
-      if (part) processPart(componentDefinition, node, part);
-
-      if (node.eventListeners.length > 0) {
-        processEventListeners(componentDefinition, component, node);
-      }
-    }
-  });
-}
-
 function processEventListeners(
   componentDefinition: ComponentDefinitionData,
-  component: Component,
   node: ExtractedNode
 ) {
+  const component = componentDefinition.component;
   // TODO: improve this, as we are basically renaming things specifically for the
   // build function that have already been renamed, which can get confusing.
   // It also needs to rename ctrl and props explicitly as it doesn't seem to

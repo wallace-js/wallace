@@ -58,7 +58,7 @@ class ClassDirective extends Directive {
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
-      node.addToggleTarget(
+      node.addClassToggleTarget(
         qualifier,
         value.type === "expression" ? value.expression : value.value
       );
@@ -297,7 +297,7 @@ class ToggleDirective extends Directive {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
     }
-    node.addToggleTrigger(qualifier, value.expression);
+    node.addClassToggleTrigger(qualifier, value.expression);
   }
 }
 

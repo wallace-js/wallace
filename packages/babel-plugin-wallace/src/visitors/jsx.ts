@@ -16,7 +16,7 @@ interface State {
 export const jsxVisitors = {
   JSXElement(
     path: NodePath<JSXElement>,
-    { component, tracker = { childIndex: 0, parent: undefined } }: State
+    { component, tracker = { childIndex: 0, initialIndex: 0, parent: undefined } }: State
   ) {
     const tagName = getJSXElementName(path);
     if (typeof tagName === "string") {
