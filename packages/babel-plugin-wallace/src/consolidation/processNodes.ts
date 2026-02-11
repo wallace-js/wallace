@@ -24,7 +24,7 @@ import {
   XARGS
 } from "../constants";
 import { ComponentDefinitionData, ComponentWatch } from "./ComponentDefinitionData";
-import { getChildren, renameVariablesInExpression } from "./utils";
+import { getChildren, getSiblings, renameVariablesInExpression } from "./utils";
 
 export function processNode(
   componentDefinition: ComponentDefinitionData,
@@ -39,11 +39,12 @@ export function processNode(
       error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
     }
 
-    // TODO: bring back with flag
-    // const siblings = getSiblings(node, component.extractedNodes);
-    // if (siblings.length > 0) {
-    //   error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
-    // }
+    if (!wallaceConfig.flags.allowRepeaterSiblings) {
+      const siblings = getSiblings(node, componentDefinition.component.extractedNodes);
+      if (siblings.length > 0) {
+        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
+      }
+    }
   }
   // Need to happen first
   ensureToggleTargetsHaveTriggers(node);

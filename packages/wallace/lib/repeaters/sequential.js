@@ -1,11 +1,17 @@
 import { countOffset } from "../offsetter";
+
 /**
- * Repeats nested components, yielding from its pool sequentially.
+ * Repeats nested components, yielding from the pool sequentially.
+ *
+ * COMPILER_MODS:
+ *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
 export function SequentialRepeater(componentDefinition, adjustmentTracker, initialIndex) {
   this.def = componentDefinition;
-  this.at = adjustmentTracker;
-  this.ii = initialIndex;
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    this.at = adjustmentTracker;
+    this.ii = initialIndex;
+  }
   this.pool = []; // pool of component instances
   this.cc = 0; // Child count
 }
@@ -33,13 +39,14 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     endOfRange = previousChildCount,
     poolCount = pool.length;
 
-  if (adjustmentTracker) {
-    // The repeat element has siblings
-    offset = countOffset(adjustmentTracker, initialIndex);
-    endOfRange += offset;
-    nextElement = childNodes[endOfRange] || null;
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    if (adjustmentTracker) {
+      // The repeat element has siblings
+      offset = countOffset(adjustmentTracker, initialIndex);
+      endOfRange += offset;
+      nextElement = childNodes[endOfRange] || null;
+    }
   }
-
   while (i < itemsLength) {
     if (i < poolCount) {
       component = pool[i];
@@ -61,7 +68,9 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
   for (let i = removeAtIndex; i > stopatIndex; i--) {
     parent.removeChild(childNodes[i]);
   }
-  if (adjustmentTracker) {
-    adjustmentTracker.set(initialIndex, itemsLength - 1);
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    if (adjustmentTracker) {
+      adjustmentTracker.set(initialIndex, itemsLength - 1);
+    }
   }
 };

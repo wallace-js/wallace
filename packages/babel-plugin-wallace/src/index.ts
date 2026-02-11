@@ -9,7 +9,12 @@ import { wallaceConfig } from "./config";
 import { Directive, NodeValue } from "./models";
 import { Module } from "./models/module";
 import { programVisitors } from "./visitors/program";
-import { flagVisitor, flattenUpdate, removeCtrl } from "./visitors/library";
+import {
+  flagVisitor,
+  flattenUpdate,
+  removeCtrl,
+  removeRepeaterDetacherParams
+} from "./visitors/library";
 
 // The general pattern involves visting high-level nodes where we instantiate models
 // which are passed to traverse calls with sets of visitors for low-level nodes,
@@ -36,6 +41,9 @@ export default function wallacePlugin({ types: t }: Babel): PluginObj {
             }
             if (!wallaceConfig.flags.useParts) {
               path.traverse(flattenUpdate, { module });
+            }
+            if (!wallaceConfig.flags.allowRepeaterSiblings) {
+              path.traverse(removeRepeaterDetacherParams, { module });
             }
           }
           path.traverse(programVisitors, { module });
