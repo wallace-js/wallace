@@ -44,7 +44,7 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
         if (t.isIdentifier(prop.value) && t.isIdentifier(prop.key)) {
           const name = prop.key.name;
           if (name === COMPONENT_PROPERTIES.ctrl) {
-            wallaceConfig.ensureFlagIstrue(path, FlagValue.useControllers);
+            wallaceConfig.ensureFlagIstrue(path, FlagValue.allowCtrl);
           }
           if (!allowed.includes(name)) {
             error(path, ERROR_MESSAGES.ILLEGAL_XARG(name));

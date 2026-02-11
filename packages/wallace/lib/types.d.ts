@@ -525,11 +525,11 @@ watchedObj[0] = 'foo';  // throws error.
 You can toggle flags in your babel config to disable certain features for cutting edge
 performance and bundle size:
 
-1.  useBase - enables use of `base` in components.
-2.  useControllers - enables use of `ctrl` in components.
-3.  useMethods - adds the `methods` helper to components.
-4.  useParts - enables use of parts.
-5.  useStubs - enables the use of stubs.
+1.  allowBase - enables use of `base` in components.
+2.  allowCtrl - enables use of `ctrl` in components.
+3.  allowMethods - adds the `methods` helper to components.
+4.  allowParts  - enables use of parts.
+5.  allowStubs - enables the use of stubs.
 
 These flags default to true, unless you specify `flags` in the plugin config, in which
 case they default to false and you need to explicitly enable those you want:
@@ -542,8 +542,8 @@ module.exports = {
       "babel-plugin-wallace",
       {
         flags: {
-          useControllers: true,
-          useStubs: false
+          allowCtrl: true,
+          allowStubs: false
         },
       }
     ],

@@ -41,7 +41,7 @@ export const jsxVisitors = {
       } else if (namespace === "stub") {
         // TODO: ensure there is nothing inside and no other attributes.
         // alternatively, allow attributes to control the stub.
-        wallaceConfig.ensureFlagIstrue(path, FlagValue.useStubs);
+        wallaceConfig.ensureFlagIstrue(path, FlagValue.allowStubs);
         component.processStub(path, name, tracker);
       } else {
         error(path, ERROR_MESSAGES.UNSUPPORTED_NAMESPACE);

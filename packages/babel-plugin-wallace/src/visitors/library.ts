@@ -21,7 +21,7 @@ import { COMPONENT_PROPERTIES } from "../constants";
  *
  * The test must be in this exact format:
  *
- *    if (wallaceConfig.flags.useStubs) {}
+ *    if (wallaceConfig.flags.allowStubs) {}
  *
  */
 export const flagVisitor = {

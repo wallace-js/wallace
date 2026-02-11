@@ -36,10 +36,10 @@ export default function wallacePlugin({ types: t }: Babel): PluginObj {
           const filename = path.hub.file.opts.filename as string;
           if (filename && filename.includes("/wallace/lib/")) {
             path.traverse(flagVisitor, { module });
-            if (!wallaceConfig.flags.useControllers) {
+            if (!wallaceConfig.flags.allowCtrl) {
               path.traverse(removeCtrl, { module });
             }
-            if (!wallaceConfig.flags.useParts) {
+            if (!wallaceConfig.flags.allowParts) {
               path.traverse(flattenUpdate, { module });
             }
             if (!wallaceConfig.flags.allowRepeaterSiblings) {

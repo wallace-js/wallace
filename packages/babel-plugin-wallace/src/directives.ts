@@ -92,7 +92,7 @@ class CtrlDirective extends Directive {
   /h <NestedComponent.nest ctrl={self.ctrl1} />
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.useControllers);
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
     node.setCtrl(value.expression);
   }
 }
@@ -204,7 +204,7 @@ class PartDirective extends Directive {
     /h <div part:title></div>
     `;
   apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
-    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.useParts);
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
     node.setPart(qualifier);
   }
 }
