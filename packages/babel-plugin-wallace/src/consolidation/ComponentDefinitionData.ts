@@ -1,14 +1,14 @@
 import type {
   Expression,
   CallExpression,
-  FunctionExpression,
+  ArrowFunctionExpression,
   Identifier,
   Statement
 } from "@babel/types";
 import {
   blockStatement,
   callExpression,
-  functionExpression,
+  arrowFunctionExpression,
   identifier,
   returnStatement
 } from "@babel/types";
@@ -34,7 +34,7 @@ export class ComponentDefinitionData {
   watches: Array<ComponentWatch> = [];
   dynamicElements: Expression[] = [];
   baseComponent: Expression | undefined;
-  lookups: Map<number, FunctionExpression> = new Map();
+  lookups: Map<number, ArrowFunctionExpression> = new Map();
   refs: string[] = [];
   parts: Array<Part> = [];
   #lookupKeys: Array<String> = [];
@@ -66,8 +66,7 @@ export class ComponentDefinitionData {
     const key = this.#lookupKeys.indexOf(hash);
     this.lookups.set(
       key,
-      functionExpression(
-        null,
+      arrowFunctionExpression(
         this.getLookupCallBackParams(),
         blockStatement([returnStatement(expression)])
       )
@@ -111,7 +110,7 @@ export class ComponentWatch {
   elementKey: number;
   address: NodeAddress;
   #tmpCallbacks: { [key: string | number]: Array<Statement> } = {};
-  callbacks: { [key: string | number]: FunctionExpression } = {};
+  callbacks: { [key: string | number]: ArrowFunctionExpression } = {};
   constructor(
     node: ExtractedNode,
     componentDefinition: ComponentDefinitionData,
@@ -148,8 +147,7 @@ export class ComponentWatch {
         this.componentDefinition.component,
         key === SPECIAL_SYMBOLS.noLookup
       );
-      this.callbacks[key] = functionExpression(
-        null,
+      this.callbacks[key] = arrowFunctionExpression(
         args,
         blockStatement(this.#tmpCallbacks[key])
       );

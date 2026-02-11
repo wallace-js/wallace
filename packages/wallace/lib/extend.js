@@ -11,7 +11,7 @@ import { initConstructor } from "./component";
  *
  * So it should never be called with 2nd arg in real life.
  */
-export function extendComponent(base, componentDef) {
+export const extendComponent = (base, componentDef) => {
   // This function call will have been replaced if 2nd arg is a valid component func.
   // and therefore we would not receive it.
   if (componentDef)
@@ -19,4 +19,4 @@ export function extendComponent(base, componentDef) {
   return initConstructor(function () {
     base.call(this);
   }, base);
-}
+};

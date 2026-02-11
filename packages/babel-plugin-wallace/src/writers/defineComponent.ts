@@ -153,6 +153,7 @@ function buildConstructor(
     );
   }
 
+  // Must not be an arrow function.
   return t.functionExpression(
     null,
     [],

@@ -17,9 +17,8 @@ const converters = {
   date: v => new Date(v)
 };
 
-export function route(path, componentDef, converter, cleanup) {
-  return new Route(path, componentDef, converter, cleanup);
-}
+export const route = (path, componentDef, converter, cleanup) =>
+  new Route(path, componentDef, converter, cleanup);
 
 export const Router = () => <div></div>;
 

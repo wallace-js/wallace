@@ -1,9 +1,9 @@
 import type { Identifier } from "@babel/types";
 import {
+  arrowFunctionExpression,
   blockStatement,
   callExpression,
   expressionStatement,
-  functionExpression,
   identifier,
   memberExpression,
   newExpression,
@@ -437,7 +437,6 @@ function processRef(
   if (componentDefinition.refs.includes(name)) {
     error(node.path, ERROR_MESSAGES.REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT);
   }
-  // Note: we modify this call expression in post processing.
   componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.saveRef, [
     identifier(COMPONENT_PROPERTIES.ref),
     t.stringLiteral(name)
@@ -472,8 +471,7 @@ function processEventListeners(
     );
     componentDefinition.wrapDynamicElementCall(node.elementKey, IMPORTABLES.onEvent, [
       stringLiteral(listener.eventName),
-      functionExpression(
-        null,
+      arrowFunctionExpression(
         [identifier(EVENT_CALLBACK_ARGS.event)],
         blockStatement([expressionStatement(updatedExpression)])
       )

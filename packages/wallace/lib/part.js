@@ -11,7 +11,7 @@ Part.prototype.update = function () {
 /**
  * Saves a reference to a part of a component so it can be updated independently.
  */
-export function savePart(node, component, parts, name, start, end) {
+export const savePart = (node, component, parts, name, start, end) => {
   parts[name] = new Part(component, start, end);
   return node;
-}
+};

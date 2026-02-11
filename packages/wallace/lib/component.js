@@ -110,7 +110,7 @@ if (wallaceConfig.flags.useStubs) {
  * @param {function} BaseComponentFunction - A Component definition function to inherit bits from.
  * @returns the ComponentFunction with bits added.
  */
-export function initConstructor(ComponentFunction, BaseComponentFunction) {
+export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
   const proto = (ComponentFunction.prototype = Object.create(
     BaseComponentFunction.prototype,
     {
@@ -122,12 +122,8 @@ export function initConstructor(ComponentFunction, BaseComponentFunction) {
 
   if (wallaceConfig.flags.useMethods) {
     Object.defineProperty(ComponentFunction, "methods", {
-      set: function (value) {
-        Object.assign(proto, value);
-      },
-      get: function () {
-        return proto;
-      }
+      set: value => Object.assign(proto, value),
+      get: () => proto
     });
   } else {
     if (process.env.NODE_ENV !== "production") {
@@ -151,9 +147,9 @@ export function initConstructor(ComponentFunction, BaseComponentFunction) {
   }
 
   return ComponentFunction;
-}
+};
 
-export function defineComponent(html, watches, queries, contructor, inheritFrom) {
+export const defineComponent = (html, watches, queries, contructor, inheritFrom) => {
   const ComponentDefinition = initConstructor(contructor, inheritFrom || ComponentBase);
   const proto = ComponentDefinition.prototype;
   throwAway.innerHTML = html;
@@ -180,4 +176,4 @@ export function defineComponent(html, watches, queries, contructor, inheritFrom)
   }
 
   return ComponentDefinition;
-}
+};

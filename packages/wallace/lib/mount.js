@@ -7,11 +7,11 @@ import { replaceNode } from "./utils";
  * @param {callable} componentDefinition The class of Component to create
  * @param {object} props The props to pass to the component (optional)
  */
-export function mount(elementOrId, componentDefinition, props, ctrl) {
+export const mount = (elementOrId, componentDefinition, props, ctrl) => {
   const component = new componentDefinition();
   component.render(props, ctrl);
   const element =
     typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
   replaceNode(element, component.el);
   return component;
-}
+};
