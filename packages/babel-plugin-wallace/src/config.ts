@@ -8,6 +8,7 @@ export enum FlagValue {
   useControllers = "useControllers",
   useMethods = "useMethods",
   useParts = "useParts",
+  allowRepeaterSiblings = "allowRepeaterSiblings",
   useStubs = "useStubs"
 }
 
@@ -23,6 +24,7 @@ const DefaultFlagValues: Flag = {
   useControllers: true,
   useMethods: true,
   useParts: true,
+  allowRepeaterSiblings: true,
   useStubs: true
 };
 
@@ -31,6 +33,7 @@ const DefaultFlagOverrideValues: Flag = {
   useControllers: false,
   useMethods: false,
   useParts: false,
+  allowRepeaterSiblings: false,
   useStubs: false
 };
 

@@ -4,6 +4,7 @@ import type { NodePath } from "@babel/core";
 import type {
   AssignmentExpression,
   FunctionExpression,
+  FunctionDeclaration,
   Identifier,
   IfStatement,
   MemberExpression,
@@ -105,6 +106,20 @@ export const flattenUpdate = {
           }
         }
       });
+    }
+  }
+};
+
+/**
+ * Removes the last two parameters from repeaters, which aren't used.
+ */
+export const removeRepeaterDetacherParams = {
+  FunctionDeclaration(path: NodePath<FunctionDeclaration>) {
+    // @ts-ignore
+    if (path.node.id?.name?.endsWith("Repeater")) {
+      path.node.params.pop();
+      path.node.params.pop();
+      console.log(path.node);
     }
   }
 };

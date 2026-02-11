@@ -62,7 +62,7 @@ export const ERROR_MESSAGES = {
   REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
   REPEAT_NOT_ALLOWED_ON_ROOT: "Repeated component not allowed on root element.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
-    "Repeat may only be used when the parent node has no other children.",
+    "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false.",
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",
   TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",

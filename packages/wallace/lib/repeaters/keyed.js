@@ -3,11 +3,15 @@ import { countOffset } from "../offsetter";
 /**
  * Repeats nested components, reusing items based on key.
  *
+ * COMPILER_MODS:
+ *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
 export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initialIndex) {
   this.def = componentDefinition;
-  this.at = adjustmentTracker;
-  this.ii = initialIndex;
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    this.at = adjustmentTracker;
+    this.ii = initialIndex;
+  }
   this.keys = []; // array of keys as last set.
   this.pool = {}; // pool of component instances.
   if (typeof key === "function") {
@@ -53,11 +57,13 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     offset = previousKeysLength - itemsLength,
     i = itemsLength - 1;
 
-  if (adjustmentTracker) {
-    adjustment = countOffset(adjustmentTracker, initialIndex);
-    endAnchor = childNodes[previousKeysLength + adjustment] || null;
-    anchor = endAnchor;
-    untouched = false;
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    if (adjustmentTracker) {
+      adjustment = countOffset(adjustmentTracker, initialIndex);
+      endAnchor = childNodes[previousKeysLength + adjustment] || null;
+      anchor = endAnchor;
+      untouched = false;
+    }
   }
 
   // Working backwards saves us having to track moves.
@@ -96,7 +102,9 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
 
   this.keys = newKeys.reverse();
 
-  if (adjustmentTracker) {
-    adjustmentTracker.set(initialIndex, itemsLength - 1);
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    if (adjustmentTracker) {
+      adjustmentTracker.set(initialIndex, itemsLength - 1);
+    }
   }
 };
