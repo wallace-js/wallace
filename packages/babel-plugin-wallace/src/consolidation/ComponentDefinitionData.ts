@@ -2,7 +2,8 @@ import type {
   Expression,
   CallExpression,
   FunctionExpression,
-  Identifier
+  Identifier,
+  Statement
 } from "@babel/types";
 import {
   blockStatement,
@@ -11,11 +12,16 @@ import {
   identifier,
   returnStatement
 } from "@babel/types";
-import { Component } from "../models";
-import { IMPORTABLES } from "../constants";
-import { NodeAddress, Part } from "./types";
-import { ComponentWatch } from "./processNodes";
-import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils";
+import { Component, ExtractedNode } from "../models";
+import { IMPORTABLES, SPECIAL_SYMBOLS } from "../constants";
+import { NodeAddress, Part, ShieldInfo } from "./types";
+import {
+  buildFindElementCall,
+  buildWatchCallbackParams,
+  buildNestedClassCall,
+  removeKeys
+} from "./utils";
+import { codeToNode } from "../utils";
 
 /**
  * An object with all the consolidated data for writing.
@@ -99,5 +105,58 @@ export class ComponentDefinitionData {
   }
   getDetacherId(index: number): string {
     return `detacher${index}`;
+  }
+}
+
+export class ComponentWatch {
+  shieldInfo?: ShieldInfo | undefined;
+  node: ExtractedNode;
+  componentDefinition: ComponentDefinitionData;
+  elementKey: number;
+  address: NodeAddress;
+  #tmpCallbacks: { [key: string | number]: Array<Statement> } = {};
+  callbacks: { [key: string | number]: FunctionExpression } = {};
+  constructor(
+    node: ExtractedNode,
+    componentDefinition: ComponentDefinitionData,
+    elementKey: number,
+    address: NodeAddress
+  ) {
+    this.node = node;
+    this.componentDefinition = componentDefinition;
+    this.elementKey = elementKey;
+    this.address = address;
+    if (this.elementKey === undefined) {
+      // Means we messed up shouldSaveElement vs needsWatch
+      throw "Internal Error: elementKey is undefined";
+    }
+    node.watches.forEach(watch => {
+      if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
+        this.add(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
+      } else {
+        const lookupKey = componentDefinition.addLookup(watch.expression);
+        this.add(lookupKey, codeToNode(watch.callback));
+      }
+    });
+    componentDefinition.watches.push(this);
+  }
+  add(lookupKey: string | number, statements: Statement[]) {
+    if (!this.#tmpCallbacks.hasOwnProperty(lookupKey)) {
+      this.#tmpCallbacks[lookupKey] = [];
+    }
+    this.#tmpCallbacks[lookupKey].push(...statements);
+  }
+  consolidate() {
+    for (const key in this.#tmpCallbacks) {
+      const args = buildWatchCallbackParams(
+        this.componentDefinition.component,
+        key === SPECIAL_SYMBOLS.noLookup
+      );
+      this.callbacks[key] = functionExpression(
+        null,
+        args,
+        blockStatement(this.#tmpCallbacks[key])
+      );
+    }
   }
 }

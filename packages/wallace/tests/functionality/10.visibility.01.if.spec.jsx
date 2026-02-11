@@ -319,3 +319,71 @@ test("Conditional nodes after repeat", () => {
     </div>
     `);
 });
+
+test.only("Keys are not strings", () => {
+  /**
+   * Check for issue using integers as object keys, which are converted to strings.
+   */
+  let show = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const Foo = () => (
+    <div>
+      <div if={show.includes(1)}>1</div>
+      <div if={show.includes(2)}>2</div>
+      <div if={show.includes(3)}>3</div>
+      <div if={show.includes(4)}>4</div>
+      <div if={show.includes(5)}>5</div>
+      <div if={show.includes(6)}>6</div>
+      <div if={show.includes(7)}>7</div>
+      <div if={show.includes(8)}>8</div>
+      <div if={show.includes(9)}>9</div>
+      <div if={show.includes(10)}>10</div>
+      <div if={show.includes(11)}>11</div>
+      <div if={show.includes(12)}>12</div>
+    </div>
+  );
+
+  const component = testMount(Foo);
+  expect(component).toRender(`
+    <div>
+      <div>1</div>
+      <div>2</div>
+      <div>3</div>
+      <div>4</div>
+      <div>5</div>
+      <div>6</div>
+      <div>7</div>
+      <div>8</div>
+      <div>9</div>
+      <div>10</div>
+      <div>11</div>
+      <div>12</div>
+    </div>
+  `);
+
+  show = [1, 2, 3, 4];
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>1</div>
+      <div>2</div>
+      <div>3</div>
+      <div>4</div>
+    </div>
+  `);
+
+  show = [4, 5, 6, 7, 8, 9, 10, 11, 12];
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>4</div>
+      <div>5</div>
+      <div>6</div>
+      <div>7</div>
+      <div>8</div>
+      <div>9</div>
+      <div>10</div>
+      <div>11</div>
+      <div>12</div>
+    </div>
+  `);
+});

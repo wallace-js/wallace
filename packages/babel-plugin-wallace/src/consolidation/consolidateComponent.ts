@@ -33,7 +33,7 @@ export function consolidateComponent(component: Component): ComponentDefinitionD
   hoistTextNodes(component);
 
   component.extractedNodes.forEach(node => {
-    processNode(component, componentDefinition, node);
+    processNode(componentDefinition, node);
   });
   postProcessing(componentDefinition);
   // This must be done after all the processing, as DOM may have changed.

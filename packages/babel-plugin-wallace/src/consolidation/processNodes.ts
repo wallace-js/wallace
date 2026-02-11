@@ -4,7 +4,6 @@ import {
   callExpression,
   expressionStatement,
   functionExpression,
-  FunctionExpression,
   identifier,
   memberExpression,
   newExpression,
@@ -13,7 +12,6 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { wallaceConfig } from "../config";
-import { codeToNode } from "../utils";
 import { Component, ExtractedNode, RepeatInstruction, VisibilityToggle } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
@@ -25,16 +23,10 @@ import {
   WATCH_AlWAYS_CALLBACK_ARGS,
   XARGS
 } from "../constants";
-import { NodeAddress, ShieldInfo } from "./types";
-import { ComponentDefinitionData } from "./ComponentDefinitionData";
-import {
-  getChildren,
-  renameVariablesInExpression,
-  buildWatchCallbackParams
-} from "./utils";
+import { ComponentDefinitionData, ComponentWatch } from "./ComponentDefinitionData";
+import { getChildren, renameVariablesInExpression } from "./utils";
 
 export function processNode(
-  component: Component,
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode
 ) {
@@ -42,7 +34,7 @@ export function processNode(
     // The watch should already have been added to the parent node, which is already
     // processed. All we do here is run some extra checks.
     // TODO: do this with visitor?
-    const children = getChildren(node, component.extractedNodes);
+    const children = getChildren(node, componentDefinition.component.extractedNodes);
     if (children.length > 0) {
       error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
     }
@@ -89,7 +81,7 @@ export function processNode(
     node.hasConditionalChildren || (node.hasRepeatedChildren && node.children.length > 1);
 
   if (needsDetacher) {
-    const detacherObject = t.objectExpression([]);
+    const detacherObject = t.newExpression(t.identifier("Map"), []);
     if (node.hasRepeatedChildren) {
       // We must save it to a variable so we can reference it when creating the
       // repeater.
@@ -164,59 +156,6 @@ export function processNode(
   }
   if (ref) processRef(componentDefinition, node, ref);
   if (part) processPart(componentDefinition, node, part);
-}
-
-export class ComponentWatch {
-  shieldInfo?: ShieldInfo | undefined;
-  node: ExtractedNode;
-  componentDefinition: ComponentDefinitionData;
-  elementKey: number;
-  address: NodeAddress;
-  #tmpCallbacks: { [key: string | number]: Array<Statement> } = {};
-  callbacks: { [key: string | number]: FunctionExpression } = {};
-  constructor(
-    node: ExtractedNode,
-    componentDefinition: ComponentDefinitionData,
-    elementKey: number,
-    address: NodeAddress
-  ) {
-    this.node = node;
-    this.componentDefinition = componentDefinition;
-    this.elementKey = elementKey;
-    this.address = address;
-    if (this.elementKey === undefined) {
-      // Means we messed up shouldSaveElement vs needsWatch
-      throw "Internal Error: elementKey is undefined";
-    }
-    node.watches.forEach(watch => {
-      if (watch.expression == SPECIAL_SYMBOLS.noLookup) {
-        this.add(SPECIAL_SYMBOLS.noLookup, codeToNode(watch.callback));
-      } else {
-        const lookupKey = componentDefinition.addLookup(watch.expression);
-        this.add(lookupKey, codeToNode(watch.callback));
-      }
-    });
-    componentDefinition.watches.push(this);
-  }
-  add(lookupKey: string | number, statements: Statement[]) {
-    if (!this.#tmpCallbacks.hasOwnProperty(lookupKey)) {
-      this.#tmpCallbacks[lookupKey] = [];
-    }
-    this.#tmpCallbacks[lookupKey].push(...statements);
-  }
-  consolidate() {
-    for (const key in this.#tmpCallbacks) {
-      const args = buildWatchCallbackParams(
-        this.componentDefinition.component,
-        key === SPECIAL_SYMBOLS.noLookup
-      );
-      this.callbacks[key] = functionExpression(
-        null,
-        args,
-        blockStatement(this.#tmpCallbacks[key])
-      );
-    }
-  }
 }
 
 function processNestedComponent(
