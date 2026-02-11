@@ -295,7 +295,6 @@ export function processNodes(
       node.hasConditionalChildren ||
       (node.hasRepeatedChildren && node.children.length > 1);
 
-    console.log("DETACHER", node.tagName, node.children.length, needsDetacher);
     if (needsDetacher) {
       const detacherObject = t.objectExpression([]);
       if (node.hasRepeatedChildren) {

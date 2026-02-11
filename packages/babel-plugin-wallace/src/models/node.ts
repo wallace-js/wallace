@@ -85,14 +85,12 @@ export class ExtractedNode {
    * The triggers that cause the classes to be toggled.
    */
   toggleTriggers: ToggleTrigger[] = [];
-  #stubName: string | undefined;
-  #visibilityToggle: VisibilityToggle | undefined;
-  #ref: string | undefined;
-  #part: string | undefined;
-  #props: Expression | undefined;
-  #ctrl: Expression | undefined;
-  #forExpression: Expression | undefined;
-  #forVariable: string | undefined;
+  #stubName?: string;
+  #visibilityToggle?: VisibilityToggle;
+  #ref?: string;
+  #part?: string;
+  #props?: Expression;
+  #ctrl?: Expression;
   constructor(
     path: NodePath<ValidElementType>,
     address: Array<number>,
@@ -214,14 +212,6 @@ export class ExtractedNode {
         // poolExpression: this.repeatNode.poolExpression
       };
     }
-    // return this.repeatNode
-    //   ? {
-    //       expression: this.repeatNode.#repeatExpression,
-    //       componentCls: this.repeatNode.tagName,
-    //       repeatKey: this.repeatNode.repeatKey
-    //       // poolExpression: this.repeatNode.poolExpression
-    //     }
-    //   : undefined;
   }
   setStub(name: string) {
     if (!this.parent) {
@@ -235,20 +225,6 @@ export class ExtractedNode {
   getStub(): string | undefined {
     return this.#stubName;
   }
-  // setForLoop(expression: Expression, variable: string | undefined) {
-  //   if (this.#forExpression) {
-  //     error(this.path, ERROR_MESSAGES.REF_ALREADY_DEFINED);
-  //   }
-  //   this.#forVariable = variable;
-  //   this.#forExpression = expression;
-  // }
-  // getForLoop():
-  //   | { expression: Expression; variable: string | undefined }
-  //   | undefined {
-  //   if (this.#forExpression) {
-  //     return { expression: this.#forExpression, variable: this.#forVariable };
-  //   }
-  // }
 }
 
 export class TagNode extends ExtractedNode {
@@ -267,7 +243,6 @@ export class TagNode extends ExtractedNode {
     isNestedComponent: boolean,
     isRepeatedComponent: boolean
   ) {
-    console.log("TagNode", tagName, address);
     super(path, address, initialIndex, parent);
     this.component = component;
     this.tagName = tagName;

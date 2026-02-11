@@ -19,18 +19,6 @@ class TestDirectiveInConfig extends Directive {
   }
 }
 
-class CancelKey extends Directive {
-  static attributeName = "nokey";
-  static allowNull = true;
-  static allowOnRepeated = true;
-  static allowOnNormalElement = false;
-  apply(node, value, qualifier, base) {
-    if (!keyed) {
-      node.setRepeatKey(undefined);
-    }
-  }
-}
-
 /**
  * Jest requires modern JS to be translated with "@babel/preset-env".
  */
@@ -40,7 +28,7 @@ module.exports = {
     [
       "babel-plugin-wallace",
       {
-        directives: [TestDirectiveInConfig, CancelKey]
+        directives: [TestDirectiveInConfig]
       }
     ],
     "@babel/plugin-syntax-jsx"

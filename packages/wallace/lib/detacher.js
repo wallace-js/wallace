@@ -16,14 +16,11 @@ Detacher.prototype.apply = function (element, shouldBeVisible, elements, stash) 
   let offset = detachedElementCache[index] || 0;
   if (shouldBeVisible && offset === -1) {
     adjustedIndex = countAdjustments(detachedElementCache, index);
-    console.log("inserting", adjustedIndex, element, parent.childNodes[adjustedIndex]);
     parent.insertBefore(element, parent.childNodes[adjustedIndex]);
     offset = 0;
   } else if (!shouldBeVisible && offset === 0) {
-    console.log("detaching", element);
     parent.removeChild(element);
     offset = -1;
   }
   detachedElementCache[index] = offset;
-  console.log(detachedElementCache);
 };

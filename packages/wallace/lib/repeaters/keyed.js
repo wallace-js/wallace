@@ -60,7 +60,6 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   if (adjustmentTracker) {
     // The repeat element has siblings
     adjustment = countAdjustments(adjustmentTracker, initialIndex);
-    console.log(adjustment, adjustmentTracker);
     endOfRange = previousKeysLength + adjustment;
     endAnchor = childNodes[endOfRange] || null;
     anchor = endAnchor;
@@ -105,5 +104,4 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   if (adjustmentTracker) {
     adjustmentTracker[initialIndex] = itemsLength - 1;
   }
-  console.log("Keyed");
 };
