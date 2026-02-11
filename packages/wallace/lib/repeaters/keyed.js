@@ -1,4 +1,4 @@
-import { countAdjustments } from "../adjuster";
+import { countOffset } from "../offsetter";
 // WARNING: Code here is near duplicated in keyedFn.
 
 /**
@@ -47,8 +47,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     el,
     key,
     component,
-    endOfRange,
-    endAnchor,
+    endAnchor = null,
     adjustment = 0,
     anchor = null,
     fragAnchor = null,
@@ -58,10 +57,8 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     i = itemsLength - 1;
 
   if (adjustmentTracker) {
-    // The repeat element has siblings
-    adjustment = countAdjustments(adjustmentTracker, initialIndex);
-    endOfRange = previousKeysLength + adjustment;
-    endAnchor = childNodes[endOfRange] || null;
+    adjustment = countOffset(adjustmentTracker, initialIndex);
+    endAnchor = childNodes[previousKeysLength + adjustment] || null;
     anchor = endAnchor;
     untouched = false;
   }

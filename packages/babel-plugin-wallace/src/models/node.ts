@@ -80,11 +80,11 @@ export class ExtractedNode {
   /**
    * The sets of classes that may be toggled.
    */
-  toggleTargets: ToggleTarget[] = [];
+  classToggleTargets: ToggleTarget[] = [];
   /**
    * The triggers that cause the classes to be toggled.
    */
-  toggleTriggers: ToggleTrigger[] = [];
+  classToggleTriggers: ToggleTrigger[] = [];
   #stubName?: string;
   #visibilityToggle?: VisibilityToggle;
   #ref?: string;
@@ -123,11 +123,11 @@ export class ExtractedNode {
       callback
     });
   }
-  addToggleTrigger(name: string, expression: Expression) {
-    this.toggleTriggers.push({ name, expression });
+  addClassToggleTrigger(name: string, expression: Expression) {
+    this.classToggleTriggers.push({ name, expression });
   }
-  addToggleTarget(name: string, value: Expression | string) {
-    this.toggleTargets.push({ name, value });
+  addClassToggleTarget(name: string, value: Expression | string) {
+    this.classToggleTargets.push({ name, value });
   }
   watchAttribute(attName: string, expression: Expression) {
     this.addWatch(expression, setAttributeCallback(attName));
@@ -222,7 +222,7 @@ export class ExtractedNode {
     }
     this.#stubName = name;
   }
-  getStub(): string | undefined {
+  getStubName(): string | undefined {
     return this.#stubName;
   }
 }

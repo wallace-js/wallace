@@ -1,4 +1,4 @@
-import { countAdjustments } from "../adjuster";
+import { countOffset } from "../offsetter";
 /**
  * Repeats nested components, yielding from its pool sequentially.
  */
@@ -35,7 +35,7 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
 
   if (adjustmentTracker) {
     // The repeat element has siblings
-    offset = countAdjustments(adjustmentTracker, initialIndex);
+    offset = countOffset(adjustmentTracker, initialIndex);
     endOfRange += offset;
     nextElement = childNodes[endOfRange] || null;
   }

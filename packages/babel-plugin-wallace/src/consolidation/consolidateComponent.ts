@@ -1,7 +1,7 @@
 import { Component, DynamicTextNode } from "../models";
 import { postProcessing } from "./postProcessing";
 import { ComponentDefinitionData } from "./ComponentDefinitionData";
-import { processNodes } from "./processNodes";
+import { processNode } from "./processNodes";
 import { getSiblings } from "./utils";
 
 /**
@@ -31,7 +31,10 @@ function hoistTextNodes(component: Component) {
 export function consolidateComponent(component: Component): ComponentDefinitionData {
   const componentDefinition = new ComponentDefinitionData(component);
   hoistTextNodes(component);
-  processNodes(component, componentDefinition);
+
+  component.extractedNodes.forEach(node => {
+    processNode(component, componentDefinition, node);
+  });
   postProcessing(componentDefinition);
   // This must be done after all the processing, as DOM may have changed.
   componentDefinition.html = component.buildHTMLString();

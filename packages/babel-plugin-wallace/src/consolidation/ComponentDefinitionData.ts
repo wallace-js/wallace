@@ -13,7 +13,8 @@ import {
 } from "@babel/types";
 import { Component } from "../models";
 import { IMPORTABLES } from "../constants";
-import { ComponentWatch, NodeAddress, Part } from "./types";
+import { NodeAddress, Part } from "./types";
+import { ComponentWatch } from "./processNodes";
 import { buildFindElementCall, buildNestedClassCall, removeKeys } from "./utils";
 
 /**

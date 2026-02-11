@@ -1,4 +1,4 @@
-import { countAdjustments } from "./adjuster";
+import { countOffset } from "./offsetter";
 /**
  * Deals with conditionally detaching elements with the if directive.
  */
@@ -15,7 +15,7 @@ Detacher.prototype.apply = function (element, shouldBeVisible, elements, stash) 
     detachedElementCache = stash[this.s];
   let offset = detachedElementCache[index] || 0;
   if (shouldBeVisible && offset === -1) {
-    adjustedIndex = countAdjustments(detachedElementCache, index);
+    adjustedIndex = countOffset(detachedElementCache, index);
     parent.insertBefore(element, parent.childNodes[adjustedIndex]);
     offset = 0;
   } else if (!shouldBeVisible && offset === 0) {

@@ -1,4 +1,4 @@
-import type { CallExpression, FunctionExpression } from "@babel/types";
+import type { CallExpression } from "@babel/types";
 
 export type NodeAddress = Array<number>;
 
@@ -13,13 +13,6 @@ export interface ShieldInfo {
   reverse: boolean;
   skipCount: number;
   detacher?: Detacher;
-}
-
-export interface ComponentWatch {
-  elementKey: number;
-  shieldInfo?: ShieldInfo | undefined;
-  callbacks: { [key: string | number]: FunctionExpression };
-  address: NodeAddress; // needed for setting the skipCount.
 }
 
 export interface Part {
