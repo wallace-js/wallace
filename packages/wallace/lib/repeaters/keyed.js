@@ -3,8 +3,6 @@ import { countOffset } from "../offsetter";
 /**
  * Repeats nested components, reusing items based on key.
  *
- * @param {function} componentDefinition - The ComponentDefinition to create.
- * @param {string | function} key - The name of the key property.
  */
 export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initialIndex) {
   this.def = componentDefinition;
@@ -97,6 +95,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   }
 
   this.keys = newKeys.reverse();
+
   if (adjustmentTracker) {
     adjustmentTracker.set(initialIndex, itemsLength - 1);
   }
