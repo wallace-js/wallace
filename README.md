@@ -132,7 +132,7 @@ You can toggle flags in your babel config to disable certain features for cuttin
 2.  `useControllers` - allows use of `ctrl` in components.
 3.  `allowMethods` - allows use of `methods` helper to components.
 4.  `allowParts` - allows use of parts.
-5.  `allowRepeaterSiblings` - allows use repeaters to have siblings.
+5.  `allowRepeaterSiblings` - allows repeaters to have siblings.
 6.  `allowStubs` - allows use of stubs.
 
 These flags default to true, unless you specify `flags` in the plugin config, in which case they default to false and you need to explicitly enable those you want. This helps you identify those you don't need to set:
@@ -406,7 +406,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
     </span>
     <Counter.repeat items={counters} />
-    <input type="text" bind:keyup={things} />
+    <input type="text" bind={things} event:keyup />
   </div>
 );
 
@@ -434,7 +434,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
     <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
     <Counter.repeat items={counters} />
-    <input type="text" bind:keyup={things} />
+    <input type="text" bind={things} even:keyup />
   </div>
 );
 
@@ -745,7 +745,7 @@ const CounterList: Uses<iCounterList, Controller, Methods> = (
     <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
     <Counter.repeat items={counters} />
-    <input type="text" bind:keyup={things.value} />
+    <input type="text" bind={things.value} event:keyup />
   </div>
 );
 

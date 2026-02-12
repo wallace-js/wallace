@@ -30,11 +30,13 @@ export const ERROR_MESSAGES = {
   DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
     return `The "${directive}" directive may not access scoped variable "${name}".`;
   },
+  EVENT_USED_WITHOUT_BIND:
+    "The `event` directive must be used with the `bind` directive.",
   FLAG_REQUIRED: (flag: string) => {
     return `Flag "${flag}" must be set to true in the config for this feature.`;
   },
-  INVALID_EVENT_NAME_IN_BIND: (badEventNameive: string) => {
-    return `"${badEventNameive}" is not a valid event name. Must be lowercase without "on" prefix. E.g. bind:keyup.`;
+  INVALID_EVENT_NAME: (event: string) => {
+    return `"${event}" is not a valid event. Must be lowercase without "on" prefix. E.g. event:keyup.`;
   },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT: "Nest components using <Name.nest /> or <Name.repeat />.",
@@ -56,6 +58,8 @@ export const ERROR_MESSAGES = {
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
   NO_ATTRIBUTES_ON_NESTED_CLASS: "Attributes not allowed on nested class elements.",
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
+  SPECIFY_EITHER_VALUE_OR_QUALIFIER: (name: string) =>
+    `Specify either value: ${name}="xyz" or qualifier: ${name}:xyz`,
   PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
     "Parts must be unique within each component.",
   REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",

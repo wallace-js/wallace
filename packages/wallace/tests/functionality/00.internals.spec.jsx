@@ -64,7 +64,7 @@ describe("Lookups", () => {
   });
 });
 
-test.only("No accidental string coercion", () => {
+test("No accidental string coercion", () => {
   /**
    * Watches, lookups and previous can easily get muddled between objects
    * and Maps and strings and numbers, which can cause 11 > 2 bugs which

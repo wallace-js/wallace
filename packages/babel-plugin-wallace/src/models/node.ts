@@ -32,8 +32,9 @@ interface EventListener {
 }
 
 interface BindInstruction {
-  eventName: string;
-  expression: Expression;
+  event?: string;
+  property?: string;
+  expression?: Expression;
 }
 
 export interface VisibilityToggle {
@@ -72,7 +73,7 @@ export class ExtractedNode {
   children: Array<ExtractedNode> = [];
   watches: Watch[] = [];
   eventListeners: EventListener[] = [];
-  bindInstructions: BindInstruction[] = [];
+  bindInstructions: BindInstruction = {};
   hasConditionalChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
   // poolExpression: Expression | undefined;
@@ -112,8 +113,12 @@ export class ExtractedNode {
   addEventListener(eventName: string, callback: Expression) {
     this.eventListeners.push({ eventName, callback });
   }
-  addBindInstruction(eventName: string, expression: Expression) {
-    this.bindInstructions.push({ eventName, expression });
+  setBindInstruction(expression: Expression, property: string) {
+    this.bindInstructions.property = property;
+    this.bindInstructions.expression = expression;
+  }
+  setBindEvent(event: string) {
+    this.bindInstructions.event = event;
   }
   addWatch(
     expression: Expression | SPECIAL_SYMBOLS.noLookup,

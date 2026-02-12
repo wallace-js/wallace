@@ -529,7 +529,8 @@ performance and bundle size:
 2.  allowCtrl - enables use of `ctrl` in components.
 3.  allowMethods - adds the `methods` helper to components.
 4.  allowParts  - enables use of parts.
-5.  allowStubs - enables the use of stubs.
+5.  allowRepeaterSiblings - allows repeaters to have siblings.
+6.  allowStubs - enables the use of stubs.
 
 These flags default to true, unless you specify `flags` in the plugin config, in which
 case they default to false and you need to explicitly enable those you want:
@@ -840,46 +841,29 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: bind
    *
-   * Sets up two-way binding:
-   *
-   *   1. It uses the expression as the element's value.
-   *   2. It assigns the value back to the expression when the element's `change` event
-   * fires.
-   *
-   * So this:
+   * Sets up two way binding between an input and data:
    *
    * ```
-   * const MyComponent = ({name}) => (
-   *   <input type="text" bind={name}/>
-   * );
+   * <input type="text" bind={name} />
    * ```
    *
    * Is the equivalent of this:
    *
-   *```
-   * const MyComponent = ({name}, {event}) => (
-   *   <input type="text" onChange={name = event.target.value} value={name}/>
-   * );
    * ```
-   *
-   * In the case of a checkbox it uses `checked` instead of `value`, so is the equivalent of this:
+   * <input type="text" value={name} onChange={name = event.target.value} />
+   * ```
+   * By default it watches the `change` event, but you can specify a different one using
+   * the `event` directive:
    *
    * ```
-   * const MyComponent = ({done}, {event}) => (
-   *   <input type="checkbox" onChange={done = event.target.checked} checked={done}/>
-   * );
+   * <input type="text" bind={name} event:keyup />
    * ```
    *
-   * By defaults it listens to the `change` event, but you can specify a different one:
+   * By default it binds to `value` but you can set a different property:
    *
    *```
-   * const MyComponent = ({name}) => (
-   *   <input type="text" bind:KeyUp={name} />
-   * );
+   * <input type="number" bind:valueAsNumber={name} />
    * ```
-   *
-   * Note that destructured props are converted to member expressions, so these examples
-   * work even though it looks like you're setting a local variable.
    */
   bind?: MustBeExpression;
 
@@ -921,6 +905,19 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    */
   ctrl?: any;
+
+  /**
+   * ## Wallace directive: event
+   *
+   *
+   * Must be used with the `bind` directive, and causes it do watch a different event
+   * (the default is `change`)
+   *
+   * ```
+   * <input type="text" bind={name} event:keyup />
+   * ```
+   */
+  event?: string;
 
   /**
    * ## Wallace directive: fixed
@@ -1085,6 +1082,7 @@ declare namespace JSX {
      * - `class:xyz` defines a set of classes to be toggled.
      * - `css` shorthand for `fixed:class`.
      * - `ctrl` specifies ctrl for nested/repeated components.
+     * - `event` changes the event which `bind` reacts to.
      * - `fixed:xyz` sets a attribute from an expression at definition.
      * - `hide` sets an element or component's hidden property.
      * - `html` Set the element's `innnerHTML` property.

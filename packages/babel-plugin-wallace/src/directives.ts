@@ -16,7 +16,6 @@ class ApplyDirective extends Directive {
   static attributeName = "apply";
   static allowNull = true;
   static allowString = false;
-  static allowQualifier = false;
   static mayAccessElement = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
@@ -26,23 +25,8 @@ class ApplyDirective extends Directive {
 class BindDirective extends Directive {
   static attributeName = "bind";
   static allowQualifier = true;
-  static help = `
-    Create a two-way binding between an input element's "value" property and the
-    expression, which must be assignable. 
-    If the input is of type "checkbox", it uses the "checked" property instead.
-    
-    /h <div bind={p.count}></div>
-
-    By defaults it listens to "change" event, but you can specify a different one:
-
-    /h <div bind:keyup={p.count}></div>
-  `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
-    const eventName = qualifier || "change";
-    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
-      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME_IN_BIND(eventName));
-    }
-    node.addBindInstruction(eventName, value.expression);
+    node.setBindInstruction(value.expression, qualifier);
   }
 }
 
@@ -94,6 +78,20 @@ class CtrlDirective extends Directive {
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
     node.setCtrl(value.expression);
+  }
+}
+
+class EventDirective extends Directive {
+  static attributeName = "event";
+  static allowExpression = false;
+  static allowNull = true;
+  static requireQualifier = true;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    const eventName = qualifier || value.value;
+    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
+      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME(eventName));
+    }
+    node.setBindEvent(eventName);
   }
 }
 
@@ -316,6 +314,7 @@ export const builtinDirectives = [
   ClassDirective,
   CssDirective,
   CtrlDirective,
+  EventDirective,
   FixedDirective,
   HideDirective,
   HtmlDirective,
