@@ -10,5 +10,6 @@ export { KeyedRepeater } from "./repeaters/keyed";
 export { SequentialRepeater } from "./repeaters/sequential";
 export { Router, route } from "./router";
 export { getStub } from "./stubs";
+export { toDateString } from "./toDateString";
 export { findElement, onEvent } from "./utils";
 export { watch, protect } from "./watch";

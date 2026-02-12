@@ -48,13 +48,13 @@ export function processNode(
   }
   // Need to happen first
   ensureToggleTargetsHaveTriggers(node);
-  createEventsForBoundInputs(node);
+  createEventsForBoundInputs(componentDefinition, node);
 
   const visibilityToggle = node.getVisibilityToggle();
   const ref = node.getRef();
   const part = node.getPart();
   const repeatInstruction = node.getRepeatInstruction();
-  const hasBoundInputs = node.bindInstructions.length > 0;
+  const hasBoundInputs = node.bindInstructions.expression;
   const hasClassToggles = node.classToggleTriggers.length > 0;
   const hasEventListeners = node.eventListeners.length > 0;
   const hasWatches = node.watches.length > 0;
@@ -238,48 +238,69 @@ function processStub(
   ]);
 }
 
-function createEventsForBoundInputs(node: ExtractedNode) {
-  if (node.bindInstructions.length === 0) {
+function createEventsForBoundInputs(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode
+) {
+  let setExpression,
+    setProperty,
+    { expression, event, property } = node.bindInstructions;
+
+  if (expression === undefined) {
+    if (event) {
+      error(node.path, ERROR_MESSAGES.EVENT_USED_WITHOUT_BIND);
+    }
     return;
   }
-  if (node.tagName.toLowerCase() == "input") {
-    // @ts-ignore
-    const inputType = node.element.type.toLowerCase();
-    const attribute = inputType === "checkbox" ? "checked" : "value";
-    node.bindInstructions.forEach(({ eventName, expression }) => {
-      // This is the callback, which must be alwaysUpate as there's otherwise a glitch
-      // caused by the fact this isn't tiggering an update, and therefore not resetting
-      // the previous stored value, which eventually ends up being the same as the new
-      // value, causing the element not to update.
-      node.addWatch(
-        SPECIAL_SYMBOLS.noLookup,
-        t.assignmentExpression(
-          "=",
-          t.memberExpression(
-            t.identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-            t.identifier(attribute)
-          ),
-          expression as Identifier
-        )
-      );
+  event = event || "change";
+  property = property || "value";
 
-      // This is the event handler that updates the data:
-      const callback = t.assignmentExpression(
-        "=",
-        expression as Identifier,
-        t.memberExpression(
-          t.memberExpression(
-            t.identifier(EVENT_CALLBACK_ARGS.event),
-            t.identifier("target")
-          ),
-          t.identifier(attribute)
-        )
-      );
-      node.addEventListener(eventName, callback);
-    });
+  // This is a hack to deal with Proxy Date objects, which we get from `watch` as they
+  // are rejected as not being Date objects:
+  //
+  //   Uncaught TypeError: Failed to set the 'valueAsDate' property on
+  //   'HTMLInputElement': The provided value is not a Date.
+  //
+  // Essentially we convert to string and write to value instead. We still read from
+  // valueAsDate.
+  // This relies on binding methods to the target, which is done inside watch.
+  if (property == "valueAsDate") {
+    componentDefinition.component.module.requireImport(IMPORTABLES.toDateString);
+    setProperty = "value";
+    setExpression = t.callExpression(t.identifier(IMPORTABLES.toDateString), [
+      expression
+    ]);
   } else {
-    error(node.path, ERROR_MESSAGES.BIND_ONLY_ALLOWED_ON_INPUT);
+    setProperty = property;
+    setExpression = expression;
   }
+
+  // This is the callback, which must be alwaysUpate as there's otherwise a glitch
+  // caused by the fact this isn't tiggering an update, and therefore not resetting
+  // the previous stored value, which eventually ends up being the same as the new
+  // value, causing the element not to update.
+  node.addWatch(
+    SPECIAL_SYMBOLS.noLookup,
+    t.assignmentExpression(
+      "=",
+      t.memberExpression(
+        t.identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
+        t.identifier(setProperty)
+      ),
+      setExpression as Identifier
+    )
+  );
+
+  // This is the event handler that updates the data:
+  const callback = t.assignmentExpression(
+    "=",
+    expression as Identifier,
+    t.memberExpression(
+      t.memberExpression(t.identifier(EVENT_CALLBACK_ARGS.event), t.identifier("target")),
+      t.identifier(property)
+    )
+  );
+  node.addEventListener(event, callback);
 }
 
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {

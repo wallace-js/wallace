@@ -320,7 +320,7 @@ test("Conditional nodes after repeat", () => {
     `);
 });
 
-test.only("Keys are not strings", () => {
+test("Keys are not strings", () => {
   /**
    * Check for issue using integers as object keys, which are converted to strings.
    */

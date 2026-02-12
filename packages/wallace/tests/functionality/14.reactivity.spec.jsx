@@ -4,7 +4,7 @@ import { watch, protect } from "wallace";
 test("Can make a component reactive", () => {
   const MyComponent = ({ checked }) => (
     <div>
-      <input ref:cbx type="checkbox" bind={checked} />
+      <input ref:cbx type="checkbox" bind:checked={checked} />
       <span>{checked ? "yep" : "nope"}</span>
     </div>
   );
