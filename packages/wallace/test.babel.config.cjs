@@ -1,4 +1,4 @@
-const { Directive } = require("babel-plugin-wallace");
+const { Directive, ValueType, FieldMode } = require("babel-plugin-wallace");
 
 /**
  * Custom directive that we can use for testing.
@@ -8,9 +8,12 @@ const { Directive } = require("babel-plugin-wallace");
  */
 class TestDirectiveInConfig extends Directive {
   static attributeName = "test-directive";
-  static allowNull = true;
-  static allowString = true;
-  static allowQualifier = true;
+  // static allowNull = true;
+  // static allowString = true;
+  // static allowQualifier = true;
+  static allowedValue = ValueType.Both;
+  static valueMode = FieldMode.Allowed;
+  static qualifierMode = FieldMode.Allowed;
   apply(node, value, qualifier, base) {
     node.addFixedAttribute("value-value", value.value);
     node.addFixedAttribute("value-expression", value.expression);

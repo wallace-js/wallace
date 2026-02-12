@@ -9,15 +9,17 @@
 
 import { wallaceConfig, FlagValue } from "./config";
 import { ERROR_MESSAGES, error } from "./errors";
-import { Directive, TagNode, NodeValue, Qualifier } from "./models";
+import { Directive, TagNode, NodeValue, Qualifier, FieldMode, ValueType } from "./models";
 import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
   static allowNull = true;
-  static allowString = false;
-  static allowQualifier = false;
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static mayAccessElement = true;
+
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
@@ -25,7 +27,9 @@ class ApplyDirective extends Directive {
 
 class BindDirective extends Directive {
   static attributeName = "bind";
-  static allowQualifier = true;
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.Allowed;
   static help = `
     Create a two-way binding between an input element's "value" property and the
     expression, which must be assignable. 
@@ -48,8 +52,9 @@ class BindDirective extends Directive {
 
 class ClassDirective extends Directive {
   static attributeName = "class";
-  static allowString = true;
-  static allowQualifier = true;
+  static allowedValue = ValueType.Both;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.Allowed;
   static help = `
     Without a qualifer this acts as a normal attribute, but with a qualifier it creates
     a toggle target for use with the "toggle" directive:
@@ -75,6 +80,9 @@ class ClassDirective extends Directive {
 
 class CssDirective extends Directive {
   static attributeName = "css";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static mayAccessComponent = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addStaticAttribute("class", value.expression);
@@ -83,6 +91,9 @@ class CssDirective extends Directive {
 
 class CtrlDirective extends Directive {
   static attributeName = "ctrl";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static allowOnNested = true;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
@@ -99,7 +110,9 @@ class CtrlDirective extends Directive {
 
 class FixedDirective extends Directive {
   static attributeName = "fixed";
-  static requireQualifier = true;
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.Required;
   static mayAccessComponent = false;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.addStaticAttribute(qualifier, value.expression);
@@ -108,6 +121,9 @@ class FixedDirective extends Directive {
 
 class HideDirective extends Directive {
   static attributeName = "hide";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static allowOnNested = true;
   static help = `
     Hides an element by toggling its hidden attribute.
@@ -121,6 +137,9 @@ class HideDirective extends Directive {
 
 class HtmlDirective extends Directive {
   static attributeName = "html";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static help = `
 
     /h <div html={'<div>hello</div>'}></div>
@@ -132,6 +151,9 @@ class HtmlDirective extends Directive {
 
 class IfDirective extends Directive {
   static attributeName = "if";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static help = `
     Conditionally includes/exludes an element from the DOM.
 
@@ -144,6 +166,9 @@ class IfDirective extends Directive {
 
 class ItemsDirective extends Directive {
   static attributeName = "items";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help: `
@@ -158,7 +183,9 @@ class ItemsDirective extends Directive {
 
 class KeyDirective extends Directive {
   static attributeName = "key";
-  static allowString = true;
+  static allowedValue = ValueType.Both;
+  static valueMode = FieldMode.Allowed;
+  static qualifierMode = FieldMode.Allowed;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help = `
@@ -169,13 +196,16 @@ class KeyDirective extends Directive {
     If specifying a key, you may not specify a pool.
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    // TODO: validate permutations.
     node.setRepeatKey(value.expression || value.value);
   }
 }
 
 class OnEventDirective extends Directive {
   static attributeName = "on*";
-  static allowString = true;
+  static allowedValue = ValueType.Both;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static mayAccessElement = true;
   static mayAccessEvent = true;
   static help = `
@@ -194,23 +224,27 @@ class OnEventDirective extends Directive {
 
 class PartDirective extends Directive {
   static attributeName = "part";
+  static allowedValue = ValueType.String;
+  static valueMode = FieldMode.Allowed;
+  static qualifierMode = FieldMode.Allowed;
   static allowOnNested = true;
-  static allowNull = true;
-  static allowExpression = false;
-  static requireQualifier = true;
   static help = `
     Saves a reference to a part of a component which can be updated.
 
     /h <div part:title></div>
     `;
-  apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
-    node.setPart(qualifier);
+    const partName = this.getValueOrQualifer(node, value, qualifier);
+    node.setPart(partName);
   }
 }
 
 class PropsDirective extends Directive {
   static attributeName = "props";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Allowed;
+  static qualifierMode = FieldMode.NotAllowed;
   static allowOnNested = true;
   static allowOnNormalElement = false;
   static help: `
@@ -225,22 +259,26 @@ class PropsDirective extends Directive {
 
 class RefDirective extends Directive {
   static attributeName = "ref";
+  static allowedValue = ValueType.String;
+  static valueMode = FieldMode.Allowed;
+  static qualifierMode = FieldMode.Allowed;
   static allowOnNested = true;
-  static allowNull = true;
-  static allowExpression = false;
-  static requireQualifier = true;
   static help = `
     Saves a reference to an element or nested component:
 
     /h <div ref:title></div>
     `;
-  apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
-    node.setRef(qualifier);
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    const refName = this.getValueOrQualifer(node, value, qualifier);
+    node.setRef(refName);
   }
 }
 
 class ShowDirective extends Directive {
   static attributeName = "show";
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.NotAllowed;
   static allowOnNested = true;
   static help = `
     Shows an element by toggling its hidden attribute.
@@ -254,8 +292,9 @@ class ShowDirective extends Directive {
 
 class StyleDirective extends Directive {
   static attributeName = "style";
-  static allowString = true;
-  static allowQualifier = true;
+  static allowedValue = ValueType.Both;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.Allowed;
   static help = `
 
     /h <div style:color="red"></div>
@@ -282,7 +321,9 @@ class StyleDirective extends Directive {
 
 class ToggleDirective extends Directive {
   static attributeName = "toggle";
-  static requireQualifier = true;
+  static allowedValue = ValueType.Expression;
+  static valueMode = FieldMode.Required;
+  static qualifierMode = FieldMode.Required;
   static help = `
     If used on its own, the qualifer is the name of the css class to toggle:
 
@@ -294,17 +335,16 @@ class ToggleDirective extends Directive {
     /h <div class:danger="red danger" toggle:danger={expr}></div>
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
-    if (!qualifier) {
-      throw new Error("Toggle must have a qualifier");
-    }
     node.addClassToggleTrigger(qualifier, value.expression);
   }
 }
 
 class UniqueDirective extends Directive {
   static attributeName = "unique";
-  static allowExpression = false;
   static allowNull = true;
+  static allowedValue = ValueType.None;
+  static valueMode = FieldMode.NotAllowed;
+  static qualifierMode = FieldMode.NotAllowed;
   apply(node: TagNode, _value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.component.unique = true;
   }

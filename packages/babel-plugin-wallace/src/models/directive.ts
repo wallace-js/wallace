@@ -14,14 +14,30 @@ export interface NodeValue {
 
 export type Qualifier = string | undefined;
 
+export enum FieldMode {
+  Required,
+  Allowed,
+  NotAllowed
+}
+
+export enum ValueType {
+  Expression,
+  String,
+  Both,
+  None
+}
+
 export class Directive {
   static attributeName: string;
   static help: string;
-  static allowExpression = true;
-  static allowNull = false;
-  static allowString = false;
-  static allowQualifier = false;
-  static requireQualifier = false;
+  // static allowExpression = true;
+  // static allowNull = false;
+  // static allowString = false;
+  // static allowQualifier = false;
+  // static requireQualifier = false;
+  static allowedValue: ValueType = ValueType.None;
+  static valueMode: FieldMode = FieldMode.NotAllowed;
+  static qualifierMode: FieldMode; // = FieldMode.NotAllowed;
   static allowOnNested = false;
   static allowOnRepeated = false;
   static allowOnNormalElement = true;
@@ -38,25 +54,81 @@ export class Directive {
     component: Component
   ) {
     const constructor = this.constructor as typeof Directive;
-    this.validateType(node, value, constructor);
     this.validateNestedAndRepeat(node, constructor);
-    this.validateQualifier(node, qualifier, constructor);
+    this.validateValues(node, value, qualifier, constructor);
+    // this.validateType(node, value, constructor);
+    // this.validateQualifier(node, qualifier, constructor);
     this.validateScopeVariablAccess(node, value, constructor, component);
   }
-  validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
-    const { attributeName, allowExpression, allowString, allowNull } = constructor;
-    const allowedTypes = [
-      allowExpression && "expression",
-      allowString && "string",
-      allowNull && "null"
-    ].filter(Boolean);
-    if (!allowedTypes.includes(value.type)) {
+  getValueOrQualifer(node: TagNode, value: NodeValue, qualifier: Qualifier): string {
+    const constructor = this.constructor as typeof Directive;
+    if (value.type === "null") {
+      return qualifier;
+    }
+    if (value.type !== "string") {
       error(
         node.path,
-        ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(attributeName, allowedTypes, value.type)
+        ERROR_MESSAGES.DIRECTIVE_VALUE_NOT_STRING(constructor.attributeName, value.type)
+      );
+    }
+    if (value.value && qualifier) {
+      error(
+        node.path,
+        ERROR_MESSAGES.DIRECTIVE_REQUIRES_QUALIFIER_OR_VALUE(constructor.attributeName)
+      );
+      return value.value;
+    }
+    return value.value || qualifier;
+  }
+  validateValues(
+    node: TagNode,
+    value: NodeValue,
+    qualifier: Qualifier,
+    constructor: typeof Directive
+  ) {
+    const { attributeName, allowedValue, valueMode, qualifierMode } = constructor;
+    // value provided
+    if (value.type !== "null" && valueMode === FieldMode.NotAllowed) {
+      error(node.path, ERROR_MESSAGES.DIRECTIVE_VALUE_NOT_ALLOWED(attributeName));
+    }
+    if (value.type === "null" && valueMode === FieldMode.Required) {
+      error(node.path, ERROR_MESSAGES.DIRECTIVE_VALUE_REQUIRED(attributeName));
+    }
+    // qualifier provided
+    if (qualifier && qualifierMode === FieldMode.NotAllowed) {
+      error(node.path, ERROR_MESSAGES.DIRECTIVE_QUALIFIER_NOT_ALLOWED(attributeName));
+    }
+    if (qualifier === undefined && qualifierMode === FieldMode.Required) {
+      error(node.path, ERROR_MESSAGES.DIRECTIVE_QUALIFIER_REQUIRED(attributeName));
+    }
+    // value type
+    if (allowedValue === ValueType.String && value.type !== "string") {
+      error(
+        node.path,
+        ERROR_MESSAGES.DIRECTIVE_VALUE_NOT_STRING(attributeName, value.type)
+      );
+    }
+    if (allowedValue === ValueType.Expression && value.type !== "expression") {
+      error(
+        node.path,
+        ERROR_MESSAGES.DIRECTIVE_VALUE_NOT_EXPRESSION(attributeName, value.type)
       );
     }
   }
+  // validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
+  //   const { attributeName, allowExpression, allowString, allowNull } = constructor;
+  //   const allowedTypes = [
+  //     allowExpression && "expression",
+  //     allowString && "string",
+  //     allowNull && "null"
+  //   ].filter(Boolean);
+  //   if (!allowedTypes.includes(value.type)) {
+  //     error(
+  //       node.path,
+  //       ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(attributeName, allowedTypes, value.type)
+  //     );
+  //   }
+  // }
   validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
     const { attributeName, allowOnRepeated, allowOnNested } = constructor;
     if (!allowOnRepeated && node.isRepeatedComponent) {
@@ -72,21 +144,21 @@ export class Directive {
       );
     }
   }
-  validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
-    let { attributeName, allowQualifier, requireQualifier } = constructor;
-    if (requireQualifier) {
-      allowQualifier = true;
-    }
-    if (requireQualifier && !qualifier) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER(attributeName)
-      );
-    }
-    if (!allowQualifier && qualifier) {
-      error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
-    }
-  }
+  // validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
+  //   let { attributeName, allowQualifier, requireQualifier } = constructor;
+  //   if (requireQualifier) {
+  //     allowQualifier = true;
+  //   }
+  //   if (requireQualifier && !qualifier) {
+  //     error(
+  //       node.path,
+  //       ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER(attributeName)
+  //     );
+  //   }
+  //   if (!allowQualifier && qualifier) {
+  //     error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
+  //   }
+  // }
   /* 
   Ensures the expression only accesses the scope variables it is allowed to.
 

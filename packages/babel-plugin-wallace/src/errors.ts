@@ -44,7 +44,27 @@ export const ERROR_MESSAGES = {
       ? `The "${directive}" directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
       : `The "${directive}" directive value must be of type ${allowed[0]}. Found: ${actual}.`;
   },
-
+  DIRECTIVE_VALUE_NOT_ALLOWED: (directive: string) => {
+    return `The "${directive}" directive does not allow values.`;
+  },
+  DIRECTIVE_VALUE_REQUIRED: (directive: string) => {
+    return `The "${directive}" directive requires a value.`;
+  },
+  DIRECTIVE_VALUE_NOT_STRING: (directive: string, received: string) => {
+    return `The "${directive}" directive value must be a string, received: ${received}.`;
+  },
+  DIRECTIVE_VALUE_NOT_EXPRESSION: (directive: string, received: string) => {
+    return `The "${directive}" directive value must be an expression, received: ${received}.`;
+  },
+  DIRECTIVE_QUALIFIER_NOT_ALLOWED: (directive: string) => {
+    return `The "${directive}" directive does not allow qualifiers.`;
+  },
+  DIRECTIVE_QUALIFIER_REQUIRED: (directive: string) => {
+    return `The "${directive}" directive requires a qualifier.`;
+  },
+  DIRECTIVE_REQUIRES_QUALIFIER_OR_VALUE: (directive: string) => {
+    return `The "${directive}" directive requires a qualifier or value, not both.`;
+  },
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
   JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS: "JSX elements are not allowed in expressions.",
