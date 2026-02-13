@@ -54,7 +54,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     itemKey,
     component,
     initialIndex,
-    adjustmentTracker,
+    offsetTracker,
     endAnchor = null,
     adjustment = 0,
     anchor = null,
@@ -65,10 +65,10 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     i = itemsLength - 1;
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
-    adjustmentTracker = this.a;
+    offsetTracker = this.a;
     initialIndex = this.i;
-    if (adjustmentTracker) {
-      adjustment = countOffset(adjustmentTracker, initialIndex);
+    if (offsetTracker) {
+      adjustment = countOffset(offsetTracker, initialIndex);
       endAnchor = childNodes[previousKeysLength + adjustment] || null;
       anchor = endAnchor;
       untouched = false;
@@ -115,8 +115,8 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   this.k = newKeys.reverse();
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
-    if (adjustmentTracker) {
-      adjustmentTracker.set(initialIndex, itemsLength - 1);
+    if (offsetTracker) {
+      offsetTracker.set(initialIndex, itemsLength - 1);
     }
   }
 };

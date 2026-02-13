@@ -9,18 +9,17 @@ export function Detacher(i, e, s) {
 }
 
 Detacher.prototype.apply = function (element, shouldBeVisible, elements, stash) {
-  let adjustedIndex;
   const index = this.i,
     parent = elements[this.e],
-    detachedElementCache = stash[this.s];
-  let offset = detachedElementCache.get(index) || 0;
-  if (shouldBeVisible && offset === -1) {
-    adjustedIndex = countOffset(detachedElementCache, index);
+    offsetTracker = stash[this.s];
+  let ownOffset = offsetTracker.get(index) || 0;
+  if (shouldBeVisible && ownOffset === -1) {
+    const adjustedIndex = countOffset(offsetTracker, index);
     parent.insertBefore(element, parent.childNodes[adjustedIndex]);
-    offset = 0;
-  } else if (!shouldBeVisible && offset === 0) {
+    ownOffset = 0;
+  } else if (!shouldBeVisible && ownOffset === 0) {
     parent.removeChild(element);
-    offset = -1;
+    ownOffset = -1;
   }
-  detachedElementCache.set(index, offset);
+  offsetTracker.set(index, ownOffset);
 };

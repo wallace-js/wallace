@@ -41,16 +41,16 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     component,
     nextElement,
     initialIndex,
-    adjustmentTracker,
+    offsetTracker,
     endOfRange = previousChildCount,
     poolCount = pool.length;
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
     initialIndex = this.i;
-    adjustmentTracker = this.a;
-    if (adjustmentTracker) {
+    offsetTracker = this.a;
+    if (offsetTracker) {
       // The repeat element has siblings
-      offset = countOffset(adjustmentTracker, initialIndex);
+      offset = countOffset(offsetTracker, initialIndex);
       endOfRange += offset;
       nextElement = childNodes[endOfRange] || null;
     }
@@ -77,8 +77,8 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     parent.removeChild(childNodes[i]);
   }
   if (wallaceConfig.flags.allowRepeaterSiblings) {
-    if (adjustmentTracker) {
-      adjustmentTracker.set(initialIndex, itemsLength - 1);
+    if (offsetTracker) {
+      offsetTracker.set(initialIndex, itemsLength - 1);
     }
   }
 };
