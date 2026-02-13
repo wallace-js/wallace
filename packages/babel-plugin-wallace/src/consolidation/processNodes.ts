@@ -49,6 +49,7 @@ export function processNode(
   // Need to happen first
   ensureToggleTargetsHaveTriggers(node);
   createEventsForBoundInputs(componentDefinition, node);
+  addRequiredImports(componentDefinition, node);
 
   const visibilityToggle = node.getVisibilityToggle();
   const ref = node.getRef();
@@ -165,6 +166,15 @@ export function processNode(
   if (part) processPart(componentDefinition, node, part);
 }
 
+function addRequiredImports(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode
+) {
+  node.requiredImports.forEach(importName => {
+    componentDefinition.component.module.requireImport(importName);
+  });
+}
+
 function processNestedComponent(
   componentDefinition: ComponentDefinitionData,
   componentWatch: ComponentWatch,
@@ -264,6 +274,7 @@ function createEventsForBoundInputs(
   // Essentially we convert to string and write to value instead. We still read from
   // valueAsDate.
   // This relies on binding methods to the target, which is done inside watch.
+  // For this same reason valueAsDate is also a hidden directive.
   if (property == "valueAsDate") {
     componentDefinition.component.module.requireImport(IMPORTABLES.toDateString);
     setProperty = "value";

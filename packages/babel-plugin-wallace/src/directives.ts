@@ -6,11 +6,16 @@
  * the packages/wallace/lib/types.d.ts to make it available by tool tip. When making
  * changes here be sure to update that file.
  */
-
+import * as t from "@babel/types";
 import { wallaceConfig, FlagValue } from "./config";
 import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
-import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
+import {
+  WATCH_CALLBACK_ARGS,
+  SPECIAL_SYMBOLS,
+  IMPORTABLES,
+  DOM_EVENTS_LOWERCASE
+} from "./constants";
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
@@ -78,6 +83,25 @@ class CtrlDirective extends Directive {
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
     node.setCtrl(value.expression);
+  }
+}
+
+/**
+ * This is a hack to enable a Proxy of a Date to be passed to `valueAsDate`.
+ * It is not a documented directive.
+ */
+class ValueAsDateDirective extends Directive {
+  static attributeName = "valueAsDate";
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    if (value.type === "expression") {
+      node.requiredImport(IMPORTABLES.toDateString);
+      node.watchAttribute(
+        "value",
+        t.callExpression(t.identifier(IMPORTABLES.toDateString), [value.expression])
+      );
+    } else if (value.type === "string") {
+      node.addFixedAttribute("valueAsDate", value.value);
+    }
   }
 }
 
@@ -314,6 +338,7 @@ export const builtinDirectives = [
   ClassDirective,
   CssDirective,
   CtrlDirective,
+  ValueAsDateDirective,
   EventDirective,
   FixedDirective,
   HideDirective,

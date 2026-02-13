@@ -7,7 +7,12 @@ import type {
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
-import { HTML_SPLITTER, WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "../constants";
+import {
+  HTML_SPLITTER,
+  WATCH_CALLBACK_ARGS,
+  IMPORTABLES,
+  SPECIAL_SYMBOLS
+} from "../constants";
 
 interface Attribute {
   name: string;
@@ -76,6 +81,7 @@ export class ExtractedNode {
   bindInstructions: BindInstruction = {};
   hasConditionalChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
+  requiredImports: Set<IMPORTABLES> = new Set();
   // poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
@@ -230,6 +236,9 @@ export class ExtractedNode {
   }
   getStubName(): string | undefined {
     return this.#stubName;
+  }
+  requiredImport(name: IMPORTABLES) {
+    this.requiredImports.add(name);
   }
 }
 
