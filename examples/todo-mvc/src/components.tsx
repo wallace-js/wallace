@@ -21,7 +21,7 @@ export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
     <div if={!ctrl.loading}>
       <span>Completed: {ctrl.completedTasksCount()}</span>
       <div style="margin-top: 10px">
-        <Task.repeat props={ctrl.tasks} />
+        <Task.repeat items={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.txtInputKeyUp(event)} />
@@ -37,7 +37,7 @@ interface TaskListMethods {
   txtInputKeyUp(event: any): void;
 }
 
-TaskList.methods({
+TaskList.methods = {
   render() {
     this.ctrl = new TaskListController(this);
     this.update(); // Ensures spinner displays while loading.
@@ -49,4 +49,4 @@ TaskList.methods({
       event.target.value = "";
     }
   }
-});
+};

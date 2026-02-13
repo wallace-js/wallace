@@ -1,4 +1,4 @@
-import "source-map-support/register"; // ensures correct line numbers in stack traces.
+import "source-map-support/register.js"; // Ensures correct line numbers in stack traces.
 
 import type { NodePath, PluginObj, PluginPass } from "@babel/core";
 import type { Program } from "@babel/types";
@@ -9,6 +9,12 @@ import { wallaceConfig } from "./config";
 import { Directive, NodeValue } from "./models";
 import { Module } from "./models/module";
 import { programVisitors } from "./visitors/program";
+import {
+  flagVisitor,
+  flattenUpdate,
+  removeCtrl,
+  removeRepeaterDetacherParams
+} from "./visitors/library";
 
 // The general pattern involves visting high-level nodes where we instantiate models
 // which are passed to traverse calls with sets of visitors for low-level nodes,
@@ -26,6 +32,20 @@ export default function wallacePlugin({ types: t }: Babel): PluginObj {
         enter(path: NodePath<Program>, pluginPass: PluginPass) {
           wallaceConfig.applyOptions(pluginPass.opts);
           const module = new Module(path);
+          //@ts-ignore
+          const filename = path.hub.file.opts.filename as string;
+          if (filename && filename.includes("/wallace/lib/")) {
+            path.traverse(flagVisitor, { module });
+            if (!wallaceConfig.flags.allowCtrl) {
+              path.traverse(removeCtrl, { module });
+            }
+            if (!wallaceConfig.flags.allowParts) {
+              path.traverse(flattenUpdate, { module });
+            }
+            if (!wallaceConfig.flags.allowRepeaterSiblings) {
+              path.traverse(removeRepeaterDetacherParams, { module });
+            }
+          }
           path.traverse(programVisitors, { module });
           module.addMissingImports();
         }

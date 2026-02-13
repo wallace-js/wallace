@@ -54,7 +54,7 @@ test("JSX not allowed in expressions", () => {
   expect(code).toCompileWithError("JSX elements are not allowed in expressions.");
 });
 
-test("JSX ignores comments and empty expressiosn", () => {
+test("JSX ignores comments and empty expressions", () => {
   const code = `
     const Foo = () => (
       <div>
@@ -63,45 +63,4 @@ test("JSX ignores comments and empty expressiosn", () => {
     );
   `;
   expect(code).toCompileWithoutError();
-});
-
-describe("Illegal names in props", () => {
-  test("illegal prop name compiles with error", () => {
-    const src = `
-      const A = (self) => (
-        <div>
-          Test
-        </div>
-      );
-    `;
-    expect(src).toCompileWithError(
-      'Illegal names in props: "self" - these are reserved for extra args.'
-    );
-  });
-
-  test("illegal name in destructured props compiles with error", () => {
-    const src = `
-      const A = ({element}) => (
-        <div>
-          Test
-        </div>
-      );
-    `;
-    expect(src).toCompileWithError(
-      'Illegal names in props: "element" - these are reserved for extra args.'
-    );
-  });
-
-  test("illegal renamed name in destructured props compiles with error", () => {
-    const src = `
-      const A = ({name: ctrl}) => (
-        <div>
-          Test
-        </div>
-      );
-    `;
-    expect(src).toCompileWithError(
-      'Illegal names in props: "ctrl" - these are reserved for extra args.'
-    );
-  });
 });

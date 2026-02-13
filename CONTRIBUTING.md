@@ -1,5 +1,9 @@
 # Contributor docs
 
+This contains documentation for contributors.
+
+Several things may be out of date.
+
 ## Quick start
 
 ### Installation
@@ -32,6 +36,9 @@ npm test
 
 However this runs all the tests, and during development you may want to restrict this. See the section on tests below.
 
+There's currently an issue with jest leaking output from previous tests, which apparently
+isn't fixable, so the best option may be to switch to vitest or something.
+
 ### Using the playground
 
 The **playground** package allows you to experiment without committing changes, as its **src** directory is gitignored.
@@ -52,7 +59,10 @@ User projects requires two packages to work:
 - **wallace** - the library with definitions you import into a project.
 - **babel-plugin-wallace** - the babel plugin which transforms the source code.
 
-Note that `wallace` always requires `babel-plugin-wallace` at the exact same version, so a user project would only need to require `wallace`
+Note that:
+
+1.  `wallace` requires `babel-plugin-wallace` so a user project would only specify `wallace` in their **package.json** file.
+2.  `wallace` may end up some versions ahead of `babel-plugin-wallace`, but Lerna ensures `wallace` gets updated if `babel-plugin-wallace` changes.
 
 ```bash
 npm i wallace@0.0.7
@@ -181,7 +191,7 @@ Suppose we have the following `babel.config.cjs` file:
 
 ```js
 module.exports = {
-  plugins: ["babel-plugin-wallace", "@babel/plugin-syntax-jsx"]
+  plugins: ['babel-plugin-wallace', '@babel/plugin-syntax-jsx']
 };
 ```
 
@@ -215,8 +225,8 @@ However if we add the `@babel/preset-env` preset to our config:
 
 ```js
 module.exports = {
-  plugins: ["babel-plugin-wallace", "@babel/plugin-syntax-jsx"],
-  presets: ["@babel/preset-env"]
+  plugins: ['babel-plugin-wallace', '@babel/plugin-syntax-jsx'],
+  presets: ['@babel/preset-env']
 };
 ```
 
@@ -259,7 +269,7 @@ You create new nodes using `t` like so:
 
 ```js
 path.replaceWith(
-  t.expressionStatement(t.stringLiteral("Is this the real life?"))
+  t.expressionStatement(t.stringLiteral('Is this the real life?'))
 );
 ```
 
@@ -393,8 +403,8 @@ Babel will typically read from the local **babel.config.cjs** which should look 
 
 ```js
 module.exports = {
-  plugins: ["babel-plugin-wallace", "@babel/plugin-syntax-jsx"],
-  presets: ["@babel/preset-typescript", "@babel/preset-env"]
+  plugins: ['babel-plugin-wallace', '@babel/plugin-syntax-jsx'],
+  presets: ['@babel/preset-typescript', '@babel/preset-env']
 };
 ```
 
@@ -436,8 +446,8 @@ Obviously, every aspect and feature must be tested, but coverage goes well beyon
 The following test may appear to prove that placeholders in attributes work:
 
 ```jsx
-test("Placeholders in attribute works", () => {
-  const css = "danger";
+test('Placeholders in attribute works', () => {
+  const css = 'danger';
   const MyComponent = () => <div class={css}>Hello</div>;
   const component = testMount(MyComponent);
   expect(component).toRender(`
@@ -553,12 +563,12 @@ There are several ways to test features.
 The default way to test. Use `testMount` to mount the component and use the custom jest matcher `toRender`.
 
 ```jsx
-import { testMount } from "../utils";
+import { testMount } from '../utils';
 
-test("Descriptive name", () => {
+test('Descriptive name', () => {
   const Foo = <div>Hello {name}!</div>;
 
-  let name = "Wallace";
+  let name = 'Wallace';
   const component = testMount(Foo);
   expect(component).toRender(`
     <div>
@@ -577,7 +587,7 @@ This doesn't work for cases where we update DOM element states such as hidden or
 You can inspect an element directly by setting a ref:
 
 ```jsx
-test("Descriptive name", () => {
+test('Descriptive name', () => {
   let disabled = false;
   const Foo = () => (
     <div>
@@ -600,7 +610,7 @@ test("Descriptive name", () => {
 Assess whether the code compiled with or without an error:
 
 ```jsx
-test("are allowed if recognised", () => {
+test('are allowed if recognised', () => {
   const src = `
   const A = ({}) => (
     <div>
@@ -611,7 +621,7 @@ test("are allowed if recognised", () => {
   expect(src).toCompileWithoutError();
 });
 
-test("JSX not allowed in expressions", () => {
+test('JSX not allowed in expressions', () => {
   const code = `
     const Foo = () => (
       <center>
@@ -622,7 +632,7 @@ test("JSX not allowed in expressions", () => {
     );
   `;
   expect(code).toCompileWithError(
-    "JSX elements are not allowed in expressions."
+    'JSX elements are not allowed in expressions.'
   );
 });
 ```
@@ -725,7 +735,7 @@ cd webdriver-ts
 npm run bench non-keyed/vanillajs non-keyed/wallace non-keyed/vue non-keyed/svelte-classic non-keyed/lit non-keyed/inferno
 # Or just some benchmarks
 npm run bench -- --benchmark 01_ 02_ --framework keyed/vanillajs keyed/react-hooks
-# Optionally nspect results
+# Optionally inspect results
 cat results/vanillajs-keyed_01_run1k.json
 ```
 

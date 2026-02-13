@@ -8,7 +8,7 @@ import {
   numericLiteral
 } from "@babel/types";
 import { Component, ExtractedNode, Module } from "../models";
-import { COMPONENT_BUILD_PARAMS, IMPORTABLES, WATCH_CALLBACK_ARGS } from "../constants";
+import { COMPONENT_PROPERTIES, IMPORTABLES, WATCH_CALLBACK_ARGS } from "../constants";
 import { NodeAddress } from "./types";
 
 export function getSiblings(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
@@ -31,10 +31,10 @@ export function buildFindElementCall(module: Module, address: NodeAddress): Expr
   module.requireImport(IMPORTABLES.findElement);
   return address.length
     ? callExpression(identifier(IMPORTABLES.findElement), [
-        identifier(COMPONENT_BUILD_PARAMS.rootElement),
+        identifier(COMPONENT_PROPERTIES.root),
         buildAddressArray(address)
       ])
-    : identifier(COMPONENT_BUILD_PARAMS.rootElement);
+    : identifier(COMPONENT_PROPERTIES.root);
 }
 
 export function buildNestedClassCall(
@@ -44,7 +44,7 @@ export function buildNestedClassCall(
 ): CallExpression {
   module.requireImport(IMPORTABLES.nestComponent);
   return callExpression(identifier(IMPORTABLES.nestComponent), [
-    identifier(COMPONENT_BUILD_PARAMS.rootElement),
+    identifier(COMPONENT_PROPERTIES.root),
     buildAddressArray(address),
     componentCls
   ]);

@@ -7,7 +7,7 @@ import type {
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
-import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "../constants";
+import { HTML_SPLITTER, WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS } from "../constants";
 
 interface Attribute {
   name: string;
@@ -19,10 +19,11 @@ interface Watch {
   callback: string | Expression;
 }
 
-interface RepeatInstruction {
+export interface RepeatInstruction {
   expression: Expression;
   componentCls: string;
-  poolExpression: Expression | undefined;
+  repeatKey: Expression | string | undefined;
+  // poolExpression: Expression | undefined;
 }
 
 interface EventListener {
@@ -31,8 +32,9 @@ interface EventListener {
 }
 
 interface BindInstruction {
-  eventName: string;
-  expression: Expression;
+  event?: string;
+  property?: string;
+  expression?: Expression;
 }
 
 export interface VisibilityToggle {
@@ -57,53 +59,66 @@ export class ExtractedNode {
   component: any;
   tagName: string;
   element: HTMLElement | Text | undefined;
-  elementKey: number | undefined;
-  detacherStashKey: number | undefined;
+  elementKey?: number;
+  detacherVariable?: string;
+  detacherStashKey?: number;
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
-  repeatNode: ExtractedNode | undefined;
+  repeatNode?: ExtractedNode;
+  repeatKey: Expression | string | undefined;
   address: Array<number>;
+  initialIndex: number;
   path: NodePath<ValidElementType>;
   parent: TagNode;
+  children: Array<ExtractedNode> = [];
   watches: Watch[] = [];
   eventListeners: EventListener[] = [];
-  bindInstructions: BindInstruction[] = [];
+  bindInstructions: BindInstruction = {};
   hasConditionalChildren: boolean = false;
-  repeatExpression: Expression | undefined;
-  poolExpression: Expression | undefined;
+  hasRepeatedChildren: boolean = false;
+  // poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
    */
-  toggleTargets: ToggleTarget[] = [];
+  classToggleTargets: ToggleTarget[] = [];
   /**
    * The triggers that cause the classes to be toggled.
    */
-  toggleTriggers: ToggleTrigger[] = [];
-  #stubName: string | undefined;
-  #visibilityToggle: VisibilityToggle | undefined;
-  #ref: string | undefined;
-  #props: Expression | undefined;
-  #forExpression: Expression | undefined;
-  #forVariable: string | undefined;
-  constructor(address: Array<number>, path: NodePath<ValidElementType>, parent: TagNode) {
-    this.path = path;
+  classToggleTriggers: ToggleTrigger[] = [];
+  // Private to prevent being set more thant once by directives.
+  #repeatExpression?: Expression;
+  #stubName?: string;
+  #visibilityToggle?: VisibilityToggle;
+  #ref?: string;
+  #part?: string;
+  #props?: Expression;
+  #ctrl?: Expression;
+  constructor(
+    path: NodePath<ValidElementType>,
+    address: Array<number>,
+    initialIndex: number,
+    parent: TagNode
+  ) {
     this.address = address;
+    this.initialIndex = initialIndex;
+    this.path = path;
     this.parent = parent;
+    if (parent) {
+      parent.children.push(this);
+    }
   }
   getElement(): HTMLElement | Text {
     throw new Error("Not implemented");
   }
   addEventListener(eventName: string, callback: Expression) {
-    if (this.isNestedComponent) {
-      error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
-    }
     this.eventListeners.push({ eventName, callback });
   }
-  addBindInstruction(eventName: string, expression: Expression) {
-    if (this.isNestedComponent) {
-      error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
-    }
-    this.bindInstructions.push({ eventName, expression });
+  setBindInstruction(expression: Expression, property: string) {
+    this.bindInstructions.property = property;
+    this.bindInstructions.expression = expression;
+  }
+  setBindEvent(event: string) {
+    this.bindInstructions.event = event;
   }
   addWatch(
     expression: Expression | SPECIAL_SYMBOLS.noLookup,
@@ -114,16 +129,13 @@ export class ExtractedNode {
       callback
     });
   }
-  addToggleTrigger(name: string, expression: Expression) {
-    this.toggleTriggers.push({ name, expression });
+  addClassToggleTrigger(name: string, expression: Expression) {
+    this.classToggleTriggers.push({ name, expression });
   }
-  addToggleTarget(name: string, value: Expression | string) {
-    this.toggleTargets.push({ name, value });
+  addClassToggleTarget(name: string, value: Expression | string) {
+    this.classToggleTargets.push({ name, value });
   }
   watchAttribute(attName: string, expression: Expression) {
-    if (this.isNestedComponent) {
-      error(this.path, ERROR_MESSAGES.NO_ATTRIBUTES_ON_NESTED_CLASS);
-    }
     this.addWatch(expression, setAttributeCallback(attName));
   }
   watchText(expression: Expression) {
@@ -132,15 +144,20 @@ export class ExtractedNode {
       `${WATCH_CALLBACK_ARGS.element}.textContent = ${WATCH_CALLBACK_ARGS.newValue}`
     );
   }
-  setProps(expression: Expression) {
-    if (this.isRepeatedComponent) {
-      this.setRepeatExpression(expression);
-    } else {
-      if (this.#props) {
-        error(this.path, ERROR_MESSAGES.PROPS_ALREADY_DEFINED);
-      }
-      this.#props = expression;
+  setCtrl(expression: Expression) {
+    if (this.#ctrl) {
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("ctrl"));
     }
+    this.#ctrl = expression;
+  }
+  getCtrl(): Expression {
+    return this.repeatNode ? this.repeatNode.getCtrl() : this.#ctrl;
+  }
+  setProps(expression: Expression) {
+    if (this.#props) {
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("props"));
+    }
+    this.#props = expression;
   }
   getProps(): Expression | undefined {
     return this.#props;
@@ -162,38 +179,45 @@ export class ExtractedNode {
   }
   setRef(name: string) {
     if (this.#ref) {
-      error(this.path, ERROR_MESSAGES.REF_ALREADY_DEFINED);
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("ref"));
     }
     this.#ref = name;
   }
   getRef(): string | undefined {
     return this.#ref;
   }
-  // TODO: fix not to use directive.
+  setPart(name: string) {
+    if (this.#part) {
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("part"));
+    }
+    this.#part = name;
+  }
+  getPart(): string | undefined {
+    return this.#part;
+  }
   setRepeatExpression(expression: Expression) {
-    // if (this.isRepeatedComponent) {
-    //   error(this.path, ERROR_MESSAGES.REPEAT_ALREADY_DEFINED);
-    // }
-    // if (!this.isNestedComponent) {
-    //   error(this.path, ERROR_MESSAGES.REPEAT_ONLY_ON_NESTED_CLASS);
-    // }
+    if (this.#repeatExpression) {
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("items"));
+    }
     this.isRepeatedComponent = true;
-    // While this could potentially be set multiple times, we later check that repeat
-    // cannot be used if there siblings.
-    this.repeatExpression = expression;
-    this.parent.repeatNode = this;
+    this.#repeatExpression = expression;
+    // this.parent.repeatNode = this;
+  }
+  setRepeatKey(expression: Expression | string) {
+    this.repeatKey = expression;
   }
   /**
    * Called on the parent of a repeat.
    */
   getRepeatInstruction(): RepeatInstruction | undefined {
-    return this.repeatNode
-      ? {
-          expression: this.repeatNode.repeatExpression,
-          componentCls: this.repeatNode.tagName,
-          poolExpression: this.repeatNode.poolExpression
-        }
-      : undefined;
+    if (this.isRepeatedComponent) {
+      return {
+        expression: this.#repeatExpression,
+        componentCls: this.tagName,
+        repeatKey: this.repeatKey
+        // poolExpression: this.repeatNode.poolExpression
+      };
+    }
   }
   setStub(name: string) {
     if (!this.parent) {
@@ -204,28 +228,8 @@ export class ExtractedNode {
     }
     this.#stubName = name;
   }
-  getStub(): string | undefined {
+  getStubName(): string | undefined {
     return this.#stubName;
-  }
-  // setForLoop(expression: Expression, variable: string | undefined) {
-  //   if (this.#forExpression) {
-  //     error(this.path, ERROR_MESSAGES.REF_ALREADY_DEFINED);
-  //   }
-  //   this.#forVariable = variable;
-  //   this.#forExpression = expression;
-  // }
-  // getForLoop():
-  //   | { expression: Expression; variable: string | undefined }
-  //   | undefined {
-  //   if (this.#forExpression) {
-  //     return { expression: this.#forExpression, variable: this.#forVariable };
-  //   }
-  // }
-  setBaseComponent(expression: Expression) {
-    if (this.component.baseComponent) {
-      error(this.path, ERROR_MESSAGES.BASE_COMPONENT_ALREADY_DEFINED);
-    }
-    this.component.baseComponent = expression;
   }
 }
 
@@ -234,22 +238,19 @@ export class TagNode extends ExtractedNode {
   address: Array<number>;
   path: NodePath<JSXElement>;
   attributes: Attribute[] = [];
-  // directives: ExtractedDirective[] = [];
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
+    initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
     tagName: string,
     isNestedComponent: boolean,
     isRepeatedComponent: boolean
   ) {
-    super(address, path, parent);
-    this.path = path;
-    this.address = address;
+    super(path, address, initialIndex, parent);
     this.component = component;
     this.tagName = tagName;
-    this.parent = parent;
     this.isNestedComponent = isNestedComponent;
     this.isRepeatedComponent = isRepeatedComponent;
     if (!this.parent) {
@@ -259,11 +260,18 @@ export class TagNode extends ExtractedNode {
         error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
       }
     }
+    if (this.isRepeatedComponent) {
+      this.parent.hasRepeatedChildren = true;
+    }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
   }
-  getElement(): HTMLElement | undefined {
+  addStaticAttribute(name: string, expression: Expression) {
+    this.component.htmlExpressions.push(expression);
+    this.attributes.push({ name, value: HTML_SPLITTER });
+  }
+  getElement(): HTMLElement | Text {
     if (this.isRepeatedComponent) {
       return undefined;
     }
@@ -280,10 +288,11 @@ export class StubNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
+    initialIndex: number,
     parent: TagNode,
     name: string
   ) {
-    super(address, path, parent);
+    super(path, address, initialIndex, parent);
     this.setStub(name);
   }
   getElement(): HTMLElement | Text {
@@ -296,10 +305,11 @@ export class DynamicTextNode extends ExtractedNode {
   constructor(
     path: NodePath<JSXExpressionContainer>,
     address: Array<number>,
+    initialIndex: number,
     parent: TagNode,
     expression: Expression
   ) {
-    super(address, path, parent);
+    super(path, address, initialIndex, parent);
     this.watchText(expression);
   }
   getElement(): HTMLElement | Text {
@@ -309,8 +319,13 @@ export class DynamicTextNode extends ExtractedNode {
 }
 
 export class PlainTextNode extends ExtractedNode {
-  constructor(path: NodePath<JSXText>, address: Array<number>, parent: TagNode) {
-    super(address, path, parent);
+  constructor(
+    path: NodePath<JSXText>,
+    address: Array<number>,
+    initialIndex: number,
+    parent: TagNode
+  ) {
+    super(path, address, initialIndex, parent);
   }
   getElement(): HTMLElement | Text {
     // @ts-ignore

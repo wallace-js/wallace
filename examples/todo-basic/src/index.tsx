@@ -20,7 +20,7 @@ const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) 
   <div class="tasklist">
     <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
-      <Task.repeat props={tasks} />
+      <Task.repeat items={tasks} />
     </div>
     <div style="margin-top: 10px">
       <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
@@ -29,7 +29,7 @@ const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) 
   </div>
 );
 
-TaskList.methods({
+TaskList.methods = {
   render(tasks) {
     this.props = watch(tasks, () => this.update());
     this.update();
@@ -42,7 +42,7 @@ TaskList.methods({
       target.value = "";
     }
   }
-});
+};
 
 mount("main", TaskList, [
   { text: "Complete Wallace tutorial", done: false },

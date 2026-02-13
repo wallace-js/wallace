@@ -1,4 +1,4 @@
-//@16 error TS2322: Type 'number' is not assignable to type 'Props'.
+//@16 error TS2322: Type '{}' is not assignable to type 'IntrinsicAttributes & { items: Props[]; ctrl?: any; key?: string | ((item: Props) => any); }'.
 import { mount, Uses } from "wallace";
 
 interface Props {
@@ -13,7 +13,7 @@ const ClickCounter: Uses<Props> = (counter: Props) => (
 
 const CounterList = () => (
   <div>
-    <ClickCounter.repeat props={[1, 2]} />
+    <ClickCounter.repeat />
   </div>
 );
 

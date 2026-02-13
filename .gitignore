@@ -1,3 +1,6 @@
+canary/package-lock.json
+canary/dist/
+
 # Logs
 logs
 *.log

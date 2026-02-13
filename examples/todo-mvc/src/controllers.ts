@@ -1,4 +1,4 @@
-import { watch, Component } from "wallace";
+import { Component } from "wallace";
 import { iTask } from "./types";
 import { fetchTasks, addTask, toggleTask } from "./store";
 

@@ -1,4 +1,3 @@
-import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type {
   Identifier,
@@ -7,8 +6,10 @@ import type {
   JSXText,
   Expression
 } from "@babel/types";
+import { stringLiteral } from "@babel/types";
+import { HTML_SPLITTER } from "../constants";
 import { ERROR_MESSAGES, error } from "../errors";
-import { getPlaceholderExpression } from "../ast-helpers";
+import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
 import { ExtractedNode, DynamicTextNode, PlainTextNode, StubNode, TagNode } from "./node";
 import { Module } from "./module";
@@ -16,6 +17,7 @@ import { Module } from "./module";
 export interface WalkTracker {
   parent: TagNode;
   childIndex: number;
+  initialIndex: number;
 }
 
 /*
@@ -34,13 +36,16 @@ at runtime.
 </div>
 */
 export class Component {
-  _currentNodeAddress: Array<number> = [];
+  #currentNodeAddress: Array<number> = [];
   module: Module;
   baseComponent: Expression | undefined;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
   propsIdentifier: Identifier;
   componentIdentifier: Identifier;
+  xargMapping: { [key: string]: string } = {};
+  htmlExpressions: Expression[] = [];
+  unique: boolean = false;
   constructor(
     module: Module,
     propsIdentifier: Identifier,
@@ -53,31 +58,35 @@ export class Component {
   #enterLevel(index: number) {
     // This skips this step for root, whose address is []
     if (this.rootElement) {
-      this._currentNodeAddress.push(index);
+      this.#currentNodeAddress.push(index);
     }
   }
   #exitLevel() {
-    this._currentNodeAddress.pop();
+    this.#currentNodeAddress.pop();
   }
   #getCurrentAddress() {
-    return this._currentNodeAddress.slice();
+    return this.#currentNodeAddress.slice();
   }
   #addElement(
     element: HTMLElement | Text | undefined,
     path: NodePath,
     tracker: WalkTracker
   ) {
+    // TODO: clean up this mess. Better way to do it.
     if (tracker.parent?.isNestedComponent) {
       error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN);
     }
     if (tracker.parent?.isRepeatedComponent) {
       error(path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
     }
+    tracker.initialIndex += 1;
     if (!element) {
+      // means it is a repeated node.
       return;
     }
+    tracker.childIndex += 1;
     if (this.rootElement) {
-      const relativePath = this._currentNodeAddress.slice(0, -1);
+      const relativePath = this.#currentNodeAddress.slice(0, -1);
       const parentNode = relativePath.reduce(
         (acc, index) => acc.childNodes[index],
         this.rootElement
@@ -87,7 +96,6 @@ export class Component {
       // @ts-ignore (TS complains this could be Text, but we know it's not.)
       this.rootElement = element;
     }
-    tracker.childIndex += 1;
   }
   #addNode(node: ExtractedNode, path: NodePath, tracker: WalkTracker) {
     this.#addElement(node.getElement(), path, tracker);
@@ -103,21 +111,22 @@ export class Component {
     const extractedNode = new TagNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent,
       this,
       tagName,
       false,
       false
     );
-    path.traverse(attributeVisitors, { extractedNode });
+    path.traverse(attributeVisitors, { extractedNode, component: this });
     this.#addNode(extractedNode, path, tracker);
     path.traverse(jsxVisitors, {
       component: this,
-      tracker: { childIndex: 0, parent: extractedNode }
+      tracker: { childIndex: 0, initialIndex: 0, parent: extractedNode }
     });
     this.#exitLevel();
   }
-  processNestedElement(
+  processNestedOrRepeatedElement(
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
     tagName: string,
@@ -127,13 +136,14 @@ export class Component {
     const extractedNode = new TagNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent,
       this,
       tagName,
-      true,
+      !isRepeat,
       isRepeat
     );
-    path.traverse(attributeVisitors, { extractedNode });
+    path.traverse(attributeVisitors, { extractedNode, component: this });
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
   }
@@ -142,6 +152,7 @@ export class Component {
     const extractedNode = new StubNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent,
       name
     );
@@ -154,6 +165,7 @@ export class Component {
     const extractedNode = new PlainTextNode(
       path,
       this.#getCurrentAddress(),
+      tracker.initialIndex,
       tracker.parent
     );
     this.#addNode(extractedNode, path, tracker);
@@ -169,11 +181,28 @@ export class Component {
       const extractedNode = new DynamicTextNode(
         path,
         this.#getCurrentAddress(),
+        tracker.initialIndex,
         tracker.parent,
         expression
       );
       this.#addNode(extractedNode, path, tracker);
     }
     this.#exitLevel();
+  }
+  buildHTMLString(): Expression {
+    const raw = this.rootElement.outerHTML;
+    if (this.htmlExpressions.length === 0) return stringLiteral(raw);
+    let expressions = [];
+    const chunks = raw.split(HTML_SPLITTER);
+    chunks.forEach((chunk, index) => {
+      expressions.push(stringLiteral(chunk));
+      const expression = this.htmlExpressions[index];
+      // just for the last one.
+      if (expression) {
+        expressions.push(expression);
+      }
+    });
+
+    return buildConcat(expressions);
   }
 }

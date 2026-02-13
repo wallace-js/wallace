@@ -6,7 +6,7 @@ describe("Repeat", () => {
     const Child = animal => <div>{animal.name}</div>;
     const Parent = () => (
       <div>
-        <Child.repeat props={items} />
+        <Child.repeat items={items} />
       </div>
     );
     const component = testMount(Parent);
@@ -37,7 +37,7 @@ describe("Repeat compiles with error when", () => {
     const code = `
       const Parent = () => (
         <div>
-          <div.repeat props={items} />
+          <div.repeat items={items} />
         </div>
       );
     `;
@@ -47,32 +47,33 @@ describe("Repeat compiles with error when", () => {
   test("element has no parent node", () => {
     const code = `
       const Parent = () => (
-        <Child.repeat props={items} />
+        <Child.repeat items={items} />
       );
     `;
     expect(code).toCompileWithError("Repeated component not allowed on root element.");
   });
 
-  test("element has siblings", () => {
-    const code = `
-      const Parent = () => (
-        <div>
-          <div>signling</div>
-          <Child.repeat props={items} />
-        </div>
-      );
-    `;
-    expect(code).toCompileWithError(
-      "Repeat may only be used when the parent node has no other children."
-    );
-  });
+  // TODO: add flag condition
+  // test("element has siblings", () => {
+  //   const code = `
+  //     const Parent = () => (
+  //       <div>
+  //         <div>signling</div>
+  //         <Child.repeat items={items} />
+  //       </div>
+  //     );
+  //   `;
+  //   expect(code).toCompileWithError(
+  //     "Repeat may only be used when the parent node has no other children."
+  //   );
+  // });
 
   // We already catch an error for the nested component having child nodes.
   test("Repeat with child nodes", () => {
     const code = `
       const Parent = () => (
         <div>
-          <Child.repeat props={items} >
+          <Child.repeat items={items} >
             <div>other stuff</div>
           </Child.repeat>
         </div>

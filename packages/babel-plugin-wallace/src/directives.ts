@@ -7,6 +7,7 @@
  * changes here be sure to update that file.
  */
 
+import { wallaceConfig, FlagValue } from "./config";
 import { ERROR_MESSAGES, error } from "./errors";
 import { Directive, TagNode, NodeValue, Qualifier } from "./models";
 import { WATCH_CALLBACK_ARGS, SPECIAL_SYMBOLS, DOM_EVENTS_LOWERCASE } from "./constants";
@@ -15,8 +16,8 @@ class ApplyDirective extends Directive {
   static attributeName = "apply";
   static allowNull = true;
   static allowString = false;
-  static allowQualifier = false;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  static mayAccessElement = true;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
   }
 }
@@ -24,23 +25,8 @@ class ApplyDirective extends Directive {
 class BindDirective extends Directive {
   static attributeName = "bind";
   static allowQualifier = true;
-  static help = `
-    Create a two-way binding between an input element's "value" property and the
-    expression, which must be assignable. 
-    If the input is of type "checkbox", it uses the "checked" property instead.
-    
-    /h <div bind={p.count}></div>
-
-    By defaults it listens to "change" event, but you can specify a different one:
-
-    /h <div bind:keyup={p.count}></div>
-  `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    const eventName = qualifier || "change";
-    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
-      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME_IN_BIND(eventName));
-    }
-    node.addBindInstruction(eventName, value.expression);
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.setBindInstruction(value.expression, qualifier);
   }
 }
 
@@ -56,7 +42,7 @@ class ClassDirective extends Directive {
     `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
-      node.addToggleTarget(
+      node.addClassToggleTarget(
         qualifier,
         value.type === "expression" ? value.expression : value.value
       );
@@ -71,17 +57,62 @@ class ClassDirective extends Directive {
   }
 }
 
+class CssDirective extends Directive {
+  static attributeName = "css";
+  static mayAccessComponent = false;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.addStaticAttribute("class", value.expression);
+  }
+}
+
+class CtrlDirective extends Directive {
+  static attributeName = "ctrl";
+  static allowOnNested = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  static help: `
+  Specify ctrl for a nested component:
+  
+  /h <NestedComponent.nest ctrl={self.ctrl1} />
+  `;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
+    node.setCtrl(value.expression);
+  }
+}
+
+class EventDirective extends Directive {
+  static attributeName = "event";
+  static allowExpression = false;
+  static allowNull = true;
+  static requireQualifier = true;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    const eventName = qualifier || value.value;
+    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
+      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME(eventName));
+    }
+    node.setBindEvent(eventName);
+  }
+}
+
+class FixedDirective extends Directive {
+  static attributeName = "fixed";
+  static requireQualifier = true;
+  static mayAccessComponent = false;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.addStaticAttribute(qualifier, value.expression);
+  }
+}
+
 class HideDirective extends Directive {
   static attributeName = "hide";
   static allowOnNested = true;
-  static allowOnRepeated = true;
   static help = `
     Hides an element by toggling its hidden attribute.
 
     /h <div hide={}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
-    // this.ensureValueType();
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, false, false);
   }
 }
@@ -92,7 +123,7 @@ class HtmlDirective extends Directive {
 
     /h <div html={'<div>hello</div>'}></div>
   `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.watchAttribute("innerHTML", value.expression);
   }
 }
@@ -104,19 +135,53 @@ class IfDirective extends Directive {
 
     /h <div if={}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, true, true);
+  }
+}
+
+class ItemsDirective extends Directive {
+  static attributeName = "items";
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  static help: `
+  Specify items for a repeated component:
+  
+  /h <NestedComponent.repeat items={arrayOfProps} />
+  `;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.setRepeatExpression(value.expression);
+  }
+}
+
+class KeyDirective extends Directive {
+  static attributeName = "key";
+  static allowString = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  static help = `
+    Specifies the key for a repeated node. Can either specify a function:
+    /h <Foo.repeat props={} key={(x) => x.id}></div>
+    Or a string:
+    /h <Foo.repeat props={} key="id"></div>
+    If specifying a key, you may not specify a pool.
+    `;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    node.setRepeatKey(value.expression || value.value);
   }
 }
 
 class OnEventDirective extends Directive {
   static attributeName = "on*";
+  static allowString = true;
+  static mayAccessElement = true;
+  static mayAccessEvent = true;
   static help = `
     Creates an event handler:
 
     /h <div onclick={alert('hello')}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, base: string) {
     if (value.type === "string") {
       node.addFixedAttribute(base, value.value);
     } else {
@@ -125,18 +190,31 @@ class OnEventDirective extends Directive {
   }
 }
 
+class PartDirective extends Directive {
+  static attributeName = "part";
+  static allowOnNested = true;
+  static allowNull = true;
+  static allowExpression = false;
+  static requireQualifier = true;
+  static help = `
+    Saves a reference to a part of a component which can be updated.
+
+    /h <div part:title></div>
+    `;
+  apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
+    node.setPart(qualifier);
+  }
+}
+
 class PropsDirective extends Directive {
   static attributeName = "props";
   static allowOnNested = true;
-  static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help: `
-  Specify props for a nested or repeated component:
+  Specify props for a nested component:
   
   /h <NestedComponent.nest props={{foo: 'bar'}} />
-  /h <NestedComponent.repeat props={{foo: 'bar'}} />
-  
-  If it is a repeated component, then props should be an array of props.
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setProps(value.expression);
@@ -162,14 +240,12 @@ class RefDirective extends Directive {
 class ShowDirective extends Directive {
   static attributeName = "show";
   static allowOnNested = true;
-  static allowOnRepeated = true;
   static help = `
     Shows an element by toggling its hidden attribute.
 
     /h <div show={}></div>
     `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    // this.ensureValueType();
     node.setVisibilityToggle(value.expression, true, false);
   }
 }
@@ -215,11 +291,20 @@ class ToggleDirective extends Directive {
 
     /h <div class:danger="red danger" toggle:danger={expr}></div>
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
     }
-    node.addToggleTrigger(qualifier, value.expression);
+    node.addClassToggleTrigger(qualifier, value.expression);
+  }
+}
+
+class UniqueDirective extends Directive {
+  static attributeName = "unique";
+  static allowExpression = false;
+  static allowNull = true;
+  apply(node: TagNode, _value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.component.unique = true;
   }
 }
 
@@ -227,13 +312,21 @@ export const builtinDirectives = [
   ApplyDirective,
   BindDirective,
   ClassDirective,
+  CssDirective,
+  CtrlDirective,
+  EventDirective,
+  FixedDirective,
   HideDirective,
   HtmlDirective,
   IfDirective,
+  ItemsDirective,
+  KeyDirective,
   OnEventDirective,
+  PartDirective,
   PropsDirective,
   RefDirective,
   ShowDirective,
   StyleDirective,
-  ToggleDirective
+  ToggleDirective,
+  UniqueDirective
 ];

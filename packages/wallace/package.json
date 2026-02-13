@@ -1,19 +1,21 @@
 {
   "name": "wallace",
-  "version": "0.3.0",
+  "version": "0.13.0",
   "author": "Andrew Buchan",
-  "description": "The framework that brings you FREEDOM!!",
+  "description": "An insanely small, fast, intuitive and extendable front-end framework",
+  "homepage": "https://wallace.js.org",
   "license": "ISC",
   "main": "lib/index.js",
   "files": [
     "/lib"
   ],
+  "sideEffects": false,
   "types": "./lib/types.d.ts",
   "scripts": {
     "test": "jest --clearCache && jest"
   },
   "dependencies": {
-    "babel-plugin-wallace": "^0.3.0",
+    "babel-plugin-wallace": "^0.13.0",
     "browserify": "^17.0.1"
   },
   "gitHead": "286a00b51777c4b7fed9a778b93e9727ed905e2a"

@@ -90,6 +90,7 @@ describe("Multiple conditional elements under same element", () => {
     <div>
       <span if={showA}>A</span>
       <span if={showB}>B</span>
+      <hr />
       <span if={showC}>C</span>
       <span if={showD}>D</span>
     </div>
@@ -100,6 +101,7 @@ describe("Multiple conditional elements under same element", () => {
     expect(component).toRender(`
       <div>
         <span>A</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -113,6 +115,7 @@ describe("Multiple conditional elements under same element", () => {
       <div>
         <span>A</span>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -128,6 +131,7 @@ describe("Multiple conditional elements under same element", () => {
     expect(component).toRender(`
       <div>
         <span>B</span>
+        <hr>
         <span>D</span>
       </div>
     `);
@@ -136,6 +140,7 @@ describe("Multiple conditional elements under same element", () => {
     expect(component).toRender(`
       <div>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -146,6 +151,7 @@ describe("Multiple conditional elements under same element", () => {
       <div>
         <span>A</span>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -160,6 +166,7 @@ describe("Multiple conditional elements under same element", () => {
     component.update();
     expect(component).toRender(`
       <div>
+        <hr>
       </div>
     `);
     showA = true;
@@ -171,6 +178,7 @@ describe("Multiple conditional elements under same element", () => {
       <div>
         <span>A</span>
         <span>B</span>
+        <hr>
         <span>C</span>
         <span>D</span>
       </div>
@@ -226,4 +234,156 @@ describe("Multiple conditional elements under different elements", () => {
       </div>
     `);
   });
+});
+
+test("Conditional nodes after repeat", () => {
+  let show = "ab";
+  const Bar = i => <div>{i}</div>;
+  let items = [];
+  const Foo = () => (
+    <div>
+      <Bar.repeat items={items} />
+      <div if={show.includes("a")}>a</div>
+      <div if={show.includes("b")}>b</div>
+    </div>
+  );
+
+  const component = testMount(Foo);
+  expect(component).toRender(`
+    <div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+  `);
+
+  show = "b";
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>b</div>
+    </div>
+    `);
+
+  show = "ab";
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+
+  items.push("fish", "chips");
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>chips</div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+
+  items.pop();
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+
+  show = "b";
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>b</div>
+    </div>
+    `);
+
+  show = "ab";
+  items.push("salad");
+  component.update();
+
+  expect(component).toRender(`
+    <div>
+      <div>fish</div>
+      <div>salad</div>
+      <div>a</div>
+      <div>b</div>
+    </div>
+    `);
+});
+
+test("Keys are not strings", () => {
+  /**
+   * Check for issue using integers as object keys, which are converted to strings.
+   */
+  let show = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const Foo = () => (
+    <div>
+      <div if={show.includes(1)}>1</div>
+      <div if={show.includes(2)}>2</div>
+      <div if={show.includes(3)}>3</div>
+      <div if={show.includes(4)}>4</div>
+      <div if={show.includes(5)}>5</div>
+      <div if={show.includes(6)}>6</div>
+      <div if={show.includes(7)}>7</div>
+      <div if={show.includes(8)}>8</div>
+      <div if={show.includes(9)}>9</div>
+      <div if={show.includes(10)}>10</div>
+      <div if={show.includes(11)}>11</div>
+      <div if={show.includes(12)}>12</div>
+    </div>
+  );
+
+  const component = testMount(Foo);
+  expect(component).toRender(`
+    <div>
+      <div>1</div>
+      <div>2</div>
+      <div>3</div>
+      <div>4</div>
+      <div>5</div>
+      <div>6</div>
+      <div>7</div>
+      <div>8</div>
+      <div>9</div>
+      <div>10</div>
+      <div>11</div>
+      <div>12</div>
+    </div>
+  `);
+
+  show = [1, 2, 3, 4];
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>1</div>
+      <div>2</div>
+      <div>3</div>
+      <div>4</div>
+    </div>
+  `);
+
+  show = [4, 5, 6, 7, 8, 9, 10, 11, 12];
+  component.update();
+  expect(component).toRender(`
+    <div>
+      <div>4</div>
+      <div>5</div>
+      <div>6</div>
+      <div>7</div>
+      <div>8</div>
+      <div>9</div>
+      <div>10</div>
+      <div>11</div>
+      <div>12</div>
+    </div>
+  `);
 });

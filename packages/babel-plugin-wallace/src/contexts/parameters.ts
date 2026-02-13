@@ -1,8 +1,9 @@
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type { Function, Identifier } from "@babel/types";
+import { wallaceConfig, FlagValue } from "../config";
 import { Component } from "../models";
-import { XARGS, SPECIAL_SYMBOLS } from "../constants";
+import { XARGS, COMPONENT_PROPERTIES } from "../constants";
 import { error, ERROR_MESSAGES } from "../errors";
 
 interface PropsMap {
@@ -29,22 +30,6 @@ function expandNameToMemberExpression(name: string): t.MemberExpression | t.Iden
   return t.memberExpression(expandNameToMemberExpression(rest), t.identifier(end));
 }
 
-function checkForIllegalNamesInProps(
-  path: NodePath<Function>,
-  propVariableMap: { [key: string]: string }
-) {
-  const illegalNamesFound = [];
-  for (let name in XARGS) {
-    const variable = XARGS[name];
-    if (propVariableMap.hasOwnProperty(variable)) {
-      illegalNamesFound.push(variable);
-    }
-  }
-  if (illegalNamesFound.length > 0) {
-    error(path, ERROR_MESSAGES.ILLEGAL_NAMES_IN_PROPS(illegalNamesFound));
-  }
-}
-
 function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
   const extraArg = path.node.params[1];
   if (extraArg === undefined) {
@@ -57,8 +42,12 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
     for (const prop of extraArg.properties) {
       if (t.isObjectProperty(prop)) {
         if (t.isIdentifier(prop.value) && t.isIdentifier(prop.key)) {
-          if (!allowed.includes(prop.key.name)) {
-            error(path, ERROR_MESSAGES.ILLEGAL_XARG(prop.key.name));
+          const name = prop.key.name;
+          if (name === COMPONENT_PROPERTIES.ctrl) {
+            wallaceConfig.ensureFlagIstrue(path, FlagValue.allowCtrl);
+          }
+          if (!allowed.includes(name)) {
+            error(path, ERROR_MESSAGES.ILLEGAL_XARG(name));
           }
         } else {
           // ObjectPattern - TODO: allow further deconstruction?
@@ -121,16 +110,19 @@ function extractFinalPropsName(path: NodePath<Function>): PropsMap {
   return propVariableMap;
 }
 
-/**
- * Only renames if function has its own binding.
- */
-function renameExtaArgs(
-  path: NodePath<Function>,
-  extraArgMap: { [key: string]: string }
-) {
-  for (const [key, value] of Object.entries(extraArgMap)) {
+function mapAndRenameXargs(path: NodePath<Function>, component: Component) {
+  const renameMapping: { [key: string]: string } = {};
+  renameMapping[XARGS.event] = XARGS.event;
+  renameMapping[XARGS.element] = XARGS.element;
+  renameMapping[XARGS.props] = component.propsIdentifier.name;
+  renameMapping[XARGS.component] = component.componentIdentifier.name;
+  renameMapping[XARGS.controller] =
+    `${component.componentIdentifier.name}.${COMPONENT_PROPERTIES.ctrl}`;
+
+  for (const [key, value] of Object.entries(renameMapping)) {
     if (path.scope.hasOwnBinding(key)) {
       path.scope.rename(key, value);
+      component.xargMapping[value] = key;
     }
   }
 }
@@ -147,14 +139,7 @@ export function processFunctionParameters(
     return;
   }
   const propVariableMap = extractFinalPropsName(path);
-  checkForIllegalNamesInProps(path, propVariableMap);
   checkForIllegalNamesInExtraArgs(path);
   renamePropKeysInsideFunction(path, propVariableMap, component.propsIdentifier.name);
-  const extraArgMap = {};
-  extraArgMap[XARGS.ev] = XARGS.event;
-  extraArgMap[XARGS.el] = XARGS.element;
-  extraArgMap[XARGS.component] = component.componentIdentifier.name;
-  extraArgMap[XARGS.controller] =
-    `${component.componentIdentifier.name}.${SPECIAL_SYMBOLS.ctrl}`;
-  renameExtaArgs(path, extraArgMap);
+  mapAndRenameXargs(path, component);
 }

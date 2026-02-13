@@ -15,10 +15,15 @@ export function createTextNode(text: string): Text {
   return document.createTextNode(text);
 }
 
+function isValidPropertyName(str) {
+  return /^(?!\d)[\w$]+$/.test(str);
+}
+
 export function setAttributeCallback(attName: string): string {
   attName = attName === "class" ? "className" : attName;
-  return `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`;
-  // TODO: determine if non-standart att and use setAttribute() instead?
+  return isValidPropertyName(attName)
+    ? `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`
+    : `${WATCH_CALLBACK_ARGS.element}.setAttribute('${attName}', ${WATCH_CALLBACK_ARGS.newValue})`;
 }
 
 const REGEX_CAPITALIZED = new RegExp(/^[A-Z].*/);

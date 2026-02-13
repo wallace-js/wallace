@@ -29,7 +29,7 @@ export const TaskList: Uses<iTask[], Controller, TaskListMethods> = (
     <div style="margin-top: 10px">
       <span>Completed: {ctrl.tasks.filter(t => t.done).length}</span>
       <div style="margin-top: 10px">
-        <Task.repeat props={ctrl.tasks} />
+        <Task.repeat items={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
@@ -39,7 +39,7 @@ export const TaskList: Uses<iTask[], Controller, TaskListMethods> = (
   </div>
 );
 
-TaskList.methods({
+TaskList.methods = {
   render(props) {
     this.ctrl = new Controller(this, props);
     this.ctrl.stateMoved();
@@ -52,4 +52,4 @@ TaskList.methods({
       target.value = "";
     }
   }
-});
+};

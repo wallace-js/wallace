@@ -6,6 +6,12 @@ import { diff } from "jest-diff";
 import { Component, mount } from "../lib/index";
 import * as ts from "typescript";
 
+// Big old issue with Jest confusing output from previous tests. Will switch to vitest or so.
+const WRONG_CODE_WARNING = `\n\n WARNING: JEST MAY SHOW OUTPUT FROM A PREVIOUS TEST, INCLUDING STACK TRACE.
+ USE test.only TO SEE RELIABLE OUTPUT.`;
+
+console.log(WRONG_CODE_WARNING);
+
 /**
  * Run the source code through tsc to find type errors.
  *
@@ -126,8 +132,8 @@ expect.extend({
         expand: this.expand
       });
       return (
-        this.utils.matcherHint(".toBe") +
-        (diffString ? `\n\nDifference:\n\n${diffString}` : "")
+        this.utils.matcherHint(".toRender") +
+        (diffString ? `\n\nDifference:\n\n${diffString}${WRONG_CODE_WARNING}` : "")
       );
     };
     const message = pass ? passMessage : failMessage;
@@ -145,15 +151,19 @@ expect.extend({
     try {
       transform(code);
     } catch (e) {
-      console.debug(e.message);
-      errorMessage = e.message.split("\n", 1)[0].substring("unknown file: ".length);
+      const errorLines = e.message.split("\n", 1);
+      errorMessage = errorLines[errorLines.length - 1].substring("unknown file: ".length);
     }
     const pass = !errorMessage;
     const failMessage = () => {
-      return `Compiled with error: ${errorMessage}`;
+      return (
+        this.utils.matcherHint(".toCompileWithoutError") +
+        `\n\Expected to compile with no error, but got error:\n\n    ${errorMessage}` +
+        WRONG_CODE_WARNING
+      );
     };
     const message = pass ? passMessage : failMessage;
-    return { actual: errorMessage, message, pass };
+    return { message, pass };
   },
   /**
    * Checks that the code compiles with specified error message.
@@ -164,29 +174,30 @@ expect.extend({
    *
    */
   toCompileWithError(code, errorMessage) {
-    let received = "NO ERROR - COMPILED OK";
+    let receivedErrorMessage = "NO ERROR - COMPILED OK";
     try {
       transform(code);
     } catch (e) {
-      received = e.message.split("\n", 1)[0].substring("unknown file: ".length);
-      if (received !== errorMessage) {
-        console.debug(e);
-      }
+      receivedErrorMessage = e.message
+        .split("\n", 1)[0]
+        .substring("unknown file: ".length);
     }
-    const pass = received === errorMessage;
+    const pass = receivedErrorMessage === errorMessage;
     const failMessage = () => {
-      const diffString = diff(errorMessage, received, {
+      const diffString = diff(errorMessage, receivedErrorMessage, {
         expand: this.expand
       });
       return (
-        this.utils.matcherHint(".toBe") +
-        (diffString ? `\n\nDifference:\n\n${diffString}` : "")
+        this.utils.matcherHint(".toCompileWithError") +
+        (diffString ? `\n\nDifference:\n\n${diffString}` : "") +
+        "\n\nIGNORE WHAT FOLLOWS - JEST OFTEN POINTS TO CODE FROM PREVIOUS TEST"
       );
     };
     const message = pass ? passMessage : failMessage;
-    return { actual: received, message, pass };
+    return { message, pass };
   },
   toHaveTypeErrors(src, err1, err2, err3) {
+    // TODO: fix this. What is errorMessage?
     const errors = tsCompile(src);
     const expected = [err1, err2, err3].filter(Boolean);
     if (errors.length === 0) {
@@ -203,6 +214,7 @@ expect.extend({
     };
   },
   toHaveNoTypeErrors(src) {
+    // TODO: make this work.
     const errors = tsCompile(src);
     if (errors.length === 0) {
       return { pass: true };

@@ -64,3 +64,17 @@ test("Child can use stub implementations from parent", () => {
   const component = testMount(Child, { name: "goat" });
   expect(component).toRender(`<div>goodbye <span>goat</span></div>`);
 });
+
+test("Stubs is sepearate object from parent", () => {
+  const BaseComponent = () => (
+    <div>
+      <stub:display />
+    </div>
+  );
+  BaseComponent.stubs.display = ({ name }) => <h3>Parent {name}</h3>;
+
+  const Child = extendComponent(BaseComponent);
+  Child.stubs.display = ({ name }) => <span>Child{name}</span>;
+  const component = testMount(BaseComponent, { name: "beaver" });
+  expect(component).toRender(`<div><h3>Parent <span>beaver</span></h3></div>`);
+});

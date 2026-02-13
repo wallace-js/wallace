@@ -11,14 +11,17 @@
   1. Components
   2. JSX
   3. Nesting
-  4. Directives
-  5. Controllers
-  6. Inheritance
-  7. Stubs
-  8. TypeScript
-  9. Utility functions
+  4. Repeating
+  5. Directives
+  6. Controllers
+  7. Inheritance
+  8. Stubs
+  9. TypeScript
+ 10. Helpers
+ 11. Flags
 
-For more detailed documentation go to https://github.com/wallace-js/wallace
+For more detailed documentation go to https://wallace.js.org/docs/
+
 
 ## 1. Components
 
@@ -47,9 +50,11 @@ const MyComponent = ({title}, {ctrl, event}) => (
 
 The **xargs** contains:
 
-- `ctrl` a reference to a controller object.
-- `self` a reference to the component instance (as `this` is not allowed).
-- `event` for use in event callbacks, signifies the event.
+- `ctrl` refers to the controller.
+- `props` refers to the props, in case you want the non-destructured version too.
+- `self` refers to the component instance (as `this` is not allowed).
+- `event` refers to the event in an event callback.
+- `element` refers to the element in an event callback, or in `apply`.
 
 The function will be replaced by a very different one during compilation, therefore:
 
@@ -71,7 +76,7 @@ The arguments are:
 3. props for the element (optional)
 4. controller (optional)
 
-`mount` returns the component instance, allowing you to call it methods:
+`mount` returns the component instance, allowing you to call its methods:
 
 ```tsx
 root.update();
@@ -98,10 +103,13 @@ render(props, ctrl) {
 Updates the DOM. Only called internally by `render`, but you can call it from other
 places.
 
-You can override these methods, and add new ones:
+#### Overriding
+
+You can override these methods, and add new ones using `methods` property of the
+component definition:
 
 ```tsx
-MyComponent.methods({
+MyComponent.methods = {
   render(props) {
     this.ctrl = new MyController(this, props);
     this.update();
@@ -109,7 +117,7 @@ MyComponent.methods({
   getName() {
     return 'wallace';
   }
-});
+};
 ```
 
 This has the same effect as setting them on the prototype:
@@ -118,17 +126,34 @@ This has the same effect as setting them on the prototype:
 MyComponent.prototype.render = function () {};
 ```
 
-You access the instance as `this` in methods, but `self` in the JSX.
+You can use `this.base` to access methods on the base `Component` class:
+
+```tsx
+MyComponent.methods = {
+  render(props) {
+    this.base.render.call(this, props, ctrl);
+  }
+};
+```
+
+Note that `base` is not the same as `super` in classes which access the lowest override.
+
+You access the instance as `this` in methods, but cannot use `this` in arrow functions,
+so use `self` from the **xargs** in component functions.
+
 
 ### 1.4 Fields
 
 Component instances have the following fields:
 
-- `props` the data for this component instance, stored as reference to original, not a 
-copy.
-- `ctrl` an object to help coordinate things, also stored as reference.
-- `ref` a dictionary of named elements.
+- `props` the data for this component instance.
+- `ctrl` the controller object.
 - `el` the component instance's root element.
+
+Optionally:
+
+- `ref` an object containing named elements or nested components.
+- `part` an object containing named parts.
 
 Both `props` and `ctrl` are set during the `render` method before calling `update`.
 There are no restrictions on types but typically:
@@ -157,7 +182,7 @@ Other than that, its standard JSX, except for three special cases:
 
 ## 3. Nesting
 
-To nest or repeat components use its name followed by `.nest` or `.repeat`:
+To nest a component use its name followed by `.nest` and pass `props` if needed:
 
 ```tsx
 const Task = (task) => (<div></div>);
@@ -171,42 +196,67 @@ const TopTasks = (tasks) => (
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} />
+    <Task.repeat items={tasks} />
   </div>
 );
 ```
 
 Notes:
 
- - You cannot use nest or repeat on the root element.
- - Repeat must be the only child element under its parent.
- - The `props` expects an array on repeat (See **TypeScript** below) 
+ - You cannot use nest on the root element.
+ - You cannot use `if` on a nested element, only `show` and `hide`.
 
-## 4. Directives
+## 4. Repeating
 
-Directives are attributes with special behaviours, as listed below. Each has more
-detailed information on its JSDoc, which should display as a tool tip\* when you hover
-over it in your IDE.
+To repeat a component use its name followed by `.repeat` and pass `items`:
 
-You can also display this list by hovering over any JSX element, like `div`.
+```tsx
+const Task = (task) => (<div></div>);
 
-- `apply` runs a callback to modify an element.
-- `bind` updates a value when an input is changed.
-- `class:xyz` defines a set of classes to be toggled.
-- `hide` sets an element or component's hidden property.
-- `html` Set the element's `innnerHTML` property.
-- `if` excludes an element from the DOM.
-- `on[EventName]` creates an event handler (note the code is copied)
-- `props` specifes props for a nested or repeated component, in which case it must be
-an array.
-- `ref` saves a reference to an element or nested component.
-- `show` sets and element or component's hidden property.
-- `style:xyz` sets a specific style property.
-- `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} />
+  </div>
+);
+```
 
-\* The tool tip won't display when you use a qualifier, like `class:danger`. 
+This form reuses components sequentially, which may cause issues with CSS animations
+and focus, in which case you should use a keyed repeater by passing `key` which can
+be a string or a function:
 
-## 5. Controllers
+```tsx
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} key="id"/>
+  </div>
+);
+
+const TaskList = (tasks) => (
+  <div>
+    <Task.repeat items={tasks} key={(x) => x.id}/>
+  </div>
+);
+```
+
+Notes:
+
+ - You cannot use repeat on the root element.
+ - You cannot toggle visibility on the repeat element.
+
+## 5. Directives
+
+Directives are attributes with special behaviours. 
+
+You can see the list of available directives by hovering over any JSX element, like
+a `div`
+
+You will get more details by hovering on the directive itself, but unfortunetely the
+tool tip won't display when you use a qualifier, like `class:danger`. To see it you can
+temporarily change it to something `class x:danger`.
+
+You can define your own directives in your babel config.
+
+## 6. Controllers
 
 A controller is just an object you create which gets passed down to every nested
 component, making it a convenient place to handle:
@@ -245,19 +295,19 @@ const Task = (task) => (<div>{task.name}</div>);
 
 const TaskList = (_, {ctrl}) => (
   <div>
-    <Task.repeat props={ctrl.getTasks()} />
+    <Task.repeat items={ctrl.getTasks()} />
   </div>
 );
 
-TaskList.methods({
+TaskList.methods = {
   render(_, ctrl) {
     this.ctrl = new TaskController(this, ctrl);
     this.update();
   }
-});
+};
 ```
 
-## 6. Inheritance
+## 7. Inheritance
 
 You can creat new component defintion by extending another one, either preserving the
 base's structure, or overriding it:
@@ -273,7 +323,7 @@ const Child2 = extendComponent(Parent, ({name}) => <h3>{name}</h3>);
 
 Either way the new component definition inherits the parent *prototype* and *stubs*.
 
-## 7. Stubs
+## 8. Stubs
 
 Stubs are named placeholders for nested components which are requested in the JSX:
 
@@ -306,7 +356,7 @@ Notes:
  - Stubs are separate components, so cannot access methods on the containing component
    through `self` (use the controller for that kind of thing).
 
-## 8. TypeScript
+## 9. TypeScript
 
 The main type is `Uses` which must be placed right after the comonent name:
 
@@ -330,19 +380,18 @@ const Task: Uses<null> = () => <div>Hello</div>;
 
 ### Props
 
-TypeScript will ensure you pass correct props during mounting or nesting,
-including repeat, which expects an arry of the type:
+TypeScript will ensure you pass correct props during mounting, nesting and repeating:
 
 ```
 const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
     First task:
     <Task.nest props={tasks[0]} />
-    <div>
-      <Task.repeat props={tasks.slice(1)} />
-    </div>
+    <Task.repeat items={tasks.slice(1)} />
   </div>
 );
+
+mount("main", TaskList, [{test: 'foo'}]);
 ```
 
 ### Controller
@@ -376,12 +425,12 @@ const Task: Uses<null, null, TaskMethods> = (_, { self }) => (
   <div>{self.getName()}</div>
 ));
 
-Task.methods({
+Task.methods = {
   getName() { return 'wallace' },
   render(props, ctrl) {  // types are already known
     this.props = { ...props, notallowed: 1 };  // type error
   }
-});
+};
 ```
 
 The type will pass into the object passed into `methods` so it recognises custom methods
@@ -429,7 +478,7 @@ Wallace defines some other types you may use:
     constructor, not a class)
  - `ComponentInstance<Props, Controller, Methods>` - a component instance.
 
-## Utility functions
+## 10. Helpers
 
 Each of these has their own JSDoc, we just lsit them here.
 
@@ -453,11 +502,61 @@ mount("elementId", MyComponent, props, ctrl);
 
 ### watch
 
-Returns a Proxy of an object which calls `callback` when keys are set:
+Returns a Proxy of an object which calls `callback` when it, or its nested objects are
+modified:
 
 ```
-watch(obj, () => console.log('obj modified);
+const watchedObj = watch([], () => console.log('obj modified));
+watchedObj[0] = 'foo;  // Calls callback.
 ```
+
+### protect
+
+Returns a Proxy of an object which throws an error if it, or its nested objects are
+modified.
+
+```
+const protectedObj = protect([]);
+watchedObj[0] = 'foo';  // throws error.
+```
+
+## 11. Flags
+
+You can toggle flags in your babel config to disable certain features for cutting edge
+performance and bundle size:
+
+1.  allowBase - enables use of `base` in components.
+2.  allowCtrl - enables use of `ctrl` in components.
+3.  allowMethods - adds the `methods` helper to components.
+4.  allowParts  - enables use of parts.
+5.  allowRepeaterSiblings - allows repeaters to have siblings.
+6.  allowStubs - enables the use of stubs.
+
+These flags default to true, unless you specify `flags` in the plugin config, in which
+case they default to false and you need to explicitly enable those you want:
+
+
+```tsx
+module.exports = {
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        flags: {
+          allowCtrl: true,
+          allowStubs: false
+        },
+      }
+    ],
+    "@babel/plugin-syntax-jsx"
+  ],
+  presets: ["@babel/preset-typescript", ...]
+};
+```
+
+The types (and therefore tool tips) are unaffected by these flags, and will treat them
+all as being true.
+
 ---
 Report any issues to https://github.com/wallace-js/wallace (and please give it a ★)
 
@@ -475,10 +574,12 @@ declare module "wallace" {
   > {
     (
       props: Props,
-      other?: {
+      xargs?: {
         ctrl: Controller;
+        props: Props;
         self: ComponentInstance<Props, Controller, Methods>;
         event: Event;
+        element: HTMLElement;
       }
     ): JSX.Element;
     nest?({
@@ -487,22 +588,21 @@ declare module "wallace" {
       hide
     }: {
       props?: Props;
+      ctrl?: Controller;
       show?: boolean;
       hide?: boolean;
     }): JSX.Element;
     repeat?({
-      props,
-      show,
-      hide
+      items,
+      ctrl,
+      key
     }: {
-      props: Array<Props>;
-      show?: boolean;
-      hide?: boolean;
+      items: Array<Props>;
+      ctrl?: Controller;
+      key?: string | ((item: Props) => any);
     }): JSX.Element;
-    methods?(
-      object: ComponenMethods<Props, Controller> &
-        ThisType<ComponentInstance<Props, Controller, Methods>>
-    ): void;
+    methods?: ComponenMethods<Props, Controller> &
+      ThisType<ComponentInstance<Props, Controller, Methods>>;
     readonly prototype?: ComponenMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
@@ -516,7 +616,7 @@ declare module "wallace" {
   };
 
   /**
-   * A type which ust be placed as shown:
+   * A type which must be placed as shown:
    *
    * ```tsx
    * const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
@@ -536,6 +636,10 @@ declare module "wallace" {
     Methods extends object = {}
   > = ComponentFunction<Props, Controller, Methods>;
 
+  export interface Part {
+    update(): void;
+  }
+
   /**
    * The type for a component instance.
    */
@@ -544,20 +648,66 @@ declare module "wallace" {
     Controller = any,
     Methods extends object = {}
   > = {
-    update(): void;
-    render(props: Props, ctrl?: Controller): void;
     el: HTMLElement;
     props: Props;
     ctrl: Controller;
-  } & Methods;
+    ref: { [key: string]: HTMLElement | ComponentInstance };
+    part: { [key: string]: Part };
+    base: Component<Props, Controller>;
+  } & Component<Props, Controller> &
+    Methods;
 
   /**
    * The component constructor function (typed as a class, but isn't).
    */
   export class Component<Props = any, Controller = any> {
+    /**
+     * The base render method looks like this:
+     *
+     * ```
+     * render(props?: Props, ctrl?: Controller) {
+     *   this.props = props;
+     *   this.ctrl = ctrl;
+     *   this.update();
+     * }
+     * ```
+     *
+     * You can override like so:
+     *
+     * ```
+     * render(props?: Props, ctrl?: Controller) {
+     *   // do your thing
+     *   this.base.render.call(this, props, ctrl);
+     * }
+     * ```
+     */
+    render(props?: Props, ctrl?: Controller): void;
+    /**
+     * Updates the DOM.
+     *
+     * You can override like so:
+     *
+     * ```
+     * update() {
+     *   // do your thing
+     *   this.base.update.call(this);
+     * }
+     * ```
+     */
     update(): void;
-    render(props: Props, ctrl?: Controller): void;
   }
+
+  /**
+   * Creates a component instance and renders it.
+   * @param def
+   * @param props
+   * @param ctrl
+   */
+  export function createComponent<Props, Controller, Methods extends object = {}>(
+    def: ComponentFunction<Props, Controller, Methods>,
+    props?: Props,
+    ctrl?: Controller
+  ): ComponentInstance<Props, Controller, Methods>;
 
   /**
    * Use to define a new component which extends another component, meaning it will
@@ -573,9 +723,9 @@ declare module "wallace" {
     Controller = any,
     Methods extends object = {}
   >(
-    base: Uses<Props, Controller, Methods>,
+    base: ComponentFunction<Props, Controller, Methods>,
     componentFunc?: ComponentFunction<Props, Controller, Methods>
-  ): Uses<Props, Controller, Methods>;
+  ): ComponentFunction<Props, Controller, Methods>;
 
   /**
    * *Replaces* element with an instance of componentDefinition and renders it.
@@ -584,14 +734,27 @@ declare module "wallace" {
    */
   export function mount<Props = any, Controller = any, Methods extends object = {}>(
     element: string | HTMLElement,
-    componentDefinition: Uses<Props, Controller, Methods>,
+    componentDefinition: ComponentFunction<Props, Controller, Methods>,
     props?: Props,
     ctrl?: Controller
   ): ComponentInstance<Props, Controller, Methods>;
 
   /**
-   * Returns a Proxy of an object which calls `callback` when keys are set, and this
-   * extends to nested objects:
+   * Returns a Proxy of an object which throws an error when it, or its nested objects
+   * are modified:
+   *
+   * ```js
+   * const protectedObj = protect([]);
+   * watchedObj[0] = 'foo';  // throws error.
+   * ```
+   */
+  export function protect<T>(target: T): T;
+
+  type WatchCallback = (target: any, key: string, value: any) => void;
+
+  /**
+   * Returns a Proxy of the target which calls `callback` when it, or its nested objects
+   * are modified:
    *
    * ```js
    * ar = watch([], callback)
@@ -603,18 +766,48 @@ declare module "wallace" {
    * obj.y = {}
    * obj.y.z = 1000
    * ```
-   * The callback does not indicate the data has changed, only that a key was set.
    *
-   * Some methods like `Array.push` set the index and then the length immediately after,
-   * so we use a timeout period to avoid calling the callback twice for what is really a
-   * single operation.
+   * The original object is also modified.
+   *
+   * The callback accepts parameters:
+   *
+   *  - `target` - the object which is being modified.
+   *  - `key` - the key being set.
+   *  - `value` - the value it is being set to.
+   *
+   * The callback is called after the modification has occured.
    *
    * @param {*} target - Any object, including arrays.
-   * @param {*} timeout - Any value in ms. Defaults to 100.
    * @param {*} callback - A callback function.
    * @returns a Proxy of the object.
    */
-  export function watch<T>(target: T, callback: CallableFunction, timeout?: number): T;
+  export function watch<T>(target: T, callback: WatchCallback): T;
+
+  export type RouteData = {
+    args: { [key: string]: any };
+    params: URLSearchParams;
+    url: string;
+  };
+
+  export function route<Props>(
+    path: string,
+    componentDef: ComponentFunction<Props>,
+    converter: RouteConverter<Props>
+  ): Route<Props>;
+
+  type RouteConverter<Props> = (routedata: RouteData) => Props;
+
+  export type Route<Props> = [string, ComponentFunction<Props>, RouteConverter<Props>?];
+  export type RouterProps = {
+    routes: readonly Route<unknown>[];
+    atts?: Record<string, unknown>;
+    error?: (error: Error, router: Router) => void;
+  };
+
+  export class Router extends Component {
+    static nest?({ props }: { props?: RouterProps }): JSX.Element;
+    mount(component: Component<any>): void;
+  }
 }
 
 type MustBeExpression = Exclude<any, string>;
@@ -648,55 +841,36 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: bind
    *
-   * Sets up two-way binding:
-   *
-   *   1. It uses the expression as the element's value.
-   *   2. It assigns the value back to the expression when the element's `change` event
-   * fires.
-   *
-   * So this:
+   * Sets up two way binding between an input and data:
    *
    * ```
-   * const MyComponent = ({name}) => (
-   *   <input type="text" bind={name}/>
-   * );
+   * <input type="text" bind={name} />
    * ```
    *
    * Is the equivalent of this:
    *
-   *```
-   * const MyComponent = ({name}, {event}) => (
-   *   <input type="text" onChange={name = event.target.value} value={name}/>
-   * );
    * ```
-   *
-   * In the case of a checkbox it uses `checked` instead of `value`, so is the equivalent of this:
+   * <input type="text" value={name} onChange={name = event.target.value} />
+   * ```
+   * By default it watches the `change` event, but you can specify a different one using
+   * the `event` directive:
    *
    * ```
-   * const MyComponent = ({done}, {event}) => (
-   *   <input type="checkbox" onChange={done = event.target.checked} checked={done}/>
-   * );
+   * <input type="text" bind={name} event:keyup />
    * ```
    *
-   * By defaults it listens to the `change` event, but you can specify a different one:
+   * By default it binds to `value` but you can set a different property:
    *
    *```
-   * const MyComponent = ({name}) => (
-   *   <input type="text" bind:KeyUp={name} />
-   * );
+   * <input type="number" bind:valueAsNumber={name} />
    * ```
-   *
-   * Unfortunately you lose the tooltip in that format.
-   *
-   * Note that destructured props are converted to member expressions, so these examples
-   * work even though it looks like you're setting a local variable.
    */
   bind?: MustBeExpression;
 
   /**
    * ## Wallace directive: class
    *
-   * Without a qualifer this acts as a normal attribute:
+   * Without a qualifier this acts as a normal attribute:
    *
    * ```
    * <div class={foo} ></div>
@@ -707,10 +881,57 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    * <div class:danger="danger red" toggle:danger={expr}></div>
    * ```
-   *
-   * Unfortunately you lose the tooltip in that format.
    */
   class?: any;
+
+  /**
+   * ## Wallace directive: css
+   *
+   * Shorthand for `fixed:class`:
+   *
+   * ```
+   * <div css={foo} ></div>
+   * ```
+   */
+  css?: string;
+
+  /**
+   * ## Wallace directive: ctrl
+   *
+   * Specifies alternative `ctrl` for nested or repeated components.
+   *
+   * ```
+   * <MyComponent.nest ctrl={altController} />
+   * ```
+   */
+  ctrl?: any;
+
+  /**
+   * ## Wallace directive: event
+   *
+   *
+   * Must be used with the `bind` directive, and causes it do watch a different event
+   * (the default is `change`)
+   *
+   * ```
+   * <input type="text" bind={name} event:keyup />
+   * ```
+   */
+  event?: string;
+
+  /**
+   * ## Wallace directive: fixed
+   *
+   * Sets the value of an attribute from an expression at point of component definition,
+   * as such the expression may not access props or xargs. See also `css` directive.
+   *
+   * Requires a qualifer, which is the name of the attribute to set.
+   *
+   * ```
+   * <div fixed:class={foo} ></div>
+   * ```
+   */
+  fixed?: string;
 
   /** ## Wallace directive: hide
    *
@@ -725,36 +946,73 @@ interface DirectiveAttributes extends AllDomEvents {
    */
   html?: MustBeExpression;
 
-  /** Wallace excludes this element from the DOM if the condition is false,
-   * and does not render dynamic elements underneath. */
+  /** ## Wallace directive: if
+   *
+   * Excludes this element from the DOM completely if the condition is false,
+   * and does not render dynamic elements underneath.
+   * When the condition becomes true, the element is reattached.
+   */
   if?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: items
+   *
+   * Specifies items for repeated component. Must be an array of the props which the
+   * nested item accepts.
+   *
+   */
+  items?: MustBeExpression;
+
+  /** ## Wallace directive: key
+   *
+   * Specifies a key for repeated components, creating an association between the key
+   * and the nested component.
+   *
+   * You can specify a property as a string or a function.
+   */
+  key?: any;
+
+  /**
+   * ## Wallace directive: part
+   *
+   * Saves a reference to part of a component allowing you to update it independently.
+   *
+   * ```
+   * <div part:title>
+   *   {name}
+   * </div>
+   * ```
+   *
+   * ```
+   * component.part.title.update();
+   * ```
+   */
+  part?: null;
 
   /**
    * ## Wallace directive: props
    *
-   * Specifies props for a nested or repeated component.
+   * Specifies props for a nested component.
    *
-   * If it is a repeated component, the props should be an array of whatever type it
-   * accepts.
    */
   props?: MustBeExpression;
 
   /**
    * ## Wallace directive: ref
    *
-   * Saves a reference to the element on the component, allowing it to be accessed.
+   * Saves a reference to an element or nested component.
    *
    * ```
-   * <div ref:title></div>
+   * <div ref:title>
+   *   {name}
+   * </div>
    * ```
    *
    * ```
    * component.ref.title.textContent = 'hello';
    * ```
-   *
-   * Requires a qualifier, but you lose the tooltip in that format.
    */
-  ref?: string;
+  ref?: null;
 
   /** ## Wallace directive: show
    *
@@ -797,9 +1055,11 @@ interface DirectiveAttributes extends AllDomEvents {
   toggle?: string;
 
   /**
-   * Foo
+   * ## Wallace directive: unique
+   *
+   * Performance optimisation that can be applied to a component which is only used once.
    */
-  "class-a"?: string;
+  unique?: boolean;
 }
 
 declare namespace JSX {
@@ -810,27 +1070,38 @@ declare namespace JSX {
      * Nesting syntax:
      *   ```
      *   <MyComponent.nest props={singleProps} />
-     *   <MyComponent.repeat props={arrayOfProps} />
+     *   <MyComponent.repeat items={arrayOfProps} />
+     *   <MyComponent.repeat items={arrayOfProps} key="id"/>
+     *   <MyComponent.repeat items={arrayOfProps} key={(i) => i.id}/>
      *   ```
-     * But note that repeat must not have siblings.
      *
      * Available Wallace directives:
      *
      * - `apply` runs a callback to modify an element.
      * - `bind` updates a value when an input is changed.
      * - `class:xyz` defines a set of classes to be toggled.
+     * - `css` shorthand for `fixed:class`.
+     * - `ctrl` specifies ctrl for nested/repeated components.
+     * - `event` changes the event which `bind` reacts to.
+     * - `fixed:xyz` sets a attribute from an expression at definition.
      * - `hide` sets an element or component's hidden property.
      * - `html` Set the element's `innnerHTML` property.
      * - `if` excludes an element from the DOM.
-     * - `on[EventName]` creates an event handler (note the code is copied)
-     * - `props` specifes props for a nested or repeated component, in which case it must be
-     * an array.
-     * - `ref` saves a reference to an element or nested component.
+     * - `key` specifies a key for repeated items.
+     * - `items` set items for repeated component, must be an array of props.
+     * - `on[EventName]` creates an event handler (note the code is copied).
+     * - `part:xyz` saves a reference to part of a component so it can be updated.
+     * - `props` specifies props for a nested components.
+     * - `ref:xyz` saves a reference to an element or nested component.
      * - `show` sets and element or component's hidden property.
      * - `style:xyz` sets a specific style property.
-     * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class `xyz`.
+     * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
+     *   `xyz`.
+     * - `unique` can be set on components which are only used once for better performance.
      *
-     * Note the tool tip won't display when you use a qualifier, like `class:danger`.
+     * You will get more details by hovering on the directive itself, but unfortunetely
+     * the tool tip won't display when you use a qualifier, like `class:danger`. To see
+     * it you cantemporarily change it to something `class x:danger`.
      */
     [elemName: string]: DirectiveAttributes & Record<string, any>;
   }

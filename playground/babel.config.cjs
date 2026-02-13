@@ -8,7 +8,11 @@
  * See `playground/package.json` and `babel-plugin-wallace/README.md`.
  */
 
+<<<<<<< HEAD
 const { TestDirective } = require("./src/directive.js");
+=======
+const { directives, flags } = require("./src/config.js");
+>>>>>>> master
 
 function flag(name) {
   const value = process.env[name];
@@ -24,8 +28,16 @@ function flag(name) {
 }
 
 const toggles = {
-  NO_PRESET_ENV: ["@babel/preset-env", { modules: false }],
-  NO_PRESET_TYPESCRIPT: "@babel/preset-typescript",
+  NO_PRESET_ENV: [
+    "@babel/preset-env",
+    {
+      targets: {
+        // browsers: ["last 1 chrome versions"]
+      },
+      modules: false
+    }
+  ],
+  NO_PRESET_TYPESCRIPT: "@babel/preset-typescript"
 };
 const presets = [];
 
@@ -42,10 +54,11 @@ module.exports = {
     [
       "babel-plugin-wallace",
       {
-        directives: TestDirective ? [TestDirective] : [],
-      },
+        directives,
+        flags
+      }
     ],
-    "@babel/plugin-syntax-jsx",
+    "@babel/plugin-syntax-jsx"
   ],
-  presets: presets,
+  presets: presets
 };

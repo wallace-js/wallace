@@ -50,40 +50,9 @@ class AbstractContextHandler {
   }
 }
 
-function getAssignedName(path: NodePath<AnyFunction>): string {
-  const parentNode = path.parentPath.node;
-  if (t.isVariableDeclarator(parentNode) && t.isIdentifier(parentNode.id)) {
-    return parentNode.id.name;
-  }
-  return "Anonymous";
-}
-
 /**
- * const Foo = () => <div></div>
- */
-class AssignedJsxFunction extends AbstractContextHandler {
-  constructor(path: NodePath<AnyFunction>, module: Module) {
-    super(path, module);
-    if (functionReturnsOnlyJSX(path) && path.parentPath.isVariableDeclarator()) {
-      this.initialiseComponent();
-    }
-  }
-}
-
-/**
- * foo = {}
- * foo.bar = () => <div></div>
- */
-class JsxFunctionAssignedToMember extends AbstractContextHandler {
-  constructor(path: NodePath<AnyFunction>, module: Module) {
-    super(path, module);
-    if (functionReturnsOnlyJSX(path) && path.parentPath.isAssignmentExpression()) {
-      this.initialiseComponent();
-    }
-  }
-}
-
-/**
+ * Special case where we change the code:
+ *
  * extendComponent(Foo, () => <div></div>);
  */
 class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
@@ -105,20 +74,6 @@ class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
   replaceWithDefineComponentCall() {
     this.component.baseComponent = this.getBaseComponent();
     this.path.parentPath.replaceWith(buildDefineComponentCall(this.component));
-  }
-}
-
-/**
- *  foo = {
- *    bar: () => <div></div>
- *  };
- */
-class JsxFunctionInProperty extends AbstractContextHandler {
-  constructor(path: NodePath<AnyFunction>, module: Module) {
-    super(path, module);
-    if (functionReturnsOnlyJSX(path) && path.parentPath.isProperty()) {
-      this.initialiseComponent();
-    }
   }
 }
 
@@ -152,28 +107,29 @@ class JsxFunctionInObjectMethod extends AbstractContextHandler {
   }
 }
 
+class AnyJsxFunction extends AbstractContextHandler {
+  constructor(path: NodePath<AnyFunction>, module: Module) {
+    super(path, module);
+    if (functionReturnsOnlyJSX(path)) {
+      this.initialiseComponent();
+    }
+  }
+}
+
 const contextClasses = [
+  JsxFunctionInObjectMethod,
   JsxFunctionInExtendComponentCall,
-  AssignedJsxFunction,
-  JsxFunctionAssignedToMember,
-  JsxFunctionInProperty,
-  JsxFunctionInObjectMethod
+  AnyJsxFunction
 ];
 
 export function identifyContextToBeHandled(
   path: NodePath<AnyFunction>,
   module: Module
 ): AbstractContextHandler | undefined {
-  const contexts = [];
-  contextClasses.forEach(contextClass => {
-    contexts.push(new contextClass(path, module));
-  });
-  const matches = contexts.filter(context => context.isMatch);
-  if (matches.length > 1) {
-    throw new Error(
-      "Function matches more than one context. This is an error with the plugin."
-    );
-  } else if (matches.length === 1) {
-    return matches[0];
+  for (const contextClass of contextClasses) {
+    const context = new contextClass(path, module);
+    if (context.isMatch) {
+      return context;
+    }
   }
 }

@@ -37,7 +37,7 @@ describe("Repeated components", () => {
   const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
   const Bar = () => (
     <div>
-      <Foo.repeat props={[1, 2, 3]} />
+      <Foo.repeat items={[1, 2, 3]} />
     </div>
   );
   Bar.prototype.render = function () {

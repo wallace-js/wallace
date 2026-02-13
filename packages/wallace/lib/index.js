@@ -1,31 +1,15 @@
-import { mount, watch } from "./utils";
-import { Component } from "./component";
-import { KeyedRepeater, SequentialRepeater } from "./repeaters";
-import {
-  extendComponent,
-  defineComponent,
-  findElement,
-  getKeyedRepeater,
-  getSequentialRepeater,
-  onEvent,
-  nestComponent,
-  saveRef,
-  stashMisc
-} from "./initCalls";
-
-export {
-  Component,
-  defineComponent,
-  extendComponent,
-  findElement,
-  getKeyedRepeater,
-  getSequentialRepeater,
-  KeyedRepeater,
-  mount,
-  nestComponent,
-  onEvent,
-  saveRef,
-  SequentialRepeater,
-  stashMisc,
-  watch
-};
+export { defineComponent } from "./component";
+export { Detacher } from "./detacher";
+export { extendComponent } from "./extend";
+export { mount } from "./mount";
+export { createComponent } from "./createComponent";
+export { nestComponent } from "./nestComponent";
+export { saveRef } from "./refs";
+export { savePart } from "./part";
+export { KeyedRepeater } from "./repeaters/keyed";
+export { SequentialRepeater } from "./repeaters/sequential";
+export { Router, route } from "./router";
+export { getStub } from "./stubs";
+export { toDateString } from "./toDateString";
+export { findElement, onEvent } from "./utils";
+export { watch, protect } from "./watch";

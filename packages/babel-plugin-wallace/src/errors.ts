@@ -24,8 +24,19 @@ export const ERROR_MESSAGES = {
   CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
     return `The "${directive}" directive may not have a qualifier.`;
   },
-  INVALID_EVENT_NAME_IN_BIND: (badEventNameive: string) => {
-    return `"${badEventNameive}" is not a valid event name. Must be lowercase without "on" prefix. E.g. bind:keyup.`;
+  DIRECTIVE_ALREADY_DEFINED: (directive: string) => {
+    return `The "${directive}" directive has already been defined on this node.`;
+  },
+  DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
+    return `The "${directive}" directive may not access scoped variable "${name}".`;
+  },
+  EVENT_USED_WITHOUT_BIND:
+    "The `event` directive must be used with the `bind` directive.",
+  FLAG_REQUIRED: (flag: string) => {
+    return `Flag "${flag}" must be set to true in the config for this feature.`;
+  },
+  INVALID_EVENT_NAME: (event: string) => {
+    return `"${event}" is not a valid event. Must be lowercase without "on" prefix. E.g. event:keyup.`;
   },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   INCORRECTLY_NESTED_COMPONENT: "Nest components using <Name.nest /> or <Name.repeat />.",
@@ -42,25 +53,23 @@ export const ERROR_MESSAGES = {
   UNSUPPORTED_ATTRIBUTE_VALUE: "Attribute value must be a string or expression.",
   VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
     "Can only define one visibility toggle on element.",
-  REF_ALREADY_DEFINED: "Ref already defined on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
-  PROPS_ALREADY_DEFINED: "Props already defined on element.",
   NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT: "Nested component not allowed on root element.",
   NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
   NO_ATTRIBUTES_ON_NESTED_CLASS: "Attributes not allowed on nested class elements.",
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
+  SPECIFY_EITHER_VALUE_OR_QUALIFIER: (name: string) =>
+    `Specify either value: ${name}="xyz" or qualifier: ${name}:xyz`,
+  PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
+    "Parts must be unique within each component.",
   REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",
   REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
   REPEAT_NOT_ALLOWED_ON_ROOT: "Repeated component not allowed on root element.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
-    "Repeat may only be used when the parent node has no other children.",
+    "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false.",
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",
   TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",
-  ILLEGAL_NAMES_IN_PROPS: (names: string[]) =>
-    `Illegal names in props: ${names
-      .map(name => `"${name}"`)
-      .join(", ")} - these are reserved for extra args.`,
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",
   ILLEGAL_XARG: (name: string) =>
     `Illegal parameter in extra args: "${name}". You are only allowed ${ALLOWED_XARGS.join(", ")}.`

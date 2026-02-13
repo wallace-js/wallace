@@ -1,22 +1,19 @@
-export enum COMPONENT_BUILD_PARAMS {
-  component = "component",
-  rootElement = "root"
-}
-
-export enum COMPONENT_METHODS {
-  render = "render",
-  getStub = "_gs"
-}
+export const HTML_SPLITTER = "____split____";
 
 export enum IMPORTABLES {
   defineComponent = "defineComponent",
+  detacher = "Detacher",
   extendComponent = "extendComponent",
   findElement = "findElement",
+  getStub = "getStub",
   nestComponent = "nestComponent",
   saveRef = "saveRef",
+  savePart = "savePart",
   stashMisc = "stashMisc",
   onEvent = "onEvent",
-  getSequentialRepeater = "getSequentialRepeater"
+  SequentialRepeater = "SequentialRepeater",
+  KeyedRepeater = "KeyedRepeater",
+  toDateString = "toDateString"
 }
 
 /**
@@ -26,11 +23,9 @@ export enum IMPORTABLES {
 export enum XARGS {
   controller = "ctrl",
   component = "self",
+  props = "props",
   event = "event",
-  element = "element",
-  // These two are allowed, they just get renamed.
-  ev = "ev",
-  el = "el"
+  element = "element"
 }
 
 export enum WATCH_CALLBACK_ARGS {
@@ -48,14 +43,31 @@ export enum WATCH_AlWAYS_CALLBACK_ARGS {
 }
 
 export enum EVENT_CALLBACK_ARGS {
-  event = XARGS.event
+  event = XARGS.event,
+  element = XARGS.element
+}
+
+export enum COMPONENT_PROPERTIES {
+  ctrl = "ctrl",
+  props = "props",
+  ref = "ref",
+  part = "part",
+  root = "el",
+  elements = "_e",
+  watchLength = "_l",
+  stash = "_s",
+  previous = "_p",
+  template = "_t",
+  watches = "_w",
+  render = "render",
+  tmpThis = "_this",
+  update = "update",
+  updateInner = "_u"
 }
 
 export enum SPECIAL_SYMBOLS {
-  objectStash = "_s",
   noLookup = "__",
-  patch = "patch",
-  ctrl = "ctrl"
+  patch = "patch"
 }
 
 export const DOM_EVENTS = [
@@ -150,4 +162,4 @@ export const DOM_EVENTS = [
 ];
 
 export const DOM_EVENTS_LOWERCASE = DOM_EVENTS.map(e => e.toLowerCase());
-export const DOM_EVENT_HANDLERS = DOM_EVENTS.map(e => `on${e}`);
+export const DOM_EVENT_HANDLERS = DOM_EVENTS_LOWERCASE.map(e => `on${e}`);
