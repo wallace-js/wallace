@@ -28,7 +28,7 @@ export interface RepeatInstruction {
   expression: Expression;
   componentCls: string;
   repeatKey: Expression | string | undefined;
-  // poolExpression: Expression | undefined;
+  poolExpression?: Expression;
 }
 
 interface EventListener {
@@ -71,6 +71,7 @@ export class ExtractedNode {
   isRepeatedComponent: boolean = false;
   repeatNode?: ExtractedNode;
   repeatKey: Expression | string | undefined;
+  repeatPool?: Expression;
   address: Array<number>;
   initialIndex: number;
   path: NodePath<ValidElementType>;
@@ -212,6 +213,9 @@ export class ExtractedNode {
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
   }
+  setRepeatPool(expression: Expression) {
+    this.repeatPool = expression;
+  }
   /**
    * Called on the parent of a repeat.
    */
@@ -220,8 +224,8 @@ export class ExtractedNode {
       return {
         expression: this.#repeatExpression,
         componentCls: this.tagName,
-        repeatKey: this.repeatKey
-        // poolExpression: this.repeatNode.poolExpression
+        repeatKey: this.repeatKey,
+        poolExpression: this.repeatPool
       };
     }
   }

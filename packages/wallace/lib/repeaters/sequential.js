@@ -6,14 +6,19 @@ import { countOffset } from "../offsetter";
  * COMPILER_MODS:
  *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
-export function SequentialRepeater(componentDefinition, adjustmentTracker, initialIndex) {
-  this.def = componentDefinition;
+export function SequentialRepeater(
+  componentDefinition,
+  pool,
+  adjustmentTracker,
+  initialIndex
+) {
+  this.d = componentDefinition;
+  this.p = pool; // pool of component instances. Must be an Array.
+  this.c = 0; // Child count
   if (wallaceConfig.flags.allowRepeaterSiblings) {
-    this.at = adjustmentTracker;
-    this.ii = initialIndex;
+    this.a = adjustmentTracker;
+    this.i = initialIndex;
   }
-  this.pool = []; // pool of component instances
-  this.cc = 0; // Child count
 }
 
 /**
@@ -25,21 +30,24 @@ export function SequentialRepeater(componentDefinition, adjustmentTracker, initi
  * @param {any} ctrl - The parent item's controller.
  */
 SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
-  const pool = this.pool,
-    componentDefinition = this.def,
-    childNodes = parent.childNodes,
+  const pool = this.p,
+    componentDefinition = this.d,
+    previousChildCount = this.c,
     itemsLength = items.length,
-    previousChildCount = this.cc,
-    initialIndex = this.ii,
-    adjustmentTracker = this.at;
+    childNodes = parent.childNodes;
+
   let i = 0,
     offset = 0,
     component,
     nextElement,
+    initialIndex,
+    adjustmentTracker,
     endOfRange = previousChildCount,
     poolCount = pool.length;
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
+    initialIndex = this.i;
+    adjustmentTracker = this.a;
     if (adjustmentTracker) {
       // The repeat element has siblings
       offset = countOffset(adjustmentTracker, initialIndex);
@@ -61,7 +69,7 @@ SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
     }
     i++;
   }
-  this.cc = itemsLength;
+  this.c = itemsLength;
 
   let removeAtIndex = offset + previousChildCount - 1;
   const stopatIndex = offset + itemsLength - 1;
