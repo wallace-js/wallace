@@ -6,18 +6,24 @@ import { countOffset } from "../offsetter";
  * COMPILER_MODS:
  *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
-export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initialIndex) {
-  this.def = componentDefinition;
-  if (wallaceConfig.flags.allowRepeaterSiblings) {
-    this.at = adjustmentTracker;
-    this.ii = initialIndex;
-  }
-  this.keys = []; // array of keys as last set.
-  this.pool = {}; // pool of component instances.
+export function KeyedRepeater(
+  componentDefinition,
+  pool,
+  key,
+  adjustmentTracker,
+  initialIndex
+) {
+  this.d = componentDefinition;
+  this.k = []; // array of keys as last set.
+  this.p = pool; // pool of component instances. Must be a Map.
   if (typeof key === "function") {
-    this.kf = key;
+    this.f = key;
   } else {
-    this.kn = key;
+    this.n = key;
+  }
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    this.a = adjustmentTracker;
+    this.i = initialIndex;
   }
 }
 
@@ -30,24 +36,25 @@ export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initi
  * @param {any} ctrl - The parent item's controller.
  */
 KeyedRepeater.prototype.patch = function (e, items, ctrl) {
-  const pool = this.pool,
-    componentDefinition = this.def,
-    keyName = this.kn,
-    keyFn = this.kf,
+  const pool = this.p,
+    componentDefinition = this.d,
+    keyName = this.n,
+    keyFn = this.f,
+    useKeyName = keyName !== undefined,
     childNodes = e.childNodes,
     itemsLength = items.length,
-    previousKeys = this.keys,
+    previousKeys = this.k,
     previousKeysLength = previousKeys.length,
     newKeys = [],
     previousKeysSet = new Set(previousKeys),
-    adjustmentTracker = this.at,
-    initialIndex = this.ii,
     frag = document.createDocumentFragment();
 
   let item,
     el,
     itemKey,
     component,
+    initialIndex,
+    adjustmentTracker,
     endAnchor = null,
     adjustment = 0,
     anchor = null,
@@ -58,6 +65,8 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     i = itemsLength - 1;
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
+    adjustmentTracker = this.a;
+    initialIndex = this.i;
     if (adjustmentTracker) {
       adjustment = countOffset(adjustmentTracker, initialIndex);
       endAnchor = childNodes[previousKeysLength + adjustment] || null;
@@ -69,8 +78,11 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   // Working backwards saves us having to track moves.
   while (i >= 0) {
     item = items[i];
-    itemKey = keyName ? item[keyName] : keyFn(item);
-    component = pool[itemKey] || (pool[itemKey] = new componentDefinition());
+    itemKey = useKeyName ? item[keyName] : keyFn(item);
+    if (!(component = pool.get(itemKey))) {
+      component = new componentDefinition();
+      pool.set(itemKey, component);
+    }
     component.render(item, ctrl);
     el = component.el;
     if (untouched && !previousKeysSet.has(itemKey)) {
@@ -100,7 +112,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
     toStrip--;
   }
 
-  this.keys = newKeys.reverse();
+  this.k = newKeys.reverse();
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
     if (adjustmentTracker) {

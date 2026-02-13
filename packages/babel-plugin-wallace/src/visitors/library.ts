@@ -119,7 +119,6 @@ export const removeRepeaterDetacherParams = {
     if (path.node.id?.name?.endsWith("Repeater")) {
       path.node.params.pop();
       path.node.params.pop();
-      console.log(path.node);
     }
   }
 };

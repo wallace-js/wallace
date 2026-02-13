@@ -190,7 +190,7 @@ class KeyDirective extends Directive {
     /h <Foo.repeat props={} key="id"></div>
     If specifying a key, you may not specify a pool.
     `;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setRepeatKey(value.expression || value.value);
   }
 }
@@ -228,6 +228,16 @@ class PartDirective extends Directive {
   apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
     node.setPart(qualifier);
+  }
+}
+
+class PoolDirective extends Directive {
+  static attributeName = "pool";
+  static allowOnRepeated = true;
+  static allowOnNested = false;
+  static allowOnNormalElement = false;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.setRepeatPool(value.expression);
   }
 }
 
@@ -348,6 +358,7 @@ export const builtinDirectives = [
   KeyDirective,
   OnEventDirective,
   PartDirective,
+  PoolDirective,
   PropsDirective,
   RefDirective,
   ShowDirective,

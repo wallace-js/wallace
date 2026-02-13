@@ -397,6 +397,9 @@ function processRepeater(
   let repeaterClass;
   const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
   if (repeatInstruction.repeatKey) {
+    repeaterArgs.push(
+      repeatInstruction.poolExpression || t.newExpression(t.identifier("Map"), [])
+    );
     repeaterClass = IMPORTABLES.KeyedRepeater;
     if (typeof repeatInstruction.repeatKey === "string") {
       repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
@@ -404,6 +407,10 @@ function processRepeater(
       repeaterArgs.push(repeatInstruction.repeatKey);
     }
   } else {
+    if (repeatInstruction.poolExpression) {
+      error(node.path, ERROR_MESSAGES.POOL_EXPRESSION_WITHOUT_REPEAT_KEY);
+    }
+    repeaterArgs.push(t.arrayExpression());
     repeaterClass = IMPORTABLES.SequentialRepeater;
   }
   componentDefinition.component.module.requireImport(repeaterClass);
