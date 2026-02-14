@@ -8,7 +8,12 @@ import {
   numericLiteral
 } from "@babel/types";
 import { Component, ExtractedNode, Module } from "../models";
-import { COMPONENT_PROPERTIES, IMPORTABLES, WATCH_CALLBACK_ARGS } from "../constants";
+import {
+  COMPONENT_PROPERTIES,
+  IMPORTABLES,
+  WATCH_CALLBACK_ARGS,
+  WATCH_AlWAYS_CALLBACK_ARGS
+} from "../constants";
 import { NodeAddress } from "./types";
 
 export function getSiblings(node: ExtractedNode, allNodes: Array<ExtractedNode>) {
@@ -106,8 +111,10 @@ export function buildWatchCallbackParams(component: Component, noLookup: boolean
   return noLookup
     ? [
         identifier(WATCH_CALLBACK_ARGS.element),
+        // We use these as there may have been renames - but should we?
         component.propsIdentifier,
-        component.componentIdentifier
+        component.componentIdentifier,
+        identifier(WATCH_AlWAYS_CALLBACK_ARGS.stash)
       ]
     : [
         identifier(WATCH_CALLBACK_ARGS.element),

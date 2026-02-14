@@ -6,16 +6,9 @@ import { countOffset } from "../offsetter";
  * COMPILER_MODS:
  *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
-export function KeyedRepeater(
-  componentDefinition,
-  pool,
-  key,
-  adjustmentTracker,
-  initialIndex
-) {
+export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initialIndex) {
   this.d = componentDefinition;
   this.k = []; // array of keys as last set.
-  this.p = pool; // pool of component instances. Must be a Map.
   if (typeof key === "function") {
     this.f = key;
   } else {
@@ -31,17 +24,17 @@ export function KeyedRepeater(
  * Updates the element's childNodes to match the items.
  * Performance is important.
  *
- * @param {DOMElement} e - The DOM element to patch.
+ * @param {DOMElement} parent - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
+ * @param {Map} pool - pool of component instances.
  * @param {any} ctrl - The parent item's controller.
  */
-KeyedRepeater.prototype.patch = function (e, items, ctrl) {
-  const pool = this.p,
-    componentDefinition = this.d,
+KeyedRepeater.prototype.patch = function (parent, items, pool, ctrl) {
+  const componentDefinition = this.d,
     keyName = this.n,
     keyFn = this.f,
     useKeyName = keyName !== undefined,
-    childNodes = e.childNodes,
+    childNodes = parent.childNodes,
     itemsLength = items.length,
     previousKeys = this.k,
     previousKeysLength = previousKeys.length,
@@ -92,7 +85,7 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
       offset++;
     } else {
       if (itemKey !== previousKeys[i + offset]) {
-        e.insertBefore(el, anchor);
+        parent.insertBefore(el, anchor);
         untouched = false;
       }
       anchor = el;
@@ -103,12 +96,12 @@ KeyedRepeater.prototype.patch = function (e, items, ctrl) {
   }
 
   if (append) {
-    e.insertBefore(frag, endAnchor);
+    parent.insertBefore(frag, endAnchor);
   }
 
   let toStrip = previousKeysSet.size;
   while (toStrip > 0) {
-    e.removeChild(childNodes[adjustment]);
+    parent.removeChild(childNodes[adjustment]);
     toStrip--;
   }
 

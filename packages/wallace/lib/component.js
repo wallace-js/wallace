@@ -35,7 +35,8 @@ const ComponentPrototype = {
     const watches = this._w,
       props = this.props,
       previous = this._p,
-      elements = this._e;
+      elements = this._e,
+      stash = this._s;
     /*
       Watches is an array of objects with keys:
         e: the element index (number)
@@ -61,7 +62,7 @@ const ComponentPrototype = {
         shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
         detacher = displayToggle.d;
         if (detacher) {
-          detacher.apply(element, shouldBeVisible, elements, this._s);
+          detacher.apply(element, shouldBeVisible, elements, stash);
         } else {
           element.hidden = !shouldBeVisible;
         }
@@ -74,7 +75,7 @@ const ComponentPrototype = {
           callbacks = watch.c;
         for (let key in callbacks) {
           if (key === NO_LOOKUP) {
-            callbacks[key](element, props, this);
+            callbacks[key](element, props, this, stash);
           } else {
             const oldValue = prev[key],
               newValue = this._q[key](props, this);
