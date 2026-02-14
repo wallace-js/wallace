@@ -397,9 +397,6 @@ function processRepeater(
   let repeaterClass;
   const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
   if (repeatInstruction.repeatKey) {
-    repeaterArgs.push(
-      repeatInstruction.poolExpression || t.newExpression(t.identifier("Map"), [])
-    );
     repeaterClass = IMPORTABLES.KeyedRepeater;
     if (typeof repeatInstruction.repeatKey === "string") {
       repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
@@ -410,7 +407,6 @@ function processRepeater(
     if (repeatInstruction.poolExpression) {
       error(node.path, ERROR_MESSAGES.POOL_EXPRESSION_WITHOUT_REPEAT_KEY);
     }
-    repeaterArgs.push(t.arrayExpression());
     repeaterClass = IMPORTABLES.SequentialRepeater;
   }
   componentDefinition.component.module.requireImport(repeaterClass);
@@ -423,9 +419,26 @@ function processRepeater(
   const stashKey = componentDefinition.stashItem(
     newExpression(identifier(repeaterClass), repeaterArgs)
   );
+
+  let poolStashKey;
+  if (!repeatInstruction.poolExpression) {
+    poolStashKey = componentDefinition.stashItem(
+      repeatInstruction.repeatKey
+        ? t.newExpression(t.identifier("Map"), [])
+        : t.arrayExpression()
+    );
+  }
+  const poolArg =
+    repeatInstruction.poolExpression ||
+    memberExpression(
+      identifier(WATCH_AlWAYS_CALLBACK_ARGS.stash),
+      numericLiteral(poolStashKey),
+      true
+    );
   const callbackArgs = [
     identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-    repeatInstruction.expression
+    repeatInstruction.expression,
+    poolArg
   ];
   if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, component));
@@ -435,10 +448,7 @@ function processRepeater(
       callExpression(
         memberExpression(
           memberExpression(
-            memberExpression(
-              component.componentIdentifier,
-              identifier(COMPONENT_PROPERTIES.stash)
-            ),
+            identifier(WATCH_AlWAYS_CALLBACK_ARGS.stash),
             numericLiteral(stashKey),
             true
           ),

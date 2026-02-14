@@ -6,14 +6,8 @@ import { countOffset } from "../offsetter";
  * COMPILER_MODS:
  *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
-export function SequentialRepeater(
-  componentDefinition,
-  pool,
-  adjustmentTracker,
-  initialIndex
-) {
+export function SequentialRepeater(componentDefinition, adjustmentTracker, initialIndex) {
   this.d = componentDefinition;
-  this.p = pool; // pool of component instances. Must be an Array.
   this.c = 0; // Child count
   if (wallaceConfig.flags.allowRepeaterSiblings) {
     this.a = adjustmentTracker;
@@ -27,11 +21,11 @@ export function SequentialRepeater(
  *
  * @param {DOMElement} parent - The DOM element to patch.
  * @param {Array} items - Array of items which will be passed as props.
+ * @param {Array} pool -  pool of component instances.
  * @param {any} ctrl - The parent item's controller.
  */
-SequentialRepeater.prototype.patch = function (parent, items, ctrl) {
-  const pool = this.p,
-    componentDefinition = this.d,
+SequentialRepeater.prototype.patch = function (parent, items, pool, ctrl) {
+  const componentDefinition = this.d,
     previousChildCount = this.c,
     itemsLength = items.length,
     childNodes = parent.childNodes;

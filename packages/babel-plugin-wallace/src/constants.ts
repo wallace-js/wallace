@@ -38,8 +38,10 @@ export enum WATCH_CALLBACK_ARGS {
 
 export enum WATCH_AlWAYS_CALLBACK_ARGS {
   element = XARGS.element,
-  props = "p",
-  component = "c"
+  // We use the component-specific instances as they may get renamed.
+  // props = "props",
+  // component = "component",
+  stash = "stash"
 }
 
 export enum EVENT_CALLBACK_ARGS {
