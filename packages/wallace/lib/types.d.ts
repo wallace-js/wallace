@@ -525,12 +525,13 @@ watchedObj[0] = 'foo';  // throws error.
 You can toggle flags in your babel config to disable certain features for cutting edge
 performance and bundle size:
 
-1.  allowBase - enables use of `base` in components.
-2.  allowCtrl - enables use of `ctrl` in components.
-3.  allowMethods - adds the `methods` helper to components.
-4.  allowParts  - enables use of parts.
-5.  allowRepeaterSiblings - allows repeaters to have siblings.
-6.  allowStubs - enables the use of stubs.
+1.  `allowBase` - allows use of `base` in components.
+2.  `allowCtrl` - allows use of `ctrl` in components.
+3.  `allowDismount` - allows components to handle dismounting.
+4.  `allowMethods` - allows use of `methods` helper to components.
+5.  `allowParts` - allows use of parts.
+6.  `allowRepeaterSiblings` - allows repeaters to have siblings.
+7.  `allowStubs` - allows use of stubs.
 
 These flags default to true, unless you specify `flags` in the plugin config, in which
 case they default to false and you need to explicitly enable those you want:

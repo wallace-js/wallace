@@ -129,11 +129,12 @@ Then configure your bundler to apply those to jsx/tsx files. The [examples](http
 You can toggle flags in your babel config to disable certain features for cutting edge performance and bundle size:
 
 1.  `allowBase` - allows use of `base` in components.
-2.  `useControllers` - allows use of `ctrl` in components.
-3.  `allowMethods` - allows use of `methods` helper to components.
-4.  `allowParts` - allows use of parts.
-5.  `allowRepeaterSiblings` - allows repeaters to have siblings.
-6.  `allowStubs` - allows use of stubs.
+2.  `allowCtrl` - allows use of `ctrl` in components.
+3.  `allowDismount` - allows components to handle dismounting.
+4.  `allowMethods` - allows use of `methods` helper to components.
+5.  `allowParts` - allows use of parts.
+6.  `allowRepeaterSiblings` - allows repeaters to have siblings.
+7.  `allowStubs` - allows use of stubs.
 
 These flags default to true, unless you specify `flags` in the plugin config, in which case they default to false and you need to explicitly enable those you want. This helps you identify those you don't need to set:
 
@@ -144,7 +145,7 @@ module.exports = {
       "babel-plugin-wallace",
       {
         flags: {
-          useControllers: true,
+          allowCtrl: true,
           allowStubs: false
         },
       }

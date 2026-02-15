@@ -6,6 +6,7 @@ import { builtinDirectives } from "./directives";
 export enum FlagValue {
   allowBase = "allowBase",
   allowCtrl = "allowCtrl",
+  allowDismount = "allowDismount",
   allowMethods = "allowMethods",
   allowParts = "allowParts",
   allowRepeaterSiblings = "allowRepeaterSiblings",
@@ -22,6 +23,7 @@ interface WallaceOptions {
 const DefaultFlagValues: Flag = {
   allowBase: true,
   allowCtrl: true,
+  allowDismount: true,
   allowMethods: true,
   allowParts: true,
   allowRepeaterSiblings: true,
@@ -31,6 +33,7 @@ const DefaultFlagValues: Flag = {
 const DefaultFlagOverrideValues: Flag = {
   allowBase: false,
   allowCtrl: false,
+  allowDismount: false,
   allowMethods: false,
   allowParts: false,
   allowRepeaterSiblings: false,

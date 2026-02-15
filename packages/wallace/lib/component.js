@@ -4,7 +4,7 @@ const NO_LOOKUP = "__";
 const ComponentPrototype = {
   /*
   COMPILER_MODS:
-    if useController is false:
+    if allowController is false:
      - param `ctrl` is removed.
      - `this.ctrl = ctrl` is removed.
   */
@@ -16,7 +16,7 @@ const ComponentPrototype = {
 
   /*
   COMPILER_MODS:
-    if useFlags is false this is deleted, so `_u` can be renamed to `update`.
+    if allowParts is false this is deleted, so `_u` can be renamed to `update`.
   */
   update: function () {
     this._u(0, this._l);
@@ -24,7 +24,7 @@ const ComponentPrototype = {
 
   /*
   COMPILER_MODS:
-  if useFlags is false:
+  if allowParts is false:
     - gets renamed to `update`
     - parameters are removed
     - add `i = 0, il = this._l` to variable declarator.
