@@ -64,7 +64,7 @@ const ComponentPrototype = {
         if (detacher) {
           detacher.apply(element, shouldBeVisible, elements, stash);
         } else {
-          element.hidden = !shouldBeVisible;
+          (element.el || element).hidden = !shouldBeVisible;
         }
         if (!shouldBeVisible) {
           i += displayToggle.s;
@@ -90,12 +90,6 @@ const ComponentPrototype = {
     }
   }
 };
-
-Object.defineProperty(ComponentPrototype, "hidden", {
-  set: function (value) {
-    this.el.hidden = value;
-  }
-});
 
 const ComponentBase = {
   prototype: ComponentPrototype
@@ -157,6 +151,7 @@ export const defineComponent = (html, watches, queries, contructor, inheritFrom)
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;
+  proto._c = []; // The component cache.
   if (wallaceConfig.flags.allowBase) {
     proto.base = ComponentPrototype;
   } else {
