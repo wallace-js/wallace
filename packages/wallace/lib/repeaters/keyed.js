@@ -2,13 +2,15 @@ import { countOffset } from "../offsetter";
 
 /**
  * Repeats nested components, reusing items based on key.
- *
- * COMPILER_MODS:
- *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
-export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initialIndex) {
+export function KeyedRepeater(
+  componentDefinition,
+  key,
+  /* #INCLUDE-IF: allowRepeaterSiblings */ adjustmentTracker,
+  /* #INCLUDE-IF: allowRepeaterSiblings */ initialIndex
+) {
   this.d = componentDefinition;
-  this.s = componentDefinition.prototype._c;
+  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.prototype._c;
   this.p = new Map();
   this.k = []; // array of keys as last set.
   if (typeof key === "function") {
@@ -16,10 +18,8 @@ export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initi
   } else {
     this.n = key;
   }
-  if (wallaceConfig.flags.allowRepeaterSiblings) {
-    this.a = adjustmentTracker;
-    this.i = initialIndex;
-  }
+  /* #INCLUDE-IF: allowRepeaterSiblings */ this.a = adjustmentTracker;
+  /* #INCLUDE-IF: allowRepeaterSiblings */ this.i = initialIndex;
 }
 
 /**
@@ -34,7 +34,7 @@ export function KeyedRepeater(componentDefinition, key, adjustmentTracker, initi
 KeyedRepeater.prototype = {
   patch: function (parent, items, ctrl) {
     const componentDefinition = this.d,
-      sharedPool = this.s,
+      /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       ownPool = this.p,
       keyName = this.n,
       keyFn = this.f,
@@ -78,7 +78,11 @@ KeyedRepeater.prototype = {
       item = items[i];
       itemKey = useKeyName ? item[keyName] : keyFn(item);
       if (!(component = ownPool.get(itemKey))) {
-        component = sharedPool.pop() || new componentDefinition();
+        if (wallaceConfig.flags.allowDismount) {
+          component = sharedPool.pop() || new componentDefinition();
+        } else {
+          component = new componentDefinition();
+        }
         ownPool.set(itemKey, component);
       }
       component.render(item, ctrl);
@@ -112,21 +116,22 @@ KeyedRepeater.prototype = {
 
     this.k = newKeys.reverse();
 
-    if (wallaceConfig.flags.allowRepeaterSiblings) {
-      if (offsetTracker) {
-        offsetTracker.set(initialIndex, itemsLength - 1);
-      }
+    /* #INCLUDE-IF: allowRepeaterSiblings */
+    if (offsetTracker) {
+      offsetTracker.set(initialIndex, itemsLength - 1);
     }
 
+    /* #INCLUDE-IF: allowDismount */
     for (const keyToRemove of previousKeysSet) {
       ownPool.get(keyToRemove).dismount();
       ownPool.delete(keyToRemove);
     }
   },
-  dismount: function () {
-    for (const [key, value] of this.p.entries()) {
+  /* #INCLUDE-IF: allowDismount */ dismount: function () {
+    const pool = this.p;
+    for (const [key, value] of pool.entries()) {
       value.dismount();
     }
-    this.p.clear();
+    pool.clear();
   }
 };

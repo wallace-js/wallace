@@ -1,4 +1,6 @@
-/* These visitors should only run on the wallace/lib source files. */
+/**
+ * These visitors should only run on the wallace source files and tests.
+ * */
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type {
@@ -17,19 +19,13 @@ import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES } from "../constants";
 
 export const flagVisitor = {
-  // Expression(path: NodePath<Expression>) {
-  //   if (path.node.leadingComments) {
-  //     console.log(path.node.leadingComments);
-  //   }
-  // },
-  // Identifier(path: NodePath<Identifier>) {
-  //   if (path.node.leadingComments) {
-  //     console.log("idefn", path.node.leadingComments);
-  //   }
-  // },
-  // ObjectProperty(path: NodePath<ObjectProperty>) {
-
-  // },
+  /**
+   * Conditionally removes statement/expressions/identifiers etc...
+   * based on leading comments:
+   *
+   *   #INCLUDE-IF: allowCtrl
+   *   #EXCLUDE-IF: allowCtrl
+   */
   enter(path: NodePath) {
     const leadingComments = path.node.leadingComments;
     if (!leadingComments || leadingComments.length === 0) return;
