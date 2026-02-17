@@ -118,12 +118,10 @@ if (wallaceConfig.flags.allowBase) {
           <div class="page" ref:div></div>
         </div>
       ));
-      MyRouter.methods = {
-        mount(component) {
-          const div = this.ref.div;
-          div.innerHTML = "";
-          div.appendChild(component.el);
-        }
+      MyRouter.prototype.mount = function (component) {
+        const div = this.ref.div;
+        div.innerHTML = "";
+        div.appendChild(component.el);
       };
 
       const props = {

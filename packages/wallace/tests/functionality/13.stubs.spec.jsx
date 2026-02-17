@@ -1,7 +1,7 @@
 import { testMount } from "../utils";
 import { extendComponent } from "wallace";
 
-if (wallaceConfig.flags.allowRepeaterSiblings) {
+if (wallaceConfig.flags.allowStubs) {
   describe("Defining stubs", () => {
     test("is not allowed on root ", () => {
       const code = `

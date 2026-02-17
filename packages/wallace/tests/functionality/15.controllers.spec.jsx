@@ -68,41 +68,43 @@ if (wallaceConfig.flags.allowCtrl) {
     });
   });
 
-  describe("Inherited component", () => {
-    const BaseComponent = ({}, { ctrl }) => (
-      <div>
-        <span>{ctrl.multiply(1)}</span>
-        <stub:display />
-      </div>
-    );
-    const SubComponent = extendComponent(BaseComponent);
-    SubComponent.stubs.display = (_, { ctrl }) => <span>{ctrl.multiply(2)}</span>;
-    SubComponent.prototype.render = function () {
-      this.ctrl = new Controller(2);
-      this.update();
-    };
-    const component = testMount(SubComponent);
+  if (wallaceConfig.flags.allowStubs) {
+    describe("Inherited component", () => {
+      const BaseComponent = ({}, { ctrl }) => (
+        <div>
+          <span>{ctrl.multiply(1)}</span>
+          <stub:display />
+        </div>
+      );
+      const SubComponent = extendComponent(BaseComponent);
+      SubComponent.stubs.display = (_, { ctrl }) => <span>{ctrl.multiply(2)}</span>;
+      SubComponent.prototype.render = function () {
+        this.ctrl = new Controller(2);
+        this.update();
+      };
+      const component = testMount(SubComponent);
 
-    test("has its controller set initially", () => {
-      expect(component).toRender(`
+      test("has its controller set initially", () => {
+        expect(component).toRender(`
       <div>
         <span>2</span>
         <span>4</span>
       </div>
     `);
-    });
+      });
 
-    test("has its controller updated", () => {
-      component.ctrl = new Controller(3);
-      component.update();
-      expect(component).toRender(`
+      test("has its controller updated", () => {
+        component.ctrl = new Controller(3);
+        component.update();
+        expect(component).toRender(`
       <div>
         <span>3</span>
         <span>6</span>
       </div>
     `);
+      });
     });
-  });
+  }
 
   test("Can pass controller in mount", () => {
     const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;

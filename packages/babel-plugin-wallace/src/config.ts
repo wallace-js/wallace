@@ -44,6 +44,9 @@ class WallaceConfig {
   directives: { [key: string]: typeof Directive } = {};
   flags: Flag;
   #loaded: boolean = false;
+  allFLags(): string[] {
+    return Object.keys(DefaultFlagValues);
+  }
   applyOptions(options: WallaceOptions) {
     if (this.#loaded) {
       return;

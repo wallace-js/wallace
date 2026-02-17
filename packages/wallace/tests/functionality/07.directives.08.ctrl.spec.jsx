@@ -8,7 +8,7 @@ if (wallaceConfig.flags.allowCtrl) {
         <Fox.nest ctrl={self.foxCtrl} />
       </div>
     );
-    AnimalList.methods.render = function (props) {
+    AnimalList.prototype.render = function (props) {
       this.props = props;
       this.foxCtrl = 6;
       this.update();
@@ -29,7 +29,7 @@ if (wallaceConfig.flags.allowCtrl) {
         <Animal.repeat items={animals} ctrl={self.tmpCtrl} />
       </div>
     );
-    AnimalList.methods.render = function (props) {
+    AnimalList.prototype.render = function (props) {
       this.props = props;
       this.tmpCtrl = 6;
       this.update();

@@ -1,4 +1,6 @@
-if (wallaceConfig.flags.allowBase) {
+import { testMount } from "../utils";
+
+if (wallaceConfig.flags.allowMethods) {
   describe("The methods property", () => {
     test("allows us to override an existing method by name", () => {
       const Foo = (_, { self }) => <div>{self.name}</div>;

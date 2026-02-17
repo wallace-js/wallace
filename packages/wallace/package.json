@@ -12,9 +12,7 @@
   "sideEffects": false,
   "types": "./lib/types.d.ts",
   "scripts": {
-    "test": "npm run test:with-flags && npm run test:without-flags",
-    "test:with-flags": "jest --clearCache && jest",
-    "test:without-flags": "jest --clearCache && ALL_FLAGS_OFF=1 jest"
+    "test": "jest --clearCache && jest"
   },
   "dependencies": {
     "babel-plugin-wallace": "^0.14.1",
