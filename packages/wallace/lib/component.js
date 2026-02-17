@@ -2,15 +2,9 @@ const throwAway = document.createElement("template");
 const NO_LOOKUP = "__";
 
 const ComponentPrototype = {
-  /*
-  COMPILER_MODS:
-    if allowController is false:
-     - param `ctrl` is removed.
-     - `this.ctrl = ctrl` is removed.
-  */
-  render: function (props, ctrl) {
+  render: function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     this.props = props;
-    this.ctrl = ctrl;
+    /* #INCLUDE-IF: allowCtrl */ this.ctrl = ctrl;
     this.update();
   },
 
@@ -89,22 +83,22 @@ const ComponentPrototype = {
       i++;
     }
   },
-  dismount: function () {
+  /* #INCLUDE-IF: allowDismount */ dismount: function () {
     this._c.push(this);
-    const stash = this._s;
-    for (const key of this._d) {
-      stash[key].dismount();
+    let i = 0,
+      stash = this._s,
+      dismountKeys = this._d;
+    while (i < dismountKeys.length) {
+      stash[dismountKeys[i]].dismount();
+      i++;
     }
   }
 };
 
 const ComponentBase = {
-  prototype: ComponentPrototype
+  prototype: ComponentPrototype,
+  /* #INCLUDE-IF: allowStubs */ stubs: {}
 };
-
-if (wallaceConfig.flags.allowStubs) {
-  ComponentBase.stubs = {};
-}
 
 /**
  *
@@ -129,7 +123,7 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
     });
   } else {
     if (process.env.NODE_ENV !== "production") {
-      Object.defineProperty(ComponentFunction, "name", {
+      Object.defineProperty(ComponentFunction, "methods", {
         set: function (value) {
           throw new Error(
             'Flag "allowMethods" must be set to true in the config for this feature.'
@@ -144,9 +138,8 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
     }
   }
 
-  if (wallaceConfig.flags.allowStubs) {
-    ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
-  }
+  /* #INCLUDE-IF: allowStubs */
+  ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
 
   return ComponentFunction;
 };

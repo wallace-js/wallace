@@ -2,34 +2,28 @@ import { countOffset } from "../offsetter";
 
 /**
  * Repeats nested components, yielding from the pool sequentially.
- *
- * COMPILER_MODS:
- *   if allowRepeaterSiblings is false the last two parameters are removed.
  */
-export function SequentialRepeater(componentDefinition, adjustmentTracker, initialIndex) {
+export function SequentialRepeater(
+  componentDefinition,
+  /* #INCLUDE-IF: allowRepeaterSiblings */ adjustmentTracker,
+  /* #INCLUDE-IF: allowRepeaterSiblings */ initialIndex
+) {
   this.d = componentDefinition;
-  this.s = componentDefinition.prototype._c;
+  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.prototype._c;
   this.p = [];
   this.c = 0; // Child count
-  if (wallaceConfig.flags.allowRepeaterSiblings) {
-    this.a = adjustmentTracker;
-    this.i = initialIndex;
-  }
+  /* #INCLUDE-IF: allowRepeaterSiblings */ this.a = adjustmentTracker;
+  /* #INCLUDE-IF: allowRepeaterSiblings */ this.i = initialIndex;
 }
 
 /**
  * Updates the element's childNodes to match the items.
  * Performance is important.
- *
- * @param {DOMElement} parent - The DOM element to patch.
- * @param {Array} items - Array of items which will be passed as props.
- * @param {Array} sharedPool - the shared pool on the component.
- * @param {any} ctrl - The parent item's controller.
  */
 SequentialRepeater.prototype = {
-  patch: function (parent, items, ctrl) {
+  patch: function (parent, items, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     const componentDefinition = this.d,
-      sharedPool = this.s,
+      /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       previousChildCount = this.c,
       pool = this.p,
       itemsLength = items.length,
@@ -59,11 +53,15 @@ SequentialRepeater.prototype = {
       if (i < poolCount) {
         component = pool[i];
       } else {
-        component = sharedPool.pop() || new componentDefinition();
+        if (wallaceConfig.flags.allowDismount) {
+          component = sharedPool.pop() || new componentDefinition();
+        } else {
+          component = new componentDefinition();
+        }
         pool.push(component);
         poolCount++;
       }
-      component.render(items[i], ctrl);
+      component.render(items[i], /* #INCLUDE-IF: allowCtrl */ ctrl);
       if (i >= previousChildCount) {
         parent.insertBefore(component.el, nextElement);
       }
@@ -77,26 +75,24 @@ SequentialRepeater.prototype = {
       parent.removeChild(childNodes[i]);
     }
 
-    if (wallaceConfig.flags.allowRepeaterSiblings) {
-      if (offsetTracker) {
-        offsetTracker.set(initialIndex, itemsLength - 1);
-      }
+    /* #INCLUDE-IF: allowRepeaterSiblings */
+    if (offsetTracker) {
+      offsetTracker.set(initialIndex, itemsLength - 1);
     }
 
-    if (wallaceConfig.flags.allowDismount) {
-      while (originalPoolCount > itemsLength) {
-        pool.pop().dismount();
-        originalPoolCount--;
-      }
+    /* #INCLUDE-IF: allowDismount */
+    while (originalPoolCount > itemsLength) {
+      pool.pop().dismount();
+      originalPoolCount--;
     }
   },
-  dismount: function () {
+  /* #INCLUDE-IF: allowDismount */ dismount: function () {
     let pool = this.p,
       poolCount = pool.length;
     while (poolCount > 0) {
       pool.pop().dismount();
       poolCount--;
     }
-    this.p.length = 0;
+    pool.length = 0;
   }
 };

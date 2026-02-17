@@ -1,4 +1,6 @@
-/* These visitors should only run on the wallace/lib source files. */
+/**
+ * These visitors should only run on the wallace source files and tests.
+ * */
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
 import type {
@@ -12,19 +14,52 @@ import type {
   VariableDeclarator,
   VariableDeclaration
 } from "@babel/types";
+import { error } from "../errors";
 import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES } from "../constants";
 
-/**
- * Very simple visitor which replaces the entire if statement with its consequent or
- * alternate.
- *
- * The test must be in this exact format:
- *
- *    if (wallaceConfig.flags.allowStubs) {}
- *
- */
 export const flagVisitor = {
+  /**
+   * Conditionally removes statement/expressions/identifiers etc...
+   * based on leading comments:
+   *
+   *   #INCLUDE-IF: allowCtrl
+   *   #EXCLUDE-IF: allowCtrl
+   *
+   * WARNING: NOT RELIABLE! It sometimes knocks out subsequent nodes, so only use on
+   * ende nodes.
+   */
+  enter(path: NodePath) {
+    const leadingComments = path.node.leadingComments;
+    if (!leadingComments || leadingComments.length === 0) return;
+
+    path.node.leadingComments.forEach(comment => {
+      const value = comment.value,
+        include = value.includes("#INCLUDE-IF:"),
+        exclude = value.includes("#EXCLUDE-IF:");
+      if (include || exclude) {
+        const flag = getFlagFromComment(path, value);
+        const flagEnabled = wallaceConfig.flags[flag];
+        if ((flagEnabled && exclude) || (!flagEnabled && include)) {
+          path.remove();
+        }
+      }
+    });
+  },
+  /**
+   * Replaces the entire if statement with its consequent or alternate:
+   *
+   * The test must be in this exact format:
+   *
+   *    if (wallaceConfig.flags.allowStubs) {
+   *      // code to keep
+   *    } else {
+   *      // code to remove (optional)
+   *    }
+   *
+   * You can't do anything more complex in the test or the conditions.
+   * There are places where this can't be used, in which case use a comment.
+   */
   IfStatement(path: NodePath<IfStatement>) {
     const test = path.node.test;
     if (t.isMemberExpression(test)) {
@@ -46,31 +81,6 @@ export const flagVisitor = {
           }
         }
       }
-    }
-  }
-};
-
-/**
- * This set of visitors removes references to `ctrl`.
- */
-export const removeCtrl = {
-  AssignmentExpression(path: NodePath<AssignmentExpression>) {
-    // @ts-ignore
-    if (path.node.right.name === "ctrl") {
-      path.remove();
-    }
-  },
-  MemberExpression(path: NodePath<MemberExpression>) {
-    // @ts-ignore
-    const name = path.node.property.name;
-    if (name === "ctrl") {
-      path.remove();
-    }
-  },
-  Identifier(path: NodePath<Identifier>) {
-    const name = path.node.name;
-    if (name === "ctrl") {
-      path.remove();
     }
   }
 };
@@ -110,15 +120,12 @@ export const flattenUpdate = {
   }
 };
 
-/**
- * Removes the last two parameters from repeaters, which aren't used.
- */
-export const removeRepeaterDetacherParams = {
-  FunctionDeclaration(path: NodePath<FunctionDeclaration>) {
-    // @ts-ignore
-    if (path.node.id?.name?.endsWith("Repeater")) {
-      path.node.params.pop();
-      path.node.params.pop();
-    }
+function getFlagFromComment(path: NodePath, comment: string): string {
+  const chunks = comment.split(":");
+  if (chunks.length !== 2) {
+    error(path, "Badly formed compiler comment");
   }
-};
+  const flag = chunks[1].trim();
+  wallaceConfig.ensureFlagIsValid(flag);
+  return flag;
+}
