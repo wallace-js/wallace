@@ -88,6 +88,13 @@ const ComponentPrototype = {
       }
       i++;
     }
+  },
+  dismount: function () {
+    this._c.push(this);
+    const stash = this._s;
+    for (const key of this._d) {
+      stash[key].dismount();
+    }
   }
 };
 
@@ -144,14 +151,22 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
   return ComponentFunction;
 };
 
-export const defineComponent = (html, watches, queries, contructor, inheritFrom) => {
+export const defineComponent = (
+  html,
+  watches,
+  queries,
+  contructor,
+  dismountKeys,
+  inheritFrom
+) => {
   const ComponentDefinition = initConstructor(contructor, inheritFrom || ComponentBase);
   const proto = ComponentDefinition.prototype;
   throwAway.innerHTML = html;
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;
-  proto._c = []; // The component cache.
+  proto._c = []; // The shared component pool.
+  proto._d = dismountKeys; // Keys of stash elements to dismount.
   if (wallaceConfig.flags.allowBase) {
     proto.base = ComponentPrototype;
   } else {
