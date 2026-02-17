@@ -25,6 +25,9 @@ export const flagVisitor = {
    *
    *   #INCLUDE-IF: allowCtrl
    *   #EXCLUDE-IF: allowCtrl
+   *
+   * WARNING: NOT RELIABLE! It sometimes knocks out subsequent nodes, so only use on
+   * ende nodes.
    */
   enter(path: NodePath) {
     const leadingComments = path.node.leadingComments;
@@ -37,8 +40,9 @@ export const flagVisitor = {
       if (include || exclude) {
         const flag = getFlagFromComment(path, value);
         const flagEnabled = wallaceConfig.flags[flag];
-        if (flagEnabled && exclude) path.remove();
-        if (!flagEnabled && include) path.remove();
+        if ((flagEnabled && exclude) || (!flagEnabled && include)) {
+          path.remove();
+        }
       }
     });
   },
@@ -82,31 +86,6 @@ export const flagVisitor = {
 };
 
 /**
- * This set of visitors removes references to `ctrl`.
- */
-export const removeCtrl = {
-  AssignmentExpression(path: NodePath<AssignmentExpression>) {
-    // @ts-ignore
-    if (path.node.right.name === "ctrl") {
-      path.remove();
-    }
-  },
-  MemberExpression(path: NodePath<MemberExpression>) {
-    // @ts-ignore
-    const name = path.node.property.name;
-    if (name === "ctrl") {
-      path.remove();
-    }
-  },
-  Identifier(path: NodePath<Identifier>) {
-    const name = path.node.name;
-    if (name === "ctrl") {
-      path.remove();
-    }
-  }
-};
-
-/**
  * This flattens the `update` and `_u` methods into one, which are
  * only separate to allow parts, as this inproves performance when
  * parts are not used.
@@ -137,19 +116,6 @@ export const flattenUpdate = {
           }
         }
       });
-    }
-  }
-};
-
-/**
- * Removes the last two parameters from repeaters, which aren't used.
- */
-export const removeRepeaterDetacherParams = {
-  FunctionDeclaration(path: NodePath<FunctionDeclaration>) {
-    // @ts-ignore
-    if (path.node.id?.name?.endsWith("Repeater")) {
-      path.node.params.pop();
-      path.node.params.pop();
     }
   }
 };

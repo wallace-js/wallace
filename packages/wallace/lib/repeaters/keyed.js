@@ -25,14 +25,9 @@ export function KeyedRepeater(
 /**
  * Updates the element's childNodes to match the items.
  * Performance is important.
- *
- * @param {DOMElement} parent - The DOM element to patch.
- * @param {Array} items - Array of items which will be passed as props.
- * @param {Array} sharedPool - the shared pool on the component.
- * @param {any} ctrl - The parent item's controller.
  */
 KeyedRepeater.prototype = {
-  patch: function (parent, items, ctrl) {
+  patch: function (parent, items, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     const componentDefinition = this.d,
       /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       ownPool = this.p,
@@ -85,7 +80,7 @@ KeyedRepeater.prototype = {
         }
         ownPool.set(itemKey, component);
       }
-      component.render(item, ctrl);
+      component.render(item, /* #INCLUDE-IF: allowCtrl */ ctrl);
       el = component.el;
       if (untouched && !previousKeysSet.has(itemKey)) {
         frag.insertBefore(el, fragAnchor);

@@ -4,12 +4,7 @@ import type { Babel } from "../babel-types";
 import { wallaceConfig } from "../config";
 import { Module } from "../models/module";
 import { programVisitors } from "./program";
-import {
-  flagVisitor,
-  flattenUpdate,
-  removeCtrl,
-  removeRepeaterDetacherParams
-} from "./library";
+import { flagVisitor, flattenUpdate } from "./library";
 
 // The general pattern involves visting high-level nodes where we instantiate models
 // which are passed to traverse calls with sets of visitors for low-level nodes,
@@ -34,14 +29,8 @@ export function wallacePlugin({ types: t }: Babel): PluginObj {
             (filename.includes("/wallace/lib/") || filename.includes("/wallace/tests/"))
           ) {
             path.traverse(flagVisitor, { module });
-            if (!wallaceConfig.flags.allowCtrl) {
-              path.traverse(removeCtrl, { module });
-            }
             if (!wallaceConfig.flags.allowParts) {
               path.traverse(flattenUpdate, { module });
-            }
-            if (!wallaceConfig.flags.allowRepeaterSiblings) {
-              path.traverse(removeRepeaterDetacherParams, { module });
             }
           }
           path.traverse(programVisitors, { module });

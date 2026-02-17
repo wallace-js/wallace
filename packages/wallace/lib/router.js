@@ -23,7 +23,7 @@ export const route = (path, componentDef, converter, cleanup) =>
 export const Router = () => <div></div>;
 
 Object.assign(Router.prototype, {
-  render(props, ctrl) {
+  render(props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     const defaultError = (error, router) => (router.el.innerHTML = error.message);
     this.error = props.error || defaultError;
     this.current = null;
@@ -33,7 +33,7 @@ Object.assign(Router.prototype, {
         this.el.setAttribute(k, props.atts[k]);
       });
     }
-    this.base.render.call(this, props, ctrl);
+    this.base.render.call(this, props, /* #INCLUDE-IF: allowCtrl */ ctrl);
   },
   async onHashChange() {
     const path = location.hash.slice(1) || "",
@@ -45,7 +45,10 @@ Object.assign(Router.prototype, {
       while (i < len) {
         let route = routes[i];
         if ((routeData = route.match(path))) {
-          const component = await route.getComponent(routeData, this.ctrl);
+          const component = await route.getComponent(
+            routeData,
+            /* #INCLUDE-IF: allowCtrl */ this.ctrl
+          );
           this.current && this.current.cleanup();
           this.mount(component);
           this.current = route;
@@ -96,12 +99,12 @@ Route.prototype = {
     }
     return { args, params: new URLSearchParams(query), url };
   },
-  async getComponent(routeData, ctrl) {
+  async getComponent(routeData, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     if (!this.component) {
       this.component = new this.def();
     }
     const props = await this._convert(routeData);
-    this.component.render(props, ctrl);
+    this.component.render(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
     return this.component;
   },
   /**

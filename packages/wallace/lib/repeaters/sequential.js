@@ -19,14 +19,9 @@ export function SequentialRepeater(
 /**
  * Updates the element's childNodes to match the items.
  * Performance is important.
- *
- * @param {DOMElement} parent - The DOM element to patch.
- * @param {Array} items - Array of items which will be passed as props.
- * @param {Array} sharedPool - the shared pool on the component.
- * @param {any} ctrl - The parent item's controller.
  */
 SequentialRepeater.prototype = {
-  patch: function (parent, items, ctrl) {
+  patch: function (parent, items, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     const componentDefinition = this.d,
       /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       previousChildCount = this.c,
@@ -66,7 +61,7 @@ SequentialRepeater.prototype = {
         pool.push(component);
         poolCount++;
       }
-      component.render(items[i], ctrl);
+      component.render(items[i], /* #INCLUDE-IF: allowCtrl */ ctrl);
       if (i >= previousChildCount) {
         parent.insertBefore(component.el, nextElement);
       }
