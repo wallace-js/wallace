@@ -7,7 +7,7 @@ on:
     branches: ["master"]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: With Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
@@ -26,3 +26,33 @@ jobs:
       - run: npm run build --if-present
       - run: npm run test:canary
       - run: npm run test
+      - run: ALL_FLAGS_OFF=1 npm run test functionality
+
+  flag-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        flags:
+          [
+            allowBase,
+            allowCtrl,
+            allowDismount,
+            allowMethods,
+            allowParts,
+            allowRepeaterSiblings,
+            allowStubs
+          ]
+        toggle: [ONE_FLAG_ON, ONE_FLAG_OFF]
+        node-version: [22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Flag  ${{ matrix.toggle }}=${{ matrix.flags }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: ${{ matrix.toggle }}=${{ matrix.flags }} npm run test functionality
