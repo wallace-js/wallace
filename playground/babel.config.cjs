@@ -10,7 +10,7 @@
 
 const { directives, flags } = require("./src/config.js");
 
-function flag(name) {
+function cmdToggle(name) {
   const value = process.env[name];
   switch (String(value).toLowerCase()) {
     case "true":
@@ -38,7 +38,7 @@ const toggles = {
 const presets = [];
 
 for (const [key, value] of Object.entries(toggles)) {
-  if (!flag(key)) {
+  if (!cmdToggle(key)) {
     presets.push(value);
   }
 }
