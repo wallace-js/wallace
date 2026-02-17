@@ -5,6 +5,12 @@ const permutations = [
   ["Keyed", 1]
 ];
 
+/* #EXCLUDE-IF: allowDismount */
+test("dummy", () => {
+  expect(true).toBe(true);
+});
+
+/* #INCLUDE-IF: allowDismount */
 describe.each(permutations)("Shared pool (%s)", (_, keyed) => {
   const Day = keyed
     ? ({ day, tasks }) => (
@@ -22,7 +28,7 @@ describe.each(permutations)("Shared pool (%s)", (_, keyed) => {
 
   const Task = ({ txt }) => <div>{txt}</div>;
 
-  // important that these are keyed/not too
+  // important that this has both permutations too, as it tests dismount cascade.
   const Week = keyed
     ? days => (
         <div>

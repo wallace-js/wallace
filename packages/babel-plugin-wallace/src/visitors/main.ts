@@ -31,7 +31,7 @@ export function wallacePlugin({ types: t }: Babel): PluginObj {
           const filename = path.hub.file.opts.filename as string;
           if (
             filename &&
-            (filename.includes("/wallace/lib/") || filename.includes("/wallace/test/"))
+            (filename.includes("/wallace/lib/") || filename.includes("/wallace/tests/"))
           ) {
             path.traverse(flagVisitor, { module });
             if (!wallaceConfig.flags.allowCtrl) {

@@ -22,7 +22,7 @@ export const route = (path, componentDef, converter, cleanup) =>
 
 export const Router = () => <div></div>;
 
-Router.methods = {
+Object.assign(Router.prototype, {
   render(props, ctrl) {
     const defaultError = (error, router) => (router.el.innerHTML = error.message);
     this.error = props.error || defaultError;
@@ -62,7 +62,7 @@ Router.methods = {
     this.el.textContent = "";
     this.el.appendChild(component.el);
   }
-};
+});
 
 export function Route(path, def, convert, cleanup) {
   this.chunks = path
