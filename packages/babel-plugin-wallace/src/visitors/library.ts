@@ -12,19 +12,54 @@ import type {
   VariableDeclarator,
   VariableDeclaration
 } from "@babel/types";
+import { error } from "../errors";
 import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES } from "../constants";
 
-/**
- * Very simple visitor which replaces the entire if statement with its consequent or
- * alternate.
- *
- * The test must be in this exact format:
- *
- *    if (wallaceConfig.flags.allowStubs) {}
- *
- */
 export const flagVisitor = {
+  // Expression(path: NodePath<Expression>) {
+  //   if (path.node.leadingComments) {
+  //     console.log(path.node.leadingComments);
+  //   }
+  // },
+  // Identifier(path: NodePath<Identifier>) {
+  //   if (path.node.leadingComments) {
+  //     console.log("idefn", path.node.leadingComments);
+  //   }
+  // },
+  // ObjectProperty(path: NodePath<ObjectProperty>) {
+
+  // },
+  enter(path: NodePath) {
+    const leadingComments = path.node.leadingComments;
+    if (!leadingComments || leadingComments.length === 0) return;
+
+    path.node.leadingComments.forEach(comment => {
+      const value = comment.value,
+        include = value.includes("#INCLUDE-IF:"),
+        exclude = value.includes("#EXCLUDE-IF:");
+      if (include || exclude) {
+        const flag = getFlagFromComment(path, value);
+        const flagEnabled = wallaceConfig.flags[flag];
+        if (flagEnabled && exclude) path.remove();
+        if (!flagEnabled && include) path.remove();
+      }
+    });
+  },
+  /**
+   * Replaces the entire if statement with its consequent or alternate:
+   *
+   * The test must be in this exact format:
+   *
+   *    if (wallaceConfig.flags.allowStubs) {
+   *      // code to keep
+   *    } else {
+   *      // code to remove (optional)
+   *    }
+   *
+   * You can't do anything more complex in the test or the conditions.
+   * There are places where this can't be used, in which case use a comment.
+   */
   IfStatement(path: NodePath<IfStatement>) {
     const test = path.node.test;
     if (t.isMemberExpression(test)) {
@@ -122,3 +157,13 @@ export const removeRepeaterDetacherParams = {
     }
   }
 };
+
+function getFlagFromComment(path: NodePath, comment: string): string {
+  const chunks = comment.split(":");
+  if (chunks.length !== 2) {
+    error(path, "Badly formed compiler comment");
+  }
+  const flag = chunks[1].trim();
+  wallaceConfig.ensureFlagIsValid(flag);
+  return flag;
+}

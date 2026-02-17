@@ -71,13 +71,16 @@ class WallaceConfig {
   applyFlags(suppliedFlags: Flag | undefined) {
     if (suppliedFlags) {
       for (const [flag, value] of Object.entries(suppliedFlags)) {
-        if (!DefaultFlagValues.hasOwnProperty(flag)) {
-          throw new Error(`Unknown flag ${flag} in supplied flags.`);
-        }
+        this.ensureFlagIsValid(flag);
       }
       this.flags = Object.assign({}, DefaultFlagOverrideValues, suppliedFlags);
     } else {
       this.flags = Object.assign({}, DefaultFlagValues, suppliedFlags);
+    }
+  }
+  ensureFlagIsValid(flag: string) {
+    if (!DefaultFlagValues.hasOwnProperty(flag)) {
+      throw new Error(`Unknown flag ${flag} in supplied flags.`);
     }
   }
   ensureFlagIstrue(path: NodePath<any>, flag: FlagValue) {

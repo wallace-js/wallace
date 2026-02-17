@@ -89,11 +89,14 @@ const ComponentPrototype = {
       i++;
     }
   },
-  dismount: function () {
+  /* #ONLY-IF: allowDismount */ dismount: function () {
     this._c.push(this);
-    const stash = this._s;
-    for (const key of this._d) {
-      stash[key].dismount();
+    let i = 0,
+      stash = this._s,
+      dismountKeys = this._d;
+    while (i < dismountKeys.length) {
+      stash[dismountKeys[i]].dismount();
+      i++;
     }
   }
 };

@@ -19,6 +19,8 @@ class TestDirectiveInConfig extends Directive {
   }
 }
 
+console.log(process.env.FOO);
+
 /**
  * Jest requires modern JS to be translated with "@babel/preset-env".
  */
