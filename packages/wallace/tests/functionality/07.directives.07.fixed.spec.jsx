@@ -52,19 +52,21 @@ describe("Fixed specification", () => {
     );
   });
 
-  test.each(["self", "element", "event", "ctrl", "props"])(
-    "disallows access to %s",
-    xarg => {
-      const code = `
+  const xargs = ["self", "element", "event", "props"];
+  if (wallaceConfig.flags.allowCtrl) {
+    xargs.push("ctrl");
+  }
+
+  test.each(xargs)("disallows access to %s", xarg => {
+    const code = `
       const Foo = (_, {${xarg}}) => (
         <div fixed:class={${xarg}} />
       )
     `;
-      expect(code).toCompileWithError(
-        `The "fixed" directive may not access scoped variable "${xarg}".`
-      );
-    }
-  );
+    expect(code).toCompileWithError(
+      `The "fixed" directive may not access scoped variable "${xarg}".`
+    );
+  });
 });
 
 describe("Fixed directive", () => {
