@@ -1,4 +1,5 @@
 const { Directive } = require("babel-plugin-wallace");
+const { flags } = require("./flags.cjs");
 
 /**
  * Custom directive that we can use for testing.
@@ -28,7 +29,8 @@ module.exports = {
     [
       "babel-plugin-wallace",
       {
-        directives: [TestDirectiveInConfig]
+        directives: [TestDirectiveInConfig],
+        flags
       }
     ],
     "@babel/plugin-syntax-jsx"
