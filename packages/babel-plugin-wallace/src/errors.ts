@@ -48,7 +48,6 @@ export const ERROR_MESSAGES = {
   },
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
-  POOL_EXPRESSION_WITHOUT_REPEAT_KEY: "Directive `pool' requires `key` to be set too.",
   JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS: "JSX elements are not allowed in expressions.",
   UNSUPPORTED_ATTRIBUTE_VALUE: "Attribute value must be a string or expression.",
   VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
