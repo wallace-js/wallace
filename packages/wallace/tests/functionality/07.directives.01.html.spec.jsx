@@ -6,10 +6,8 @@ test("HTML directive works", () => {
       <div class="title" html={self.getHtml()}></div>
     </div>
   );
-  MyComponent.methods = {
-    getHtml() {
-      return `<h3>${this.props.name}</h3>`;
-    }
+  MyComponent.prototype.getHtml = function () {
+    return `<h3>${this.props.name}</h3>`;
   };
   const component = testMount(MyComponent, { name: "Wallace" });
   expect(component).toRender(`
