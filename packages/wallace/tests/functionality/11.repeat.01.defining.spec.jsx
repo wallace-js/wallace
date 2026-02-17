@@ -53,20 +53,33 @@ describe("Repeat compiles with error when", () => {
     expect(code).toCompileWithError("Repeated component not allowed on root element.");
   });
 
-  // TODO: add flag condition
-  // test("element has siblings", () => {
-  //   const code = `
-  //     const Parent = () => (
-  //       <div>
-  //         <div>signling</div>
-  //         <Child.repeat items={items} />
-  //       </div>
-  //     );
-  //   `;
-  //   expect(code).toCompileWithError(
-  //     "Repeat may only be used when the parent node has no other children."
-  //   );
-  // });
+  if (wallaceConfig.flags.allowRepeaterSiblings) {
+    test("element has siblings", () => {
+      const code = `
+      const Parent = () => (
+        <div>
+          <div>signling</div>
+          <Child.repeat items={items} />
+        </div>
+      );
+    `;
+      expect(code).toCompileWithoutError();
+    });
+  } else {
+    test("element may not have siblings", () => {
+      const code = `
+      const Parent = () => (
+        <div>
+          <div>signling</div>
+          <Child.repeat items={items} />
+        </div>
+      );
+    `;
+      expect(code).toCompileWithError(
+        "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false."
+      );
+    });
+  }
 
   // We already catch an error for the nested component having child nodes.
   test("Repeat with child nodes", () => {

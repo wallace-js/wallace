@@ -1,16 +1,18 @@
 import { testMount } from "../utils";
 
 describe("Xargs", () => {
-  test("are allowed if recognised", () => {
-    const src = `
-    const A = (_, {self, ctrl, element, event, props}) => (
-      <div>
+  if (wallaceConfig.flags.allowCtrl) {
+    test("are allowed if recognised", () => {
+      const src = `
+      const A = (_, {self, ctrl, element, event, props}) => (
+        <div>
         Test
-      </div>
-    );
-  `;
-    expect(src).toCompileWithoutError();
-  });
+        </div>
+        );
+        `;
+      expect(src).toCompileWithoutError();
+    });
+  }
 
   test("must be a destructured object", () => {
     const src = `
@@ -44,34 +46,35 @@ describe("Xargs", () => {
     expect(component).toRender(`<div>Test <span>9</span></div>`);
   });
 
-  test("are allowed in props if not in Xargs", () => {
-    const Foo = ({ self, ctrl, element, event, props }) => (
-      <div>
-        <div>{self}</div>
-        <div>{ctrl}</div>
-        <div>{element}</div>
-        <div>{event}</div>
-        <div>{props}</div>
-        <button ref:btn onClick={foo(event, element)}>
-          Test
-        </button>
-      </div>
-    );
+  if (wallaceConfig.flags.allowCtrl) {
+    test("are allowed in props if not in Xargs", () => {
+      const Foo = ({ self, ctrl, element, event, props }) => (
+        <div>
+          <div>{self}</div>
+          <div>{ctrl}</div>
+          <div>{element}</div>
+          <div>{event}</div>
+          <div>{props}</div>
+          <button ref:btn onClick={foo(event, element)}>
+            Test
+          </button>
+        </div>
+      );
 
-    let args;
-    const foo = (event, element) => {
-      args = [event, element];
-    };
+      let args;
+      const foo = (event, element) => {
+        args = [event, element];
+      };
 
-    const component = testMount(Foo, {
-      self: 1,
-      ctrl: 2,
-      element: 3,
-      event: 4,
-      props: 5
-    });
-    expect(component).toRender(
-      `<div>
+      const component = testMount(Foo, {
+        self: 1,
+        ctrl: 2,
+        element: 3,
+        event: 4,
+        props: 5
+      });
+      expect(component).toRender(
+        `<div>
         <div>1</div>
         <div>2</div>
         <div>3</div>
@@ -79,16 +82,19 @@ describe("Xargs", () => {
         <div>5</div>
         <button>Test</button>
       </div>`
-    );
-    component.ref.btn.click();
-    expect(args).toEqual([4, 3]);
-  });
+      );
+      component.ref.btn.click();
+      expect(args).toEqual([4, 3]);
+    });
+  }
 });
 
 describe("Xargs access validation in directive expressions", () => {
   const eventXargs = ["event", "element"];
-  const applyXargs = ["ctrl", "self", "props", "element"];
-
+  const applyXargs = ["self", "props", "element"];
+  if (wallaceConfig.flags.allowCtrl) {
+    applyXargs.push("ctrl");
+  }
   test.each(eventXargs)("Event arg '%s' is not allowed in non-event directive", xarg => {
     const src = `const Foo = (_, { ${xarg} }) => <div class={${xarg}}>Test</div>;`;
     expect(src).toCompileWithError(
@@ -170,15 +176,17 @@ describe("Xargs point to correct objects", () => {
     expect(String(e)).toBe("[object MouseEvent]");
   });
 
-  test("ctrl is ctrl", () => {
-    const Foo = (_, { ctrl }) => <div>{ctrl.name}</div>;
-    Foo.prototype.render = function () {
-      this.ctrl = { name: "Bear" };
-      this.update();
-    };
-    const component = testMount(Foo);
-    expect(component).toRender(`<div>Bear</div>`);
-  });
+  if (wallaceConfig.flags.allowCtrl) {
+    test("ctrl is ctrl", () => {
+      const Foo = (_, { ctrl }) => <div>{ctrl.name}</div>;
+      Foo.prototype.render = function () {
+        this.ctrl = { name: "Bear" };
+        this.update();
+      };
+      const component = testMount(Foo);
+      expect(component).toRender(`<div>Bear</div>`);
+    });
+  }
 
   test("self is self", () => {
     const Foo = (_, { self }) => <div>{self.foo}</div>;

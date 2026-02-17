@@ -10,8 +10,6 @@ import * as ts from "typescript";
 const WRONG_CODE_WARNING = `\n\n WARNING: JEST MAY SHOW OUTPUT FROM A PREVIOUS TEST, INCLUDING STACK TRACE.
  USE test.only TO SEE RELIABLE OUTPUT.`;
 
-console.log(WRONG_CODE_WARNING);
-
 /**
  * Run the source code through tsc to find type errors.
  *
