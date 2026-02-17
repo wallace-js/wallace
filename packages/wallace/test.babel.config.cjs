@@ -1,4 +1,5 @@
 const { Directive } = require("babel-plugin-wallace");
+const { flags } = require("./flags.cjs");
 
 /**
  * Custom directive that we can use for testing.
@@ -19,34 +20,19 @@ class TestDirectiveInConfig extends Directive {
   }
 }
 
-function cmdToggle(name) {
-  const value = process.env[name];
-  switch (String(value).toLowerCase()) {
-    case "true":
-    case "1":
-    case "yes":
-    case "y":
-      return true;
-    default:
-      return false;
-  }
-}
-
-const options = {
-  directives: [TestDirectiveInConfig]
-};
-
-if (cmdToggle("ALL_FLAGS_OFF")) {
-  console.log("RUNNING WITHOUT FLAGS");
-  options.flags = {};
-} else {
-  console.log("RUNNING WITH FLAGS");
-}
-
 /**
  * Jest requires modern JS to be translated with "@babel/preset-env".
  */
 module.exports = {
   presets: ["@babel/preset-env"],
-  plugins: [["babel-plugin-wallace", options], "@babel/plugin-syntax-jsx"]
+  plugins: [
+    [
+      "babel-plugin-wallace",
+      {
+        directives: [TestDirectiveInConfig],
+        flags
+      }
+    ],
+    "@babel/plugin-syntax-jsx"
+  ]
 };
