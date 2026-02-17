@@ -1,8 +1,7 @@
 import { findElement, replaceNode } from "./utils";
 
 export const nestComponent = (rootElement, path, componentDefinition) => {
-  const el = findElement(rootElement, path),
-    child = new componentDefinition();
-  replaceNode(el, child.el);
+  const child = new componentDefinition();
+  replaceNode(findElement(rootElement, path), child.el);
   return child;
 };

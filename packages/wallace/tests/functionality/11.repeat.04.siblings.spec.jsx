@@ -7,7 +7,7 @@ import { testMount } from "../utils";
 
 const Child = ({ i }) => <div>{i}</div>;
 const permutations = [
-  ["NonKeyed", 0],
+  ["Sequential", 0],
   ["Keyed", 1]
 ];
 

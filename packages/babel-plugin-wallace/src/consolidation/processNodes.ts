@@ -93,30 +93,16 @@ export function processNode(
     if (node.hasRepeatedChildren) {
       // We must save it to a variable so we can reference it when creating the
       // repeater.
-      node.detacherVariable = componentDefinition.createDetacher(detacherObject);
-      node.detacherStashKey = componentDefinition.stashItem(
-        t.identifier(node.detacherVariable)
-      );
+      node.detacherIdentifier = componentDefinition.addDeclaration(detacherObject);
+      node.detacherStashKey = componentDefinition.stashItem(node.detacherIdentifier);
     } else {
       node.detacherStashKey = componentDefinition.stashItem(detacherObject);
     }
   }
 
   if (shouldSaveElement) {
-    if (node.isNestedComponent) {
-      node.elementKey = componentDefinition.saveNestedAsDynamicElement(
-        node.address,
-        t.identifier(node.tagName)
-      );
-    } else if (isStub) {
-      const stubExpression = t.callExpression(t.identifier(IMPORTABLES.getStub), [
-        t.thisExpression(),
-        t.stringLiteral(node.getStubName())
-      ]);
-      node.elementKey = componentDefinition.saveNestedAsDynamicElement(
-        node.address,
-        stubExpression
-      );
+    if (node.isNestedComponent || isStub) {
+      saveNestedOrStubElement(isStub, node, componentDefinition);
     } else {
       node.elementKey = componentDefinition.saveDynamicElement(node.address);
     }
@@ -221,6 +207,31 @@ function processVisibilityToggle(
       parentKey: node.parent.elementKey
     };
   }
+}
+
+function saveNestedOrStubElement(
+  isStub: boolean,
+  node: ExtractedNode,
+  componentDefinition: ComponentDefinitionData
+) {
+  let componentExpression = isStub
+    ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
+        t.thisExpression(),
+        t.stringLiteral(node.getStubName())
+      ])
+    : t.identifier(node.tagName);
+
+  // We need to save to stash and register as a dismountable.
+  if (wallaceConfig.flags.allowDismount) {
+    componentExpression = componentDefinition.addDeclaration(componentExpression);
+    const stashKey = componentDefinition.stashItem(componentExpression);
+    componentDefinition.dismountKeys.push(stashKey);
+  }
+
+  node.elementKey = componentDefinition.saveNestedAsDynamicElement(
+    node.address,
+    componentExpression
+  );
 }
 
 function processStub(
@@ -387,10 +398,10 @@ function processRepeater(
   componentWatch: ComponentWatch
 ) {
   const component = componentDefinition.component;
-  const detacherInfo = node.parent.detacherVariable
+  const detacherInfo = node.parent.detacherIdentifier
     ? {
         index: node.initialIndex,
-        detacherVariable: node.parent.detacherVariable
+        detacherVariable: node.parent.detacherIdentifier
       }
     : undefined;
 
@@ -404,41 +415,23 @@ function processRepeater(
       repeaterArgs.push(repeatInstruction.repeatKey);
     }
   } else {
-    if (repeatInstruction.poolExpression) {
-      error(node.path, ERROR_MESSAGES.POOL_EXPRESSION_WITHOUT_REPEAT_KEY);
-    }
     repeaterClass = IMPORTABLES.SequentialRepeater;
   }
   componentDefinition.component.module.requireImport(repeaterClass);
   if (detacherInfo) {
-    repeaterArgs.push(
-      t.identifier(detacherInfo.detacherVariable),
-      numericLiteral(detacherInfo.index)
-    );
+    repeaterArgs.push(detacherInfo.detacherVariable, numericLiteral(detacherInfo.index));
   }
   const stashKey = componentDefinition.stashItem(
     newExpression(identifier(repeaterClass), repeaterArgs)
   );
 
-  let poolStashKey;
-  if (!repeatInstruction.poolExpression) {
-    poolStashKey = componentDefinition.stashItem(
-      repeatInstruction.repeatKey
-        ? t.newExpression(t.identifier("Map"), [])
-        : t.arrayExpression()
-    );
+  if (wallaceConfig.flags.allowDismount) {
+    componentDefinition.dismountKeys.push(stashKey);
   }
-  const poolArg =
-    repeatInstruction.poolExpression ||
-    memberExpression(
-      identifier(WATCH_AlWAYS_CALLBACK_ARGS.stash),
-      numericLiteral(poolStashKey),
-      true
-    );
+
   const callbackArgs = [
     identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-    repeatInstruction.expression,
-    poolArg
+    repeatInstruction.expression
   ];
   if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, component));

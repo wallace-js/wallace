@@ -23,12 +23,18 @@ import {
 } from "./utils";
 import { codeToNode } from "../utils";
 
+interface Declaration {
+  id: Identifier;
+  expression: Expression;
+}
 /**
  * An object with all the consolidated data for writing.
  */
 export class ComponentDefinitionData {
   stash: Array<Expression> = [];
-  detachers: Array<Expression> = [];
+  stashKey: number = -1;
+  additionalDeclarations: Array<Declaration> = [];
+  dismountKeys: Array<number> = [];
   component: Component;
   html: Expression;
   watches: Array<ComponentWatch> = [];
@@ -42,7 +48,6 @@ export class ComponentDefinitionData {
     this.component = component;
     this.baseComponent = component.baseComponent;
   }
-
   saveDynamicElement(address: NodeAddress) {
     this.dynamicElements.push(buildFindElementCall(this.component.module, address));
     return this.dynamicElements.length - 1;
@@ -92,14 +97,16 @@ export class ComponentDefinitionData {
   }
   stashItem(expression: Expression): number {
     this.stash.push(expression);
-    return this.stash.length - 1;
+    this.stashKey++;
+    return this.stashKey;
   }
-  createDetacher(expression: Expression): string {
-    this.detachers.push(expression);
-    return this.getDetacherId(this.detachers.length - 1);
-  }
-  getDetacherId(index: number): string {
-    return `detacher${index}`;
+  addDeclaration(expression: Expression): Identifier {
+    const declarationId = this.component.scope.generateUidIdentifier("tmp");
+    this.additionalDeclarations.push({
+      id: declarationId,
+      expression
+    });
+    return declarationId;
   }
 }
 

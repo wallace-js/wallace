@@ -113,10 +113,8 @@ function buildConstructor(
     );
   }
 
-  componentDefinition.detachers.forEach((detacher, i) => {
-    chainedConstExpressions.push(
-      t.variableDeclarator(t.identifier(componentDefinition.getDetacherId(i)), detacher)
-    );
+  componentDefinition.additionalDeclarations.forEach(({ id, expression }) => {
+    chainedConstExpressions.push(t.variableDeclarator(id, expression));
   });
 
   const expressions: any[] = [
@@ -164,13 +162,20 @@ function buildConstructor(
   );
 }
 
+function buildDismountKeys(componentDefinition: ComponentDefinitionData) {
+  return t.arrayExpression(
+    componentDefinition.dismountKeys.map(key => t.numericLiteral(key))
+  );
+}
+
 export function buildDefineComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
   const args: any[] = [
     componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildConstructor(componentDefinition)
+    buildConstructor(componentDefinition),
+    buildDismountKeys(componentDefinition)
   ];
   if (componentDefinition.baseComponent) {
     args.push(componentDefinition.baseComponent);

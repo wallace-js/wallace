@@ -50,21 +50,23 @@ export enum EVENT_CALLBACK_ARGS {
 }
 
 export enum COMPONENT_PROPERTIES {
+  elements = "_e",
+  stash = "_s",
+  cache = "_c",
+  dismountKeys = "_d",
+  previous = "_p",
+  template = "_t",
+  updateInner = "_u",
+  watches = "_w",
+  watchLength = "_l",
+  root = "el",
   ctrl = "ctrl",
   props = "props",
   ref = "ref",
   part = "part",
-  root = "el",
-  elements = "_e",
-  watchLength = "_l",
-  stash = "_s",
-  previous = "_p",
-  template = "_t",
-  watches = "_w",
   render = "render",
   tmpThis = "_this",
-  update = "update",
-  updateInner = "_u"
+  update = "update"
 }
 
 export enum SPECIAL_SYMBOLS {

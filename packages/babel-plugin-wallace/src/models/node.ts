@@ -3,7 +3,8 @@ import type {
   Expression,
   JSXElement,
   JSXExpressionContainer,
-  JSXText
+  JSXText,
+  Identifier
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
@@ -28,7 +29,6 @@ export interface RepeatInstruction {
   expression: Expression;
   componentCls: string;
   repeatKey: Expression | string | undefined;
-  poolExpression?: Expression;
 }
 
 interface EventListener {
@@ -65,13 +65,12 @@ export class ExtractedNode {
   tagName: string;
   element: HTMLElement | Text | undefined;
   elementKey?: number;
-  detacherVariable?: string;
+  detacherIdentifier?: Identifier;
   detacherStashKey?: number;
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
   repeatNode?: ExtractedNode;
   repeatKey: Expression | string | undefined;
-  repeatPool?: Expression;
   address: Array<number>;
   initialIndex: number;
   path: NodePath<ValidElementType>;
@@ -83,7 +82,6 @@ export class ExtractedNode {
   hasConditionalChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
   requiredImports: Set<IMPORTABLES> = new Set();
-  // poolExpression: Expression | undefined;
   /**
    * The sets of classes that may be toggled.
    */
@@ -213,9 +211,6 @@ export class ExtractedNode {
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
   }
-  setRepeatPool(expression: Expression) {
-    this.repeatPool = expression;
-  }
   /**
    * Called on the parent of a repeat.
    */
@@ -224,8 +219,7 @@ export class ExtractedNode {
       return {
         expression: this.#repeatExpression,
         componentCls: this.tagName,
-        repeatKey: this.repeatKey,
-        poolExpression: this.repeatPool
+        repeatKey: this.repeatKey
       };
     }
   }

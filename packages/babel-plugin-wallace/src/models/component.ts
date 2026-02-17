@@ -7,6 +7,7 @@ import type {
   Expression
 } from "@babel/types";
 import { stringLiteral } from "@babel/types";
+import type { Scope } from "@babel/traverse";
 import { HTML_SPLITTER } from "../constants";
 import { ERROR_MESSAGES, error } from "../errors";
 import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
@@ -38,6 +39,7 @@ at runtime.
 export class Component {
   #currentNodeAddress: Array<number> = [];
   module: Module;
+  scope: Scope;
   baseComponent: Expression | undefined;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
@@ -48,10 +50,12 @@ export class Component {
   unique: boolean = false;
   constructor(
     module: Module,
+    scope: Scope,
     propsIdentifier: Identifier,
     componentIdentifier: Identifier
   ) {
     this.module = module;
+    this.scope = scope;
     this.propsIdentifier = propsIdentifier;
     this.componentIdentifier = componentIdentifier;
   }
