@@ -24,7 +24,12 @@ import {
   XARGS
 } from "../constants";
 import { ComponentDefinitionData, ComponentWatch } from "./ComponentDefinitionData";
-import { getChildren, getSiblings, renameVariablesInExpression } from "./utils";
+import {
+  buildNestedClassCall,
+  getChildren,
+  getSiblings,
+  renameVariablesInExpression
+} from "./utils";
 
 export function processNode(
   componentDefinition: ComponentDefinitionData,
@@ -214,24 +219,34 @@ function saveNestedOrStubElement(
   node: ExtractedNode,
   componentDefinition: ComponentDefinitionData
 ) {
-  let componentExpression = isStub
+  const componentCls = isStub
     ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
         t.thisExpression(),
         t.stringLiteral(node.getStubName())
       ])
     : t.identifier(node.tagName);
 
-  // We need to save to stash and register as a dismountable.
   if (wallaceConfig.flags.allowDismount) {
-    componentExpression = componentDefinition.addDeclaration(componentExpression);
+    // We need to save to stash and register as a dismountable.
+    const componentExpression = componentDefinition.addDeclaration(
+      buildNestedClassCall(
+        componentDefinition.component.module,
+        node.address,
+        componentCls
+      )
+    );
     const stashKey = componentDefinition.stashItem(componentExpression);
     componentDefinition.dismountKeys.push(stashKey);
+    const dynamicElements = componentDefinition.dynamicElements;
+    dynamicElements.push(componentExpression);
+    node.elementKey = dynamicElements.length - 1;
+  } else {
+    // Do it normally
+    node.elementKey = componentDefinition.saveNestedAsDynamicElement(
+      node.address,
+      componentCls
+    );
   }
-
-  node.elementKey = componentDefinition.saveNestedAsDynamicElement(
-    node.address,
-    componentExpression
-  );
 }
 
 function processStub(

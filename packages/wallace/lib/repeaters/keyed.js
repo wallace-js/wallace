@@ -10,7 +10,7 @@ export function KeyedRepeater(
   /* #INCLUDE-IF: allowRepeaterSiblings */ initialIndex
 ) {
   this.d = componentDefinition;
-  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.prototype._c;
+  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.pool;
   this.p = new Map();
   this.k = []; // array of keys as last set.
   if (typeof key === "function") {

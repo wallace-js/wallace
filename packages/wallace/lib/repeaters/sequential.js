@@ -9,7 +9,7 @@ export function SequentialRepeater(
   /* #INCLUDE-IF: allowRepeaterSiblings */ initialIndex
 ) {
   this.d = componentDefinition;
-  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.prototype._c;
+  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.pool;
   this.p = [];
   this.c = 0; // Child count
   /* #INCLUDE-IF: allowRepeaterSiblings */ this.a = adjustmentTracker;

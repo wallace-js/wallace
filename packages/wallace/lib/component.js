@@ -158,8 +158,10 @@ export const defineComponent = (
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;
-  proto._c = []; // The shared component pool.
-  proto._d = dismountKeys; // Keys of stash elements to dismount.
+  if (wallaceConfig.flags.allowDismount) {
+    ComponentDefinition.pool = proto._c = []; // The shared component pool.
+    proto._d = dismountKeys; // Keys of stashed elements to dismount.
+  }
   if (wallaceConfig.flags.allowBase) {
     proto.base = ComponentPrototype;
   } else {
