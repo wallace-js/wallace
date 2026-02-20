@@ -166,3 +166,123 @@ describe("Conditional display", () => {
     `);
   });
 });
+
+// component creation
+//     component is not created when initial state is hidden
+//     component is fetched from pool if there is one
+//     mention component is not released when hidden
+
+describe("Component", () => {
+  test("is not created when initial state is hidden", () => {
+    let show = false,
+      created = 0;
+    const Fox = () => <div>Fox</div>;
+    Fox.prototype.render = function (props, ctrl) {
+      created += 1;
+    };
+    const AnimalList = () => (
+      <div>
+        <Fox.nest if={show} />
+      </div>
+    );
+    const component = testMount(AnimalList);
+    expect(component).toRender(`
+      <div>
+      </div>
+    `);
+    expect(created).toBe(0);
+    show = true;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div>Fox</div>
+      </div>
+    `);
+    expect(created).toBe(1);
+  });
+
+  test("is reused", () => {
+    let show = false,
+      created = new Set();
+    const Fox = () => <div>Fox</div>;
+    Fox.prototype.render = function (props, ctrl) {
+      created.add(this);
+    };
+    const AnimalList = () => (
+      <div>
+        <Fox.nest if={show} />
+      </div>
+    );
+    const component = testMount(AnimalList);
+    expect(component).toRender(`
+      <div>
+      </div>
+    `);
+    expect(created.size).toBe(0);
+    show = true;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div>Fox</div>
+      </div>
+    `);
+    expect(created.size).toBe(1);
+    show = false;
+    component.update();
+    show = true;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div>Fox</div>
+      </div>
+    `);
+
+    expect(created.size).toBe(1);
+  });
+
+  if (wallaceConfig.flags.allowDismount) {
+    test("is fetched from pool if available", () => {
+      let show = false,
+        created = new Set();
+
+      const Fox = () => <div>Fox</div>;
+      Fox.prototype.render = function () {
+        created.add(this);
+      };
+      const AnimalList = () => (
+        <div>
+          <Fox.nest if={show} />
+        </div>
+      );
+
+      const fox = new Fox();
+      fox.render();
+      Fox.pool.push(fox);
+      const component = testMount(AnimalList);
+      expect(component).toRender(`
+      <div>
+      </div>
+    `);
+      expect(created.size).toBe(1);
+      show = true;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <div>Fox</div>
+      </div>
+    `);
+      expect(created.size).toBe(1);
+      show = false;
+      component.update();
+      show = true;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <div>Fox</div>
+      </div>
+    `);
+
+      expect(created.size).toBe(1);
+    });
+  }
+});
