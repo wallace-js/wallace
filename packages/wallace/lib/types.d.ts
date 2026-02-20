@@ -612,11 +612,11 @@ declare module "wallace" {
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
   }
 
-  type ComponentMethods<Props, Controller> = {
-    render?(props: Props, ctrl: Controller): void;
-    update?(): void;
-    [key: string]: any;
-  };
+  // type ComponentMethods<Props, Controller> = {
+  //   render?(props: Props, ctrl: Controller): void;
+  //   update?(): void;
+  //   [key: string]: any;
+  // };
 
   /**
    * A type which must be placed as shown:
@@ -643,43 +643,43 @@ declare module "wallace" {
   // // ComponentFunctionAlt<Props, Controller, Methods>;
   // | ComponentFunction2<Props, Controller, Methods>;
 
-  type ComponentJSXProps<Props, Controller> =
-    | { props: Props; ctrl?: Controller }
-    | { items: Props[]; ctrl?: Controller; key?: string | ((item: Props) => any) };
+  // type ComponentJSXProps<Props, Controller> =
+  //   | { props: Props; ctrl?: Controller }
+  //   | { items: Props[]; ctrl?: Controller; key?: string | ((item: Props) => any) };
 
-  interface ComponentFunction2<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  > {
-    (
-      props: Props,
-      xargs?: {
-        ctrl: Controller;
-        props: Props;
-        self: ComponentInstance<Props, Controller, Methods>;
-        event: Event;
-        element: HTMLElement;
-      }
-    ): JSX.Element;
+  // interface ComponentFunction2<
+  //   Props = any,
+  //   Controller = any,
+  //   Methods extends object = {}
+  // > {
+  //   (
+  //     props: Props,
+  //     xargs?: {
+  //       ctrl: Controller;
+  //       props: Props;
+  //       self: ComponentInstance<Props, Controller, Methods>;
+  //       event: Event;
+  //       element: HTMLElement;
+  //     }
+  //   ): JSX.Element;
 
-    // THIS is what JSX sees
-    (jsxProps: ComponentJSXProps<Props, Controller>): JSX.Element;
+  //   // THIS is what JSX sees
+  //   (jsxProps: ComponentJSXProps<Props, Controller>): JSX.Element;
 
-    methods?: Methods & ThisType<ComponentInstance<Props, Controller, Methods>>;
-  }
+  //   methods?: Methods & ThisType<ComponentInstance<Props, Controller, Methods>>;
+  // }
 
-  //| ComponentFunctionAlt<Props, Controller, Methods>
-  interface ComponentFunctionAlt<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  > {
-    // (props: Props): JSX.Element;
+  // //| ComponentFunctionAlt<Props, Controller, Methods>
+  // interface ComponentFunctionAlt<
+  //   Props = any,
+  //   Controller = any,
+  //   Methods extends object = {}
+  // > {
+  //   // (props: Props): JSX.Element;
 
-    (props: { props: Props }): JSX.Element;
-    // (...args): JSX.Element;
-  }
+  //   (props: { props: Props }): JSX.Element;
+  //   // (...args): JSX.Element;
+  // }
 
   export interface Part {
     update(): void;
@@ -1156,6 +1156,23 @@ interface ComponentFunction3<Props = any, Controller = any, Methods = any> {
   // Methods will not be available on nested component, so omit.
   readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
 }
+
+/**
+ * The type for a component instance.
+ */
+// export type ComponentInstance<
+//   Props = any,
+//   Controller = any,
+//   Methods extends object = {}
+// > = {
+//   el: HTMLElement;
+//   props: Props;
+//   ctrl: Controller;
+//   ref: { [key: string]: HTMLElement | ComponentInstance };
+//   part: { [key: string]: Part };
+//   base: Component<Props, Controller>;
+// } & Component<Props, Controller> &
+//   Methods;
 
 declare namespace JSX {
   type ComponentWrapperProps<Props> =
