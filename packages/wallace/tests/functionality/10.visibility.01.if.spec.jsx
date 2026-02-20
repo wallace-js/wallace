@@ -64,25 +64,68 @@ describe("Conditional directive on element", () => {
   });
 });
 
-describe("Multiple conditional elements under same element", () => {
-  let showA = true;
-  let showB = false;
-  let showC = true;
-  let showD = true;
+describe.each([1, 2, 3])(
+  "Multiple conditional elements under same element (%s)",
+  permutation => {
+    let Foo,
+      showA = true,
+      showB = false,
+      showC = true,
+      showD = true;
 
-  const Foo = () => (
-    <div>
-      <span if={showA}>A</span>
-      <span if={showB}>B</span>
-      <hr />
-      <span if={showC}>C</span>
-      <span if={showD}>D</span>
-    </div>
-  );
-  const component = testMount(Foo);
+    const Span = text => <span>{text}</span>;
 
-  test("have correct initial positions", () => {
-    expect(component).toRender(`
+    switch (permutation) {
+      case 1:
+        Foo = () => (
+          <div>
+            <span if={showA}>A</span>
+            <span if={showB}>B</span>
+            <hr />
+            <Span.nest if={showC} props={"C"} />
+            <span if={showD}>D</span>
+          </div>
+        );
+        break;
+      case 2:
+        Foo = () => (
+          <div>
+            <Span.nest if={showA} props={"A"} />
+            <Span.nest if={showB} props={"B"} />
+            <hr />
+            <span if={showC}>C</span>
+            <span if={showD}>D</span>
+          </div>
+        );
+        break;
+      case 3:
+        Foo = () => (
+          <div>
+            <Span.nest if={showA} props={"A"} />
+            <Span.nest if={showB} props={"B"} />
+            <hr />
+            <span if={showC}>C</span>
+            <Span.nest if={showD} props={"D"} />
+          </div>
+        );
+        break;
+      case 4:
+        Foo = () => (
+          <div>
+            <span if={showA}>A</span>
+            <span if={showB}>B</span>
+            <hr />
+            <span if={showC}>C</span>
+            <span if={showD}>D</span>
+          </div>
+        );
+        break;
+    }
+
+    const component = testMount(Foo);
+
+    test("have correct initial positions", () => {
+      expect(component).toRender(`
       <div>
         <span>A</span>
         <hr>
@@ -90,75 +133,12 @@ describe("Multiple conditional elements under same element", () => {
         <span>D</span>
       </div>
     `);
-  });
+    });
 
-  test("inserts at correct position", () => {
-    showB = true;
-    component.update();
-    expect(component).toRender(`
-      <div>
-        <span>A</span>
-        <span>B</span>
-        <hr>
-        <span>C</span>
-        <span>D</span>
-      </div>
-    `);
-  });
-
-  test("adjusts insertion position based on removed elements", () => {
-    showA = false;
-    showB = true;
-    showC = false;
-    showD = true;
-    component.update();
-    expect(component).toRender(`
-      <div>
-        <span>B</span>
-        <hr>
-        <span>D</span>
-      </div>
-    `);
-    showC = true;
-    component.update();
-    expect(component).toRender(`
-      <div>
-        <span>B</span>
-        <hr>
-        <span>C</span>
-        <span>D</span>
-      </div>
-    `);
-    showA = true;
-    component.update();
-    expect(component).toRender(`
-      <div>
-        <span>A</span>
-        <span>B</span>
-        <hr>
-        <span>C</span>
-        <span>D</span>
-      </div>
-    `);
-  });
-
-  test("can remove and add all", () => {
-    showA = false;
-    showB = false;
-    showC = false;
-    showD = false;
-    component.update();
-    expect(component).toRender(`
-      <div>
-        <hr>
-      </div>
-    `);
-    showA = true;
-    showB = true;
-    showC = true;
-    showD = true;
-    component.update();
-    expect(component).toRender(`
+    test("inserts at correct position", () => {
+      showB = true;
+      component.update();
+      expect(component).toRender(`
       <div>
         <span>A</span>
         <span>B</span>
@@ -167,8 +147,72 @@ describe("Multiple conditional elements under same element", () => {
         <span>D</span>
       </div>
     `);
-  });
-});
+    });
+
+    test("adjusts insertion position based on removed elements", () => {
+      showA = false;
+      showB = true;
+      showC = false;
+      showD = true;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <span>B</span>
+        <hr>
+        <span>D</span>
+      </div>
+    `);
+      showC = true;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <span>B</span>
+        <hr>
+        <span>C</span>
+        <span>D</span>
+      </div>
+    `);
+      showA = true;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <span>A</span>
+        <span>B</span>
+        <hr>
+        <span>C</span>
+        <span>D</span>
+      </div>
+    `);
+    });
+
+    test("can remove and add all", () => {
+      showA = false;
+      showB = false;
+      showC = false;
+      showD = false;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <hr>
+      </div>
+    `);
+      showA = true;
+      showB = true;
+      showC = true;
+      showD = true;
+      component.update();
+      expect(component).toRender(`
+      <div>
+        <span>A</span>
+        <span>B</span>
+        <hr>
+        <span>C</span>
+        <span>D</span>
+      </div>
+    `);
+    });
+  }
+);
 
 describe("Multiple conditional elements under different elements", () => {
   let showA = true;

@@ -9,9 +9,7 @@ import {
   blockStatement,
   callExpression,
   arrowFunctionExpression,
-  expressionStatement,
-  identifier,
-  returnStatement
+  identifier
 } from "@babel/types";
 import { Component, ExtractedNode } from "../models";
 import { IMPORTABLES, SPECIAL_SYMBOLS } from "../constants";
@@ -63,7 +61,8 @@ export class ComponentDefinitionData {
       key,
       arrowFunctionExpression(
         this.getLookupCallBackParams(),
-        blockStatement([expressionStatement(expression)])
+        expression
+        // blockStatement([expressionStatement(expression)])
       )
     );
     return key;

@@ -152,7 +152,7 @@ export const defineComponent = (
   watches,
   queries,
   contructor,
-  dismountKeys,
+  /* #INCLUDE-IF: allowDismount */ dismountKeys,
   inheritFrom
 ) => {
   const ComponentDefinition = initConstructor(contructor, inheritFrom || ComponentBase);

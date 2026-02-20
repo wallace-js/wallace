@@ -176,9 +176,11 @@ export function buildDefineComponentCall(component: Component): CallExpression {
     componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildConstructor(componentDefinition),
-    buildDismountKeys(componentDefinition)
+    buildConstructor(componentDefinition)
   ];
+  if (wallaceConfig.flags.allowDismount) {
+    args.push(buildDismountKeys(componentDefinition));
+  }
   if (componentDefinition.baseComponent) {
     args.push(componentDefinition.baseComponent);
   }

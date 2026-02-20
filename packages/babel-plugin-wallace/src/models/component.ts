@@ -85,7 +85,7 @@ export class Component {
     }
     tracker.initialIndex += 1;
     if (!element) {
-      // means it is a repeated node.
+      // means it is a nested or repeated node.
       return;
     }
     tracker.childIndex += 1;
