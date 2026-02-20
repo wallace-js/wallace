@@ -4,7 +4,8 @@ import type {
   JSXElement,
   JSXExpressionContainer,
   JSXText,
-  Identifier
+  Identifier,
+  NewExpression
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
@@ -66,6 +67,7 @@ export class ExtractedNode {
   element: HTMLElement | Text | undefined;
   elementKey?: number;
   detacherIdentifier?: Identifier;
+  detacherObject?: NewExpression;
   detacherStashKey?: number;
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
@@ -282,7 +284,7 @@ export class TagNode extends ExtractedNode {
     this.attributes.push({ name, value: HTML_SPLITTER });
   }
   getElement(): HTMLElement | Text {
-    if (this.isRepeatedComponent) {
+    if (this.isRepeatedComponent || this.isNestedComponent) {
       return undefined;
     }
     const element = createElement(this.tagName);
@@ -308,6 +310,7 @@ export class StubNode extends TagNode {
     this.setStub(name);
   }
   getElement(): HTMLElement | Text {
+    return undefined;
     this.element = createElement("div");
     return this.element;
   }

@@ -6,7 +6,7 @@ export function Nester(componentDefinition) {
 
 Nester.prototype = {
   send: function (props, ctrl) {
-    this.c().render(props, ctrl);
+    this.get().render(props, ctrl);
   },
   get: function () {
     if (!this.i) {

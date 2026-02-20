@@ -1,4 +1,4 @@
-import type { Identifier } from "@babel/types";
+import type { ArrayExpression, Identifier } from "@babel/types";
 import {
   arrowFunctionExpression,
   blockStatement,
@@ -110,6 +110,7 @@ export function processNode(
     } else {
       node.detacherStashKey = componentDefinition.stashItem(detacherObject);
     }
+    node.detacherObject = detacherObject;
   }
 
   if (needsWatch) {
@@ -130,8 +131,16 @@ export function processNode(
       );
     }
 
-    // Must happen after calling visibilityToggle
     if (node.isNestedComponent || isStub) {
+      const parentDetacherArgs = node.parent.detacherObject.arguments;
+      if (parentDetacherArgs.length === 0) {
+        parentDetacherArgs.push(t.arrayExpression([]));
+      }
+      const firstArg = parentDetacherArgs[0] as ArrayExpression;
+      firstArg.elements.push(
+        t.arrayExpression([t.numericLiteral(node.initialIndex), t.numericLiteral(-1)])
+      );
+      // Must happen after calling visibilityToggle
       addNestedComponentWatch(componentDefinition, node, componentWatch);
     }
 
