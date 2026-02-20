@@ -3,7 +3,6 @@ export { Detacher } from "./detacher";
 export { extendComponent } from "./extend";
 export { mount } from "./mount";
 export { createComponent } from "./createComponent";
-export { nestComponent } from "./nestComponent";
 export { Nester } from "./repeaters/nester";
 export { saveRef } from "./refs";
 export { savePart } from "./part";

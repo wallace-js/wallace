@@ -9,6 +9,7 @@ import {
   blockStatement,
   callExpression,
   arrowFunctionExpression,
+  expressionStatement,
   identifier,
   returnStatement
 } from "@babel/types";
@@ -62,7 +63,7 @@ export class ComponentDefinitionData {
       key,
       arrowFunctionExpression(
         this.getLookupCallBackParams(),
-        blockStatement([returnStatement(expression)])
+        blockStatement([expressionStatement(expression)])
       )
     );
     return key;
