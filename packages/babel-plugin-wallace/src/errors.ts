@@ -67,6 +67,7 @@ export const ERROR_MESSAGES = {
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
     "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false.",
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",
+  TAG_DOES_NOT_ALLOW_ATTRIBUTES: "This tag does not allow regular attributes.",
   TOGGLE_TARGETS_WITHOUT_TOGGLE_TRIGGERS: "Toggle targets must have toggle triggers.",
   UNSUPPORTED_NAMESPACE: "Unsupported namespace, may only use 'stub'.",
   XARGS_MUST_BE_OBJECT: "Extra args must be a destructured object.",

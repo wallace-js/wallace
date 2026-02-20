@@ -118,13 +118,17 @@ KeyedRepeater.prototype = {
 
     /* #INCLUDE-IF: allowDismount */
     for (const keyToRemove of previousKeysSet) {
-      ownPool.get(keyToRemove).dismount();
+      component = ownPool.get(keyToRemove);
+      component.dismount();
+      sharedPool.push(component);
       ownPool.delete(keyToRemove);
     }
   },
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
-    const pool = this.p;
+    const pool = this.p,
+      sharedPool = this.s;
     for (const [key, value] of pool.entries()) {
+      sharedPool.push(value);
       value.dismount();
     }
     pool.clear();

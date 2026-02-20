@@ -12,22 +12,6 @@ describe("Conditional directive not allowed", () => {
     expect(code).toCompileWithError("Cannot use 'if' on root element.");
   });
 
-  test("on nested element", () => {
-    const code = `
-      const Bar = () => (
-        <span>Hello</span>
-      )
-      const Foo = () => (
-        <div>
-          <Bar.nest if={true} />
-        </div>
-      );
-    `;
-    expect(code).toCompileWithError(
-      'The "if" directive may not be used on nested elements.'
-    );
-  });
-
   test("on repeated element", () => {
     const code = `
       const Bar = () => (

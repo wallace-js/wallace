@@ -42,19 +42,6 @@ export function buildFindElementCall(module: Module, address: NodeAddress): Expr
     : identifier(COMPONENT_PROPERTIES.root);
 }
 
-export function buildNestedClassCall(
-  module: Module,
-  address: NodeAddress,
-  componentCls: Expression
-): CallExpression {
-  module.requireImport(IMPORTABLES.nestComponent);
-  return callExpression(identifier(IMPORTABLES.nestComponent), [
-    identifier(COMPONENT_PROPERTIES.root),
-    buildAddressArray(address),
-    componentCls
-  ]);
-}
-
 export function removeKeys(obj: Object, keys: Array<string>) {
   for (const prop in obj) {
     if (keys.includes(prop)) delete obj[prop];

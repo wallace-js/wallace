@@ -10,6 +10,7 @@ import { getPlaceholderExpression } from "../ast-helpers";
 interface State {
   extractedNode: TagNode;
   component: Component;
+  allowAttributes: boolean;
 }
 
 /**
@@ -56,7 +57,10 @@ function extractValue(path: NodePath<JSXAttribute>): NodeValue | undefined {
 }
 
 export const attributeVisitors = {
-  JSXAttribute(path: NodePath<JSXAttribute>, { extractedNode, component }: State) {
+  JSXAttribute(
+    path: NodePath<JSXAttribute>,
+    { extractedNode, component, allowAttributes }: State
+  ) {
     if (extractedNode.path.node !== path.parentPath.parentPath.node) {
       // We exit here as otherwise we'd traverse attributes of nested JSXElements too.
       return;
@@ -76,6 +80,9 @@ export const attributeVisitors = {
       handler.validate(extractedNode, extractedValue, qualifier, base, component);
       handler.apply(extractedNode, extractedValue, qualifier, base);
     } else {
+      if (!allowAttributes) {
+        error(path, ERROR_MESSAGES.TAG_DOES_NOT_ALLOW_ATTRIBUTES);
+      }
       const attName = qualifier ? `${base}:${qualifier}` : base;
       switch (extractedValue.type) {
         case "expression":

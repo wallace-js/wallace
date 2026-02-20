@@ -80,6 +80,7 @@ export class ExtractedNode {
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction = {};
   hasConditionalChildren: boolean = false;
+  hasNestedChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
   requiredImports: Set<IMPORTABLES> = new Set();
   /**
@@ -269,6 +270,8 @@ export class TagNode extends ExtractedNode {
     }
     if (this.isRepeatedComponent) {
       this.parent.hasRepeatedChildren = true;
+    } else if (this.isNestedComponent) {
+      this.parent.hasNestedChildren = true;
     }
   }
   addFixedAttribute(name: string, value?: string) {
@@ -291,15 +294,17 @@ export class TagNode extends ExtractedNode {
   }
 }
 
-export class StubNode extends ExtractedNode {
+export class StubNode extends TagNode {
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
     initialIndex: number,
     parent: TagNode,
+    component: any, // TODO: fix type circular import.
     name: string
   ) {
-    super(path, address, initialIndex, parent);
+    super(path, address, initialIndex, parent, component, name, false, false);
+    this.parent.hasNestedChildren = true;
     this.setStub(name);
   }
   getElement(): HTMLElement | Text {

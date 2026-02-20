@@ -82,15 +82,21 @@ SequentialRepeater.prototype = {
 
     /* #INCLUDE-IF: allowDismount */
     while (originalPoolCount > itemsLength) {
-      pool.pop().dismount();
+      component = pool.pop();
+      component.dismount();
+      sharedPool.push(component);
       originalPoolCount--;
     }
   },
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
-    let pool = this.p,
-      poolCount = pool.length;
+    let component,
+      pool = this.p,
+      poolCount = pool.length,
+      sharedPool = this.s;
     while (poolCount > 0) {
-      pool.pop().dismount();
+      component = pool.pop();
+      component.dismount();
+      sharedPool.push(component);
       poolCount--;
     }
     pool.length = 0;

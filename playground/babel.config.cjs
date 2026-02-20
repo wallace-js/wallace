@@ -28,7 +28,7 @@ const toggles = {
     "@babel/preset-env",
     {
       targets: {
-        // browsers: ["last 1 chrome versions"]
+        browsers: ["last 1 chrome versions"]
       },
       modules: false
     }

@@ -15,12 +15,7 @@ import {
 import { Component, ExtractedNode } from "../models";
 import { IMPORTABLES, SPECIAL_SYMBOLS } from "../constants";
 import { NodeAddress, Part, ShieldInfo } from "./types";
-import {
-  buildFindElementCall,
-  buildWatchCallbackParams,
-  buildNestedClassCall,
-  removeKeys
-} from "./utils";
+import { buildFindElementCall, buildWatchCallbackParams, removeKeys } from "./utils";
 import { codeToNode } from "../utils";
 
 interface Declaration {
@@ -50,12 +45,6 @@ export class ComponentDefinitionData {
   }
   saveDynamicElement(address: NodeAddress) {
     this.dynamicElements.push(buildFindElementCall(this.component.module, address));
-    return this.dynamicElements.length - 1;
-  }
-  saveNestedAsDynamicElement(address: NodeAddress, componentCls: Expression) {
-    this.dynamicElements.push(
-      buildNestedClassCall(this.component.module, address, componentCls)
-    );
     return this.dynamicElements.length - 1;
   }
   addLookup(expression: Expression) {

@@ -122,7 +122,11 @@ export class Component {
       false,
       false
     );
-    path.traverse(attributeVisitors, { extractedNode, component: this });
+    path.traverse(attributeVisitors, {
+      extractedNode,
+      allowAttributes: true,
+      component: this
+    });
     this.#addNode(extractedNode, path, tracker);
     path.traverse(jsxVisitors, {
       component: this,
@@ -147,7 +151,11 @@ export class Component {
       !isRepeat,
       isRepeat
     );
-    path.traverse(attributeVisitors, { extractedNode, component: this });
+    path.traverse(attributeVisitors, {
+      extractedNode,
+      allowAttributes: false,
+      component: this
+    });
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
   }
@@ -158,8 +166,15 @@ export class Component {
       this.#getCurrentAddress(),
       tracker.initialIndex,
       tracker.parent,
+      this,
       name
     );
+
+    path.traverse(attributeVisitors, {
+      extractedNode,
+      allowAttributes: false,
+      component: this
+    });
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
   }

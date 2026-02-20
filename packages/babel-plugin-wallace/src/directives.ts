@@ -154,6 +154,7 @@ class HtmlDirective extends Directive {
 
 class IfDirective extends Directive {
   static attributeName = "if";
+  static allowOnNested = true;
   static help = `
     Conditionally includes/exludes an element from the DOM.
 

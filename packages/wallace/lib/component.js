@@ -24,12 +24,13 @@ const ComponentPrototype = {
     - add `i = 0, il = this._l` to variable declarator.
   */
   _u: function (i, il) {
-    let watch, element, displayToggle, detacher, lookupTrue, shouldBeVisible;
+    let watch, element, displayToggle, detacher, query, lookupTrue, shouldBeVisible;
 
     const watches = this._w,
       props = this.props,
       previous = this._p,
       elements = this._e,
+      lookups = this._q,
       stash = this._s;
     /*
       Watches is an array of objects with keys:
@@ -52,13 +53,16 @@ const ComponentPrototype = {
       displayToggle = watch.v;
       shouldBeVisible = true;
       if (displayToggle) {
-        lookupTrue = !!this._q[displayToggle.q](props, this);
-        shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
+        query = displayToggle.q;
         detacher = displayToggle.d;
+        if (query !== undefined) {
+          lookupTrue = !!lookups[query](props, this);
+          shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
+        }
         if (detacher) {
           detacher.apply(element, shouldBeVisible, elements, stash);
         } else {
-          (element.el || element).hidden = !shouldBeVisible;
+          element.hidden = !shouldBeVisible;
         }
         if (!shouldBeVisible) {
           i += displayToggle.s;
@@ -72,7 +76,7 @@ const ComponentPrototype = {
             callbacks[key](element, props, this, stash);
           } else {
             const oldValue = prev[key],
-              newValue = this._q[key](props, this);
+              newValue = lookups[key](props, this);
             if (oldValue !== newValue) {
               callbacks[key](element, props, this, newValue);
               prev[key] = newValue;
@@ -84,7 +88,6 @@ const ComponentPrototype = {
     }
   },
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
-    this._c.push(this);
     let i = 0,
       stash = this._s,
       dismountKeys = this._d;
