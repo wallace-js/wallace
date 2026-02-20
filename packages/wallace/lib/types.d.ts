@@ -586,12 +586,14 @@ declare module "wallace" {
     nest?({
       props,
       show,
+      ctrl,
       hide
     }: {
       props?: Props;
       ctrl?: Controller;
       show?: boolean;
       hide?: boolean;
+      if?: boolean;
     }): JSX.Element;
     repeat?({
       items,
@@ -600,17 +602,17 @@ declare module "wallace" {
     }: {
       items: Array<Props>;
       ctrl?: Controller;
-      key?: string | ((item: Props) => any);
+      key?: keyof Props | ((item: Props) => any);
     }): JSX.Element;
-    methods?: ComponenMethods<Props, Controller> &
+    methods?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
-    readonly prototype?: ComponenMethods<Props, Controller> &
+    readonly prototype?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
   }
 
-  type ComponenMethods<Props, Controller> = {
+  type ComponentMethods<Props, Controller> = {
     render?(props: Props, ctrl: Controller): void;
     update?(): void;
     [key: string]: any;
@@ -635,7 +637,49 @@ declare module "wallace" {
     Props = any,
     Controller = any,
     Methods extends object = {}
-  > = ComponentFunction<Props, Controller, Methods>;
+  > = ComponentFunction3<Props, Controller, Methods>;
+
+  // | ComponentFunction<Props, Controller, Methods>
+  // // ComponentFunctionAlt<Props, Controller, Methods>;
+  // | ComponentFunction2<Props, Controller, Methods>;
+
+  type ComponentJSXProps<Props, Controller> =
+    | { props: Props; ctrl?: Controller }
+    | { items: Props[]; ctrl?: Controller; key?: string | ((item: Props) => any) };
+
+  interface ComponentFunction2<
+    Props = any,
+    Controller = any,
+    Methods extends object = {}
+  > {
+    (
+      props: Props,
+      xargs?: {
+        ctrl: Controller;
+        props: Props;
+        self: ComponentInstance<Props, Controller, Methods>;
+        event: Event;
+        element: HTMLElement;
+      }
+    ): JSX.Element;
+
+    // THIS is what JSX sees
+    (jsxProps: ComponentJSXProps<Props, Controller>): JSX.Element;
+
+    methods?: Methods & ThisType<ComponentInstance<Props, Controller, Methods>>;
+  }
+
+  //| ComponentFunctionAlt<Props, Controller, Methods>
+  interface ComponentFunctionAlt<
+    Props = any,
+    Controller = any,
+    Methods extends object = {}
+  > {
+    // (props: Props): JSX.Element;
+
+    (props: { props: Props }): JSX.Element;
+    // (...args): JSX.Element;
+  }
 
   export interface Part {
     update(): void;
@@ -1063,8 +1107,70 @@ interface DirectiveAttributes extends AllDomEvents {
   unique?: boolean;
 }
 
+type ComponentMethods<Props, Controller> = {
+  render?(props: Props, ctrl: Controller): void;
+  update?(): void;
+  [key: string]: any;
+};
+
+/**
+ * Fooo
+ */
+interface ComponentFunction3<Props = any, Controller = any, Methods = any> {
+  // (props: Props, { ctrl: Ctrl }): JSX.Element;
+  (
+    props: Props,
+    xargs?: {
+      ctrl: Controller;
+      props: Props;
+      self: ComponentInstance<Props, Controller, Methods>;
+      event: Event;
+      element: HTMLElement;
+    }
+  ): JSX.Element;
+  // nest?({
+  //   props,
+  //   show,
+  //   ctrl,
+  //   hide
+  // }: {
+  //   props?: Props;
+  //   ctrl?: Controller;
+  //   show?: boolean;
+  //   hide?: boolean;
+  //   if?: boolean;
+  // }): JSX.Element;
+  // repeat?({
+  //   items,
+  //   ctrl,
+  //   key
+  // }: {
+  //   items: Array<Props>;
+  //   ctrl?: Controller;
+  //   key?: keyof Props | ((item: Props) => any);
+  // }): JSX.Element;
+  methods?: ComponentMethods<Props, Controller> &
+    ThisType<ComponentInstance<Props, Controller, Methods>>;
+  readonly prototype?: ComponentMethods<Props, Controller> &
+    ThisType<ComponentInstance<Props, Controller, Methods>>;
+  // Methods will not be available on nested component, so omit.
+  readonly stubs?: Record<string, ComponentFunction<Props, Controller>>;
+}
+
 declare namespace JSX {
-  interface Element {}
+  type ComponentWrapperProps<Props> =
+    | { props?: Props; if?: boolean }
+    | { items: Props[]; key?: keyof Props | ((item: Props) => any) };
+
+  type LibraryManagedAttributes<C, P> =
+    C extends ComponentFunction3<infer Props, any, any>
+      ? ComponentWrapperProps<Props>
+      : P;
+
+  interface Element {
+    // [elem: string]: any;
+    // props: any;
+  }
 
   interface IntrinsicElements {
     /**
