@@ -565,8 +565,7 @@ Report any issues to https://github.com/wallace-js/wallace (and please give it a
 
 declare module "wallace" {
   /**
-   * For internal use. Ensures a component can be nested in JSX, and also sets the types
-   * for the args.
+   * A component function.
    */
   interface ComponentFunction<
     Props = any,
@@ -607,8 +606,11 @@ declare module "wallace" {
     // }): JSX.Element;
     methods?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
-    readonly prototype?: ComponentMethods<Props, Controller> &
-      ThisType<ComponentInstance<Props, Controller, Methods>>;
+    // readonly prototype?: ComponentMethods<Props, Controller> &
+
+    // TODO: This works, so coppy for methods.
+    readonly prototype: ComponentInstance<Props, Controller>;
+    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
     readonly stubs?: Record<string, ComponentFunction>;
   }
