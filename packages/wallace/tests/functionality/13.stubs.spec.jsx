@@ -94,19 +94,21 @@ if (wallaceConfig.flags.allowStubs) {
     expect(component).toRender(`<div>hello <span>Fox</span></div>`);
   });
 
-  test("Can specify ctrl", () => {
-    const myCtrl = { name: "Fox" };
-    const BaseComponent = () => (
-      <div>
-        hello
-        <stub:display ctrl={myCtrl} />
-      </div>
-    );
-    const Child = extendComponent(BaseComponent);
-    Child.stubs.display = (_, { ctrl }) => <span>{ctrl.name}</span>;
-    const component = testMount(Child);
-    expect(component).toRender(`<div>hello <span>Fox</span></div>`);
-  });
+  if (wallaceConfig.flags.allowControllers) {
+    test("Can specify ctrl", () => {
+      const myCtrl = { name: "Fox" };
+      const BaseComponent = () => (
+        <div>
+          hello
+          <stub:display ctrl={myCtrl} />
+        </div>
+      );
+      const Child = extendComponent(BaseComponent);
+      Child.stubs.display = (_, { ctrl }) => <span>{ctrl.name}</span>;
+      const component = testMount(Child);
+      expect(component).toRender(`<div>hello <span>Fox</span></div>`);
+    });
+  }
 } else {
   test("is not allowed without flag", () => {
     const code = `
