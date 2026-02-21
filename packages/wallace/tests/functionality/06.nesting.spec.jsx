@@ -82,9 +82,6 @@ describe("Basic use", () => {
   test("Can specify props", () => {
     const myProps = { name: "Fox" };
     const Animal = animal => <div class="animal">{animal.name}</div>;
-    Animal.prototype.render = function (props, ctrl) {
-      this.base.render.call(this, props, ctrl);
-    };
     const AnimalList = () => (
       <div>
         <Animal.nest props={myProps} />
