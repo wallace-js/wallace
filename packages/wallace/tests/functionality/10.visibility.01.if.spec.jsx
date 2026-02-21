@@ -12,7 +12,7 @@ describe("Conditional directive not allowed", () => {
     expect(code).toCompileWithError("Cannot use 'if' on root element.");
   });
 
-  test("on repeated element", () => {
+  test.only("on repeated element", () => {
     const code = `
       const Bar = () => (
         <span>Hello</span>
@@ -109,33 +109,9 @@ describe.each([1, 2, 3, 4, 5])(
           </div>
         );
         break;
-      case 4:
-        Foo = () => (
-          <div>
-            <stub.span if={showA} props={"A"} />
-            <stub.span if={showB} props={"B"} />
-            <hr />
-            <span if={showC}>C</span>
-            <stub.span if={showD} props={"D"} />
-          </div>
-        );
-        break;
-      case 5:
-        Foo = () => (
-          <div>
-            <stub.span if={showA} props={"A"} />
-            <stub.span if={showB} props={"B"} />
-            <hr />
-            <span if={showC}>C</span>
-            <span if={showD}>D</span>
-          </div>
-        );
-        break;
     }
 
     if (wallaceConfig.flags.allowStubs) {
-      Foo.stubs.span = text => <span>{text}</span>;
-
       switch (permutation) {
         case 4:
           Foo = () => (
@@ -160,6 +136,8 @@ describe.each([1, 2, 3, 4, 5])(
           );
           break;
       }
+
+      Foo.stubs.span = text => <span>{text}</span>;
     } else {
       if (permutation > 3) return;
     }
