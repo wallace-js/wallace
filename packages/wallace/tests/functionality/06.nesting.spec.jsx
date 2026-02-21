@@ -39,7 +39,7 @@ describe("Specifying", () => {
       </div>
     );
   `;
-    expect(code).toCompileWithError("Nested component may not have child nodes.");
+    expect(code).toCompileWithError("Nested components may not have child nodes.");
   });
 
   test("Disallow nesting on root", () => {
@@ -48,7 +48,7 @@ describe("Specifying", () => {
       <Child.nest />
     );
   `;
-    expect(code).toCompileWithError("Nested component not allowed on root element.");
+    expect(code).toCompileWithError("Nested components not allowed as root element.");
   });
 
   test("Disallow attributes", () => {
@@ -59,7 +59,7 @@ describe("Specifying", () => {
       </div>
     );
   `;
-    expect(code).toCompileWithError("This tag does not allow regular attributes.");
+    expect(code).toCompileWithError("Nested components do not allow regular attributes.");
   });
 });
 
@@ -83,7 +83,6 @@ describe("Basic use", () => {
     const myProps = { name: "Fox" };
     const Animal = animal => <div class="animal">{animal.name}</div>;
     Animal.prototype.render = function (props, ctrl) {
-      console.log("render", props, ctrl);
       this.base.render.call(this, props, ctrl);
     };
     const AnimalList = () => (

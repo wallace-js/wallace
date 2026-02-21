@@ -44,13 +44,24 @@ describe("Repeat compiles with error when", () => {
     expect(code).toCompileWithError("Nested component must be capitalized.");
   });
 
-  test("element has no parent node", () => {
+  test("repeat on root element", () => {
     const code = `
       const Parent = () => (
         <Child.repeat items={items} />
       );
     `;
-    expect(code).toCompileWithError("Repeated component not allowed on root element.");
+    expect(code).toCompileWithError("Nested components not allowed as root element.");
+  });
+
+  test("Disallow attributes", () => {
+    const code = `
+    const Parent = () => (
+      <div>
+        <Child.repeat items={items} id="foo" />
+      </div>
+    );
+  `;
+    expect(code).toCompileWithError("Nested components do not allow regular attributes.");
   });
 
   if (wallaceConfig.flags.allowRepeaterSiblings) {
@@ -92,6 +103,6 @@ describe("Repeat compiles with error when", () => {
         </div>
       );
     `;
-    expect(code).toCompileWithError("Nested component may not have child nodes.");
+    expect(code).toCompileWithError("Nested components may not have child nodes.");
   });
 });

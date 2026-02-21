@@ -208,7 +208,12 @@ function createNesterObject(
           t.stringLiteral(node.getStubName())
         ])
       : t.identifier(node.tagName);
+
   component.module.requireImport(IMPORTABLES.Nester);
+
+  if (isStub) {
+    component.module.requireImport(IMPORTABLES.getStub);
+  }
 
   const nesterObject = componentDefinition.addDeclaration(
     newExpression(identifier(IMPORTABLES.Nester), [componentCls])

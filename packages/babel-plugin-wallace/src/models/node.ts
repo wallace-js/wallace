@@ -227,9 +227,6 @@ export class ExtractedNode {
     }
   }
   setStub(name: string) {
-    if (!this.parent) {
-      error(this.path, ERROR_MESSAGES.CANNOT_MAKE_ROOT_ELEMENT_A_STUB);
-    }
     if (this.#stubName) {
       error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
     }
@@ -263,12 +260,8 @@ export class TagNode extends ExtractedNode {
     this.tagName = tagName;
     this.isNestedComponent = isNestedComponent;
     this.isRepeatedComponent = isRepeatedComponent;
-    if (!this.parent) {
-      if (this.isRepeatedComponent) {
-        error(this.path, ERROR_MESSAGES.REPEAT_NOT_ALLOWED_ON_ROOT);
-      } else if (this.isNestedComponent) {
-        error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
-      }
+    if (!this.parent && (this.isRepeatedComponent || this.isNestedComponent)) {
+      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
     }
     if (this.isRepeatedComponent) {
       this.parent.hasRepeatedChildren = true;
@@ -306,6 +299,9 @@ export class StubNode extends TagNode {
     name: string
   ) {
     super(path, address, initialIndex, parent, component, name, false, false);
+    if (!this.parent) {
+      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+    }
     this.parent.hasNestedChildren = true;
     this.setStub(name);
   }

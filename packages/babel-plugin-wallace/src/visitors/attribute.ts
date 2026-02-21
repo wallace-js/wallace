@@ -81,7 +81,7 @@ export const attributeVisitors = {
       handler.apply(extractedNode, extractedValue, qualifier, base);
     } else {
       if (!allowAttributes) {
-        error(path, ERROR_MESSAGES.TAG_DOES_NOT_ALLOW_ATTRIBUTES);
+        error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_ATTRIBUTES);
       }
       const attName = qualifier ? `${base}:${qualifier}` : base;
       switch (extractedValue.type) {
