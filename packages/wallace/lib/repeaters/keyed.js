@@ -119,8 +119,8 @@ KeyedRepeater.prototype = {
     /* #INCLUDE-IF: allowDismount */
     for (const keyToRemove of previousKeysSet) {
       component = ownPool.get(keyToRemove);
-      component.dismount();
       sharedPool.push(component);
+      component.dismount();
       ownPool.delete(keyToRemove);
     }
   },

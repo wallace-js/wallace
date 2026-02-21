@@ -51,7 +51,7 @@ describe("Specifying", () => {
     expect(code).toCompileWithError("Nested components not allowed as root element.");
   });
 
-  test("Disallow attributes", () => {
+  test("Disallow regular attributes", () => {
     const code = `
     const Parent = () => (
       <div>
@@ -162,11 +162,6 @@ describe("Conditional display", () => {
     `);
   });
 });
-
-// component creation
-//     component is not created when initial state is hidden
-//     component is fetched from pool if there is one
-//     mention component is not released when hidden
 
 describe("Component", () => {
   test("is not created when initial state is hidden", () => {

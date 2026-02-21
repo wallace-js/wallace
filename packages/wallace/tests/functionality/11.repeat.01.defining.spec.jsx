@@ -53,7 +53,7 @@ describe("Repeat compiles with error when", () => {
     expect(code).toCompileWithError("Nested components not allowed as root element.");
   });
 
-  test("Disallow attributes", () => {
+  test("Disallow regular attributes", () => {
     const code = `
     const Parent = () => (
       <div>

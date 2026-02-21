@@ -64,7 +64,7 @@ describe("Conditional directive on element", () => {
   });
 });
 
-describe.each([1, 2, 3])(
+describe.each([1, 2, 3, 4, 5])(
   "Multiple conditional elements under same element (%s)",
   permutation => {
     let Foo,
@@ -74,6 +74,11 @@ describe.each([1, 2, 3])(
       showD = true;
 
     const Span = text => <span>{text}</span>;
+
+    if (wallaceConfig.flags.allowStubs) {
+    } else {
+      if (permutation > 3) return;
+    }
 
     switch (permutation) {
       case 1:
@@ -112,8 +117,19 @@ describe.each([1, 2, 3])(
       case 4:
         Foo = () => (
           <div>
-            <span if={showA}>A</span>
-            <span if={showB}>B</span>
+            <stub.span if={showA} props={"A"} />
+            <stub.span if={showB} props={"B"} />
+            <hr />
+            <span if={showC}>C</span>
+            <stub.span if={showD} props={"D"} />
+          </div>
+        );
+        break;
+      case 5:
+        Foo = () => (
+          <div>
+            <stub.span if={showA} props={"A"} />
+            <stub.span if={showB} props={"B"} />
             <hr />
             <span if={showC}>C</span>
             <span if={showD}>D</span>
@@ -122,6 +138,9 @@ describe.each([1, 2, 3])(
         break;
     }
 
+    if (wallaceConfig.flags.allowStubs) {
+      Foo.stubs.span = text => <span>{text}</span>;
+    }
     const component = testMount(Foo);
 
     test("have correct initial positions", () => {

@@ -13,11 +13,11 @@ export function Detacher(initialIndex, parentElementKey, offsetTrackerStashKey) 
 This is very tricky bit of code.
 
 It is affected by:
-  - initialIndex as passed into Detacher constructor
-  - offsetTracker's initial value
+  - initialIndex as passed into Detacher constructor.
+  - offsetTracker's initial value.
 
 It take either:
-  - an element, which starts attached
+  - an element, which starts attached.
   - a nester, whose element isn't attached to begin with.
 
 Which affects how the insertion position is calculated.
@@ -40,17 +40,17 @@ For elements an offset of 0 means it is attached (and is the default if not set)
 indicates it is detached, and tells elements after it that they need to adjust their
 insertion index by that much.
 
-For repeaters the offset is the number of items last rendered -1, because 0 items means
-no elements inserted.
+For nesters it is also 0 or -1, but the default is -1, which is set in the constructor.
 
-For nesters it is also 0 or -1, but the default starts at -1.
+For repeaters the offset is the number of items last rendered -1, because 0 items means
+no elements inserted. However the repeaters never go through this function, so we can
+assume the value here is always 0 or -1.
+
 */
 Detacher.prototype.apply = function (elementOrNester, shouldBeVisible, elements, stash) {
   const index = this.i,
     offsetTracker = stash[this.s];
-  let // ownOffset starts at -1 for Nester as the component isn't attached to begin with.
-    // This is set in constructor. Elements are not set and default to 0.
-    ownOffset = offsetTracker.get(index) || 0;
+  let ownOffset = offsetTracker.get(index) || 0;
 
   if ((shouldBeVisible && ownOffset < 0) || (!shouldBeVisible && ownOffset === 0)) {
     var parent = elements[this.e],

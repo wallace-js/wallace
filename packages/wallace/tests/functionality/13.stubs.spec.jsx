@@ -5,10 +5,10 @@ if (wallaceConfig.flags.allowStubs) {
   describe("Defining stubs", () => {
     test("is not allowed on root ", () => {
       const code = `
-      const Foo = () => (
-        <stub:display />
-      );
-      `;
+        const Foo = () => (
+          <stub:display />
+        );
+        `;
       expect(code).toCompileWithError("Nested components not allowed as root element.");
     });
   });
@@ -78,6 +78,34 @@ if (wallaceConfig.flags.allowStubs) {
     Child.stubs.display = ({ name }) => <span>Child{name}</span>;
     const component = testMount(BaseComponent, { name: "beaver" });
     expect(component).toRender(`<div><h3>Parent <span>beaver</span></h3></div>`);
+  });
+
+  test("Can specify props", () => {
+    const myProps = { name: "Fox" };
+    const BaseComponent = () => (
+      <div>
+        hello
+        <stub:display props={myProps} />
+      </div>
+    );
+    const Child = extendComponent(BaseComponent);
+    Child.stubs.display = ({ name }) => <span>{name}</span>;
+    const component = testMount(Child);
+    expect(component).toRender(`<div>hello <span>Fox</span></div>`);
+  });
+
+  test("Can specify ctrl", () => {
+    const myCtrl = { name: "Fox" };
+    const BaseComponent = () => (
+      <div>
+        hello
+        <stub:display ctrl={myCtrl} />
+      </div>
+    );
+    const Child = extendComponent(BaseComponent);
+    Child.stubs.display = (_, { ctrl }) => <span>{ctrl.name}</span>;
+    const component = testMount(Child);
+    expect(component).toRender(`<div>hello <span>Fox</span></div>`);
   });
 } else {
   test("is not allowed without flag", () => {

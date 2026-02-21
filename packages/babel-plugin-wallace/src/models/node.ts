@@ -240,6 +240,12 @@ export class ExtractedNode {
   }
 }
 
+/**
+ * Class for tag nodes:
+ * <img />
+ * <div>...</div>
+ * <NestedComponent />
+ */
 export class TagNode extends ExtractedNode {
   parent: TagNode;
   address: Array<number>;
@@ -307,8 +313,6 @@ export class StubNode extends TagNode {
   }
   getElement(): HTMLElement | Text {
     return undefined;
-    this.element = createElement("div");
-    return this.element;
   }
 }
 
