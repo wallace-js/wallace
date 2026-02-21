@@ -196,19 +196,26 @@ expect.extend({
   },
   toHaveTypeErrors(src, err1, err2, err3) {
     // TODO: fix this. What is errorMessage?
-    const errors = tsCompile(src);
-    const expected = [err1, err2, err3].filter(Boolean);
+    const errors = tsCompile(src)
+      .map(e => e.split(":")[1].trim())
+      .sort();
+    const expected = [err1, err2, err3].filter(Boolean).sort();
+
     if (errors.length === 0) {
       return {
         pass: false,
-        message: () => `Expected error "${errorMessage}" but no errors were thrown`
+        message: () =>
+          `Expected errors "${expected.join("\n")}" but no errors were thrown`
       };
     }
-    console.log(expected);
-
+    const expectedStr = expected.join("\n");
+    const errorsStr = errors.join("\n");
+    if (expectedStr === errorsStr) {
+      return { pass: true };
+    }
     return {
       pass: false,
-      message: () => `Expected error "${expected}" but no errors were thrown`
+      message: () => `Expected errors:\n\n${expectedStr}\n\nbut got:\n\n${errorsStr}`
     };
   },
   toHaveNoTypeErrors(src) {
