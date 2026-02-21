@@ -75,11 +75,6 @@ describe.each([1, 2, 3, 4, 5])(
 
     const Span = text => <span>{text}</span>;
 
-    if (wallaceConfig.flags.allowStubs) {
-    } else {
-      if (permutation > 3) return;
-    }
-
     switch (permutation) {
       case 1:
         Foo = () => (
@@ -140,7 +135,35 @@ describe.each([1, 2, 3, 4, 5])(
 
     if (wallaceConfig.flags.allowStubs) {
       Foo.stubs.span = text => <span>{text}</span>;
+
+      switch (permutation) {
+        case 4:
+          Foo = () => (
+            <div>
+              <stub.span if={showA} props={"A"} />
+              <stub.span if={showB} props={"B"} />
+              <hr />
+              <span if={showC}>C</span>
+              <stub.span if={showD} props={"D"} />
+            </div>
+          );
+          break;
+        case 5:
+          Foo = () => (
+            <div>
+              <stub.span if={showA} props={"A"} />
+              <stub.span if={showB} props={"B"} />
+              <hr />
+              <span if={showC}>C</span>
+              <span if={showD}>D</span>
+            </div>
+          );
+          break;
+      }
+    } else {
+      if (permutation > 3) return;
     }
+
     const component = testMount(Foo);
 
     test("have correct initial positions", () => {
