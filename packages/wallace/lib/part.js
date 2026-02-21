@@ -1,11 +1,11 @@
 function Part(component, start, end) {
-  this._c = component;
-  this._s = start;
-  this._e = end;
+  this.c = component;
+  this.s = start;
+  this.e = end;
 }
 
 Part.prototype.update = function () {
-  this._c._u(this._s, this._e);
+  this.c._u(this.s, this.e);
 };
 
 /**

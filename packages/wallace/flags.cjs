@@ -24,7 +24,6 @@ function cmdToggle(name) {
 }
 
 if (cmdToggle("ALL_FLAGS_OFF")) {
-  console.log("RUNNING WITHOUT FLAGS");
   flags = {};
 } else if ((oneFlag = process.env["ONE_FLAG_ON"])) {
   flags = { [oneFlag]: true };
@@ -33,11 +32,8 @@ if (cmdToggle("ALL_FLAGS_OFF")) {
     .allFLags()
     .reduce((acc, flagName) => ({ ...acc, [flagName]: true }), {});
   flags[oneFlag] = false;
-} else {
-  console.log("RUNNING WITH FLAGS");
 }
 
-a = 4 / 0;
 module.exports = {
   flags
 };

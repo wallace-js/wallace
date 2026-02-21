@@ -4,7 +4,8 @@ import type {
   JSXElement,
   JSXExpressionContainer,
   JSXText,
-  Identifier
+  Identifier,
+  NewExpression
 } from "@babel/types";
 import { createElement, createTextNode, setAttributeCallback } from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
@@ -66,6 +67,7 @@ export class ExtractedNode {
   element: HTMLElement | Text | undefined;
   elementKey?: number;
   detacherIdentifier?: Identifier;
+  detacherObject?: NewExpression;
   detacherStashKey?: number;
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
@@ -80,6 +82,7 @@ export class ExtractedNode {
   eventListeners: EventListener[] = [];
   bindInstructions: BindInstruction = {};
   hasConditionalChildren: boolean = false;
+  hasNestedChildren: boolean = false;
   hasRepeatedChildren: boolean = false;
   requiredImports: Set<IMPORTABLES> = new Set();
   /**
@@ -224,9 +227,6 @@ export class ExtractedNode {
     }
   }
   setStub(name: string) {
-    if (!this.parent) {
-      error(this.path, ERROR_MESSAGES.CANNOT_MAKE_ROOT_ELEMENT_A_STUB);
-    }
     if (this.#stubName) {
       error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
     }
@@ -240,6 +240,12 @@ export class ExtractedNode {
   }
 }
 
+/**
+ * Class for tag nodes:
+ * <img />
+ * <div>...</div>
+ * <NestedComponent />
+ */
 export class TagNode extends ExtractedNode {
   parent: TagNode;
   address: Array<number>;
@@ -260,15 +266,13 @@ export class TagNode extends ExtractedNode {
     this.tagName = tagName;
     this.isNestedComponent = isNestedComponent;
     this.isRepeatedComponent = isRepeatedComponent;
-    if (!this.parent) {
-      if (this.isRepeatedComponent) {
-        error(this.path, ERROR_MESSAGES.REPEAT_NOT_ALLOWED_ON_ROOT);
-      } else if (this.isNestedComponent) {
-        error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
-      }
+    if (!this.parent && (this.isRepeatedComponent || this.isNestedComponent)) {
+      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
     }
     if (this.isRepeatedComponent) {
       this.parent.hasRepeatedChildren = true;
+    } else if (this.isNestedComponent) {
+      this.parent.hasNestedChildren = true;
     }
   }
   addFixedAttribute(name: string, value?: string) {
@@ -279,7 +283,7 @@ export class TagNode extends ExtractedNode {
     this.attributes.push({ name, value: HTML_SPLITTER });
   }
   getElement(): HTMLElement | Text {
-    if (this.isRepeatedComponent) {
+    if (this.isRepeatedComponent || this.isNestedComponent) {
       return undefined;
     }
     const element = createElement(this.tagName);
@@ -291,20 +295,24 @@ export class TagNode extends ExtractedNode {
   }
 }
 
-export class StubNode extends ExtractedNode {
+export class StubNode extends TagNode {
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
     initialIndex: number,
     parent: TagNode,
+    component: any, // TODO: fix type circular import.
     name: string
   ) {
-    super(path, address, initialIndex, parent);
+    super(path, address, initialIndex, parent, component, name, false, false);
+    if (!this.parent) {
+      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+    }
+    this.parent.hasNestedChildren = true;
     this.setStub(name);
   }
   getElement(): HTMLElement | Text {
-    this.element = createElement("div");
-    return this.element;
+    return undefined;
   }
 }
 

@@ -1,5 +1,3 @@
-import { replaceNode } from "./utils";
-
 /**
  * Creates and mounts a component onto an element.
  *
@@ -18,6 +16,6 @@ export const mount = (
   component.render(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
   const element =
     typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
-  replaceNode(element, component.el);
+  element.parentNode.replaceChild(component.el, element);
   return component;
 };

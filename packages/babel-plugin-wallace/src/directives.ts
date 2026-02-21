@@ -130,7 +130,6 @@ class FixedDirective extends Directive {
 
 class HideDirective extends Directive {
   static attributeName = "hide";
-  static allowOnNested = true;
   static help = `
     Hides an element by toggling its hidden attribute.
 
@@ -154,6 +153,7 @@ class HtmlDirective extends Directive {
 
 class IfDirective extends Directive {
   static attributeName = "if";
+  static allowOnNested = true;
   static help = `
     Conditionally includes/exludes an element from the DOM.
 
@@ -256,7 +256,6 @@ class RefDirective extends Directive {
 
 class ShowDirective extends Directive {
   static attributeName = "show";
-  static allowOnNested = true;
   static help = `
     Shows an element by toggling its hidden attribute.
 

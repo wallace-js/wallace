@@ -13,7 +13,7 @@ test("Ref on element points to element", () => {
   expect(component.ref.a.className).toBe("danger");
 });
 
-test("Ref on nested component points to component", () => {
+test("Ref on nested component points to nester", () => {
   const A = () => <span class="danger">hello</span>;
   const B = () => (
     <div>
@@ -22,7 +22,7 @@ test("Ref on nested component points to component", () => {
   );
   const component = testMount(B);
   expect(component.ref.a).not.toBeInstanceOf(HTMLSpanElement);
-  expect(component.ref.a.el.className).toBe("danger");
+  expect(component.ref.a.get().el.className).toBe("danger");
 });
 
 test("Multiple refs allowed", () => {

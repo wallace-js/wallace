@@ -10,7 +10,6 @@ export const ERROR_MESSAGES = {
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
-  CANNOT_MAKE_ROOT_ELEMENT_A_STUB: "Cannot make the root element a stub.",
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
   CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT: (directive: string) => {
     return `The "${directive}" directive may not be used on nested elements.`;
@@ -53,9 +52,9 @@ export const ERROR_MESSAGES = {
   VISIBILITY_TOGGLE_DISPLAY_ALREADY_DEFINED:
     "Can only define one visibility toggle on element.",
   STUB_ALREADY_DEFINED: "Stub already defined on element.",
-  NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT: "Nested component not allowed on root element.",
-  NESTED_COMPONENT_WITH_CHILDREN: "Nested component may not have child nodes.",
-  NO_ATTRIBUTES_ON_NESTED_CLASS: "Attributes not allowed on nested class elements.",
+  NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT: "Nested components not allowed as root element.",
+  NESTED_COMPONENT_WITH_CHILDREN: "Nested components may not have child nodes.",
+  NESTED_COMPONENT_WITH_ATTRIBUTES: "Nested components do not allow regular attributes.",
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
   SPECIFY_EITHER_VALUE_OR_QUALIFIER: (name: string) =>
     `Specify either value: ${name}="xyz" or qualifier: ${name}:xyz`,
@@ -63,7 +62,6 @@ export const ERROR_MESSAGES = {
     "Parts must be unique within each component.",
   REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",
   REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
-  REPEAT_NOT_ALLOWED_ON_ROOT: "Repeated component not allowed on root element.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
     "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false.",
   REPEAT_DIRECTIVE_WITH_CHILDREN: "Repeat may not have child nodes.",

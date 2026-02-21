@@ -23,13 +23,13 @@ if (wallaceConfig.flags.allowCtrl) {
     };
     const component = testMount(Bar);
     test("has its controller set initially", () => {
-      expect(component.ref.foo.ctrl).toBe(8);
+      expect(component.ref.foo.get().ctrl).toBe(8);
     });
 
     test("has its controller updated", () => {
       component.ctrl = 10;
       component.update();
-      expect(component.ref.foo.ctrl).toBe(10);
+      expect(component.ref.foo.get().ctrl).toBe(10);
     });
   });
 

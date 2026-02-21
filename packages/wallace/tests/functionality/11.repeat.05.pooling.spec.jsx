@@ -37,7 +37,7 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
             </div>
           );
 
-      const sharedPool = Task.prototype._c;
+      const sharedPool = Task.pool;
 
       test("Components are returned to shared pool", () => {
         const days = [

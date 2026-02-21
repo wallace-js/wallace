@@ -10,7 +10,7 @@ export function KeyedRepeater(
   /* #INCLUDE-IF: allowRepeaterSiblings */ initialIndex
 ) {
   this.d = componentDefinition;
-  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.prototype._c;
+  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.pool;
   this.p = new Map();
   this.k = []; // array of keys as last set.
   if (typeof key === "function") {
@@ -118,13 +118,17 @@ KeyedRepeater.prototype = {
 
     /* #INCLUDE-IF: allowDismount */
     for (const keyToRemove of previousKeysSet) {
-      ownPool.get(keyToRemove).dismount();
+      component = ownPool.get(keyToRemove);
+      sharedPool.push(component);
+      component.dismount();
       ownPool.delete(keyToRemove);
     }
   },
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
-    const pool = this.p;
+    const pool = this.p,
+      sharedPool = this.s;
     for (const [key, value] of pool.entries()) {
+      sharedPool.push(value);
       value.dismount();
     }
     pool.clear();

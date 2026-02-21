@@ -9,7 +9,7 @@ export function SequentialRepeater(
   /* #INCLUDE-IF: allowRepeaterSiblings */ initialIndex
 ) {
   this.d = componentDefinition;
-  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.prototype._c;
+  /* #INCLUDE-IF: allowDismount */ this.s = componentDefinition.pool;
   this.p = [];
   this.c = 0; // Child count
   /* #INCLUDE-IF: allowRepeaterSiblings */ this.a = adjustmentTracker;
@@ -82,15 +82,21 @@ SequentialRepeater.prototype = {
 
     /* #INCLUDE-IF: allowDismount */
     while (originalPoolCount > itemsLength) {
-      pool.pop().dismount();
+      component = pool.pop();
+      sharedPool.push(component);
+      component.dismount();
       originalPoolCount--;
     }
   },
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
-    let pool = this.p,
-      poolCount = pool.length;
+    let component,
+      pool = this.p,
+      poolCount = pool.length,
+      sharedPool = this.s;
     while (poolCount > 0) {
-      pool.pop().dismount();
+      component = pool.pop();
+      sharedPool.push(component);
+      component.dismount();
       poolCount--;
     }
     pool.length = 0;

@@ -45,11 +45,13 @@ function buildWatchesArg(componentDefinition: ComponentDefinitionData): ArrayExp
       c: buildObjectExpression(watch.callbacks)
     };
     if (watch.shieldInfo) {
-      const visibilityToggle = {
-        q: t.numericLiteral(watch.shieldInfo.key),
-        s: t.numericLiteral(watch.shieldInfo.skipCount || 0),
-        r: t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0)
-      };
+      const visibilityToggle: Record<string, Expression> = {};
+      if (watch.shieldInfo.lookupIndex !== undefined) {
+        visibilityToggle.q = t.numericLiteral(watch.shieldInfo.lookupIndex);
+        visibilityToggle.s = t.numericLiteral(watch.shieldInfo.skipCount || 0);
+        visibilityToggle.r = t.numericLiteral(watch.shieldInfo.reverse ? 1 : 0);
+      }
+
       if (watch.shieldInfo.detacher) {
         const detacher = watch.shieldInfo.detacher;
         visibilityToggle["d"] = t.newExpression(t.identifier(IMPORTABLES.detacher), [
@@ -174,9 +176,11 @@ export function buildDefineComponentCall(component: Component): CallExpression {
     componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildConstructor(componentDefinition),
-    buildDismountKeys(componentDefinition)
+    buildConstructor(componentDefinition)
   ];
+  if (wallaceConfig.flags.allowDismount) {
+    args.push(buildDismountKeys(componentDefinition));
+  }
   if (componentDefinition.baseComponent) {
     args.push(componentDefinition.baseComponent);
   }

@@ -9,9 +9,9 @@ export interface Detacher {
 }
 
 export interface ShieldInfo {
-  key: number;
-  reverse: boolean;
-  skipCount: number;
+  lookupIndex?: number;
+  reverse?: boolean;
+  skipCount?: number;
   detacher?: Detacher;
 }
 

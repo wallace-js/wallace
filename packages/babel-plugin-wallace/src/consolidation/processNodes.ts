@@ -1,4 +1,4 @@
-import type { Identifier } from "@babel/types";
+import type { ArrayExpression, Identifier } from "@babel/types";
 import {
   arrowFunctionExpression,
   blockStatement,
@@ -81,14 +81,26 @@ export function processNode(
     isStub ||
     node.isNestedComponent ||
     node.hasConditionalChildren ||
+    node.hasNestedChildren ||
     node.hasRepeatedChildren;
+
+  if (shouldSaveElement) {
+    if (node.isNestedComponent || isStub) {
+      node.elementKey = createNesterObject(componentDefinition, node, isStub);
+    } else {
+      node.elementKey = componentDefinition.saveDynamicElement(node.address);
+    }
+  }
 
   // Note the detacher is associated with the parent node of conditionally displayed
   // or repeated nodes.
   const needsDetacher =
-    node.hasConditionalChildren || (node.hasRepeatedChildren && node.children.length > 1);
+    node.hasConditionalChildren ||
+    node.hasNestedChildren ||
+    (node.hasRepeatedChildren && node.children.length > 1);
 
   if (needsDetacher) {
+    componentDefinition.component.module.requireImport(IMPORTABLES.detacher);
     const detacherObject = t.newExpression(t.identifier("Map"), []);
     if (node.hasRepeatedChildren) {
       // We must save it to a variable so we can reference it when creating the
@@ -98,14 +110,7 @@ export function processNode(
     } else {
       node.detacherStashKey = componentDefinition.stashItem(detacherObject);
     }
-  }
-
-  if (shouldSaveElement) {
-    if (node.isNestedComponent || isStub) {
-      saveNestedOrStubElement(isStub, node, componentDefinition);
-    } else {
-      node.elementKey = componentDefinition.saveDynamicElement(node.address);
-    }
+    node.detacherObject = detacherObject;
   }
 
   if (needsWatch) {
@@ -117,10 +122,6 @@ export function processNode(
       node.address
     );
 
-    if (node.isNestedComponent) {
-      processNestedComponent(componentDefinition, componentWatch, node);
-    }
-
     if (visibilityToggle) {
       processVisibilityToggle(
         componentDefinition,
@@ -130,16 +131,25 @@ export function processNode(
       );
     }
 
+    if (node.isNestedComponent || isStub) {
+      const parentDetacherArgs = node.parent.detacherObject.arguments;
+      if (parentDetacherArgs.length === 0) {
+        parentDetacherArgs.push(t.arrayExpression([]));
+      }
+      const firstArg = parentDetacherArgs[0] as ArrayExpression;
+      firstArg.elements.push(
+        t.arrayExpression([t.numericLiteral(node.initialIndex), t.numericLiteral(-1)])
+      );
+      // Must happen after calling visibilityToggle
+      addNestedComponentWatch(componentDefinition, node, componentWatch);
+    }
+
     if (repeatInstruction) {
       processRepeater(componentDefinition, node, repeatInstruction, componentWatch);
     }
 
     if (hasClassToggles) {
       addToggleCallbackStatement(componentDefinition, node, componentWatch);
-    }
-
-    if (isStub) {
-      processStub(componentDefinition, node, componentWatch);
     }
 
     componentWatch.consolidate();
@@ -161,10 +171,64 @@ function addRequiredImports(
   });
 }
 
-function processNestedComponent(
+function processVisibilityToggle(
   componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
   componentWatch: ComponentWatch,
-  node: ExtractedNode
+  visibilityToggle: VisibilityToggle
+) {
+  const shieldLookupKey = componentDefinition.addLookup(visibilityToggle.expression);
+  componentWatch.shieldInfo = {
+    skipCount: 0, // gets set later once we've processed all the nodes.
+    lookupIndex: shieldLookupKey,
+    reverse: visibilityToggle.reverse
+  };
+  if (visibilityToggle.detach) {
+    if (node.parent.detacherStashKey === undefined) {
+      throw new Error("Parent node was not given a stash key");
+    }
+    componentWatch.shieldInfo.detacher = {
+      originalIndex: node.initialIndex,
+      stashKey: node.parent.detacherStashKey,
+      parentKey: node.parent.elementKey
+    };
+  }
+}
+
+function createNesterObject(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  isStub: boolean
+): number {
+  const component = componentDefinition.component,
+    dynamicElements = componentDefinition.dynamicElements,
+    componentCls = isStub
+      ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
+          t.thisExpression(),
+          t.stringLiteral(node.getStubName())
+        ])
+      : t.identifier(node.tagName);
+
+  component.module.requireImport(IMPORTABLES.Nester);
+
+  if (isStub) {
+    component.module.requireImport(IMPORTABLES.getStub);
+  }
+
+  const nesterObject = componentDefinition.addDeclaration(
+    newExpression(identifier(IMPORTABLES.Nester), [componentCls])
+  );
+  const stashKey = componentDefinition.stashItem(nesterObject);
+  componentDefinition.dismountKeys.push(stashKey);
+  dynamicElements.push(nesterObject);
+
+  return dynamicElements.length - 1;
+}
+
+function addNestedComponentWatch(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode,
+  componentWatch: ComponentWatch
 ) {
   const callbackArgs = [node.getProps() || t.objectExpression([])];
   if (wallaceConfig.flags.allowCtrl) {
@@ -176,87 +240,20 @@ function processNestedComponent(
       callExpression(
         memberExpression(
           identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-          identifier(COMPONENT_PROPERTIES.render)
+          identifier(SPECIAL_SYMBOLS.send)
         ),
         callbackArgs
       )
     )
   ]);
-}
-
-function processVisibilityToggle(
-  componentDefinition: ComponentDefinitionData,
-  node: ExtractedNode,
-  componentWatch: ComponentWatch,
-  visibilityToggle: VisibilityToggle
-) {
-  const shieldLookupKey = componentDefinition.addLookup(visibilityToggle.expression);
-  componentWatch.shieldInfo = {
-    skipCount: 0, // gets set later once we've processed all the nodes.
-    key: shieldLookupKey,
-    reverse: visibilityToggle.reverse
+  if (!componentWatch.shieldInfo) {
+    componentWatch.shieldInfo = {};
+  }
+  componentWatch.shieldInfo.detacher = {
+    originalIndex: node.initialIndex,
+    stashKey: node.parent.detacherStashKey,
+    parentKey: node.parent.elementKey
   };
-  if (visibilityToggle.detach) {
-    if (node.parent.detacherStashKey === undefined) {
-      throw new Error("Parent node was not given a stash key");
-    }
-    componentDefinition.component.module.requireImport(IMPORTABLES.detacher);
-    componentWatch.shieldInfo.detacher = {
-      originalIndex: node.initialIndex,
-      stashKey: node.parent.detacherStashKey,
-      parentKey: node.parent.elementKey
-    };
-  }
-}
-
-function saveNestedOrStubElement(
-  isStub: boolean,
-  node: ExtractedNode,
-  componentDefinition: ComponentDefinitionData
-) {
-  let componentExpression = isStub
-    ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
-        t.thisExpression(),
-        t.stringLiteral(node.getStubName())
-      ])
-    : t.identifier(node.tagName);
-
-  // We need to save to stash and register as a dismountable.
-  if (wallaceConfig.flags.allowDismount) {
-    componentExpression = componentDefinition.addDeclaration(componentExpression);
-    const stashKey = componentDefinition.stashItem(componentExpression);
-    componentDefinition.dismountKeys.push(stashKey);
-  }
-
-  node.elementKey = componentDefinition.saveNestedAsDynamicElement(
-    node.address,
-    componentExpression
-  );
-}
-
-function processStub(
-  componentDefinition: ComponentDefinitionData,
-  node: ExtractedNode,
-  componentWatch: ComponentWatch
-) {
-  const component = componentDefinition.component;
-  componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
-  const callbackArgs: any[] = [component.propsIdentifier];
-  if (wallaceConfig.flags.allowCtrl) {
-    callbackArgs.push(getCtrlExpression(node, component));
-  }
-  componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
-    expressionStatement(
-      callExpression(
-        memberExpression(
-          // In this case "element" is in fact the nested component.
-          identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-          identifier(COMPONENT_PROPERTIES.render)
-        ),
-        callbackArgs
-      )
-    )
-  ]);
 }
 
 function createEventsForBoundInputs(

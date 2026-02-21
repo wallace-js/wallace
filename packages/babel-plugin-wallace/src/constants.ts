@@ -6,7 +6,7 @@ export enum IMPORTABLES {
   extendComponent = "extendComponent",
   findElement = "findElement",
   getStub = "getStub",
-  nestComponent = "nestComponent",
+  Nester = "Nester",
   saveRef = "saveRef",
   savePart = "savePart",
   stashMisc = "stashMisc",
@@ -71,6 +71,7 @@ export enum COMPONENT_PROPERTIES {
 
 export enum SPECIAL_SYMBOLS {
   noLookup = "__",
+  send = "send",
   patch = "patch"
 }
 

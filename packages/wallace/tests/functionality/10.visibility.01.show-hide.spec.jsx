@@ -78,24 +78,19 @@ describe("Elements under hidden parents", () => {
 });
 
 describe("Nested components", () => {
-  test("show and hide their root element", () => {
-    let showWalrus = true;
-    const walrus = { name: "Mr Walrus" };
-    const fox = { name: "Ms Fox" };
-    const Animal = animal => <div>Hello {animal.name}</div>;
-    const AnimalList = () => (
-      <div>
-        <Animal.nest show={showWalrus} props={walrus} ref:target />
-        <Animal.nest props={fox} ref:other />
-      </div>
-    );
-    const component = testMount(AnimalList);
-    expect(component.ref.target.el.hidden).toBe(false);
-    expect(component.ref.other.el.hidden).toBe(false);
-    showWalrus = false;
-    component.update();
-    expect(component.ref.target.el.hidden).toBe(true);
-    expect(component.ref.other.el.hidden).toBe(false);
+  describe("Not allowed on nested component itself", () => {
+    test("is not allowed on root ", () => {
+      const code = `
+      const Foo = () => (
+        <div>
+          <Bar.nest show={true} />
+        </div>
+      );
+      `;
+      expect(code).toCompileWithError(
+        'The "show" directive may not be used on nested elements.'
+      );
+    });
   });
 
   test("do not update when hidden", () => {
@@ -116,8 +111,8 @@ describe("Nested components", () => {
       </div>
     );
     const component = testMount(Counters);
-    const targetSpan = component.ref.target.ref.val;
-    const otherSpan = component.ref.other.ref.val;
+    const targetSpan = component.ref.target.get().ref.val;
+    const otherSpan = component.ref.other.get().ref.val;
 
     expect(targetSpan.textContent).toBe("1");
     expect(otherSpan.textContent).toBe("1");
