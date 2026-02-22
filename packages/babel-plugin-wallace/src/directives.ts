@@ -39,12 +39,6 @@ class ClassDirective extends Directive {
   static attributeName = "class";
   static allowString = true;
   static allowQualifier = true;
-  static help = `
-    Without a qualifer this acts as a normal attribute, but with a qualifier it creates
-    a toggle target for use with the "toggle" directive:
-
-    /h <div class:danger="btn-danger" toggle:danger={expr}></div>
-    `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
       node.addClassToggleTarget(

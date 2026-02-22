@@ -8,7 +8,7 @@ describe("Fixed specification", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "fixed" directive value must be of type expression. Found: null.'
+      "The \`fixed\` directive value must be of type expression. Found: null."
     );
   });
 
@@ -19,7 +19,7 @@ describe("Fixed specification", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "fixed" directive value must be of type expression. Found: string.'
+      "The \`fixed\` directive value must be of type expression. Found: string."
     );
   });
 
@@ -29,7 +29,7 @@ describe("Fixed specification", () => {
         <div fixed={x}></div>
       )
     `;
-    expect(code).toCompileWithError('The "fixed" directive must have a qualifier.');
+    expect(code).toCompileWithError("The \`fixed\` directive must have a qualifier.");
   });
 
   test("allows expression with qualifier", () => {
@@ -48,7 +48,7 @@ describe("Fixed specification", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "fixed" directive may not access scoped variable "props".'
+      "The \`fixed\` directive may not access scoped variable `props`."
     );
   });
 
@@ -64,7 +64,7 @@ describe("Fixed specification", () => {
       )
     `;
     expect(code).toCompileWithError(
-      `The "fixed" directive may not access scoped variable "${xarg}".`
+      `The \`fixed\` directive may not access scoped variable \`${xarg}\`.`
     );
   });
 });

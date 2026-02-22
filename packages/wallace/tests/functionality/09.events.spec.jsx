@@ -8,7 +8,7 @@ describe("Event directive", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "on*" directive value must be of type expression or string. Found: null.'
+      "The `on*` directive value must be of type expression or string. Found: null."
     );
   });
 

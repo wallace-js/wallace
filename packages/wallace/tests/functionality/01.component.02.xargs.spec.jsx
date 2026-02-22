@@ -98,7 +98,7 @@ describe("Xargs access validation in directive expressions", () => {
   test.each(eventXargs)("Event arg '%s' is not allowed in non-event directive", xarg => {
     const src = `const Foo = (_, { ${xarg} }) => <div class={${xarg}}>Test</div>;`;
     expect(src).toCompileWithError(
-      `The "class" directive may not access scoped variable "${xarg}".`
+      `The \`class\` directive may not access scoped variable \`${xarg}\`.`
     );
   });
 
@@ -120,7 +120,7 @@ describe("Xargs access validation in directive expressions", () => {
   test("may not access disallowed xarg if in xargs", () => {
     const src = `const Foo = (_, { event }) => <div apply={event}>Test</div>;`;
     expect(src).toCompileWithError(
-      `The "apply" directive may not access scoped variable "event".`
+      "The `apply` directive may not access scoped variable `event`."
     );
   });
 

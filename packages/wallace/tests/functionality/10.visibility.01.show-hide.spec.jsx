@@ -78,19 +78,17 @@ describe("Elements under hidden parents", () => {
 });
 
 describe("Nested components", () => {
-  describe("Not allowed on nested component itself", () => {
-    test("is not allowed on root ", () => {
-      const code = `
+  test("do not allow `show` on nested component", () => {
+    const code = `
       const Foo = () => (
         <div>
           <Bar.nest show={true} />
         </div>
       );
       `;
-      expect(code).toCompileWithError(
-        'The "show" directive may not be used on nested elements.'
-      );
-    });
+    expect(code).toCompileWithError(
+      "The `show` directive may not be used on nested elements."
+    );
   });
 
   test("do not update when hidden", () => {

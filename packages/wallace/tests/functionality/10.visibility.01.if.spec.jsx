@@ -24,7 +24,7 @@ describe("Conditional directive not allowed", () => {
       );
     `;
     expect(code).toCompileWithError(
-      'The "if" directive may not be used on repeated elements.'
+      "The `if` directive may not be used on repeated elements."
     );
   });
 });
