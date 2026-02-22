@@ -12,7 +12,14 @@ import { HTML_SPLITTER } from "../constants";
 import { ERROR_MESSAGES, error } from "../errors";
 import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
-import { ExtractedNode, DynamicTextNode, PlainTextNode, StubNode, TagNode } from "./node";
+import {
+  ExtractedNode,
+  DynamicTextNode,
+  PlainTextNode,
+  StubNode,
+  TagNode,
+  NestedComponentTagNode
+} from "./node";
 import { Module } from "./module";
 
 export interface WalkTracker {
@@ -118,9 +125,7 @@ export class Component {
       tracker.initialIndex,
       tracker.parent,
       this,
-      tagName,
-      false,
-      false
+      tagName
     );
     path.traverse(attributeVisitors, {
       extractedNode,
@@ -134,22 +139,19 @@ export class Component {
     });
     this.#exitLevel();
   }
-  processNestedOrRepeatedElement(
+  processNestedComponentTagNode(
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
-    tagName: string,
-    isRepeat: boolean
+    tagName: string
   ) {
     this.#enterLevel(tracker.childIndex);
-    const extractedNode = new TagNode(
+    const extractedNode = new NestedComponentTagNode(
       path,
       this.#getCurrentAddress(),
       tracker.initialIndex,
       tracker.parent,
       this,
-      tagName,
-      !isRepeat,
-      isRepeat
+      tagName
     );
     path.traverse(attributeVisitors, {
       extractedNode,

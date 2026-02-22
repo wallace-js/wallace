@@ -583,27 +583,6 @@ declare module "wallace" {
         element: HTMLElement;
       }
     ): JSX.Element;
-    // nest?({
-    //   props,
-    //   show,
-    //   ctrl,
-    //   hide
-    // }: {
-    //   props?: Props;
-    //   ctrl?: Controller;
-    //   show?: boolean;
-    //   hide?: boolean;
-    //   if?: boolean;
-    // }): JSX.Element;
-    // repeat?({
-    //   items,
-    //   ctrl,
-    //   key
-    // }: {
-    //   items: Array<Props>;
-    //   ctrl?: Controller;
-    //   key?: keyof Props | ((item: Props) => any);
-    // }): JSX.Element;
     methods?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // readonly prototype?: ComponentMethods<Props, Controller> &

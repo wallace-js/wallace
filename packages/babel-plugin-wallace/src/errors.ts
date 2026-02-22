@@ -38,7 +38,6 @@ export const ERROR_MESSAGES = {
     return `"${event}" is not a valid event. Must be lowercase without "on" prefix. E.g. event:keyup.`;
   },
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
-  INCORRECTLY_NESTED_COMPONENT: "Nest components using <Name.nest /> or <Name.repeat />.",
   ARROW_FUNCTION_NOT_ASSIGNED: "Component function must be assigned to a variable.",
   DIRECTIVE_INVALID_TYPE: (directive: string, allowed: string[], actual: string) => {
     return allowed.length

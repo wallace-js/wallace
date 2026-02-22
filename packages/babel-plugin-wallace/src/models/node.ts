@@ -162,6 +162,7 @@ export class ExtractedNode {
     return this.repeatNode ? this.repeatNode.getCtrl() : this.#ctrl;
   }
   setProps(expression: Expression) {
+    this.parent.hasNestedChildren = true;
     if (this.#props) {
       error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("props"));
     }
@@ -207,9 +208,10 @@ export class ExtractedNode {
     if (this.#repeatExpression) {
       error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("items"));
     }
+    this.isNestedComponent = false;
     this.isRepeatedComponent = true;
     this.#repeatExpression = expression;
-    // this.parent.repeatNode = this;
+    this.parent.hasRepeatedChildren = true;
   }
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
@@ -230,6 +232,7 @@ export class ExtractedNode {
     if (this.#stubName) {
       error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
     }
+    this.parent.hasNestedChildren = true;
     this.#stubName = name;
   }
   getStubName(): string | undefined {
@@ -241,10 +244,9 @@ export class ExtractedNode {
 }
 
 /**
- * Class for tag nodes:
+ * Class for standars tag nodes:
  * <img />
  * <div>...</div>
- * <NestedComponent />
  */
 export class TagNode extends ExtractedNode {
   parent: TagNode;
@@ -257,23 +259,21 @@ export class TagNode extends ExtractedNode {
     initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
-    tagName: string,
-    isNestedComponent: boolean,
-    isRepeatedComponent: boolean
+    tagName: string
   ) {
     super(path, address, initialIndex, parent);
     this.component = component;
     this.tagName = tagName;
-    this.isNestedComponent = isNestedComponent;
-    this.isRepeatedComponent = isRepeatedComponent;
-    if (!this.parent && (this.isRepeatedComponent || this.isNestedComponent)) {
-      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
-    }
-    if (this.isRepeatedComponent) {
-      this.parent.hasRepeatedChildren = true;
-    } else if (this.isNestedComponent) {
-      this.parent.hasNestedChildren = true;
-    }
+    // this.isNestedComponent = isNestedComponent;
+    // this.isRepeatedComponent = isRepeatedComponent;
+    // if (!this.parent && (this.isRepeatedComponent || this.isNestedComponent)) {
+    //   error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+    // }
+    // if (this.isRepeatedComponent) {
+    //   this.parent.hasRepeatedChildren = true;
+    // } else if (this.isNestedComponent) {
+    //   this.parent.hasNestedChildren = true;
+    // }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
@@ -283,9 +283,6 @@ export class TagNode extends ExtractedNode {
     this.attributes.push({ name, value: HTML_SPLITTER });
   }
   getElement(): HTMLElement | Text {
-    if (this.isRepeatedComponent || this.isNestedComponent) {
-      return undefined;
-    }
     const element = createElement(this.tagName);
     this.attributes.forEach(({ name, value }) => {
       element.setAttribute(name, value || "");
@@ -295,7 +292,44 @@ export class TagNode extends ExtractedNode {
   }
 }
 
-export class StubNode extends TagNode {
+/**
+ * Class for nested component tag nodes:
+ *
+ * <NestedComponent />
+ */
+export class NestedComponentTagNode extends TagNode {
+  parent: TagNode;
+  address: Array<number>;
+  path: NodePath<JSXElement>;
+  attributes: Attribute[] = [];
+  constructor(
+    path: NodePath<JSXElement>,
+    address: Array<number>,
+    initialIndex: number,
+    parent: TagNode,
+    component: any, // TODO: fix type circular import.
+    tagName: string
+  ) {
+    super(path, address, initialIndex, parent, component, tagName);
+    this.isNestedComponent = true; // this will be false if we get repeat instructions
+    if (!this.parent) {
+      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
+    }
+
+    // this.isRepeatedComponent = isRepeatedComponent;
+    // this.parent.hasNestedChildren = true
+    // if (this.isRepeatedComponent) {
+    //   this.parent.hasRepeatedChildren = true;
+    // } else if (this.isNestedComponent) {
+    //   ;
+    // }
+  }
+  getElement(): HTMLElement | Text {
+    return undefined;
+  }
+}
+
+export class StubNode extends NestedComponentTagNode {
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
@@ -304,15 +338,12 @@ export class StubNode extends TagNode {
     component: any, // TODO: fix type circular import.
     name: string
   ) {
-    super(path, address, initialIndex, parent, component, name, false, false);
+    super(path, address, initialIndex, parent, component, name);
     if (!this.parent) {
       error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
     }
     this.parent.hasNestedChildren = true;
     this.setStub(name);
-  }
-  getElement(): HTMLElement | Text {
-    return undefined;
   }
 }
 

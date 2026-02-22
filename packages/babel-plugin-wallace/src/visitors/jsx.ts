@@ -21,26 +21,19 @@ export const jsxVisitors = {
     const tagName = getJSXElementName(path);
     if (typeof tagName === "string") {
       if (isCapitalized(tagName)) {
-        error(path, ERROR_MESSAGES.INCORRECTLY_NESTED_COMPONENT);
+        component.processNestedComponentTagNode(path, tracker, tagName);
+        path.traverse(errorIfJSXelementsFoundUnderNested);
+      } else {
+        component.processJSXElement(path, tracker, tagName, jsxVisitors);
       }
-      component.processJSXElement(path, tracker, tagName, jsxVisitors);
     } else {
+      // Namespace can be <x.y /> or <x:y />
       const { namespace, name } = tagName;
       if (name === "nest" || name === "repeat") {
-        const componentCls = namespace;
-        if (!isCapitalized(componentCls)) {
-          error(path, ERROR_MESSAGES.NESTED_COMPONENT_MUST_BE_CAPTIALIZED);
-        }
-        component.processNestedOrRepeatedElement(
-          path,
-          tracker,
-          componentCls,
-          name === "repeat"
-        );
+        // DEPRECATE
+        component.processNestedComponentTagNode(path, tracker, namespace);
         path.traverse(errorIfJSXelementsFoundUnderNested);
       } else if (namespace === "stub") {
-        // TODO: ensure there is nothing inside and no other attributes.
-        // alternatively, allow attributes to control the stub.
         wallaceConfig.ensureFlagIstrue(path, FlagValue.allowStubs);
         component.processStub(path, name, tracker);
       } else {

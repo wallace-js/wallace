@@ -61,14 +61,17 @@ export function processNode(
   const hasWatches = node.watches.length > 0;
   const isStub = node.getStubName() !== undefined;
 
+  if (node.isNestedComponent && node.isRepeatedComponent) {
+    throw new Error("Nodecannot be nested and repeated");
+  }
+
   const needsWatch =
     hasWatches ||
     hasBoundInputs ||
     hasClassToggles ||
     visibilityToggle ||
     node.isNestedComponent ||
-    repeatInstruction ||
-    isStub;
+    node.isRepeatedComponent;
 
   const shouldSaveElement =
     hasWatches ||
@@ -78,14 +81,13 @@ export function processNode(
     ref ||
     part ||
     hasEventListeners ||
-    isStub ||
     node.isNestedComponent ||
     node.hasConditionalChildren ||
     node.hasNestedChildren ||
     node.hasRepeatedChildren;
 
   if (shouldSaveElement) {
-    if (node.isNestedComponent || isStub) {
+    if (node.isNestedComponent) {
       node.elementKey = createNesterObject(componentDefinition, node, isStub);
     } else {
       node.elementKey = componentDefinition.saveDynamicElement(node.address);
@@ -131,7 +133,7 @@ export function processNode(
       );
     }
 
-    if (node.isNestedComponent || isStub) {
+    if (node.isNestedComponent) {
       const parentDetacherArgs = node.parent.detacherObject.arguments;
       if (parentDetacherArgs.length === 0) {
         parentDetacherArgs.push(t.arrayExpression([]));
