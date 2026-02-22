@@ -59,12 +59,12 @@ export class Directive {
   }
   validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
     const { attributeName, allowOnRepeated, allowOnNested } = constructor;
-    // if (!allowOnRepeated && node.isRepeatedComponent) {
-    //   error(
-    //     node.path,
-    //     ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT(attributeName)
-    //   );
-    // }
+    if (!allowOnRepeated && node.isRepeatedComponent) {
+      error(
+        node.path,
+        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT(attributeName)
+      );
+    }
     if (!allowOnNested && node.isNestedComponent) {
       error(
         node.path,

@@ -30,23 +30,8 @@ export function processNode(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode
 ) {
-  if (node.isRepeatedComponent) {
-    // The watch should already have been added to the parent node, which is already
-    // processed. All we do here is run some extra checks.
-    // TODO: do this with visitor?
-    const children = getChildren(node, componentDefinition.component.extractedNodes);
-    if (children.length > 0) {
-      error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
-    }
-
-    if (!wallaceConfig.flags.allowRepeaterSiblings) {
-      const siblings = getSiblings(node, componentDefinition.component.extractedNodes);
-      if (siblings.length > 0) {
-        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
-      }
-    }
-  }
-  // Need to happen first
+  // These need to happen first...
+  nestedComponentValidation(node, componentDefinition);
   ensureToggleTargetsHaveTriggers(node);
   createEventsForBoundInputs(componentDefinition, node);
   addRequiredImports(componentDefinition, node);
@@ -60,10 +45,6 @@ export function processNode(
   const hasEventListeners = node.eventListeners.length > 0;
   const hasWatches = node.watches.length > 0;
   const isStub = node.getStubName() !== undefined;
-
-  if (node.isNestedComponent && node.isRepeatedComponent) {
-    throw new Error("Nodecannot be nested and repeated");
-  }
 
   const needsWatch =
     hasWatches ||
@@ -162,6 +143,23 @@ export function processNode(
   }
   if (ref) processRef(componentDefinition, node, ref);
   if (part) processPart(componentDefinition, node, part);
+}
+
+function nestedComponentValidation(
+  node: ExtractedNode,
+  componentDefinition: ComponentDefinitionData
+) {
+  if (node.isNestedComponent && node.isRepeatedComponent) {
+    throw new Error("Internal error: node cannot be nested and repeated");
+  }
+  if (node.isRepeatedComponent) {
+    if (!wallaceConfig.flags.allowRepeaterSiblings) {
+      const siblings = getSiblings(node, componentDefinition.component.extractedNodes);
+      if (siblings.length > 0) {
+        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
+      }
+    }
+  }
 }
 
 function addRequiredImports(

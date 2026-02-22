@@ -208,10 +208,7 @@ export class ExtractedNode {
     if (this.#repeatExpression) {
       error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("items"));
     }
-    this.isNestedComponent = false;
-    this.isRepeatedComponent = true;
     this.#repeatExpression = expression;
-    this.parent.hasRepeatedChildren = true;
   }
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
@@ -264,16 +261,6 @@ export class TagNode extends ExtractedNode {
     super(path, address, initialIndex, parent);
     this.component = component;
     this.tagName = tagName;
-    // this.isNestedComponent = isNestedComponent;
-    // this.isRepeatedComponent = isRepeatedComponent;
-    // if (!this.parent && (this.isRepeatedComponent || this.isNestedComponent)) {
-    //   error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
-    // }
-    // if (this.isRepeatedComponent) {
-    //   this.parent.hasRepeatedChildren = true;
-    // } else if (this.isNestedComponent) {
-    //   this.parent.hasNestedChildren = true;
-    // }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
@@ -308,21 +295,20 @@ export class NestedComponentTagNode extends TagNode {
     initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
-    tagName: string
+    tagName: string,
+    isRepeat: boolean
   ) {
     super(path, address, initialIndex, parent, component, tagName);
-    this.isNestedComponent = true; // this will be false if we get repeat instructions
     if (!this.parent) {
       error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
     }
-
-    // this.isRepeatedComponent = isRepeatedComponent;
-    // this.parent.hasNestedChildren = true
-    // if (this.isRepeatedComponent) {
-    //   this.parent.hasRepeatedChildren = true;
-    // } else if (this.isNestedComponent) {
-    //   ;
-    // }
+    if (isRepeat) {
+      this.isRepeatedComponent = true;
+      this.parent.hasRepeatedChildren = true;
+    } else {
+      this.isNestedComponent = true;
+      this.parent.hasNestedChildren = true;
+    }
   }
   getElement(): HTMLElement | Text {
     return undefined;
@@ -336,13 +322,10 @@ export class StubNode extends NestedComponentTagNode {
     initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
-    name: string
+    name: string,
+    isRepeat: boolean
   ) {
-    super(path, address, initialIndex, parent, component, name);
-    if (!this.parent) {
-      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
-    }
-    this.parent.hasNestedChildren = true;
+    super(path, address, initialIndex, parent, component, name, isRepeat);
     this.setStub(name);
   }
 }

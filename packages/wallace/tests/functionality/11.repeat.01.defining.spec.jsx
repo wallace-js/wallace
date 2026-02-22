@@ -33,21 +33,10 @@ describe("Repeat", () => {
 });
 
 describe("Repeat compiles with error when", () => {
-  test("element is not a nested component", () => {
-    const code = `
-      const Parent = () => (
-        <div>
-          <div.repeat items={items} />
-        </div>
-      );
-    `;
-    expect(code).toCompileWithError("Nested component must be capitalized.");
-  });
-
   test("repeat on root element", () => {
     const code = `
       const Parent = () => (
-        <Child.repeat items={items} />
+        <Child items={items} />
       );
     `;
     expect(code).toCompileWithError("Nested components not allowed as root element.");

@@ -1,20 +1,6 @@
 import { testMount } from "../utils";
 
 describe("Specifying", () => {
-  test("Disallow React style nesting", () => {
-    const code = `
-    const Animal = (animal) => <div>{animal.name}</div>;
-    const AnimalList = () => (
-      <div>
-        <Animal props={fox} />
-      </div>
-    );
-  `;
-    expect(code).toCompileWithError(
-      "Nest components using <Name.nest /> or <Name.repeat />."
-    );
-  });
-
   test("Disallow passing a litteral object as props", () => {
     const code = `
     const Animal = (animal) => <div>{animal.name}</div>;

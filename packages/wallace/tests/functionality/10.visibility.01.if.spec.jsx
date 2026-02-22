@@ -19,7 +19,7 @@ describe("Conditional directive not allowed", () => {
       )
       const Foo = () => (
         <div>
-          <Bar.repeat if={true} />
+          <Bar items={[1, 2, 3]} if={true} />
         </div>
       );
     `;

@@ -9,8 +9,7 @@ import type {
 import { stringLiteral } from "@babel/types";
 import type { Scope } from "@babel/traverse";
 import { HTML_SPLITTER } from "../constants";
-import { ERROR_MESSAGES, error } from "../errors";
-import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
+import { buildConcat, getPlaceholderExpression, isRepeat } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
 import {
   ExtractedNode,
@@ -83,13 +82,6 @@ export class Component {
     path: NodePath,
     tracker: WalkTracker
   ) {
-    // TODO: clean up this mess. Better way to do it.
-    if (tracker.parent?.isNestedComponent) {
-      error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN);
-    }
-    if (tracker.parent?.isRepeatedComponent) {
-      error(path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
-    }
     tracker.initialIndex += 1;
     if (!element) {
       // means it is a nested or repeated node.
@@ -151,7 +143,8 @@ export class Component {
       tracker.initialIndex,
       tracker.parent,
       this,
-      tagName
+      tagName,
+      isRepeat(path)
     );
     path.traverse(attributeVisitors, {
       extractedNode,
@@ -169,9 +162,9 @@ export class Component {
       tracker.initialIndex,
       tracker.parent,
       this,
-      name
+      name,
+      isRepeat(path)
     );
-
     path.traverse(attributeVisitors, {
       extractedNode,
       allowAttributes: false,

@@ -73,6 +73,7 @@ class CssDirective extends Directive {
 class CtrlDirective extends Directive {
   static attributeName = "ctrl";
   static allowOnNested = true;
+  static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help: `
   Specify ctrl for a nested component:
@@ -165,7 +166,7 @@ class IfDirective extends Directive {
 
 class ItemsDirective extends Directive {
   static attributeName = "items";
-  static allowOnNested = true;
+  static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help: `
   Specify items for a repeated component:
@@ -180,6 +181,7 @@ class ItemsDirective extends Directive {
 class KeyDirective extends Directive {
   static attributeName = "key";
   static allowString = true;
+  static allowOnRepeated = true;
   static allowOnNormalElement = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setRepeatKey(value.expression || value.value);
@@ -208,6 +210,7 @@ class OnEventDirective extends Directive {
 class PartDirective extends Directive {
   static attributeName = "part";
   static allowOnNested = true;
+  static allowOnRepeated = true;
   static allowNull = true;
   static allowExpression = false;
   static requireQualifier = true;
