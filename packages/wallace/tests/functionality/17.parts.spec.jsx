@@ -71,6 +71,49 @@ if (wallaceConfig.flags.allowParts) {
     </div>
   `);
   });
+
+  test("Parts work on repeated components", () => {
+    const Foo = n => <span>{n}</span>;
+    const Bar = () => (
+      <div>
+        <span>total: {items.reduce((a, b) => a + b, 0)}</span>
+        <Foo part:foo items={items} />
+      </div>
+    );
+    const items = [1, 2, 3];
+    const component = testMount(Bar);
+
+    expect(component).toRender(`
+      <div> 
+        <span>total: <span>6</span></span>
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+      </div>
+    `);
+    items.push(4);
+    component.part.foo.update();
+    expect(component).toRender(`
+      <div> 
+        <span>total: <span>6</span></span>
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+      </div>
+    `);
+
+    component.update();
+    expect(component).toRender(`
+      <div> 
+        <span>total: <span>10</span></span>
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+      </div>
+    `);
+  });
 } else {
   test("at least one test", () => {
     expect(true).toBe(true);

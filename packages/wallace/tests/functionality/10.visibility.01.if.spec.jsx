@@ -9,10 +9,10 @@ describe("Conditional directive not allowed", () => {
         </div>
       );
     `;
-    expect(code).toCompileWithError("Cannot use 'if' on root element.");
+    expect(code).toCompileWithError("Cannot use `if` directive on root element.");
   });
 
-  test.only("on repeated element", () => {
+  test("on repeated element", () => {
     const code = `
       const Bar = () => (
         <span>Hello</span>
