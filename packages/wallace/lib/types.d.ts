@@ -572,17 +572,8 @@ declare module "wallace" {
     Controller = any,
     Methods extends object = {}
   > {
-    ({
-      props: Props,
-      if: boolean,
-      part: string
-    }: {
-      props: Props;
-      if?: boolean;
-      part?: string;
-    }): JSX.Element;
     (
-      props: Props,
+      props?: Props,
       xargs?: {
         ctrl: Controller;
         props: Props;
@@ -592,6 +583,50 @@ declare module "wallace" {
         element: HTMLElement;
       }
     ): JSX.Element;
+    nest({
+      props,
+      part,
+      if: boolean
+    }: {
+      props: Props;
+      if?: boolean;
+      part?: string;
+    }): JSX.Element;
+    repeat?({
+      props,
+      ctrl,
+      part,
+      key
+    }: {
+      props: Array<Props>;
+      ctrl?: Controller;
+      part?: string;
+      key?: keyof Props | ((item: Props) => any);
+    }): JSX.Element;
+    methods?: ComponentMethods<Props, Controller> &
+      ThisType<ComponentInstance<Props, Controller, Methods>>;
+    // readonly prototype?: ComponentMethods<Props, Controller> &
+    // TODO: This works, so coppy for methods.
+    readonly prototype: ComponentInstance<Props, Controller>;
+    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
+    // Methods will not be available on nested component, so omit.
+    readonly stubs?: Record<string, ComponentFunction>;
+  }
+
+  interface ComponentFunction2<
+    Props = any,
+    Controller = any,
+    Methods extends object = {}
+  > {
+    ({
+      props: Props,
+      if: boolean,
+      part: string
+    }?: {
+      props: Props;
+      if?: boolean;
+      part?: string;
+    }): JSX.Element;
     // repeat?: repeat;
     repeat?({
       props,
@@ -607,7 +642,6 @@ declare module "wallace" {
     methods?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // readonly prototype?: ComponentMethods<Props, Controller> &
-
     // TODO: This works, so coppy for methods.
     readonly prototype: ComponentInstance<Props, Controller>;
     //   ThisType<ComponentInstance<Props, Controller, Methods>>;
