@@ -30,7 +30,7 @@ export const jsxVisitors = {
       // Namespace can be <x.y /> or <x:y />
       const { namespace, name } = tagName;
       if (name === "nest" || name === "repeat") {
-        // DEPRECATE
+        // TODO: ensure it has items if it's repeat
         component.processNestedComponentTagNode(path, tracker, namespace);
         path.traverse(errorIfJSXelementsFoundUnderNested);
       } else if (namespace === "stub") {
