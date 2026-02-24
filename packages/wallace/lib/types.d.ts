@@ -572,6 +572,15 @@ declare module "wallace" {
     Controller = any,
     Methods extends object = {}
   > {
+    ({
+      props: Props,
+      if: boolean,
+      part: string
+    }: {
+      props: Props;
+      if?: boolean;
+      part?: string;
+    }): JSX.Element;
     (
       props: Props,
       xargs?: {
@@ -583,7 +592,18 @@ declare module "wallace" {
         element: HTMLElement;
       }
     ): JSX.Element;
-    repeat?: ComponentFunction<Props, Controller, Methods>;
+    // repeat?: repeat;
+    repeat?({
+      props,
+      ctrl,
+      part,
+      key
+    }: {
+      props: Array<Props>;
+      ctrl?: Controller;
+      part?: string;
+      key?: keyof Props | ((item: Props) => any);
+    }): JSX.Element;
     methods?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     // readonly prototype?: ComponentMethods<Props, Controller> &
@@ -1060,20 +1080,13 @@ interface DirectiveAttributes extends AllDomEvents {
   unique?: boolean;
 }
 
-/**
- * Fooo
- */
-// interface ComponentFunction3<Props = any, Ctrl = any, Methods = any> {
-//   (props: Props, { ctrl: Ctrl }): JSX.Element;
-// }
+// This makes this a module, which is needed.
 export {};
 
 declare global {
   namespace JSX {
-    type NestedComponentAttributes<Props> =
-      | { props: Props }
-      | { props: Props; if?: boolean }
-      | { items: Props[]; key?: keyof Props | ((item: Props) => any) };
+    type NestedComponentAttributes<Props> = { props: Props; if?: boolean };
+
     // | {
     //     props: Props;
     //     if?: boolean;
@@ -1131,10 +1144,11 @@ declare global {
 
     // type NestedComponentAttributes<Props> = XOR<Single<Props>, Multiple<Props>>;
 
-    type LibraryManagedAttributes<C, P> =
-      C extends ComponentFunction<infer Props, any, any>
-        ? NestedComponentAttributes<Props>
-        : P;
+    // type LibraryManagedAttributes<C, P> = C extends
+    //   | ComponentFunction<infer Props, any, any>
+    //   | ComponentFunctionWithRepeat<infer Props, any, any>
+    //   ? NestedComponentAttributes<Props>
+    //   : P;
 
     // type LibraryManagedAttributes<C, P> =
     //   C extends ComponentFunction<infer Props, any, any>
