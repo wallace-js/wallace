@@ -580,7 +580,15 @@ declare module "wallace" {
     [P in Exclude<keyof T, keyof K>]?: never;
   };
   type XOR<T, U> = (T & Without<U, T>) | (U & Without<T, U>);
-  type Wrapper<Props> = XOR<Props, { props: Props; if?: boolean }>;
+
+  interface NestedCall<Props, Controller> {
+    props: Props;
+    if?: boolean;
+    part?: string; // TODO: keyof?
+    ctrl?: Controller;
+  }
+
+  type Wrapper<Props, Controller> = XOR<Props, NestedCall<Props, Controller>>;
 
   /**
    * A component function.
@@ -591,52 +599,16 @@ declare module "wallace" {
     Methods extends object = {}
   > {
     (
-      props?: Wrapper<Props>,
+      props?: Wrapper<Props, Controller>,
       xargs?: {
         ctrl: Controller;
         props: Props;
         self: ComponentInstance<Props, Controller, Methods>;
-        stub: Record<string, ComponentFunction>;
+        // stub: Record<string, ComponentFunction>;
         event: Event;
         element: HTMLElement;
       }
     ): JSX.Element;
-    repeat?({
-      props,
-      ctrl,
-      part,
-      key
-    }: {
-      props: Array<Props>;
-      ctrl?: Controller;
-      part?: string;
-      key?: keyof Props | ((item: Props) => any);
-    }): JSX.Element;
-    methods?: ComponentMethods<Props, Controller> &
-      ThisType<ComponentInstance<Props, Controller, Methods>>;
-    // readonly prototype?: ComponentMethods<Props, Controller> &
-    // TODO: This works, so coppy for methods.
-    readonly prototype: ComponentInstance<Props, Controller>;
-    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
-    // Methods will not be available on nested component, so omit.
-    readonly stubs?: Record<string, ComponentFunction>;
-  }
-
-  interface ComponentFunction2<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  > {
-    ({
-      props: Props,
-      if: boolean,
-      part: string
-    }?: {
-      props: Props;
-      if?: boolean;
-      part?: string;
-    }): JSX.Element;
-    // repeat?: repeat;
     repeat?({
       props,
       ctrl,
@@ -691,7 +663,7 @@ declare module "wallace" {
     methods?: object;
   }
 
-  export type Accepts<T extends CompoundTypes> = ComponentFunction<
+  export type UsesX<T extends CompoundTypes> = ComponentFunction<
     T["props"],
     T["ctrl"],
     T["methods"]
