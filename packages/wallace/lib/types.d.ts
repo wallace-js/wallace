@@ -564,6 +564,24 @@ Report any issues to https://github.com/wallace-js/wallace (and please give it a
 */
 
 declare module "wallace" {
+  // type DirectCall<Props> = Props;
+
+  // type NestCall<Props> = {
+  //   props: Props;
+  //   if?: boolean;
+  //   part?: string;
+  // };
+
+  // type ComponentCall<Props> = DirectCall<Props> | NestCall<Props>;
+
+  // type Wrapper<Props> = Props | { props: Props; if?: boolean };
+
+  type Without<T, K> = {
+    [P in Exclude<keyof T, keyof K>]?: never;
+  };
+  type XOR<T, U> = (T & Without<U, T>) | (U & Without<T, U>);
+  type Wrapper<Props> = XOR<Props, { props: Props; if?: boolean }>;
+
   /**
    * A component function.
    */
@@ -573,7 +591,7 @@ declare module "wallace" {
     Methods extends object = {}
   > {
     (
-      props?: Props,
+      props?: Wrapper<Props>,
       xargs?: {
         ctrl: Controller;
         props: Props;
@@ -583,15 +601,6 @@ declare module "wallace" {
         element: HTMLElement;
       }
     ): JSX.Element;
-    nest({
-      props,
-      part,
-      if: boolean
-    }: {
-      props: Props;
-      if?: boolean;
-      part?: string;
-    }): JSX.Element;
     repeat?({
       props,
       ctrl,
