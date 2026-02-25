@@ -564,53 +564,15 @@ Report any issues to https://github.com/wallace-js/wallace (and please give it a
 */
 
 declare module "wallace" {
-  // type DirectCall<Props> = Props;
-
-  // type NestCall<Props> = {
-  //   props: Props;
-  //   if?: boolean;
-  //   part?: string;
-  // };
-
-  // type ComponentCall<Props> = DirectCall<Props> | NestCall<Props>;
-
-  // type Wrapper<Props> = Props | { props: Props; if?: boolean };
-
-  //--------------------------------------------
-
-  // Thought this worked but it doesn't
-
-  // type Without<T, K> = {
-  //   [P in Exclude<keyof T, keyof K>]?: never;
-  // };
-  // type XOR<T, U> = (T & Without<U, T>) | (U & Without<T, U>);
-
-  // interface NestedCall<Props, Controller> {
-  //   props: Props;
-  //   if?: boolean;
-  //   part?: string; // TODO: keyof?
-  //   ctrl?: Controller;
-  // }
-
-  // type Wrapper<Props, Controller> = XOR<Props, NestedCall<Props, Controller>>;
-
-  //--------------------------------------------
-
-  // type StubType<Stubs> = { key: keyof Stubs; ComponentFunction };
-
   type StubDefinition = {
     [key: string]: ComponentFunction;
   };
 
   // type PropsOf<C> = C extends ComponentFunction<infer P, any, any, any> ? P : never;
 
-  type StubsInterface<Stubs> = {
+  type StubInterface<Stubs> = {
     [K in keyof Stubs]: Stubs[K] extends ComponentFunction ? Stubs[K] : never;
   };
-
-  // type StubsInterface<Stubs> = {
-  //   [key in keyof Stubs]: ComponentFunction;
-  // };
 
   /**
    * A component function.
@@ -619,15 +581,15 @@ declare module "wallace" {
     Props = any,
     Controller = any,
     Methods extends object = {},
-    Stubs extends object = StubDefinition
+    Stubs extends StubDefinition = {}
   > {
     (
-      props?: Props, //Wrapper<Props, Controller>,
+      props?: Props,
       xargs?: {
         ctrl: Controller;
         props: Props;
         self: ComponentInstance<Props, Controller, Methods>;
-        stub: StubsInterface<Stubs>;
+        stub: StubInterface<Stubs>;
         event: Event;
         element: HTMLElement;
       }
@@ -645,12 +607,7 @@ declare module "wallace" {
     }): JSX.Element;
     methods?: ComponentMethods<Props, Controller> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
-    // readonly prototype?: ComponentMethods<Props, Controller> &
-    // TODO: This works, so coppy for methods.
     readonly prototype: ComponentInstance<Props, Controller>;
-    //   ThisType<ComponentInstance<Props, Controller, Methods>>;
-    // Methods will not be available on nested component, so omit.
-
     readonly stub?: Stubs;
   }
 
@@ -678,8 +635,8 @@ declare module "wallace" {
   type Uses<
     T = any,
     Controller = any
-    // Methods extends object = {},
     // Stub extends object = {}
+    // Methods extends object = {},
   > = T extends CompoundTypes
     ? ComponentFunction<T["props"], T["ctrl"], T["methods"], T["stub"]>
     : ComponentFunction<T, Controller>;

@@ -31,7 +31,7 @@ describe("Props", () => {
   //   `).toHaveTypeErrors([]);
   // });
 
-  test("diallows no props if they are specified", () => {
+  test("diallows no props if props are specified", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
@@ -63,7 +63,7 @@ describe("Props", () => {
 
       const Bar: Uses = () => (
         <div>
-          <Foo props={5}/>
+          <Foo props={5} />
         </div>
       );
     `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Props'."]);
