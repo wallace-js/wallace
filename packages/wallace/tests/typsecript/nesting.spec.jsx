@@ -97,7 +97,7 @@ describe("Other directives", () => {
 
     const Bar: Uses = () => (
       <div>
-        <Foo props={5} part="foo"/>
+        <Foo props={{clicks: 5}} part="foo"/>
       </div>
     );
     const bar = mount("main", Bar);

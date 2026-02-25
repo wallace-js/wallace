@@ -1202,7 +1202,8 @@ declare global {
     //     ? NestedComponentAttributes<Props> & P
     //     : P;
 
-    type Wrapper<Props> = Props | { props: Props; if?: boolean };
+    // This allows <Foo props={x} if={y} />
+    type Wrapper<Props> = Props | { props: Props; if?: boolean; part?: string };
 
     type LibraryManagedAttributes<C, P> =
       C extends ComponentFunction<infer Props, any, any, any> ? Wrapper<Props> : P;
