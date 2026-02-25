@@ -89,13 +89,19 @@ describe("Other directives", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
-    const Foo: Uses = () => (<div></div>);
+    interface Props {
+      clicks: number;
+    }
+
+    const Foo: Uses<Props> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
-        <Foo part="foo" />
+        <Foo props={5} part="foo"/>
       </div>
     );
+    const bar = mount("main", Bar);
+    bar.part.foo.update();
   `).toHaveNoTypeErrors();
   });
 
