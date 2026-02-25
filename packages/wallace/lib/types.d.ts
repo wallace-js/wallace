@@ -576,31 +576,37 @@ declare module "wallace" {
 
   // type Wrapper<Props> = Props | { props: Props; if?: boolean };
 
-  type Without<T, K> = {
-    [P in Exclude<keyof T, keyof K>]?: never;
-  };
-  type XOR<T, U> = (T & Without<U, T>) | (U & Without<T, U>);
+  //--------------------------------------------
 
-  interface NestedCall<Props, Controller> {
-    props: Props;
-    if?: boolean;
-    part?: string; // TODO: keyof?
-    ctrl?: Controller;
-  }
+  // Thought this worked but it doesn't
 
-  type Wrapper<Props, Controller> = XOR<Props, NestedCall<Props, Controller>>;
+  // type Without<T, K> = {
+  //   [P in Exclude<keyof T, keyof K>]?: never;
+  // };
+  // type XOR<T, U> = (T & Without<U, T>) | (U & Without<T, U>);
+
+  // interface NestedCall<Props, Controller> {
+  //   props: Props;
+  //   if?: boolean;
+  //   part?: string; // TODO: keyof?
+  //   ctrl?: Controller;
+  // }
+
+  // type Wrapper<Props, Controller> = XOR<Props, NestedCall<Props, Controller>>;
+
+  //--------------------------------------------
 
   // type StubType<Stubs> = { key: keyof Stubs; ComponentFunction };
 
-  // type StubDefinition = {
-  //   [key: string]: ComponentFunction;
-  // };
+  type StubDefinition = {
+    [key: string]: ComponentFunction;
+  };
 
   // type PropsOf<C> = C extends ComponentFunction<infer P, any, any, any> ? P : never;
 
-  // type StubsInterface<Stubs> = {
-  //   [K in keyof Stubs]: Stubs[K] extends ComponentFunction ? Stubs[K] : never;
-  // };
+  type StubsInterface<Stubs> = {
+    [K in keyof Stubs]: Stubs[K] extends ComponentFunction ? Stubs[K] : never;
+  };
 
   // type StubsInterface<Stubs> = {
   //   [key in keyof Stubs]: ComponentFunction;
@@ -612,16 +618,16 @@ declare module "wallace" {
   interface ComponentFunction<
     Props = any,
     Controller = any,
-    Methods extends object = {}
-    // Stubs extends object = StubDefinition
+    Methods extends object = {},
+    Stubs extends object = StubDefinition
   > {
     (
-      props?: Wrapper<Props, Controller>,
+      props?: Props, //Wrapper<Props, Controller>,
       xargs?: {
         ctrl: Controller;
         props: Props;
         self: ComponentInstance<Props, Controller, Methods>;
-        // stubs: StubsInterface<Stubs>;
+        stubs: StubsInterface<Stubs>;
         event: Event;
         element: HTMLElement;
       }
@@ -1121,7 +1127,12 @@ export {};
 
 declare global {
   namespace JSX {
-    type NestedComponentAttributes<Props> = { props: Props; if?: boolean };
+    // type NestedComponentAttributes<Props> = { props: Props; if?: boolean };
+
+    type Wrapper<Props> = Props | { props: Props; if?: boolean };
+
+    type LibraryManagedAttributes<C, P> =
+      C extends ComponentFunction<infer Props, any, any, any> ? Wrapper<Props> : P;
 
     // | {
     //     props: Props;
