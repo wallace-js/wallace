@@ -203,7 +203,7 @@ const Counter = ({ count }) => (
 
 const CounterList = (counters) => (
   <div>
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
   </div>
 );
 
@@ -235,7 +235,7 @@ And special syntax for nesting and repeating:
 const CounterList = (counters) => (
   <div>
     <Counter props={counters[0]} />
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
   </div>
 );
 ```
@@ -247,13 +247,13 @@ be a string or a function:
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} key="id" />
+    <Task.repeat props={tasks} key="id" />
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} key={(x) => x.id} />
+    <Task.repeat props={tasks} key={(x) => x.id} />
   </div>
 );
 ```
@@ -282,7 +282,7 @@ const Counter: Uses<iCounter> = ({ count }) => (
 const CounterList: Uses<iCounter[]> = (counters) => (
   <div>
     <Counter props={counters[0]} />
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
   </div>
 );
 
@@ -359,7 +359,7 @@ To see reactivity working more clearly, let's display the total across all count
 const CounterList: Uses<iCounter[]> = (counters) => (
   <div>
     <span>Total: {counters.reduce((t, c) => t + c.count, 0)}</span>
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
   </div>
 );
 ```
@@ -406,7 +406,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
     <span>
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
     </span>
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
     <input type="text" bind={things} event:keyup />
   </div>
 );
@@ -434,7 +434,7 @@ const CounterList: Uses<iCounterList> = ({ counters, things }) => (
   <div>
     <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
     <input type="text" bind={things} even:keyup />
   </div>
 );
@@ -745,7 +745,7 @@ const CounterList: Uses<iCounterList, Controller, Methods> = (
   <div>
     <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
-    <Counter.repeat items={counters} />
+    <Counter.repeat props={counters} />
     <input type="text" bind={things.value} event:keyup />
   </div>
 );
@@ -783,7 +783,7 @@ const SpecialCounterList = extendComponent(
   CounterList,
   ({ counters, things }, { self }) => (
     <div>
-      <Counter.repeat items={counters} />
+      <Counter.repeat props={counters} />
       <span>Total: {self.total()}</span>
     </div>
   )
@@ -812,7 +812,7 @@ CounterList.stub = {
   ),
   counters: ({ counters }) => (
     <div>
-      <Counter.repeat items={counters} />
+      <Counter.repeat props={counters} />
     </div>
   )
 );
@@ -842,7 +842,7 @@ BaseCounterList.stub = {
   total: (_, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
     <div>
-      <Counter.repeat items={counters} />
+      <Counter.repeat props={counters} />
     </div>
   )
 };

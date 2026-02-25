@@ -37,7 +37,7 @@ if (wallaceConfig.flags.allowCtrl) {
     const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
     const Bar = () => (
       <div>
-        <Foo.repeat items={[1, 2, 3]} />
+        <Foo.repeat props={[1, 2, 3]} />
       </div>
     );
     Bar.prototype.render = function () {

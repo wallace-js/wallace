@@ -291,7 +291,7 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
     let items = [];
     const Foo = () => (
       <div>
-        <Bar.repeat items={items} />
+        <Bar.repeat props={items} />
         <div if={show.includes("a")}>a</div>
         <div if={show.includes("b")}>b</div>
       </div>

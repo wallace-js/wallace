@@ -196,7 +196,7 @@ const TopTasks = (tasks) => (
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} />
+    <Task.repeat props={tasks} />
   </div>
 );
 ```
@@ -215,7 +215,7 @@ const Task = (task) => (<div></div>);
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} />
+    <Task.repeat props={tasks} />
   </div>
 );
 ```
@@ -227,13 +227,13 @@ be a string or a function:
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} key="id"/>
+    <Task.repeat props={tasks} key="id"/>
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat items={tasks} key={(x) => x.id}/>
+    <Task.repeat props={tasks} key={(x) => x.id}/>
   </div>
 );
 ```
@@ -295,7 +295,7 @@ const Task = (task) => (<div>{task.name}</div>);
 
 const TaskList = (_, {ctrl}) => (
   <div>
-    <Task.repeat items={ctrl.getTasks()} />
+    <Task.repeat props={ctrl.getTasks()} />
   </div>
 );
 
@@ -387,7 +387,7 @@ const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
     First task:
     <Task props={tasks[0]} />
-    <Task.repeat items={tasks.slice(1)} />
+    <Task.repeat props={tasks.slice(1)} />
   </div>
 );
 
@@ -1071,9 +1071,9 @@ declare namespace JSX {
      * Nesting syntax:
      *   ```
      *   <MyComponent props={singleProps} />
-     *   <MyComponent.repeat items={arrayOfProps} />
-     *   <MyComponent.repeat items={arrayOfProps} key="id"/>
-     *   <MyComponent.repeat items={arrayOfProps} key={(i) => i.id}/>
+     *   <MyComponent.repeat props={arrayOfProps} />
+     *   <MyComponent.repeat props={arrayOfProps} key="id"/>
+     *   <MyComponent.repeat props={arrayOfProps} key={(i) => i.id}/>
      *   ```
      *
      * Available Wallace directives:

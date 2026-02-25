@@ -145,7 +145,7 @@ describe("Repeated components", () => {
     const AnimalList = () => (
       <div show={showAnimals}>
         <div class="list">
-          <Animal.repeat items={getAnimals()} />
+          <Animal.repeat props={getAnimals()} />
         </div>
       </div>
     );

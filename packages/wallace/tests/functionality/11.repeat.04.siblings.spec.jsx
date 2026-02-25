@@ -18,13 +18,13 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
       ? () => (
           <div>
             <div>hello</div>
-            <Child.repeat items={items} key="i" />
+            <Child.repeat props={items} key="i" />
           </div>
         )
       : () => (
           <div>
             <div>hello</div>
-            <Child.repeat items={items} />
+            <Child.repeat props={items} />
           </div>
         );
 
@@ -135,13 +135,13 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
       ? () => (
           <div>
             <div if={showElement}>hello</div>
-            <Child.repeat items={items} key="i" />
+            <Child.repeat props={items} key="i" />
           </div>
         )
       : () => (
           <div>
             <div if={showElement}>hello</div>
-            <Child.repeat items={items} />
+            <Child.repeat props={items} />
           </div>
         );
 
@@ -330,14 +330,14 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
     const Container = keyed
       ? () => (
           <div>
-            <Child.repeat items={items1} />
-            <Child.repeat items={items2} key="i" />
+            <Child.repeat props={items1} />
+            <Child.repeat props={items2} key="i" />
           </div>
         )
       : () => (
           <div>
-            <Child.repeat items={items1} />
-            <Child.repeat items={items2} />
+            <Child.repeat props={items1} />
+            <Child.repeat props={items2} />
           </div>
         );
 
@@ -440,9 +440,9 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
           <div>
             <span if={showA}>A</span>
             <span if={showB}>B</span>
-            <Child.repeat items={items1} key="i" />
+            <Child.repeat props={items1} key="i" />
             <span if={showC}>C</span>
-            <Child.repeat items={items2} key="i" />
+            <Child.repeat props={items2} key="i" />
             <span if={showD}>D</span>
           </div>
         )
@@ -450,9 +450,9 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
           <div>
             <span if={showA}>A</span>
             <span if={showB}>B</span>
-            <Child.repeat items={items1} />
+            <Child.repeat props={items1} />
             <span if={showC}>C</span>
-            <Child.repeat items={items2} />
+            <Child.repeat props={items2} />
             <span if={showD}>D</span>
           </div>
         );
@@ -529,13 +529,13 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
       ? () => (
           <div>
             <Other />
-            <Child.repeat items={items} key="i" />
+            <Child.repeat props={items} key="i" />
           </div>
         )
       : () => (
           <div>
             <Other />
-            <Child.repeat items={items} />
+            <Child.repeat props={items} />
           </div>
         );
 

@@ -26,7 +26,7 @@ if (wallaceConfig.flags.allowCtrl) {
     const Animal = (name, { ctrl }) => <div>{name + " " + ctrl}</div>;
     const AnimalList = (_, { self }) => (
       <div>
-        <Animal.repeat items={animals} ctrl={self.tmpCtrl} />
+        <Animal.repeat props={animals} ctrl={self.tmpCtrl} />
       </div>
     );
     AnimalList.prototype.render = function (props) {

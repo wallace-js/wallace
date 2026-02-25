@@ -165,7 +165,7 @@ class ItemsDirective extends Directive {
   static help: `
   Specify items for a repeated component:
   
-  /h <NestedComponent.repeat items={arrayOfProps} />
+  /h <NestedComponent.repeat props={arrayOfProps} />
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setProps(value.expression);
