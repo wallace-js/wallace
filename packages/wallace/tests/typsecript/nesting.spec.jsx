@@ -47,7 +47,7 @@ describe("Props", () => {
       </div>
     );
   `).toHaveTypeErrors([
-      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Props, any>'."
+      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Props>'."
     ]);
   });
 
@@ -116,8 +116,9 @@ describe("Other directives", () => {
     );
   `).toHaveTypeErrors([
       `
-    Type '{ props: { clicks: number; }; ${directive}: string; }' is not assignable to type 'IntrinsicAttributes & Wrapper<Props, any>'.
-    Property '${directive}' does not exist on type 'IntrinsicAttributes & Wrapper<Props, any>'.
+    Type '{ props: { clicks: number; }; ${directive}: string; }' is not assignable to
+    type 'IntrinsicAttributes & Wrapper<Props>'. Property '${directive}' does not exist
+    on type 'IntrinsicAttributes & Wrapper<Props>'.
     `
     ]);
   });

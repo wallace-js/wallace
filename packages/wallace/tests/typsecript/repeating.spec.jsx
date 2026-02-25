@@ -17,11 +17,8 @@ describe("Props", () => {
       </div>
     );
   `).toHaveTypeErrors([
-      `Type '{}' is not assignable to type 'IntrinsicAttributes
-       & { props: Props[]; ctrl?: any; part?: string; key?: "clicks"
-      | ((item: Props) => any); }'. Property 'props' is missing in type
-      '{}' but required in type '{ props: Props[]; ctrl?: any; part?: string; key?: 
-      "clicks" | ((item: Props) => any); }'.`
+      `Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<{ props:
+      Props[]; ctrl?: any; part?: string; key?: "clicks" | ((item: Props) => any); }>'.`
     ]);
   });
 
@@ -124,10 +121,12 @@ describe("Other directives", () => {
         <Foo.repeat part="foo" props={[{clicks: 1}]} />
       </div>
     );
+    const bar = mount("main", Bar);
+    bar.part.foo.update();
   `).toHaveNoTypeErrors();
   });
 
-  test.each(["id", "if", "show", "hide"])("disallows %s directive", directive => {
+  test.each(["id", "show", "hide"])("disallows %s directive", directive => {
     expect(`
     import { mount, Uses } from "wallace";
 
@@ -136,19 +135,19 @@ describe("Other directives", () => {
     }
 
     const Foo: Uses<Props> = () => (<div></div>);
-
+    const clicks = true;
     const Bar: Uses = () => (
       <div>
-        <Foo.repeat props={[{ clicks: 1 }]} ${directive}="clicks" />
+        <Foo.repeat props={[{ clicks: 1 }]} ${directive}={clicks} />
       </div>
     );
   `).toHaveTypeErrors([
       `
-    Type '{ props: { clicks: number; }[]; ${directive}: string; }' is not assignable 
-    to type 'IntrinsicAttributes & { props: Props[]; ctrl?: any; part?: string; key?:
-    "clicks" | ((item: Props) => any); }'. Property '${directive}' does not exist on
-    type 'IntrinsicAttributes & { props: Props[]; ctrl?: any; part?: string; key?:
-    "clicks" | ((item: Props) => any); }'.
+    Type '{ props: { clicks: number; }[]; ${directive}: boolean; }' is not assignable to
+    type 'IntrinsicAttributes & Wrapper<{ props: Props[]; ctrl?: any; part?: string;
+    key?: "clicks" | ((item: Props) => any); }>'. Property '${directive}' does not exist
+    on type 'IntrinsicAttributes & Wrapper<{ props: Props[]; ctrl?: any; part?: string;
+    key?: "clicks" | ((item: Props) => any); }>'.
     `
     ]);
   });

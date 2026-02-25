@@ -1129,11 +1129,6 @@ declare global {
   namespace JSX {
     // type NestedComponentAttributes<Props> = { props: Props; if?: boolean };
 
-    type Wrapper<Props> = Props | { props: Props; if?: boolean };
-
-    type LibraryManagedAttributes<C, P> =
-      C extends ComponentFunction<infer Props, any, any, any> ? Wrapper<Props> : P;
-
     // | {
     //     props: Props;
     //     if?: boolean;
@@ -1207,10 +1202,10 @@ declare global {
     //     ? NestedComponentAttributes<Props> & P
     //     : P;
 
-    interface Element {
-      // [elem: string]: any;
-      // props: any;
-    }
+    type Wrapper<Props> = Props | { props: Props; if?: boolean };
+
+    type LibraryManagedAttributes<C, P> =
+      C extends ComponentFunction<infer Props, any, any, any> ? Wrapper<Props> : P;
 
     interface IntrinsicElements {
       /**
@@ -1252,6 +1247,7 @@ declare global {
        */
       [elemName: string]: DirectiveAttributes & Record<string, any>;
     }
+    interface Element {}
     interface ElementClass {}
     interface IntrinsicAttributes {}
     interface ElementAttributesProperty {}
