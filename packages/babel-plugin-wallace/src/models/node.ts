@@ -26,12 +26,6 @@ interface Watch {
   callback: string | Expression;
 }
 
-export interface RepeatInstruction {
-  expression: Expression;
-  componentCls: string;
-  repeatKey: Expression | string | undefined;
-}
-
 interface EventListener {
   eventName: string;
   callback: Expression;
@@ -94,7 +88,6 @@ export class ExtractedNode {
    */
   classToggleTriggers: ToggleTrigger[] = [];
   // Private to prevent being set more thant once by directives.
-  #repeatExpression?: Expression;
   #stubName?: string;
   #visibilityToggle?: VisibilityToggle;
   #ref?: string;
@@ -162,7 +155,6 @@ export class ExtractedNode {
     return this.repeatNode ? this.repeatNode.getCtrl() : this.#ctrl;
   }
   setProps(expression: Expression) {
-    this.parent.hasNestedChildren = true;
     if (this.#props) {
       error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("props"));
     }
@@ -204,32 +196,13 @@ export class ExtractedNode {
   getPart(): string | undefined {
     return this.#part;
   }
-  setRepeatExpression(expression: Expression) {
-    if (this.#repeatExpression) {
-      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("items"));
-    }
-    this.#repeatExpression = expression;
-  }
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
-  }
-  /**
-   * Called on the parent of a repeat.
-   */
-  getRepeatInstruction(): RepeatInstruction | undefined {
-    if (this.isRepeatedComponent) {
-      return {
-        expression: this.#repeatExpression,
-        componentCls: this.tagName,
-        repeatKey: this.repeatKey
-      };
-    }
   }
   setStub(name: string) {
     if (this.#stubName) {
       error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
     }
-    this.parent.hasNestedChildren = true;
     this.#stubName = name;
   }
   getStubName(): string | undefined {

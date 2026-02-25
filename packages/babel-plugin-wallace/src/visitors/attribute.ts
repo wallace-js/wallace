@@ -4,7 +4,7 @@ import { wallaceConfig } from "../config";
 import { DOM_EVENT_HANDLERS } from "../constants";
 import { Component, TagNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
-import { extractName, extractValue } from "../ast-helpers";
+import { extractAttributeName, extractAttributeValue } from "../ast-helpers";
 
 interface State {
   extractedNode: TagNode;
@@ -21,8 +21,8 @@ export const attributeVisitors = {
       // We exit here as otherwise we'd traverse attributes of nested JSXElements too.
       return;
     }
-    const { base, qualifier } = extractName(path);
-    const extractedValue = extractValue(path);
+    const { base, qualifier } = extractAttributeName(path);
+    const extractedValue = extractAttributeValue(path);
     if (!extractedValue) {
       return;
     }

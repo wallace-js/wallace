@@ -33,11 +33,16 @@ export const ERROR_MESSAGES = {
   FLAG_REQUIRED: (flag: string) => {
     return `Flag \`${flag}\` must be set to true in the config for this feature.`;
   },
-  INVALID_EVENT_NAME: (event: string) => {
-    return `\`${event}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`;
-  },
+  INVALID_TAG_FORMAT: `Invalid tag format, must be one of:
+    <div ...>               // A normal element
+    <Foo ...>               // A nested component
+    <Foo.repeat ...>        // A repeated component
+    <stubs.foo ...>         // A nested stub
+    <stubs.foo.repeat ..>   // A repeated stub
+  `,
+  INVALID_EVENT_NAME: (event: string) =>
+    `\`${event}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`,
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
-  ARROW_FUNCTION_NOT_ASSIGNED: "Component function must be assigned to a variable.",
   DIRECTIVE_INVALID_TYPE: (directive: string, allowed: string[], actual: string) => {
     return allowed.length
       ? `The \`${directive}\` directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
@@ -56,7 +61,7 @@ export const ERROR_MESSAGES = {
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
   PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
     "Parts must be unique within each component.",
-  REPEAT_ALREADY_DEFINED: "Repeat already defined on element.",
+  REPEAT_WITHOUT_PROPS: "Repeated component must specifiy props.",
   REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
     "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false.",

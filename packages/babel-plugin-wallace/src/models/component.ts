@@ -9,7 +9,7 @@ import type {
 import { stringLiteral } from "@babel/types";
 import type { Scope } from "@babel/traverse";
 import { HTML_SPLITTER } from "../constants";
-import { buildConcat, getPlaceholderExpression, isRepeat } from "../ast-helpers";
+import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
 import {
   ExtractedNode,
@@ -134,7 +134,8 @@ export class Component {
   processNestedComponentTagNode(
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
-    tagName: string
+    tagName: string,
+    isRepeat: boolean
   ) {
     this.#enterLevel(tracker.childIndex);
     const extractedNode = new NestedComponentTagNode(
@@ -144,7 +145,7 @@ export class Component {
       tracker.parent,
       this,
       tagName,
-      isRepeat(path)
+      isRepeat
     );
     path.traverse(attributeVisitors, {
       extractedNode,
@@ -154,7 +155,12 @@ export class Component {
     this.#addNode(extractedNode, path, tracker);
     this.#exitLevel();
   }
-  processStub(path: NodePath<JSXElement>, name: string, tracker: WalkTracker) {
+  processStub(
+    path: NodePath<JSXElement>,
+    tracker: WalkTracker,
+    name: string,
+    isRepeat: boolean
+  ) {
     this.#enterLevel(tracker.childIndex);
     const extractedNode = new StubNode(
       path,
@@ -163,7 +169,7 @@ export class Component {
       tracker.parent,
       this,
       name,
-      isRepeat(path)
+      isRepeat
     );
     path.traverse(attributeVisitors, {
       extractedNode,

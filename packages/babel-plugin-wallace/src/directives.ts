@@ -168,7 +168,7 @@ class ItemsDirective extends Directive {
   /h <NestedComponent.repeat items={arrayOfProps} />
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setRepeatExpression(value.expression);
+    node.setProps(value.expression);
   }
 }
 
@@ -222,6 +222,7 @@ class PartDirective extends Directive {
 class PropsDirective extends Directive {
   static attributeName = "props";
   static allowOnNested = true;
+  static allowOnRepeated = true;
   static allowOnNormalElement = false;
   static help: `
   Specify props for a nested component:

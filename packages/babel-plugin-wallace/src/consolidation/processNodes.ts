@@ -12,7 +12,7 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { wallaceConfig } from "../config";
-import { Component, ExtractedNode, RepeatInstruction, VisibilityToggle } from "../models";
+import { Component, ExtractedNode, VisibilityToggle } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_PROPERTIES,
@@ -39,12 +39,10 @@ export function processNode(
   const visibilityToggle = node.getVisibilityToggle();
   const ref = node.getRef();
   const part = node.getPart();
-  const repeatInstruction = node.getRepeatInstruction();
   const hasBoundInputs = node.bindInstructions.expression;
   const hasClassToggles = node.classToggleTriggers.length > 0;
   const hasEventListeners = node.eventListeners.length > 0;
   const hasWatches = node.watches.length > 0;
-  const isStub = node.getStubName() !== undefined;
 
   const needsWatch =
     hasWatches ||
@@ -69,7 +67,7 @@ export function processNode(
 
   if (shouldSaveElement) {
     if (node.isNestedComponent) {
-      node.elementKey = createNesterObject(componentDefinition, node, isStub);
+      node.elementKey = createNesterObject(componentDefinition, node);
     } else {
       node.elementKey = componentDefinition.saveDynamicElement(node.address);
     }
@@ -101,7 +99,7 @@ export function processNode(
     const componentWatch = new ComponentWatch(
       node,
       componentDefinition,
-      repeatInstruction ? node.parent.elementKey : node.elementKey,
+      node.isRepeatedComponent ? node.parent.elementKey : node.elementKey,
       node.address
     );
 
@@ -127,8 +125,8 @@ export function processNode(
       addNestedComponentWatch(componentDefinition, node, componentWatch);
     }
 
-    if (repeatInstruction) {
-      processRepeater(componentDefinition, node, repeatInstruction, componentWatch);
+    if (node.isRepeatedComponent) {
+      processRepeater(componentDefinition, node, componentWatch);
     }
 
     if (hasClassToggles) {
@@ -197,24 +195,13 @@ function processVisibilityToggle(
 
 function createNesterObject(
   componentDefinition: ComponentDefinitionData,
-  node: ExtractedNode,
-  isStub: boolean
+  node: ExtractedNode
 ): number {
   const component = componentDefinition.component,
     dynamicElements = componentDefinition.dynamicElements,
-    componentCls = isStub
-      ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
-          t.thisExpression(),
-          t.stringLiteral(node.getStubName())
-        ])
-      : t.identifier(node.tagName);
+    componentCls = getNestedComponentCls(componentDefinition, node);
 
   component.module.requireImport(IMPORTABLES.Nester);
-
-  if (isStub) {
-    component.module.requireImport(IMPORTABLES.getStub);
-  }
-
   const nesterObject = componentDefinition.addDeclaration(
     newExpression(identifier(IMPORTABLES.Nester), [componentCls])
   );
@@ -388,13 +375,36 @@ function addToggleCallbackStatement(
   });
 }
 
+function getNestedComponentCls(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode
+): t.Expression {
+  const stubName = node.getStubName();
+  if (stubName) {
+    componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
+  }
+  return stubName
+    ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
+        t.thisExpression(),
+        t.stringLiteral(node.getStubName())
+      ])
+    : t.identifier(node.tagName);
+}
+
 function processRepeater(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
-  repeatInstruction: RepeatInstruction,
   componentWatch: ComponentWatch
 ) {
-  const component = componentDefinition.component;
+  const component = componentDefinition.component,
+    repeatKey = node.repeatKey,
+    repeatProps = node.getProps(),
+    componentCls = getNestedComponentCls(componentDefinition, node);
+
+  if (!repeatProps) {
+    error(node.path, ERROR_MESSAGES.REPEAT_WITHOUT_PROPS);
+  }
+
   const detacherInfo = node.parent.detacherIdentifier
     ? {
         index: node.initialIndex,
@@ -403,13 +413,13 @@ function processRepeater(
     : undefined;
 
   let repeaterClass;
-  const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
-  if (repeatInstruction.repeatKey) {
+  const repeaterArgs: any = [componentCls];
+  if (repeatKey) {
     repeaterClass = IMPORTABLES.KeyedRepeater;
-    if (typeof repeatInstruction.repeatKey === "string") {
-      repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
+    if (typeof repeatKey === "string") {
+      repeaterArgs.push(t.stringLiteral(repeatKey));
     } else {
-      repeaterArgs.push(repeatInstruction.repeatKey);
+      repeaterArgs.push(repeatKey);
     }
   } else {
     repeaterClass = IMPORTABLES.SequentialRepeater;
@@ -426,10 +436,7 @@ function processRepeater(
     componentDefinition.dismountKeys.push(stashKey);
   }
 
-  const callbackArgs = [
-    identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-    repeatInstruction.expression
-  ];
+  const callbackArgs = [identifier(WATCH_AlWAYS_CALLBACK_ARGS.element), repeatProps];
   if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, component));
   }

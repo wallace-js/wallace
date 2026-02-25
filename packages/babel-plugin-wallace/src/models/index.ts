@@ -6,7 +6,6 @@ import {
   TagNode,
   DynamicTextNode,
   PlainTextNode,
-  RepeatInstruction,
   VisibilityToggle
 } from "./node";
 
@@ -19,7 +18,6 @@ export {
   TagNode,
   DynamicTextNode,
   PlainTextNode,
-  RepeatInstruction,
   Module,
   Qualifier,
   WalkTracker
