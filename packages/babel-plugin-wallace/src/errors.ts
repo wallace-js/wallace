@@ -38,7 +38,7 @@ export const ERROR_MESSAGES = {
     <Foo ...>               // A nested component
     <Foo.repeat ...>        // A repeated component
     <stub.foo ...>         // A nested stub
-    <stub.foo.repeat ..>   // A repeated stub
+    <stub.foo.repeat ...>   // A repeated stub
   `,
   INVALID_EVENT_NAME: (event: string) =>
     `\`${event}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`,

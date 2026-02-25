@@ -675,11 +675,20 @@ declare module "wallace" {
    *
    * See cheat sheet by hovering over the module import for more details.
    */
-  export type Uses<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  > = ComponentFunction<Props, Controller, Methods>;
+  type Uses<
+    T = any,
+    Controller = any
+    // Methods extends object = {},
+    // Stub extends object = {}
+  > = T extends CompoundTypes
+    ? ComponentFunction<T["props"], T["ctrl"], T["methods"], T["stub"]>
+    : ComponentFunction<T, Controller>;
+
+  // export type Uses<
+  //   Props = any,
+  //   Controller = any,
+  //   Methods extends object = {}
+  // > = ComponentFunction<Props, Controller, Methods>;
 
   interface CompoundTypes {
     props?: any;
@@ -688,12 +697,12 @@ declare module "wallace" {
     stub?: StubDefinition;
   }
 
-  export type UsesX<T extends CompoundTypes> = ComponentFunction<
-    T["props"],
-    T["ctrl"],
-    T["methods"],
-    T["stub"]
-  >;
+  // export type UsesX<T extends CompoundTypes> = ComponentFunction<
+  //   T["props"],
+  //   T["ctrl"],
+  //   T["methods"],
+  //   T["stub"]
+  // >;
 
   export interface Part {
     update(): void;
