@@ -25,7 +25,8 @@ export enum XARGS {
   component = "self",
   props = "props",
   event = "event",
-  element = "element"
+  element = "element",
+  stubs = "stubs"
 }
 
 export enum WATCH_CALLBACK_ARGS {

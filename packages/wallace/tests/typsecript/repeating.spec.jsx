@@ -56,6 +56,22 @@ describe("Props", () => {
       );
     `).toHaveNoTypeErrors();
   });
+
+  test("props are passed through correctly", () => {
+    expect(`
+      import { mount, Uses } from "wallace";
+      interface Props {
+        clicks: number;
+      }
+      const Foo: Uses<Props> = () => (<div></div>);
+
+      const Bar: Uses<Props[]> = (items) => (
+        <div>
+          <Foo.repeat props={items}/>
+        </div>
+      );
+    `).toHaveNoTypeErrors();
+  });
 });
 
 describe("key directive", () => {

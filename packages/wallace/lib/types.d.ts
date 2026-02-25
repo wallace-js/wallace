@@ -590,6 +590,22 @@ declare module "wallace" {
 
   type Wrapper<Props, Controller> = XOR<Props, NestedCall<Props, Controller>>;
 
+  // type StubType<Stubs> = { key: keyof Stubs; ComponentFunction };
+
+  // type StubDefinition = {
+  //   [key: string]: ComponentFunction;
+  // };
+
+  // type PropsOf<C> = C extends ComponentFunction<infer P, any, any, any> ? P : never;
+
+  // type StubsInterface<Stubs> = {
+  //   [K in keyof Stubs]: Stubs[K] extends ComponentFunction ? Stubs[K] : never;
+  // };
+
+  // type StubsInterface<Stubs> = {
+  //   [key in keyof Stubs]: ComponentFunction;
+  // };
+
   /**
    * A component function.
    */
@@ -597,6 +613,7 @@ declare module "wallace" {
     Props = any,
     Controller = any,
     Methods extends object = {}
+    // Stubs extends object = StubDefinition
   > {
     (
       props?: Wrapper<Props, Controller>,
@@ -604,7 +621,7 @@ declare module "wallace" {
         ctrl: Controller;
         props: Props;
         self: ComponentInstance<Props, Controller, Methods>;
-        // stub: Record<string, ComponentFunction>;
+        // stubs: StubsInterface<Stubs>;
         event: Event;
         element: HTMLElement;
       }
@@ -627,7 +644,9 @@ declare module "wallace" {
     readonly prototype: ComponentInstance<Props, Controller>;
     //   ThisType<ComponentInstance<Props, Controller, Methods>>;
     // Methods will not be available on nested component, so omit.
-    readonly stubs?: Record<string, ComponentFunction>;
+
+    // readonly stubs?: Record<string, ComponentFunction>;
+    readonly stubs?: Stubs;
   }
 
   type ComponentMethods<Props, Controller> = {
@@ -661,12 +680,14 @@ declare module "wallace" {
     props?: any;
     ctrl?: any;
     methods?: object;
+    stubs?: StubDefinition;
   }
 
   export type UsesX<T extends CompoundTypes> = ComponentFunction<
     T["props"],
     T["ctrl"],
-    T["methods"]
+    T["methods"],
+    T["stubs"]
   >;
 
   export interface Part {

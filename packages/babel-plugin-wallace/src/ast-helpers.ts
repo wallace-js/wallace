@@ -62,30 +62,6 @@ export function getJSXElementData(path: NodePath<JSXElement>): JSXElementData {
   error(path, ERROR_MESSAGES.INVALID_TAG_FORMAT);
 }
 
-// export function getJSXElementName(
-//   path: NodePath<JSXElement>
-// ): string | { name: string; namespace: string } {
-//   const openingElementName = path.node.openingElement.name;
-//   console.log(path.node.openingElement);
-
-//   if (t.isJSXIdentifier(openingElementName)) {
-//     return openingElementName.name;
-//   } else if (t.isJSXNamespacedName(openingElementName)) {
-//     const { namespace, name } = openingElementName;
-//     return { namespace: namespace.name, name: name.name };
-//   } else if (t.isJSXMemberExpression(openingElementName)) {
-//     const { object, property } = openingElementName;
-//     if (t.isJSXIdentifier(object)) {
-//       return { namespace: object.name, name: property.name };
-//     } else {
-//       error(path, ERROR_MESSAGES.ARROW_FUNCTION_NOT_ASSIGNED);
-//     }
-//   } else {
-//     console.debug(path.node);
-//     throw Error(`Can't read name from ${openingElementName}`);
-//   }
-// }
-
 /**
  * An Expression can be one of dozens of types, most of which are not usable.
  */
