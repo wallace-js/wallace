@@ -528,13 +528,13 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
     const Container = keyed
       ? () => (
           <div>
-            <Other.nest />
+            <Other />
             <Child.repeat items={items} key="i" />
           </div>
         )
       : () => (
           <div>
-            <Other.nest />
+            <Other />
             <Child.repeat items={items} />
           </div>
         );

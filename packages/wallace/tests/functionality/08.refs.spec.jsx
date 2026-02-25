@@ -18,7 +18,7 @@ describe("Specification", () => {
     const src = `
     const A = () => (
     <div>
-      <Foo ref:a items={[]}/>
+      <Foo.repeat ref:a props={[]}/>
     </div>
   );
   `;
@@ -59,7 +59,7 @@ test("Ref on nested component points to nester", () => {
   const A = () => <span class="danger">hello</span>;
   const B = () => (
     <div>
-      <A.nest ref:a />
+      <A ref:a />
     </div>
   );
   const component = testMount(B);

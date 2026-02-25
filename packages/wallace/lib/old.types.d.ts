@@ -189,8 +189,8 @@ const Task = (task) => (<div></div>);
 
 const TopTasks = (tasks) => (
   <div>
-    <Task.nest props={tasks[0]} />
-    <Task.nest props={tasks[1]} />
+    <Task props={tasks[0]} />
+    <Task props={tasks[1]} />
   </div>
 );
 
@@ -330,17 +330,17 @@ Stubs are named placeholders for nested components which are requested in the JS
 ```tsx
 const MyComponent = () => (
   <div>
-    <stub:animation />
-    <stub:text />
+    <stub.animation />
+    <stub.text />
   </div>
 );
 ```
 
-And defined on the `stubs` property of the component definition:
+And defined on the `stub` property of the component definition:
 
 ```tsx
-MyComponent.stubs.animation: () => <div>...</div>;
-MyComponent.stubs.text: MyTextComponent;
+MyComponent.stub.animation: () => <div>...</div>;
+MyComponent.stub.text: MyTextComponent;
 ```
 
 Stubs are inherited and can be overridden, which means you can either:
@@ -386,7 +386,7 @@ TypeScript will ensure you pass correct props during mounting, nesting and repea
 const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
     First task:
-    <Task.nest props={tasks[0]} />
+    <Task props={tasks[0]} />
     <Task.repeat items={tasks.slice(1)} />
   </div>
 );
@@ -439,13 +439,13 @@ in addition to standard methods like `render`, which are already typed for you.
 ### Stubs
 
 The `props` and `controller` will pass through to functions you assign to
-`Component.stubs` as stubs receive the same props as the parent.
+`Component.stub` as stubs receive the same props as the parent.
 
 But `methods` are not passed through as stubs are distinct components and will have
 their own methods.
 
 ```tsx
-Task.stubs.foo = (_, { self }) => (
+Task.stub.foo = (_, { self }) => (
   <div>{self.getName()}</div>
 ));
 ```
@@ -902,7 +902,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * Specifies alternative `ctrl` for nested or repeated components.
    *
    * ```
-   * <MyComponent.nest ctrl={altController} />
+   * <MyComponent ctrl={altController} />
    * ```
    */
   ctrl?: any;
@@ -1070,7 +1070,7 @@ declare namespace JSX {
     /**
      * Nesting syntax:
      *   ```
-     *   <MyComponent.nest props={singleProps} />
+     *   <MyComponent props={singleProps} />
      *   <MyComponent.repeat items={arrayOfProps} />
      *   <MyComponent.repeat items={arrayOfProps} key="id"/>
      *   <MyComponent.repeat items={arrayOfProps} key={(i) => i.id}/>

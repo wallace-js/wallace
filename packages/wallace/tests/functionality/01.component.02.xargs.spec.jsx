@@ -34,7 +34,7 @@ describe("Xargs", () => {
     );
   `;
     expect(src).toCompileWithError(
-      'Illegal parameter in extra args: "x". You are only allowed "ctrl", "self", "props", "event", "element".'
+      'Illegal parameter in extra args: "x". You are only allowed "ctrl", "self", "props", "event", "element", "stub".'
     );
   });
 

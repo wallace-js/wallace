@@ -16,7 +16,7 @@ const badProps = { foo: 8 };
 
 const CounterList = () => (
   <div>
-    <ClickCounter.nest props={badProps} />
+    <ClickCounter props={badProps} />
   </div>
 );
 

@@ -72,7 +72,7 @@ class CtrlDirective extends Directive {
   static help: `
   Specify ctrl for a nested component:
   
-  /h <NestedComponent.nest ctrl={self.ctrl1} />
+  /h <NestedComponent ctrl={self.ctrl1} />
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
@@ -227,7 +227,7 @@ class PropsDirective extends Directive {
   static help: `
   Specify props for a nested component:
   
-  /h <NestedComponent.nest props={{foo: 'bar'}} />
+  /h <NestedComponent props={{foo: 'bar'}} />
   `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setProps(value.expression);

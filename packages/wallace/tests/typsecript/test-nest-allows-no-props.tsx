@@ -8,7 +8,7 @@ const ClickCounter: Uses<null> = () => (
 
 const CounterList = () => (
   <div>
-    <ClickCounter.nest />
+    <ClickCounter />
   </div>
 );
 

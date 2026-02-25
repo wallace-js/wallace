@@ -26,7 +26,7 @@ export enum XARGS {
   props = "props",
   event = "event",
   element = "element",
-  stubs = "stubs"
+  stub = "stub"
 }
 
 export enum WATCH_CALLBACK_ARGS {

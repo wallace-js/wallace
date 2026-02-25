@@ -5,7 +5,7 @@ if (wallaceConfig.flags.allowCtrl) {
     const Fox = (_, { ctrl }) => <div>Fox {ctrl}</div>;
     const AnimalList = (_, { self }) => (
       <div>
-        <Fox.nest ctrl={self.foxCtrl} />
+        <Fox ctrl={self.foxCtrl} />
       </div>
     );
     AnimalList.prototype.render = function (props) {

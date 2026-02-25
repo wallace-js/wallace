@@ -100,7 +100,7 @@ const ComponentPrototype = {
 
 const ComponentBase = {
   prototype: ComponentPrototype,
-  /* #INCLUDE-IF: allowStubs */ stubs: {}
+  /* #INCLUDE-IF: allowStubs */ stub: {}
 };
 
 /**
@@ -142,7 +142,7 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
   }
 
   /* #INCLUDE-IF: allowStubs */
-  ComponentFunction.stubs = Object.assign({}, BaseComponentFunction.stubs);
+  ComponentFunction.stub = Object.assign({}, BaseComponentFunction.stub);
 
   return ComponentFunction;
 };

@@ -6,7 +6,7 @@ if (wallaceConfig.flags.allowStubs) {
     test("is not allowed on root ", () => {
       const code = `
         const Foo = () => (
-          <stub:display />
+          <stub.display />
         );
         `;
       expect(code).toCompileWithError("Nested components not allowed as root element.");
@@ -17,10 +17,10 @@ if (wallaceConfig.flags.allowStubs) {
     const Foo = ({}, { props }) => (
       <div>
         hello
-        <stub:display props={props} />
+        <stub.display props={props} />
       </div>
     );
-    Foo.stubs.display = ({ name }) => <span>{name}</span>;
+    Foo.stub.display = ({ name }) => <span>{name}</span>;
     const component = testMount(Foo, { name: "swan" });
     expect(component).toRender(`<div>hello <span>swan</span></div>`);
   });
@@ -29,11 +29,11 @@ if (wallaceConfig.flags.allowStubs) {
     const BaseComponent = (_, { props }) => (
       <div>
         hello
-        <stub:display props={props} />
+        <stub.display props={props} />
       </div>
     );
     const Child = extendComponent(BaseComponent);
-    Child.stubs.display = ({ name }) => <span>{name}</span>;
+    Child.stub.display = ({ name }) => <span>{name}</span>;
     const component = testMount(Child, { name: "beaver" });
     expect(component).toRender(`<div>hello <span>beaver</span></div>`);
   });
@@ -42,10 +42,10 @@ if (wallaceConfig.flags.allowStubs) {
     const BaseComponent = (_, { props }) => (
       <div>
         hello
-        <stub:display props={props} />
+        <stub.display props={props} />
       </div>
     );
-    BaseComponent.stubs.display = ({ name }) => <span>{name}</span>;
+    BaseComponent.stub.display = ({ name }) => <span>{name}</span>;
     const Child = extendComponent(BaseComponent);
     const component = testMount(Child, { name: "beaver" });
     expect(component).toRender(`<div>hello <span>beaver</span></div>`);
@@ -53,12 +53,12 @@ if (wallaceConfig.flags.allowStubs) {
 
   test("Child can use stub implementations from parent", () => {
     const BaseComponent = () => <div></div>;
-    BaseComponent.stubs.display = ({ name }) => <span>{name}</span>;
+    BaseComponent.stub.display = ({ name }) => <span>{name}</span>;
 
     const Child = extendComponent(BaseComponent, (_, { props }) => (
       <div>
         goodbye
-        <stub:display props={props} />
+        <stub.display props={props} />
       </div>
     ));
 
@@ -69,13 +69,13 @@ if (wallaceConfig.flags.allowStubs) {
   test("Stubs is sepearate object from parent", () => {
     const BaseComponent = (_, { props }) => (
       <div>
-        <stub:display props={props} />
+        <stub.display props={props} />
       </div>
     );
-    BaseComponent.stubs.display = ({ name }) => <h3>Parent {name}</h3>;
+    BaseComponent.stub.display = ({ name }) => <h3>Parent {name}</h3>;
 
     const Child = extendComponent(BaseComponent);
-    Child.stubs.display = ({ name }) => <span>Child{name}</span>;
+    Child.stub.display = ({ name }) => <span>Child{name}</span>;
     const component = testMount(BaseComponent, { name: "beaver" });
     expect(component).toRender(`<div><h3>Parent <span>beaver</span></h3></div>`);
   });
@@ -85,11 +85,11 @@ if (wallaceConfig.flags.allowStubs) {
     const BaseComponent = () => (
       <div>
         hello
-        <stub:display props={myProps} />
+        <stub.display props={myProps} />
       </div>
     );
     const Child = extendComponent(BaseComponent);
-    Child.stubs.display = ({ name }) => <span>{name}</span>;
+    Child.stub.display = ({ name }) => <span>{name}</span>;
     const component = testMount(Child);
     expect(component).toRender(`<div>hello <span>Fox</span></div>`);
   });
@@ -100,11 +100,11 @@ if (wallaceConfig.flags.allowStubs) {
       const BaseComponent = () => (
         <div>
           hello
-          <stub:display ctrl={myCtrl} />
+          <stub.display ctrl={myCtrl} />
         </div>
       );
       const Child = extendComponent(BaseComponent);
-      Child.stubs.display = (_, { ctrl }) => <span>{ctrl.name}</span>;
+      Child.stub.display = (_, { ctrl }) => <span>{ctrl.name}</span>;
       const component = testMount(Child);
       expect(component).toRender(`<div>hello <span>Fox</span></div>`);
     });
@@ -114,7 +114,7 @@ if (wallaceConfig.flags.allowStubs) {
     const code = `
     const Foo = () => (
       <div>
-        <stub:display />
+        <stub.display />
       </div>
       );
       `;

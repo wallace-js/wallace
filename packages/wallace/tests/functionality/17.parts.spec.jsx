@@ -77,7 +77,7 @@ if (wallaceConfig.flags.allowParts) {
     const Bar = () => (
       <div>
         <span>total: {items.reduce((a, b) => a + b, 0)}</span>
-        <Foo part:foo items={items} />
+        <Foo.repeat part:foo props={items} />
       </div>
     );
     const items = [1, 2, 3];

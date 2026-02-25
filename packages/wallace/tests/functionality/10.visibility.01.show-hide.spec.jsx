@@ -82,7 +82,7 @@ describe("Nested components", () => {
     const code = `
       const Foo = () => (
         <div>
-          <Bar.nest show={true} />
+          <Bar show={true} />
         </div>
       );
       `;
@@ -103,9 +103,9 @@ describe("Nested components", () => {
     const Counters = () => (
       <div>
         <div show={showTarget}>
-          <UpdateCounter.nest props={c1} ref:target />
+          <UpdateCounter props={c1} ref:target />
         </div>
-        <UpdateCounter.nest props={c2} ref:other />
+        <UpdateCounter props={c2} ref:other />
       </div>
     );
     const component = testMount(Counters);

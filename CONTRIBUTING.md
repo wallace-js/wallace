@@ -544,10 +544,10 @@ When we add stubs:
 const Foo = ({}) => (
   <div>
     hello
-    <stub:display />
+    <stub.display />
   </div>
 );
-Foo.stubs.display = ({ name }) => <span>{name}</span>;
+Foo.stub.display = ({ name }) => <span>{name}</span>;
 ```
 
 We have to decide whether we add that structure to `1.defining.spec.jsx` and therefore cater for it throughout the other suites, or to create it as its own feature, and test other features within it.

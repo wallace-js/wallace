@@ -19,7 +19,7 @@ describe("Conditional directive not allowed", () => {
       )
       const Foo = () => (
         <div>
-          <Bar items={[1, 2, 3]} if={true} />
+          <Bar.repeat props={[1, 2, 3]} if={true} />
         </div>
       );
     `;
@@ -82,7 +82,7 @@ describe.each([1, 2, 3, 4, 5])(
             <span if={showA}>A</span>
             <span if={showB}>B</span>
             <hr />
-            <Span.nest if={showC} props={"C"} />
+            <Span if={showC} props={"C"} />
             <span if={showD}>D</span>
           </div>
         );
@@ -90,8 +90,8 @@ describe.each([1, 2, 3, 4, 5])(
       case 2:
         Foo = () => (
           <div>
-            <Span.nest if={showA} props={"A"} />
-            <Span.nest if={showB} props={"B"} />
+            <Span if={showA} props={"A"} />
+            <Span if={showB} props={"B"} />
             <hr />
             <span if={showC}>C</span>
             <span if={showD}>D</span>
@@ -101,11 +101,11 @@ describe.each([1, 2, 3, 4, 5])(
       case 3:
         Foo = () => (
           <div>
-            <Span.nest if={showA} props={"A"} />
-            <Span.nest if={showB} props={"B"} />
+            <Span if={showA} props={"A"} />
+            <Span if={showB} props={"B"} />
             <hr />
             <span if={showC}>C</span>
-            <Span.nest if={showD} props={"D"} />
+            <Span if={showD} props={"D"} />
           </div>
         );
         break;
@@ -137,7 +137,7 @@ describe.each([1, 2, 3, 4, 5])(
           break;
       }
 
-      Foo.stubs.span = text => <span>{text}</span>;
+      Foo.stub.span = text => <span>{text}</span>;
     } else {
       if (permutation > 3) return;
     }

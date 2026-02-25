@@ -234,7 +234,7 @@ And special syntax for nesting and repeating:
 ```tsx
 const CounterList = (counters) => (
   <div>
-    <Counter.nest props={counters[0]} />
+    <Counter props={counters[0]} />
     <Counter.repeat items={counters} />
   </div>
 );
@@ -281,7 +281,7 @@ const Counter: Uses<iCounter> = ({ count }) => (
 
 const CounterList: Uses<iCounter[]> = (counters) => (
   <div>
-    <Counter.nest props={counters[0]} />
+    <Counter props={counters[0]} />
     <Counter.repeat items={counters} />
   </div>
 );
@@ -801,12 +801,12 @@ Stubs let you implement parts of the DOM in derived components, or vice versa:
 ```tsx
 const CounterList: Uses<iCounterList, Controller> = () => (
   <div>
-    <stub:stats />
-    <stub:counters />
+    <stub.stats />
+    <stub.counters />
   </div>
 );
 
-CounterList.stubs = {
+CounterList.stub = {
   stats: (_, { self }) => (
     <span>Total: {self.total()}</span>
   ),
@@ -819,7 +819,7 @@ CounterList.stubs = {
 
 const HighestCounterList = extendComponent(CounterList);
 
-HighestCounterList.stubs.stats = ({ counters }) => (
+HighestCounterList.stub.stats = ({ counters }) => (
   <span>Highest: {self.highest()}</span>
 );
 
@@ -837,7 +837,7 @@ A base component may also implement stubs it doesn't reference, and leave it to 
 ```tsx
 const BaseCounterList = () => <div>OVERRIDE ME</div>;
 
-BaseCounterList.stubs = {
+BaseCounterList.stub = {
   highest: (_, { self }) => <span>Highest: {self.highest()}</span>,
   total: (_, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
@@ -858,9 +858,9 @@ BaseCounterList.methods = {
 
 const HighestCounterList = extendComponent(BaseCounterList, () => (
   <div>
-    <stub:counters />
+    <stub.counters />
     <hr />
-    <stub:highest />
+    <stub.highest />
   </div>
 ));
 ```

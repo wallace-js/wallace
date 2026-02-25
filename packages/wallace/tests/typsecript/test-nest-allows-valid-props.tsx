@@ -12,7 +12,7 @@ const ClickCounter: Uses<Props> = (counter: Props) => (
 
 const CounterList = () => (
   <div>
-    <ClickCounter.nest props={{ clicks: 8 }} />
+    <ClickCounter props={{ clicks: 8 }} />
   </div>
 );
 

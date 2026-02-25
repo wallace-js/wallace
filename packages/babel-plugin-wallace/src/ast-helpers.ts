@@ -22,8 +22,8 @@ interface JSXElementData {
  *  <div                // A normal element
  *  <Foo                // A nested component
  *  <Foo.repeat         // A repeated component
- *  <stubs.foo          // A nested stub
- *  <stubs.foo.repeat   // A repeated stub
+ *  <stub.foo          // A nested stub
+ *  <stub.foo.repeat   // A repeated stub
  *
  */
 export function getJSXElementData(path: NodePath<JSXElement>): JSXElementData {
@@ -43,7 +43,7 @@ export function getJSXElementData(path: NodePath<JSXElement>): JSXElementData {
           return { name: object.name, type: "nested", repeat: true };
         }
       } else {
-        if (object.name === "stubs") {
+        if (object.name === "stub") {
           return { name: property.name, type: "stub" };
         }
       }
@@ -52,7 +52,7 @@ export function getJSXElementData(path: NodePath<JSXElement>): JSXElementData {
       const { object: subObject, property: subProperty } = object;
       if (
         t.isJSXIdentifier(subObject) &&
-        subObject.name === "stubs" &&
+        subObject.name === "stub" &&
         property.name === "repeat"
       ) {
         return { name: subProperty.name, type: "stub", repeat: true };
