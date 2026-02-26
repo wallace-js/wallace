@@ -5,37 +5,33 @@ const ALLOWED_XARGS: string[] = Object.values(XARGS).map(n => `"${n}"`);
 
 export const ERROR_MESSAGES = {
   BASE_COMPONENT_ALREADY_DEFINED: "Base component already defined.",
-  BIND_ONLY_ALLOWED_ON_INPUT: "The `bind` directive may only be used on `input` tags.",
   FOUND_JSX_IN_INVALID_LOCATION: "Found JSX in invalid location.",
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
-  CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use 'if' on root element.",
+  CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use `if` directive on root element.",
   CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT: (directive: string) => {
-    return `The "${directive}" directive may not be used on nested elements.`;
+    return `The \`${directive}\` directive may not be used on nested elements.`;
   },
   CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT: (directive: string) => {
-    return `The "${directive}" directive may not be used on repeated elements.`;
+    return `The \`${directive}\` directive may not be used on repeated elements.`;
   },
   CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER: (directive: string) => {
-    return `The "${directive}" directive must have a qualifier.`;
+    return `The \`${directive}\` directive must have a qualifier.`;
   },
   CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
-    return `The "${directive}" directive may not have a qualifier.`;
+    return `The \`${directive}\` directive may not have a qualifier.`;
   },
   DIRECTIVE_ALREADY_DEFINED: (directive: string) => {
-    return `The "${directive}" directive has already been defined on this node.`;
+    return `The \`${directive}\` directive has already been defined on this node.`;
   },
   DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
-    return `The "${directive}" directive may not access scoped variable "${name}".`;
+    return `The \`${directive}\` directive may not access scoped variable \`${name}\`.`;
   },
   EVENT_USED_WITHOUT_BIND:
     "The `event` directive must be used with the `bind` directive.",
   FLAG_REQUIRED: (flag: string) => {
-    return `Flag "${flag}" must be set to true in the config for this feature.`;
-  },
-  INVALID_EVENT_NAME: (event: string) => {
-    return `"${event}" is not a valid event. Must be lowercase without "on" prefix. E.g. event:keyup.`;
+    return `Flag \`${flag}\` must be set to true in the config for this feature.`;
   },
   INVALID_TAG_FORMAT: `Invalid tag format, must be one of:
     <div ...>               // A normal element
@@ -49,8 +45,8 @@ export const ERROR_MESSAGES = {
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   DIRECTIVE_INVALID_TYPE: (directive: string, allowed: string[], actual: string) => {
     return allowed.length
-      ? `The "${directive}" directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
-      : `The "${directive}" directive value must be of type ${allowed[0]}. Found: ${actual}.`;
+      ? `The \`${directive}\` directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
+      : `The \`${directive}\` directive value must be of type ${allowed[0]}. Found: ${actual}.`;
   },
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
@@ -63,8 +59,6 @@ export const ERROR_MESSAGES = {
   NESTED_COMPONENT_WITH_CHILDREN: "Nested components may not have child nodes.",
   NESTED_COMPONENT_WITH_ATTRIBUTES: "Nested components do not allow regular attributes.",
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
-  SPECIFY_EITHER_VALUE_OR_QUALIFIER: (name: string) =>
-    `Specify either value: ${name}="xyz" or qualifier: ${name}:xyz`,
   PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
     "Parts must be unique within each component.",
   REPEAT_WITHOUT_PROPS: "Repeated component must specifiy props.",
