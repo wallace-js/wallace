@@ -14,7 +14,7 @@ if (wallaceConfig.flags.allowCtrl) {
     const Foo = () => <div></div>;
     const Bar = () => (
       <div>
-        <Foo.nest ref:foo />
+        <Foo ref:foo />
       </div>
     );
     Bar.prototype.render = function () {
@@ -37,7 +37,7 @@ if (wallaceConfig.flags.allowCtrl) {
     const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
     const Bar = () => (
       <div>
-        <Foo.repeat items={[1, 2, 3]} />
+        <Foo.repeat props={[1, 2, 3]} />
       </div>
     );
     Bar.prototype.render = function () {
@@ -73,11 +73,11 @@ if (wallaceConfig.flags.allowCtrl) {
       const BaseComponent = ({}, { ctrl }) => (
         <div>
           <span>{ctrl.multiply(1)}</span>
-          <stub:display />
+          <stub.display />
         </div>
       );
       const SubComponent = extendComponent(BaseComponent);
-      SubComponent.stubs.display = (_, { ctrl }) => <span>{ctrl.multiply(2)}</span>;
+      SubComponent.stub.display = (_, { ctrl }) => <span>{ctrl.multiply(2)}</span>;
       SubComponent.prototype.render = function () {
         this.ctrl = new Controller(2);
         this.update();

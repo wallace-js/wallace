@@ -78,19 +78,17 @@ describe("Elements under hidden parents", () => {
 });
 
 describe("Nested components", () => {
-  describe("Not allowed on nested component itself", () => {
-    test("is not allowed on root ", () => {
-      const code = `
+  test("do not allow `show` on nested component", () => {
+    const code = `
       const Foo = () => (
         <div>
-          <Bar.nest show={true} />
+          <Bar show={true} />
         </div>
       );
       `;
-      expect(code).toCompileWithError(
-        'The "show" directive may not be used on nested elements.'
-      );
-    });
+    expect(code).toCompileWithError(
+      "The `show` directive may not be used on nested elements."
+    );
   });
 
   test("do not update when hidden", () => {
@@ -105,9 +103,9 @@ describe("Nested components", () => {
     const Counters = () => (
       <div>
         <div show={showTarget}>
-          <UpdateCounter.nest props={c1} ref:target />
+          <UpdateCounter props={c1} ref:target />
         </div>
-        <UpdateCounter.nest props={c2} ref:other />
+        <UpdateCounter props={c2} ref:other />
       </div>
     );
     const component = testMount(Counters);
@@ -147,7 +145,7 @@ describe("Repeated components", () => {
     const AnimalList = () => (
       <div show={showAnimals}>
         <div class="list">
-          <Animal.repeat items={getAnimals()} />
+          <Animal.repeat props={getAnimals()} />
         </div>
       </div>
     );

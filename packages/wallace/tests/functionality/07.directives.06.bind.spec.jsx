@@ -23,7 +23,7 @@ describe("Bind directive", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "bind" directive value must be of type expression. Found: null.'
+      "The `bind` directive value must be of type expression. Found: null."
     );
   });
 
@@ -34,7 +34,7 @@ describe("Bind directive", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "bind" directive value must be of type expression. Found: string.'
+      "The `bind` directive value must be of type expression. Found: string."
     );
   });
 
@@ -77,7 +77,7 @@ describe("Event specification", () => {
       )
     `;
     expect(code).toCompileWithError(
-      'The "event" directive value must be of type null. Found: expression.'
+      "The `event` directive value must be of type null. Found: expression."
     );
   });
 
@@ -90,7 +90,7 @@ describe("Event specification", () => {
         )
       `;
       expect(code).toCompileWithError(
-        `"${name}" is not a valid event. Must be lowercase without "on" prefix. E.g. event:keyup.`
+        `\`${name}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`
       );
     }
   );

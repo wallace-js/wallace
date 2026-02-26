@@ -6,7 +6,7 @@ describe("Repeat", () => {
     const Child = animal => <div>{animal.name}</div>;
     const Parent = () => (
       <div>
-        <Child.repeat items={items} />
+        <Child.repeat props={items} />
       </div>
     );
     const component = testMount(Parent);
@@ -33,21 +33,10 @@ describe("Repeat", () => {
 });
 
 describe("Repeat compiles with error when", () => {
-  test("element is not a nested component", () => {
-    const code = `
-      const Parent = () => (
-        <div>
-          <div.repeat items={items} />
-        </div>
-      );
-    `;
-    expect(code).toCompileWithError("Nested component must be capitalized.");
-  });
-
   test("repeat on root element", () => {
     const code = `
       const Parent = () => (
-        <Child.repeat items={items} />
+        <Child.repeat props={items} />
       );
     `;
     expect(code).toCompileWithError("Nested components not allowed as root element.");
@@ -57,7 +46,7 @@ describe("Repeat compiles with error when", () => {
     const code = `
     const Parent = () => (
       <div>
-        <Child.repeat items={items} id="foo" />
+        <Child.repeat props={items} id="foo" />
       </div>
     );
   `;
@@ -70,7 +59,7 @@ describe("Repeat compiles with error when", () => {
       const Parent = () => (
         <div>
           <div>signling</div>
-          <Child.repeat items={items} />
+          <Child.repeat props={items} />
         </div>
       );
     `;
@@ -82,7 +71,7 @@ describe("Repeat compiles with error when", () => {
       const Parent = () => (
         <div>
           <div>signling</div>
-          <Child.repeat items={items} />
+          <Child.repeat props={items} />
         </div>
       );
     `;
@@ -97,7 +86,7 @@ describe("Repeat compiles with error when", () => {
     const code = `
       const Parent = () => (
         <div>
-          <Child.repeat items={items} >
+          <Child.repeat props={items} >
             <div>other stuff</div>
           </Child.repeat>
         </div>

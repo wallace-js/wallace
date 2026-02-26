@@ -4,13 +4,13 @@ const Child = ({ i }) => <div>{i}</div>;
 
 const KeyString = data => (
   <div>
-    <Child.repeat items={data} key={item => item.i} />
+    <Child.repeat props={data} key={item => item.i} />
   </div>
 );
 
 const KeyFunction = data => (
   <div>
-    <Child.repeat items={data} key="i" />
+    <Child.repeat props={data} key="i" />
   </div>
 );
 
