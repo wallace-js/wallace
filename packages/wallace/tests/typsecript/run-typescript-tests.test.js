@@ -51,36 +51,34 @@ const tscCmd = name => {
   return `tsc --jsx preserve ${file} --noEmit`;
 };
 
-// OLD system....
+test.each(tsxFilesWithoutErrors)("Expect no error in $fileName", ({ fileName }, done) => {
+  exec(tscCmd(fileName), (err, stdout) => {
+    if (err) {
+      done(stdout);
+    } else {
+      done();
+    }
+  });
+});
 
-// test.each(tsxFilesWithoutErrors)("Expect no error in $fileName", ({ fileName }, done) => {
-//   exec(tscCmd(fileName), (err, stdout) => {
-//     if (err) {
-//       done(stdout);
-//     } else {
-//       done();
-//     }
-//   });
-// });
-
-// test.each(tsxFilesWithErrors)(
-//   "Expect error in $fileName",
-//   ({ fileName, lineNo, errorMessage }, done) => {
-//     exec(tscCmd(fileName), (err, stdout) => {
-//       if (err) {
-//         const [path, rest] = splitOnce(stdout, ":");
-//         const foundLine = splitOnce(splitOnce(path, "(")[1], ",")[0];
-//         const foundMessage = splitOnce(rest, "\n")[0].trim();
-//         if (errorMessage != foundMessage) {
-//           done(`Expected error:\n    ${errorMessage}\nbut found:\n    ${foundMessage}`);
-//         } else if (foundLine != lineNo) {
-//           done(`Expected error on line ${lineNo} but it appeared on line ${foundLine}.`);
-//         } else {
-//           done();
-//         }
-//       } else {
-//         done(`Expected error on line ${lineNo}: ${errorMessage}`);
-//       }
-//     });
-//   }
-// );
+test.each(tsxFilesWithErrors)(
+  "Expect error in $fileName",
+  ({ fileName, lineNo, errorMessage }, done) => {
+    exec(tscCmd(fileName), (err, stdout) => {
+      if (err) {
+        const [path, rest] = splitOnce(stdout, ":");
+        const foundLine = splitOnce(splitOnce(path, "(")[1], ",")[0];
+        const foundMessage = splitOnce(rest, "\n")[0].trim();
+        if (errorMessage != foundMessage) {
+          done(`Expected error:\n    ${errorMessage}\nbut found:\n    ${foundMessage}`);
+        } else if (foundLine != lineNo) {
+          done(`Expected error on line ${lineNo} but it appeared on line ${foundLine}.`);
+        } else {
+          done();
+        }
+      } else {
+        done(`Expected error on line ${lineNo}: ${errorMessage}`);
+      }
+    });
+  }
+);

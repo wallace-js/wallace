@@ -559,7 +559,7 @@ The types (and therefore tool tips) are unaffected by these flags, and will trea
 all as being true.
 
 ---
-Report any issues to https://github.com/wallace-js/wallace (and please give it a ★)
+Report any issues to https://github.com/wallace-js/wallace
 
 */
 
@@ -567,8 +567,6 @@ declare module "wallace" {
   type StubDefinition = {
     [key: string]: ComponentFunction;
   };
-
-  // type PropsOf<C> = C extends ComponentFunction<infer P, any, any, any> ? P : never;
 
   type StubInterface<Stubs> = {
     [K in keyof Stubs]: Stubs[K] extends ComponentFunction ? Stubs[K] : never;
@@ -605,15 +603,19 @@ declare module "wallace" {
       part?: string;
       key?: keyof Props | ((item: Props) => any);
     }): JSX.Element;
-    methods?: ComponentMethods<Props, Controller> &
+    methods?: ComponentMethods<Props, Controller, Methods> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     readonly prototype: ComponentInstance<Props, Controller>;
     readonly stub?: Stubs;
   }
 
-  type ComponentMethods<Props, Controller> = {
-    render?(props: Props, ctrl: Controller): void;
-    update?(): void;
+  type ComponentMethods<Props, Controller, Methods extends object = {}> = {
+    render?(
+      this: ComponentInstance<Props, Controller, Methods>,
+      props: Props,
+      ctrl: Controller
+    ): void;
+    update?(this: ComponentInstance<Props, Controller, Methods>): void;
     [key: string]: any;
   };
 
@@ -632,20 +634,9 @@ declare module "wallace" {
    *
    * See cheat sheet by hovering over the module import for more details.
    */
-  type Uses<
-    T = any,
-    Controller = any
-    // Stub extends object = {}
-    // Methods extends object = {},
-  > = T extends CompoundTypes
+  type Uses<T = any> = T extends CompoundTypes
     ? ComponentFunction<T["props"], T["ctrl"], T["methods"], T["stub"]>
-    : ComponentFunction<T, Controller>;
-
-  // export type Uses<
-  //   Props = any,
-  //   Controller = any,
-  //   Methods extends object = {}
-  // > = ComponentFunction<Props, Controller, Methods>;
+    : ComponentFunction<T>;
 
   interface CompoundTypes {
     props?: any;
@@ -653,13 +644,6 @@ declare module "wallace" {
     methods?: object;
     stub?: StubDefinition;
   }
-
-  // export type UsesX<T extends CompoundTypes> = ComponentFunction<
-  //   T["props"],
-  //   T["ctrl"],
-  //   T["methods"],
-  //   T["stub"]
-  // >;
 
   export interface Part {
     update(): void;
@@ -1012,7 +996,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * component.part.title.update();
    * ```
    */
-  part?: null;
+  part?: string | null;
 
   /**
    * ## Wallace directive: props
@@ -1037,7 +1021,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * component.ref.title.textContent = 'hello';
    * ```
    */
-  ref?: null;
+  ref?: string | null;
 
   /** ## Wallace directive: show
    *
@@ -1087,86 +1071,12 @@ interface DirectiveAttributes extends AllDomEvents {
   unique?: boolean;
 }
 
-// This makes this a module, which is needed.
+// This makes this a module, which is needed to declare global, which is needed to make
+// LibraryManagedAttributes work.
 export {};
 
 declare global {
   namespace JSX {
-    // type NestedComponentAttributes<Props> = { props: Props; if?: boolean };
-
-    // | {
-    //     props: Props;
-    //     if?: boolean;
-    //     items?: never;
-    //     key?: never;
-    //   }
-    // | {
-    //     items: Props[];
-    //     key?: keyof Props | ((item: Props) => any);
-    //     props?: never;
-    //     if?: never;
-    //   };
-
-    // type Forbidden<T extends string> = {
-    //   __error__: `Property "${T}" is not allowed here`;
-    // } & never;
-
-    // // Works for key, but unhelpful error message. fails on if
-
-    // type Single<Props> = {
-    //   mode?: "single";
-    //   props: Props;
-    //   if?: boolean;
-    //   items?: never;
-    //   // key?: Forbidden<"key">;
-    // };
-
-    // type Multiple<Props> = {
-    //   mode?: "multiple";
-    //   items: Props[];
-    //   if?: never;
-    // } & {
-    //   key?: keyof Props | ((item: Props) => any);
-    // };
-
-    // type NestedComponentAttributes<Props> = Single<Props> | Multiple<Props>;
-
-    // This doesn't allow key
-    // type Without<T, K> = {
-    //   [P in Exclude<keyof T, keyof K>]?: never;
-    // };
-
-    // type XOR<T, U> = (T & Without<U, T>) | (U & Without<T, U>);
-
-    // type Single<Props> = {
-    //   props: Props;
-    //   if?: boolean;
-    //   key: never;
-    // };
-
-    // type Multiple<Props> = {
-    //   items: Props[];
-    //   key?: keyof Props | ((item: Props) => any);
-    // };
-
-    // type NestedComponentAttributes<Props> = XOR<Single<Props>, Multiple<Props>>;
-
-    // type LibraryManagedAttributes<C, P> = C extends
-    //   | ComponentFunction<infer Props, any, any>
-    //   | ComponentFunctionWithRepeat<infer Props, any, any>
-    //   ? NestedComponentAttributes<Props>
-    //   : P;
-
-    // type LibraryManagedAttributes<C, P> =
-    //   C extends ComponentFunction<infer Props, any, any>
-    //     ? NestedComponentAttributes<Props> & {}
-    //     : P;
-
-    // type LibraryManagedAttributes<C, P> =
-    //   C extends ComponentFunction<infer Props, any, any>
-    //     ? NestedComponentAttributes<Props> & P
-    //     : P;
-
     // This allows <Foo props={x} if={y} />
     type Wrapper<Props> = Props | { props: Props; if?: boolean; part?: string };
 

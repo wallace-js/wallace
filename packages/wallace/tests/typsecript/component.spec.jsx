@@ -1,14 +1,4 @@
 import { testMount } from "../utils";
-/*
-
-  component definition
-      (for each, check that it exists on component, via mount)
-      can specify no props
-      can specify null props
-      can specify ctrl
-      can specify methods
-
-*/
 
 describe("Component definition with Uses", () => {
   test("can specify no props", () => {
@@ -43,7 +33,7 @@ describe("Component definition with Uses", () => {
         things: number;
       }
 
-      const Foo: Uses<null, Controller> = () => (<div></div>);
+      const Foo: Uses<{ctrl: Controller}> = () => (<div></div>);
       const foo = mount("main", Foo);
       foo.ctrl.things = 1;
       foo.ctrl.things = 'a';
@@ -62,7 +52,7 @@ describe("Component definition with Uses", () => {
         things: number;
       }
 
-      const Foo: Uses<FooProps, Controller> = () => (<div></div>);
+      const Foo: Uses<{props: FooProps, ctrl: Controller}> = () => (<div></div>);
       const foo = mount("main", Foo);
       foo.ctrl.things = 1;
       foo.props.clicks = 1;
