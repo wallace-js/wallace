@@ -16,7 +16,7 @@ It is affected by:
   - initialIndex as passed into Detacher constructor.
   - offsetTracker's initial value.
 
-It take either:
+It takes either:
   - an element, which starts attached.
   - a nester, whose element isn't attached to begin with.
 
