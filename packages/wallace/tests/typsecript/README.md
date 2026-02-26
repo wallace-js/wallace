@@ -9,7 +9,7 @@ There are two mechanisms for testing TypeScript:
 Using the `toHaveTypeErrors` and `toHaveNoTypeErrors` on a source code string:
 
 ```js
-test("can specify props", () => {
+test('can specify props', () => {
   expect(`
     import { mount, Uses } from "wallace";
 
@@ -21,7 +21,9 @@ test("can specify props", () => {
     const foo = mount("main", Foo);
     foo.props.clicks = 1;
     foo.props.clicks = 'a';
-  `).toHaveTypeErrors(["Type 'string' is not assignable to type 'number'."]);
+  `).toHaveTypeErrors([
+    "Type 'string' is not assignable to type 'number'."
+  ]);
 });
 ```
 
@@ -39,8 +41,8 @@ const MyComponent: Uses<null> = () => (
 );
 
 const c = 6;
-mount("str", MyComponent);
-mount(document.getElementById("a"), MyComponent);
+mount('str', MyComponent);
+mount(document.getElementById('a'), MyComponent);
 
 mount(c, MyComponent);
 ```
