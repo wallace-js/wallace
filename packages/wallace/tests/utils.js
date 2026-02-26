@@ -10,46 +10,51 @@ import * as ts from "typescript";
 const WRONG_CODE_WARNING = `\n\n WARNING: JEST MAY SHOW OUTPUT FROM A PREVIOUS TEST, INCLUDING STACK TRACE.
  USE test.only TO SEE RELIABLE OUTPUT.`;
 
+let tsCompilerHost;
+const hostOptions = {
+  jsx: ts.JsxEmit.Preserve,
+  skipLibCheck: true, // don't validate lib files
+  types: [], // avoid @types auto-inclusion
+  lib: [
+    "lib.es2020.d.ts",
+    // Must point to packages, not node_modules!
+    "../../../packages/wallace/lib/types.d.ts"
+  ]
+};
+
+const getCompilerHost = () => {
+  if (!tsCompilerHost) {
+    const fileName = "module.tsx";
+    tsCompilerHost = ts.createCompilerHost(hostOptions, true);
+
+    const originalFileExists = tsCompilerHost.fileExists;
+    tsCompilerHost.fileExists = f =>
+      f === fileName ? true : originalFileExists.call(tsCompilerHost, f);
+  }
+  return tsCompilerHost;
+};
+
 /**
  * Run the source code through tsc to find type errors.
  *
  * @param source a sample of source code
- * @param options compiler options
  * @returns an array of error messages
  */
-function tsCompile(source, options) {
+function tsCompile(source) {
   const fileName = "module.tsx";
+  const compilerHost = getCompilerHost();
+  const originalReadFile = compilerHost.readFile;
+  const originalGetSourceFile = compilerHost.getSourceFile;
+  compilerHost.readFile = f =>
+    f === fileName ? source : originalReadFile.call(compilerHost, f);
 
-  const finalOptions = {
-    ...options,
-    jsx: ts.JsxEmit.Preserve,
-    // noResolve: true, // do not load node_modules or follow imports
-    skipLibCheck: true, // don't validate lib files
-    types: [], // avoid @types auto-inclusion
-    lib: [
-      "lib.es2020.d.ts",
-      // Must point to packages, not node_modules!
-      "../../../packages/wallace/lib/types.d.ts"
-    ]
-  };
-
-  const host = ts.createCompilerHost(finalOptions, true);
-
-  const originalReadFile = host.readFile;
-  const originalFileExists = host.fileExists;
-  const originalGetSourceFile = host.getSourceFile;
-
-  host.readFile = f => (f === fileName ? source : originalReadFile.call(host, f));
-  host.fileExists = f => (f === fileName ? true : originalFileExists.call(host, f));
-
-  host.getSourceFile = (f, langVersion, ...rest) => {
+  compilerHost.getSourceFile = (f, langVersion, ...rest) => {
     if (f === fileName) {
       return ts.createSourceFile(f, source, langVersion, true);
     }
-    return originalGetSourceFile.call(host, f, langVersion, ...rest);
+    return originalGetSourceFile.call(compilerHost, f, langVersion, ...rest);
   };
-
-  const program = ts.createProgram([fileName], finalOptions, host);
+  const program = ts.createProgram([fileName], hostOptions, compilerHost);
   const diagnostics = ts.getPreEmitDiagnostics(program);
 
   return diagnostics.map(d => {
@@ -194,25 +199,43 @@ expect.extend({
     const message = pass ? passMessage : failMessage;
     return { message, pass };
   },
-  toHaveTypeErrors(src, err1, err2, err3) {
-    // TODO: fix this. What is errorMessage?
-    const errors = tsCompile(src);
-    const expected = [err1, err2, err3].filter(Boolean);
+  toHaveTypeErrors(src, expectedErrors) {
+    if (!Array.isArray(expectedErrors)) {
+      throw new Error("toHaveTypeErrors requires an array of expected errors");
+    }
+    const errors = tsCompile(src)
+      .map(e => e.split("):")[1].replaceAll(/\s+/g, " ").trim())
+      .sort();
+    const expected = expectedErrors.map(e => e.replaceAll(/\s+/g, " ").trim()).sort();
+
     if (errors.length === 0) {
       return {
         pass: false,
-        message: () => `Expected error "${errorMessage}" but no errors were thrown`
+        message: () =>
+          `Expected errors "${expected.join("\n")}" but no errors were thrown`
       };
     }
-    console.log(expected);
-
+    const expectedStr = expected.join("\n");
+    const errorsStr = errors.join("\n");
+    if (expectedStr === errorsStr) {
+      return { pass: true };
+    }
+    console.log(errorsStr);
     return {
       pass: false,
-      message: () => `Expected error "${expected}" but no errors were thrown`
+      message: () => {
+        const diffString = diff(expectedStr, errorsStr, {
+          expand: this.expand
+        });
+        return (
+          this.utils.matcherHint(".toHaveTypeErrors") +
+          (diffString ? `\n\nDifference:\n\n${diffString}` : "") +
+          "\n\nIGNORE WHAT FOLLOWS - JEST OFTEN POINTS TO CODE FROM PREVIOUS TEST"
+        );
+      }
     };
   },
   toHaveNoTypeErrors(src) {
-    // TODO: make this work.
     const errors = tsCompile(src);
     if (errors.length === 0) {
       return { pass: true };
