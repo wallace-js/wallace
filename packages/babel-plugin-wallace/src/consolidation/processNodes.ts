@@ -379,14 +379,13 @@ function getNestedComponentCls(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode
 ): t.Expression {
-  const stubName = node.getStubName();
-  if (stubName) {
+  if (node.isStub) {
     componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
   }
-  return stubName
+  return node.isStub
     ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
         t.thisExpression(),
-        t.stringLiteral(node.getStubName())
+        t.stringLiteral(node.tagName)
       ])
     : t.identifier(node.tagName);
 }

@@ -1,7 +1,6 @@
 import type { NodePath } from "@babel/core";
 import type { JSXElement, JSXExpressionContainer, JSXText } from "@babel/types";
 import { getJSXElementData } from "../ast-helpers";
-import { wallaceConfig, FlagValue } from "../config";
 import { Component, WalkTracker } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 
@@ -20,17 +19,14 @@ export const jsxVisitors = {
     const tagData = getJSXElementData(path);
     switch (tagData.type) {
       case "stub":
-        wallaceConfig.ensureFlagIstrue(path, FlagValue.allowStubs);
-        path.traverse(errorIfJSXelementsFoundUnderNested);
-        component.processStub(path, tracker, tagData.name, tagData.repeat);
-        break;
       case "nested":
         path.traverse(errorIfJSXelementsFoundUnderNested);
         component.processNestedComponentTagNode(
           path,
           tracker,
           tagData.name,
-          tagData.repeat
+          tagData.repeat,
+          tagData.type === "stub"
         );
         break;
       case "normal":

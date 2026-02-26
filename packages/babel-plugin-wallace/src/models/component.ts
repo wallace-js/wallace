@@ -15,7 +15,6 @@ import {
   ExtractedNode,
   DynamicTextNode,
   PlainTextNode,
-  StubNode,
   TagNode,
   NestedComponentTagNode
 } from "./node";
@@ -135,7 +134,8 @@ export class Component {
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
     tagName: string,
-    isRepeat: boolean
+    isRepeat: boolean,
+    isStub: boolean
   ) {
     this.#enterLevel(tracker.childIndex);
     const extractedNode = new NestedComponentTagNode(
@@ -145,31 +145,8 @@ export class Component {
       tracker.parent,
       this,
       tagName,
-      isRepeat
-    );
-    path.traverse(attributeVisitors, {
-      extractedNode,
-      allowAttributes: false,
-      component: this
-    });
-    this.#addNode(extractedNode, path, tracker);
-    this.#exitLevel();
-  }
-  processStub(
-    path: NodePath<JSXElement>,
-    tracker: WalkTracker,
-    name: string,
-    isRepeat: boolean
-  ) {
-    this.#enterLevel(tracker.childIndex);
-    const extractedNode = new StubNode(
-      path,
-      this.#getCurrentAddress(),
-      tracker.initialIndex,
-      tracker.parent,
-      this,
-      name,
-      isRepeat
+      isRepeat,
+      isStub
     );
     path.traverse(attributeVisitors, {
       extractedNode,
