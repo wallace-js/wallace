@@ -88,3 +88,48 @@ export function buildConcat(parts: Expression[]): Expression {
     null
   );
 }
+
+/**
+ * Name could be:
+ *  foo
+ *  foo:bar
+ */
+export function extractAttributeName(path: NodePath<JSXAttribute>): {
+  base: string;
+  qualifier: string | undefined;
+} {
+  const { name } = path.node;
+  let base: string, qualifier: string | undefined;
+  if (t.isJSXNamespacedName(name)) {
+    base = name.namespace.name;
+    qualifier = name.name.name;
+  } else {
+    base = name.name;
+  }
+  return { base, qualifier };
+}
+
+/**
+ * Value could be:
+ *
+ *   foo
+ *   foo="bar"
+ *   foo={bar}
+ */
+export function extractAttributeValue(
+  path: NodePath<JSXAttribute>
+): NodeValue | undefined {
+  const { value } = path.node;
+  if (t.isStringLiteral(value)) {
+    return { type: "string", value: value.value };
+  } else if (t.isJSXExpressionContainer(value)) {
+    const expression = getPlaceholderExpression(path, value.expression);
+    if (expression) {
+      return { type: "expression", expression: expression, path };
+    }
+  } else if (value === null) {
+    return { type: "null" };
+  } else {
+    error(path, ERROR_MESSAGES.JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS);
+  }
+}
