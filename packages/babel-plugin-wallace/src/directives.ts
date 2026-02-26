@@ -39,12 +39,6 @@ class ClassDirective extends Directive {
   static attributeName = "class";
   static allowString = true;
   static allowQualifier = true;
-  static help = `
-    Without a qualifer this acts as a normal attribute, but with a qualifier it creates
-    a toggle target for use with the "toggle" directive:
-
-    /h <div class:danger="btn-danger" toggle:danger={expr}></div>
-    `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
       node.addClassToggleTarget(
@@ -75,11 +69,6 @@ class CtrlDirective extends Directive {
   static allowOnNested = true;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
-  static help: `
-  Specify ctrl for a nested component:
-  
-  /h <NestedComponent.nest ctrl={self.ctrl1} />
-  `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
     node.setCtrl(value.expression);
@@ -130,11 +119,6 @@ class FixedDirective extends Directive {
 
 class HideDirective extends Directive {
   static attributeName = "hide";
-  static help = `
-    Hides an element by toggling its hidden attribute.
-
-    /h <div hide={}></div>
-    `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, false, false);
   }
@@ -142,10 +126,6 @@ class HideDirective extends Directive {
 
 class HtmlDirective extends Directive {
   static attributeName = "html";
-  static help = `
-
-    /h <div html={'<div>hello</div>'}></div>
-  `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.watchAttribute("innerHTML", value.expression);
   }
@@ -154,11 +134,6 @@ class HtmlDirective extends Directive {
 class IfDirective extends Directive {
   static attributeName = "if";
   static allowOnNested = true;
-  static help = `
-    Conditionally includes/exludes an element from the DOM.
-
-    /h <div if={}></div>
-    `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, true, true);
   }
@@ -179,11 +154,6 @@ class OnEventDirective extends Directive {
   static allowString = true;
   static mayAccessElement = true;
   static mayAccessEvent = true;
-  static help = `
-    Creates an event handler:
-
-    /h <div onclick={alert('hello')}></div>
-    `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, base: string) {
     if (value.type === "string") {
       node.addFixedAttribute(base, value.value);
@@ -196,14 +166,10 @@ class OnEventDirective extends Directive {
 class PartDirective extends Directive {
   static attributeName = "part";
   static allowOnNested = true;
+  static allowOnRepeated = true;
   static allowNull = true;
   static allowExpression = false;
   static requireQualifier = true;
-  static help = `
-    Saves a reference to a part of a component which can be updated.
-
-    /h <div part:title></div>
-    `;
   apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
     node.setPart(qualifier);
@@ -213,12 +179,8 @@ class PartDirective extends Directive {
 class PropsDirective extends Directive {
   static attributeName = "props";
   static allowOnNested = true;
+  static allowOnRepeated = true;
   static allowOnNormalElement = false;
-  static help: `
-  Specify props for a nested component:
-  
-  /h <NestedComponent.nest props={{foo: 'bar'}} />
-  `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setProps(value.expression);
   }
@@ -230,11 +192,6 @@ class RefDirective extends Directive {
   static allowNull = true;
   static allowExpression = false;
   static requireQualifier = true;
-  static help = `
-    Saves a reference to an element or nested component:
-
-    /h <div ref:title></div>
-    `;
   apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
     node.setRef(qualifier);
   }
@@ -242,11 +199,6 @@ class RefDirective extends Directive {
 
 class ShowDirective extends Directive {
   static attributeName = "show";
-  static help = `
-    Shows an element by toggling its hidden attribute.
-
-    /h <div show={}></div>
-    `;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, true, false);
   }
@@ -256,10 +208,6 @@ class StyleDirective extends Directive {
   static attributeName = "style";
   static allowString = true;
   static allowQualifier = true;
-  static help = `
-
-    /h <div style:color="red"></div>
-    `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
       if (value.type === "string") {
@@ -283,16 +231,6 @@ class StyleDirective extends Directive {
 class ToggleDirective extends Directive {
   static attributeName = "toggle";
   static requireQualifier = true;
-  static help = `
-    If used on its own, the qualifer is the name of the css class to toggle:
-
-    /h <div toggle:danger={expr}></div>
-
-    If the element has class sets, then the qualifer corresponds to the name of the
-    class set:
-
-    /h <div class:danger="red danger" toggle:danger={expr}></div>
-    `;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
