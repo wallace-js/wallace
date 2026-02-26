@@ -1,28 +1,65 @@
 import * as t from "@babel/types";
 import type { NodePath } from "@babel/core";
-import type { Expression, JSXElement, JSXEmptyExpression } from "@babel/types";
+import type {
+  Expression,
+  JSXElement,
+  JSXAttribute,
+  JSXEmptyExpression
+} from "@babel/types";
+import { NodeValue } from "./models";
 import { ERROR_MESSAGES, error } from "./errors";
+import { isCapitalized } from "./utils";
 
-export function getJSXElementName(
-  path: NodePath<JSXElement>
-): string | { name: string; namespace: string } {
+interface JSXElementData {
+  type: "normal" | "nested" | "stub";
+  repeat?: true;
+  name: string;
+}
+
+/**
+ * A JSXElement's openingElement can be several things:
+ *
+ *  <div                // A normal element
+ *  <Foo                // A nested component
+ *  <Foo.repeat         // A repeated component
+ *  <stub.foo          // A nested stub
+ *  <stub.foo.repeat   // A repeated stub
+ *
+ */
+export function getJSXElementData(path: NodePath<JSXElement>): JSXElementData {
   const openingElementName = path.node.openingElement.name;
-  if (t.isJSXIdentifier(openingElementName)) {
-    return openingElementName.name;
-  } else if (t.isJSXNamespacedName(openingElementName)) {
+  if (t.isJSXNamespacedName(openingElementName)) {
     const { namespace, name } = openingElementName;
-    return { namespace: namespace.name, name: name.name };
+    return { type: "normal", name: `${namespace.name}:${name.name}` };
+  } else if (t.isJSXIdentifier(openingElementName)) {
+    const name = openingElementName.name;
+    return { name, type: isCapitalized(name) ? "nested" : "normal" };
   } else if (t.isJSXMemberExpression(openingElementName)) {
     const { object, property } = openingElementName;
     if (t.isJSXIdentifier(object)) {
-      return { namespace: object.name, name: property.name };
-    } else {
-      error(path, ERROR_MESSAGES.ARROW_FUNCTION_NOT_ASSIGNED);
+      // Means we have aaa.bbb
+      if (isCapitalized(object.name)) {
+        if (property.name === "repeat") {
+          return { name: object.name, type: "nested", repeat: true };
+        }
+      } else {
+        if (object.name === "stub") {
+          return { name: property.name, type: "stub" };
+        }
+      }
+    } else if (t.isJSXMemberExpression(object)) {
+      // Means we have aaa.bbb.ccc
+      const { object: subObject, property: subProperty } = object;
+      if (
+        t.isJSXIdentifier(subObject) &&
+        subObject.name === "stub" &&
+        property.name === "repeat"
+      ) {
+        return { name: subProperty.name, type: "stub", repeat: true };
+      }
     }
-  } else {
-    console.debug(path.node);
-    throw Error(`Can't read name from ${openingElementName}`);
   }
+  error(path, ERROR_MESSAGES.INVALID_TAG_FORMAT);
 }
 
 /**
