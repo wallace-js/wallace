@@ -1,10 +1,8 @@
 import type { NodePath } from "@babel/core";
 import type { JSXElement, JSXExpressionContainer, JSXText } from "@babel/types";
-import { getJSXElementName } from "../ast-helpers";
-import { wallaceConfig, FlagValue } from "../config";
+import { getJSXElementData } from "../ast-helpers";
 import { Component, WalkTracker } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
-import { isCapitalized } from "../utils";
 
 interface State {
   component: Component;
@@ -18,34 +16,22 @@ export const jsxVisitors = {
     path: NodePath<JSXElement>,
     { component, tracker = { childIndex: 0, initialIndex: 0, parent: undefined } }: State
   ) {
-    const tagName = getJSXElementName(path);
-    if (typeof tagName === "string") {
-      if (isCapitalized(tagName)) {
-        error(path, ERROR_MESSAGES.INCORRECTLY_NESTED_COMPONENT);
-      }
-      component.processJSXElement(path, tracker, tagName, jsxVisitors);
-    } else {
-      const { namespace, name } = tagName;
-      if (name === "nest" || name === "repeat") {
-        const componentCls = namespace;
-        if (!isCapitalized(componentCls)) {
-          error(path, ERROR_MESSAGES.NESTED_COMPONENT_MUST_BE_CAPTIALIZED);
-        }
-        component.processNestedOrRepeatedElement(
+    const tagData = getJSXElementData(path);
+    switch (tagData.type) {
+      case "stub":
+      case "nested":
+        path.traverse(errorIfJSXelementsFoundUnderNested);
+        component.processNestedComponentTagNode(
           path,
           tracker,
-          componentCls,
-          name === "repeat"
+          tagData.name,
+          tagData.repeat,
+          tagData.type === "stub"
         );
-        path.traverse(errorIfJSXelementsFoundUnderNested);
-      } else if (namespace === "stub") {
-        // TODO: ensure there is nothing inside and no other attributes.
-        // alternatively, allow attributes to control the stub.
-        wallaceConfig.ensureFlagIstrue(path, FlagValue.allowStubs);
-        component.processStub(path, name, tracker);
-      } else {
-        error(path, ERROR_MESSAGES.UNSUPPORTED_NAMESPACE);
-      }
+        break;
+      case "normal":
+        component.processJSXElement(path, tracker, tagData.name, jsxVisitors);
+        break;
     }
     path.remove();
   },

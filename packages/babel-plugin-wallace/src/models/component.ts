@@ -9,10 +9,15 @@ import type {
 import { stringLiteral } from "@babel/types";
 import type { Scope } from "@babel/traverse";
 import { HTML_SPLITTER } from "../constants";
-import { ERROR_MESSAGES, error } from "../errors";
 import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
 import { attributeVisitors } from "../visitors/attribute";
-import { ExtractedNode, DynamicTextNode, PlainTextNode, StubNode, TagNode } from "./node";
+import {
+  ExtractedNode,
+  DynamicTextNode,
+  PlainTextNode,
+  TagNode,
+  NestedComponentTagNode
+} from "./node";
 import { Module } from "./module";
 
 export interface WalkTracker {
@@ -76,13 +81,6 @@ export class Component {
     path: NodePath,
     tracker: WalkTracker
   ) {
-    // TODO: clean up this mess. Better way to do it.
-    if (tracker.parent?.isNestedComponent) {
-      error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_CHILDREN);
-    }
-    if (tracker.parent?.isRepeatedComponent) {
-      error(path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
-    }
     tracker.initialIndex += 1;
     if (!element) {
       // means it is a nested or repeated node.
@@ -118,9 +116,7 @@ export class Component {
       tracker.initialIndex,
       tracker.parent,
       this,
-      tagName,
-      false,
-      false
+      tagName
     );
     path.traverse(attributeVisitors, {
       extractedNode,
@@ -134,42 +130,24 @@ export class Component {
     });
     this.#exitLevel();
   }
-  processNestedOrRepeatedElement(
+  processNestedComponentTagNode(
     path: NodePath<JSXElement>,
     tracker: WalkTracker,
     tagName: string,
-    isRepeat: boolean
+    isRepeat: boolean,
+    isStub: boolean
   ) {
     this.#enterLevel(tracker.childIndex);
-    const extractedNode = new TagNode(
+    const extractedNode = new NestedComponentTagNode(
       path,
       this.#getCurrentAddress(),
       tracker.initialIndex,
       tracker.parent,
       this,
       tagName,
-      !isRepeat,
-      isRepeat
+      isRepeat,
+      isStub
     );
-    path.traverse(attributeVisitors, {
-      extractedNode,
-      allowAttributes: false,
-      component: this
-    });
-    this.#addNode(extractedNode, path, tracker);
-    this.#exitLevel();
-  }
-  processStub(path: NodePath<JSXElement>, name: string, tracker: WalkTracker) {
-    this.#enterLevel(tracker.childIndex);
-    const extractedNode = new StubNode(
-      path,
-      this.#getCurrentAddress(),
-      tracker.initialIndex,
-      tracker.parent,
-      this,
-      name
-    );
-
     path.traverse(attributeVisitors, {
       extractedNode,
       allowAttributes: false,

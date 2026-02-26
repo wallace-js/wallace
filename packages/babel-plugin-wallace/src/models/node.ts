@@ -15,6 +15,7 @@ import {
   IMPORTABLES,
   SPECIAL_SYMBOLS
 } from "../constants";
+import { wallaceConfig, FlagValue } from "../config";
 
 interface Attribute {
   name: string;
@@ -24,12 +25,6 @@ interface Attribute {
 interface Watch {
   expression: Expression | SPECIAL_SYMBOLS.noLookup;
   callback: string | Expression;
-}
-
-export interface RepeatInstruction {
-  expression: Expression;
-  componentCls: string;
-  repeatKey: Expression | string | undefined;
 }
 
 interface EventListener {
@@ -71,7 +66,7 @@ export class ExtractedNode {
   detacherStashKey?: number;
   isNestedComponent: boolean = false;
   isRepeatedComponent: boolean = false;
-  repeatNode?: ExtractedNode;
+  isStub: boolean = false;
   repeatKey: Expression | string | undefined;
   address: Array<number>;
   initialIndex: number;
@@ -94,8 +89,6 @@ export class ExtractedNode {
    */
   classToggleTriggers: ToggleTrigger[] = [];
   // Private to prevent being set more thant once by directives.
-  #repeatExpression?: Expression;
-  #stubName?: string;
   #visibilityToggle?: VisibilityToggle;
   #ref?: string;
   #part?: string;
@@ -159,7 +152,7 @@ export class ExtractedNode {
     this.#ctrl = expression;
   }
   getCtrl(): Expression {
-    return this.repeatNode ? this.repeatNode.getCtrl() : this.#ctrl;
+    return this.#ctrl;
   }
   setProps(expression: Expression) {
     if (this.#props) {
@@ -203,37 +196,8 @@ export class ExtractedNode {
   getPart(): string | undefined {
     return this.#part;
   }
-  setRepeatExpression(expression: Expression) {
-    if (this.#repeatExpression) {
-      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("items"));
-    }
-    this.isRepeatedComponent = true;
-    this.#repeatExpression = expression;
-    // this.parent.repeatNode = this;
-  }
   setRepeatKey(expression: Expression | string) {
     this.repeatKey = expression;
-  }
-  /**
-   * Called on the parent of a repeat.
-   */
-  getRepeatInstruction(): RepeatInstruction | undefined {
-    if (this.isRepeatedComponent) {
-      return {
-        expression: this.#repeatExpression,
-        componentCls: this.tagName,
-        repeatKey: this.repeatKey
-      };
-    }
-  }
-  setStub(name: string) {
-    if (this.#stubName) {
-      error(this.path, ERROR_MESSAGES.STUB_ALREADY_DEFINED);
-    }
-    this.#stubName = name;
-  }
-  getStubName(): string | undefined {
-    return this.#stubName;
   }
   requiredImport(name: IMPORTABLES) {
     this.requiredImports.add(name);
@@ -241,10 +205,9 @@ export class ExtractedNode {
 }
 
 /**
- * Class for tag nodes:
+ * Class for standard tag nodes:
  * <img />
  * <div>...</div>
- * <NestedComponent />
  */
 export class TagNode extends ExtractedNode {
   parent: TagNode;
@@ -257,23 +220,11 @@ export class TagNode extends ExtractedNode {
     initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
-    tagName: string,
-    isNestedComponent: boolean,
-    isRepeatedComponent: boolean
+    tagName: string
   ) {
     super(path, address, initialIndex, parent);
     this.component = component;
     this.tagName = tagName;
-    this.isNestedComponent = isNestedComponent;
-    this.isRepeatedComponent = isRepeatedComponent;
-    if (!this.parent && (this.isRepeatedComponent || this.isNestedComponent)) {
-      error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
-    }
-    if (this.isRepeatedComponent) {
-      this.parent.hasRepeatedChildren = true;
-    } else if (this.isNestedComponent) {
-      this.parent.hasNestedChildren = true;
-    }
   }
   addFixedAttribute(name: string, value?: string) {
     this.attributes.push({ name, value });
@@ -283,9 +234,6 @@ export class TagNode extends ExtractedNode {
     this.attributes.push({ name, value: HTML_SPLITTER });
   }
   getElement(): HTMLElement | Text {
-    if (this.isRepeatedComponent || this.isNestedComponent) {
-      return undefined;
-    }
     const element = createElement(this.tagName);
     this.attributes.forEach(({ name, value }) => {
       element.setAttribute(name, value || "");
@@ -295,21 +243,41 @@ export class TagNode extends ExtractedNode {
   }
 }
 
-export class StubNode extends TagNode {
+/**
+ * Class for nested component tag nodes:
+ *
+ * <NestedComponent />
+ */
+export class NestedComponentTagNode extends TagNode {
+  parent: TagNode;
+  address: Array<number>;
+  path: NodePath<JSXElement>;
+  attributes: Attribute[] = [];
   constructor(
     path: NodePath<JSXElement>,
     address: Array<number>,
     initialIndex: number,
     parent: TagNode,
     component: any, // TODO: fix type circular import.
-    name: string
+    tagName: string,
+    isRepeat: boolean,
+    isStub: boolean
   ) {
-    super(path, address, initialIndex, parent, component, name, false, false);
+    super(path, address, initialIndex, parent, component, tagName);
     if (!this.parent) {
       error(this.path, ERROR_MESSAGES.NESTED_COMPONENT_NOT_ALLOWED_ON_ROOT);
     }
-    this.parent.hasNestedChildren = true;
-    this.setStub(name);
+    if (isStub) {
+      this.isStub = true;
+      wallaceConfig.ensureFlagIstrue(path, FlagValue.allowStubs);
+    }
+    if (isRepeat) {
+      this.isRepeatedComponent = true;
+      this.parent.hasRepeatedChildren = true;
+    } else {
+      this.isNestedComponent = true;
+      this.parent.hasNestedChildren = true;
+    }
   }
   getElement(): HTMLElement | Text {
     return undefined;

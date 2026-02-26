@@ -12,7 +12,7 @@ import {
 } from "@babel/types";
 import * as t from "@babel/types";
 import { wallaceConfig } from "../config";
-import { Component, ExtractedNode, RepeatInstruction, VisibilityToggle } from "../models";
+import { Component, ExtractedNode, VisibilityToggle } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   COMPONENT_PROPERTIES,
@@ -30,23 +30,8 @@ export function processNode(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode
 ) {
-  if (node.isRepeatedComponent) {
-    // The watch should already have been added to the parent node, which is already
-    // processed. All we do here is run some extra checks.
-    // TODO: do this with visitor?
-    const children = getChildren(node, componentDefinition.component.extractedNodes);
-    if (children.length > 0) {
-      error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_CHILDREN);
-    }
-
-    if (!wallaceConfig.flags.allowRepeaterSiblings) {
-      const siblings = getSiblings(node, componentDefinition.component.extractedNodes);
-      if (siblings.length > 0) {
-        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
-      }
-    }
-  }
-  // Need to happen first
+  // These need to happen first...
+  nestedComponentValidation(node, componentDefinition);
   ensureToggleTargetsHaveTriggers(node);
   createEventsForBoundInputs(componentDefinition, node);
   addRequiredImports(componentDefinition, node);
@@ -54,12 +39,10 @@ export function processNode(
   const visibilityToggle = node.getVisibilityToggle();
   const ref = node.getRef();
   const part = node.getPart();
-  const repeatInstruction = node.getRepeatInstruction();
   const hasBoundInputs = node.bindInstructions.expression;
   const hasClassToggles = node.classToggleTriggers.length > 0;
   const hasEventListeners = node.eventListeners.length > 0;
   const hasWatches = node.watches.length > 0;
-  const isStub = node.getStubName() !== undefined;
 
   const needsWatch =
     hasWatches ||
@@ -67,8 +50,7 @@ export function processNode(
     hasClassToggles ||
     visibilityToggle ||
     node.isNestedComponent ||
-    repeatInstruction ||
-    isStub;
+    node.isRepeatedComponent;
 
   const shouldSaveElement =
     hasWatches ||
@@ -78,15 +60,14 @@ export function processNode(
     ref ||
     part ||
     hasEventListeners ||
-    isStub ||
     node.isNestedComponent ||
     node.hasConditionalChildren ||
     node.hasNestedChildren ||
     node.hasRepeatedChildren;
 
   if (shouldSaveElement) {
-    if (node.isNestedComponent || isStub) {
-      node.elementKey = createNesterObject(componentDefinition, node, isStub);
+    if (node.isNestedComponent) {
+      node.elementKey = createNesterObject(componentDefinition, node);
     } else {
       node.elementKey = componentDefinition.saveDynamicElement(node.address);
     }
@@ -118,7 +99,7 @@ export function processNode(
     const componentWatch = new ComponentWatch(
       node,
       componentDefinition,
-      repeatInstruction ? node.parent.elementKey : node.elementKey,
+      node.isRepeatedComponent ? node.parent.elementKey : node.elementKey,
       node.address
     );
 
@@ -131,7 +112,7 @@ export function processNode(
       );
     }
 
-    if (node.isNestedComponent || isStub) {
+    if (node.isNestedComponent) {
       const parentDetacherArgs = node.parent.detacherObject.arguments;
       if (parentDetacherArgs.length === 0) {
         parentDetacherArgs.push(t.arrayExpression([]));
@@ -144,8 +125,8 @@ export function processNode(
       addNestedComponentWatch(componentDefinition, node, componentWatch);
     }
 
-    if (repeatInstruction) {
-      processRepeater(componentDefinition, node, repeatInstruction, componentWatch);
+    if (node.isRepeatedComponent) {
+      processRepeater(componentDefinition, node, componentWatch);
     }
 
     if (hasClassToggles) {
@@ -160,6 +141,23 @@ export function processNode(
   }
   if (ref) processRef(componentDefinition, node, ref);
   if (part) processPart(componentDefinition, node, part);
+}
+
+function nestedComponentValidation(
+  node: ExtractedNode,
+  componentDefinition: ComponentDefinitionData
+) {
+  if (node.isNestedComponent && node.isRepeatedComponent) {
+    throw new Error("Internal error: node cannot be nested and repeated");
+  }
+  if (node.isRepeatedComponent) {
+    if (!wallaceConfig.flags.allowRepeaterSiblings) {
+      const siblings = getSiblings(node, componentDefinition.component.extractedNodes);
+      if (siblings.length > 0) {
+        error(node.path, ERROR_MESSAGES.REPEAT_DIRECTIVE_WITH_SIBLINGS);
+      }
+    }
+  }
 }
 
 function addRequiredImports(
@@ -197,24 +195,13 @@ function processVisibilityToggle(
 
 function createNesterObject(
   componentDefinition: ComponentDefinitionData,
-  node: ExtractedNode,
-  isStub: boolean
+  node: ExtractedNode
 ): number {
   const component = componentDefinition.component,
     dynamicElements = componentDefinition.dynamicElements,
-    componentCls = isStub
-      ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
-          t.thisExpression(),
-          t.stringLiteral(node.getStubName())
-        ])
-      : t.identifier(node.tagName);
+    componentCls = getNestedComponentCls(componentDefinition, node);
 
   component.module.requireImport(IMPORTABLES.Nester);
-
-  if (isStub) {
-    component.module.requireImport(IMPORTABLES.getStub);
-  }
-
   const nesterObject = componentDefinition.addDeclaration(
     newExpression(identifier(IMPORTABLES.Nester), [componentCls])
   );
@@ -388,13 +375,35 @@ function addToggleCallbackStatement(
   });
 }
 
+function getNestedComponentCls(
+  componentDefinition: ComponentDefinitionData,
+  node: ExtractedNode
+): t.Expression {
+  if (node.isStub) {
+    componentDefinition.component.module.requireImport(IMPORTABLES.getStub);
+  }
+  return node.isStub
+    ? t.callExpression(t.identifier(IMPORTABLES.getStub), [
+        t.thisExpression(),
+        t.stringLiteral(node.tagName)
+      ])
+    : t.identifier(node.tagName);
+}
+
 function processRepeater(
   componentDefinition: ComponentDefinitionData,
   node: ExtractedNode,
-  repeatInstruction: RepeatInstruction,
   componentWatch: ComponentWatch
 ) {
-  const component = componentDefinition.component;
+  const component = componentDefinition.component,
+    repeatKey = node.repeatKey,
+    repeatProps = node.getProps(),
+    componentCls = getNestedComponentCls(componentDefinition, node);
+
+  if (!repeatProps) {
+    error(node.path, ERROR_MESSAGES.REPEAT_WITHOUT_PROPS);
+  }
+
   const detacherInfo = node.parent.detacherIdentifier
     ? {
         index: node.initialIndex,
@@ -403,13 +412,13 @@ function processRepeater(
     : undefined;
 
   let repeaterClass;
-  const repeaterArgs: any = [identifier(repeatInstruction.componentCls)];
-  if (repeatInstruction.repeatKey) {
+  const repeaterArgs: any = [componentCls];
+  if (repeatKey) {
     repeaterClass = IMPORTABLES.KeyedRepeater;
-    if (typeof repeatInstruction.repeatKey === "string") {
-      repeaterArgs.push(t.stringLiteral(repeatInstruction.repeatKey));
+    if (typeof repeatKey === "string") {
+      repeaterArgs.push(t.stringLiteral(repeatKey));
     } else {
-      repeaterArgs.push(repeatInstruction.repeatKey);
+      repeaterArgs.push(repeatKey);
     }
   } else {
     repeaterClass = IMPORTABLES.SequentialRepeater;
@@ -426,10 +435,7 @@ function processRepeater(
     componentDefinition.dismountKeys.push(stashKey);
   }
 
-  const callbackArgs = [
-    identifier(WATCH_AlWAYS_CALLBACK_ARGS.element),
-    repeatInstruction.expression
-  ];
+  const callbackArgs = [identifier(WATCH_AlWAYS_CALLBACK_ARGS.element), repeatProps];
   if (wallaceConfig.flags.allowCtrl) {
     callbackArgs.push(getCtrlExpression(node, component));
   }
