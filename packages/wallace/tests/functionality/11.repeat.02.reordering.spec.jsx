@@ -3,13 +3,13 @@ import { testMount } from "../utils";
 const Child = ({ i }) => <div>{i}</div>;
 const NonKeyed = data => (
   <div>
-    <Child.repeat items={data} />
+    <Child.repeat props={data} />
   </div>
 );
 
 const Keyed = data => (
   <div>
-    <Child.repeat items={data} key="i" />
+    <Child.repeat props={data} key="i" />
   </div>
 );
 

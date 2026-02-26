@@ -1,26 +1,12 @@
 import { testMount } from "../utils";
 
 describe("Specifying", () => {
-  test("Disallow React style nesting", () => {
-    const code = `
-    const Animal = (animal) => <div>{animal.name}</div>;
-    const AnimalList = () => (
-      <div>
-        <Animal props={fox} />
-      </div>
-    );
-  `;
-    expect(code).toCompileWithError(
-      "Nest components using <Name.nest /> or <Name.repeat />."
-    );
-  });
-
   test("Disallow passing a litteral object as props", () => {
     const code = `
     const Animal = (animal) => <div>{animal.name}</div>;
     const AnimalList = () => (
       <div>
-        <Animal.nest props={{ name: "Fox" }} />
+        <Animal props={{ name: "Fox" }} />
       </div>
     );
   `;
@@ -33,9 +19,9 @@ describe("Specifying", () => {
     const code = `
     const Parent = () => (
       <div>
-        <Child.nest>
+        <Child>
           <div>other stuff</div>
-        </Child.nest>
+        </Child>
       </div>
     );
   `;
@@ -45,7 +31,7 @@ describe("Specifying", () => {
   test("Disallow nesting on root", () => {
     const code = `
     const Parent = () => (
-      <Child.nest />
+      <Child />
     );
   `;
     expect(code).toCompileWithError("Nested components not allowed as root element.");
@@ -55,7 +41,7 @@ describe("Specifying", () => {
     const code = `
     const Parent = () => (
       <div>
-        <Child.nest id="foo"/>
+        <Child id="foo"/>
       </div>
     );
   `;
@@ -68,7 +54,7 @@ describe("Basic use", () => {
     const Fox = () => <div>Fox</div>;
     const AnimalList = () => (
       <div>
-        <Fox.nest />
+        <Fox />
       </div>
     );
     const component = testMount(AnimalList);
@@ -84,7 +70,7 @@ describe("Basic use", () => {
     const Animal = animal => <div class="animal">{animal.name}</div>;
     const AnimalList = () => (
       <div>
-        <Animal.nest props={myProps} />
+        <Animal props={myProps} />
       </div>
     );
     const component = testMount(AnimalList);
@@ -102,7 +88,7 @@ describe("Basic use", () => {
       const Fox = (_, { ctrl }) => <div>Fox {ctrl}</div>;
       const AnimalList = () => (
         <div>
-          <Fox.nest ctrl={foxCtrl} />
+          <Fox ctrl={foxCtrl} />
         </div>
       );
       const foxCtrl = 6;
@@ -122,7 +108,7 @@ describe("Conditional display", () => {
     const Fox = () => <div>Fox</div>;
     const AnimalList = () => (
       <div>
-        <Fox.nest if={show} />
+        <Fox if={show} />
       </div>
     );
     const component = testMount(AnimalList);
@@ -145,7 +131,7 @@ describe("Conditional display", () => {
     const Fox = () => <div>Fox</div>;
     const AnimalList = () => (
       <div>
-        <Fox.nest if={show} />
+        <Fox if={show} />
       </div>
     );
     const component = testMount(AnimalList);
@@ -173,7 +159,7 @@ describe("Component", () => {
     };
     const AnimalList = () => (
       <div>
-        <Fox.nest if={show} />
+        <Fox if={show} />
       </div>
     );
     const component = testMount(AnimalList);
@@ -201,7 +187,7 @@ describe("Component", () => {
     };
     const AnimalList = () => (
       <div>
-        <Fox.nest if={show} />
+        <Fox if={show} />
       </div>
     );
     const component = testMount(AnimalList);
@@ -242,7 +228,7 @@ describe("Component", () => {
       };
       const AnimalList = () => (
         <div>
-          <Fox.nest if={show} />
+          <Fox if={show} />
         </div>
       );
 
