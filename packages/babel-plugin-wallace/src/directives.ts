@@ -164,20 +164,6 @@ class IfDirective extends Directive {
   }
 }
 
-class ItemsDirective extends Directive {
-  static attributeName = "items";
-  static allowOnRepeated = true;
-  static allowOnNormalElement = false;
-  static help: `
-  Specify items for a repeated component:
-  
-  /h <NestedComponent.repeat items={arrayOfProps} />
-  `;
-  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setRepeatExpression(value.expression);
-  }
-}
-
 class KeyDirective extends Directive {
   static attributeName = "key";
   static allowString = true;
@@ -336,7 +322,6 @@ export const builtinDirectives = [
   HideDirective,
   HtmlDirective,
   IfDirective,
-  ItemsDirective,
   KeyDirective,
   OnEventDirective,
   PartDirective,
