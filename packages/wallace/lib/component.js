@@ -129,12 +129,12 @@ export const initConstructor = (ComponentFunction, BaseComponentFunction) => {
       Object.defineProperty(ComponentFunction, "methods", {
         set: function (value) {
           throw new Error(
-            'Flag "allowMethods" must be set to true in the config for this feature.'
+            "Flag `allowMethods` must be set to true in the config for this feature."
           );
         },
         get: function () {
           throw new Error(
-            'Flag "allowMethods" must be set to true in the config for this feature.'
+            "Flag `allowMethods` must be set to true in the config for this feature."
           );
         }
       });
@@ -172,12 +172,12 @@ export const defineComponent = (
       Object.defineProperty(proto, "base", {
         set: function (value) {
           throw new Error(
-            'Flag "allowBase" must be set to true in the config for this feature.'
+            "Flag `allowBase` must be set to true in the config for this feature."
           );
         },
         get: function () {
           throw new Error(
-            'Flag "allowBase" must be set to true in the config for this feature.'
+            "Flag `allowBase` must be set to true in the config for this feature."
           );
         }
       });

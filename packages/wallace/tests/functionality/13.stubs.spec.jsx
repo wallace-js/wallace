@@ -119,7 +119,7 @@ if (wallaceConfig.flags.allowStubs) {
       );
       `;
     expect(code).toCompileWithError(
-      'Flag "allowStubs" must be set to true in the config for this feature.'
+      "Flag `allowStubs` must be set to true in the config for this feature."
     );
   });
 }
