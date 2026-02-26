@@ -3,9 +3,8 @@ import { testMount } from "../utils";
 if (wallaceConfig.flags.allowParts) {
   test("Parts update the right elements", () => {
     let color = "red",
-      age = 10,
       animal = "Otter";
-    const Foo = ({ count }, { element }) => (
+    const Foo = () => (
       <div>
         <div part:a style:color={color}>
           <span>{animal}</span>
@@ -77,7 +76,9 @@ if (wallaceConfig.flags.allowParts) {
     const Bar = () => (
       <div>
         <span>total: {items.reduce((a, b) => a + b, 0)}</span>
-        <Foo.repeat part:foo props={items} />
+        <div>
+          <Foo.repeat part:foo props={items} />
+        </div>
       </div>
     );
     const items = [1, 2, 3];
@@ -86,9 +87,11 @@ if (wallaceConfig.flags.allowParts) {
     expect(component).toRender(`
       <div> 
         <span>total: <span>6</span></span>
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
+        <div>
+          <span>1</span>
+          <span>2</span>
+          <span>3</span>
+        </div>
       </div>
     `);
     items.push(4);
@@ -96,10 +99,12 @@ if (wallaceConfig.flags.allowParts) {
     expect(component).toRender(`
       <div> 
         <span>total: <span>6</span></span>
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
-        <span>4</span>
+        <div>
+          <span>1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+        </div>
       </div>
     `);
 
@@ -107,10 +112,12 @@ if (wallaceConfig.flags.allowParts) {
     expect(component).toRender(`
       <div> 
         <span>total: <span>10</span></span>
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
-        <span>4</span>
+        <div>
+          <span>1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+        </div>
       </div>
     `);
   });
