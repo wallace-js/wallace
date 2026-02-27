@@ -182,7 +182,7 @@ Other than that, its standard JSX, except for three special cases:
 
 ## 3. Nesting
 
-To nest a component use its name followed by `.nest` and pass `props` if needed:
+To nest a component use its name and pass `props` if needed:
 
 ```tsx
 const Task = (task) => (<div></div>);
@@ -190,13 +190,6 @@ const Task = (task) => (<div></div>);
 const TopTasks = (tasks) => (
   <div>
     <Task props={tasks[0]} />
-    <Task props={tasks[1]} />
-  </div>
-);
-
-const TaskList = (tasks) => (
-  <div>
-    <Task.repeat props={tasks} />
   </div>
 );
 ```
@@ -208,7 +201,8 @@ Notes:
 
 ## 4. Repeating
 
-To repeat a component use its name followed by `.repeat` and pass `items`:
+To repeat a component use its name followed by `.repeat` and pass `props` which must
+be an Array of the props the component uses:
 
 ```tsx
 const Task = (task) => (<div></div>);
@@ -358,7 +352,8 @@ Notes:
 
 ## 9. TypeScript
 
-The main type is `Uses` which must be placed right after the comonent name:
+The `Uses` lets you annotate a component's props and other types. It must be placed
+right after the component name (not inside the parameters):
 
 ```tsx
 import { Uses } from 'wallace';
@@ -370,17 +365,7 @@ interface iTask {
 const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
 ```
 
-If you require no props, set it to `null`:
-
-```tsx
-const Task: Uses<null> = () => <div>Hello</div>;
-```
-
-`Uses` sets up type support in several places.
-
-### Props
-
-TypeScript will ensure you pass correct props during mounting, nesting and repeating:
+This ensure you pass correct props during mounting, nesting and repeating:
 
 ```
 const TaskList: Uses<iTask[]> = (tasks) => (
@@ -394,25 +379,27 @@ const TaskList: Uses<iTask[]> = (tasks) => (
 mount("main", TaskList, [{test: 'foo'}]);
 ```
 
-### Controller
-
-The 2nd type is used for the controller, available as `ctrl` in **xargs**:
+If you require no props, pass `null`:
 
 ```tsx
-import { Uses } from 'wallace';
+const Task: Uses<null> = () => <div>Hello</div>;
+```
 
-class TaskController () {
-  getName() {}
-}
+### Other types
 
-const Task: Uses<null, TaskController> = (_, { ctrl }) => (
+You can alternatively pass a compound type which lets you specify other things:
+
+### Controller
+
+```tsx
+const Task: Uses<{ctrl: Controller}> = (_, { ctrl }) => (
   <div>{ctrl.getName()}</div>
-));
+);
 ```
 
 ### Methods
 
-To see custom methods on `self` you'll need use an interface:
+Custom methods of the component are available `self`:
 
 ```tsx
 import { Uses } from 'wallace';
@@ -421,7 +408,7 @@ interface TaskMethods () {
   getName(): string;
 }
 
-const Task: Uses<null, null, TaskMethods> = (_, { self }) => (
+const Task: Uses<{methods: TaskMethods}> = (_, { self }) => (
   <div>{self.getName()}</div>
 ));
 
@@ -438,16 +425,23 @@ in addition to standard methods like `render`, which are already typed for you.
 
 ### Stubs
 
-The `props` and `controller` will pass through to functions you assign to
-`Component.stub` as stubs receive the same props as the parent.
-
-But `methods` are not passed through as stubs are distinct components and will have
-their own methods.
+You can specify the props and controller of each stub:
 
 ```tsx
-Task.stub.foo = (_, { self }) => (
-  <div>{self.getName()}</div>
-));
+interface ParentTypes {
+  ctrl: Controller;
+  stub: {
+    foo: Uses<iDay>;
+    bar: Uses<{props: iDay, ctrl: Controller}>;
+  };
+}
+
+const Parent: Uses<ParentTypes> = (_, { stub }) => (
+  <div>
+    <stub.foo props={data[0]} /> 
+    <stub.foo.repeat props={data} /> 
+  </div>
+);
 ```
 
 ### Inheritance
@@ -907,7 +901,7 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: ctrl
    *
-   * Specifies alternative `ctrl` for nested or repeated components.
+   * Specifies alternative `ctrl` for stubs, nested or repeated components.
    *
    * ```
    * <MyComponent ctrl={altController} />
@@ -963,15 +957,6 @@ interface DirectiveAttributes extends AllDomEvents {
    */
   if?: MustBeExpression;
 
-  /**
-   * ## Wallace directive: items
-   *
-   * Specifies items for repeated component. Must be an array of the props which the
-   * nested item accepts.
-   *
-   */
-  items?: MustBeExpression;
-
   /** ## Wallace directive: key
    *
    * Specifies a key for repeated components, creating an association between the key
@@ -1001,7 +986,8 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: props
    *
-   * Specifies props for a nested component.
+   * Specifies props for a stub, nested or repeated component - in which case it means
+   * an Array of the props used by the component.
    *
    */
   props?: MustBeExpression;
@@ -1105,11 +1091,10 @@ declare global {
        * - `hide` sets an element or component's hidden property.
        * - `html` Set the element's `innnerHTML` property.
        * - `if` excludes an element from the DOM.
-       * - `key` specifies a key for repeated items.
-       * - `items` set items for repeated component, must be an array of props.
+       * - `key` specifies a key for repeated components.
        * - `on[EventName]` creates an event handler (note the code is copied).
        * - `part:xyz` saves a reference to part of a component so it can be updated.
-       * - `props` specifies props for a nested components.
+       * - `props` specifies props for stubs, nested or repeated components.
        * - `ref:xyz` saves a reference to an element or nested component.
        * - `show` sets and element or component's hidden property.
        * - `style:xyz` sets a specific style property.
