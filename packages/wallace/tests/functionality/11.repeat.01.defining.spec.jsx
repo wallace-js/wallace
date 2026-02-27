@@ -30,6 +30,35 @@ describe("Repeat", () => {
     `
     );
   });
+
+  test("Cannot repeat normal elements", () => {
+    const code = `
+      const Parent = () => (
+        <div>
+          <div.repeat items={items} />
+        </div>
+      );
+    `;
+    expect(code).toCompileWithError(`Invalid tag format, must be one of:`);
+  });
+
+  test("Can repeat without props", () => {
+    const Child = () => <div>Hello</div>;
+    const Parent = () => (
+      <div>
+        <Child.repeat props={Array(3)} />
+      </div>
+    );
+    const component = testMount(Parent);
+    expect(component).toRender(
+      `<div>
+        <div>Hello</div>
+        <div>Hello</div>
+        <div>Hello</div>
+      </div>
+    `
+    );
+  });
 });
 
 describe("Repeat compiles with error when", () => {

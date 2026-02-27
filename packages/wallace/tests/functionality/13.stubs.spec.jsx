@@ -109,6 +109,25 @@ if (wallaceConfig.flags.allowStubs) {
       expect(component).toRender(`<div>hello <span>Fox</span></div>`);
     });
   }
+
+  // keyed mode is tested along with repeater keyed tests.
+  test("Can repeat", () => {
+    const myProps = [{ name: "Fox" }, { name: "Badger" }];
+    const BaseComponent = () => (
+      <div>
+        <stub.display.repeat props={myProps} />
+      </div>
+    );
+    const Child = extendComponent(BaseComponent);
+    Child.stub.display = ({ name }) => <span>{name}</span>;
+    const component = testMount(Child);
+    expect(component).toRender(`
+      <div>
+        <span>Fox</span>
+        <span>Badger</span>
+      </div>
+    `);
+  });
 } else {
   test("is not allowed without flag", () => {
     const code = `
