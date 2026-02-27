@@ -14,11 +14,24 @@ const KeyFunction = data => (
   </div>
 );
 
+const permutations = [
+  ["KeyString", KeyString],
+  ["KeyFunction", KeyFunction]
+];
+
+if (wallaceConfig.flags.allowStubs) {
+  const UsingStub = data => (
+    <div>
+      <stub.child.repeat props={data} key="i" />
+    </div>
+  );
+
+  UsingStub.stub.child = ({ i }) => <div>{i}</div>;
+  permutations.push(["Stubs", UsingStub]);
+}
+
 describe("Nodes are bound to keys", () => {
-  test.each([
-    ["KeyString", KeyString],
-    ["KeyFunction", KeyFunction]
-  ])("%s", (_, Container) => {
+  test.each(permutations)("%s", (_, Container) => {
     const component = testMount(Container, [
       { i: "red" },
       { i: "yellow" },

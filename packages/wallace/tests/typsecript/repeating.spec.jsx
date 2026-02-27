@@ -1,8 +1,6 @@
 import { testMount } from "../utils";
 
 describe("Props", () => {
-  // How should we repeat a compoennt which accepts no props?
-
   test("force props to be specified", () => {
     expect(`
     import { mount, Uses } from "wallace";
@@ -65,6 +63,18 @@ describe("Props", () => {
       const Bar: Uses<Props[]> = (items) => (
         <div>
           <Foo.repeat props={items}/>
+        </div>
+      );
+    `).toHaveNoTypeErrors();
+  });
+
+  test("Can repeat without props", () => {
+    expect(`
+      import { mount, Uses } from "wallace";
+      const Child: Uses = () => <div>Hello</div>;
+      const Parent: Uses = () => (
+        <div>
+          <Child.repeat props={Array(3)} />
         </div>
       );
     `).toHaveNoTypeErrors();
