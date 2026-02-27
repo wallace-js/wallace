@@ -352,7 +352,7 @@ Notes:
 
 ## 9. TypeScript
 
-The `Uses` lets you annotate a component's props and other types. It must be placed
+The `Uses` type lets you annotate a component's props and other types. It must be placed
 right after the component name (not inside the parameters):
 
 ```tsx
@@ -600,7 +600,7 @@ declare module "wallace" {
     methods?: ComponentMethods<Props, Controller, Methods> &
       ThisType<ComponentInstance<Props, Controller, Methods>>;
     readonly prototype: ComponentInstance<Props, Controller>;
-    readonly stub?: Stubs;
+    stub?: Stubs;
   }
 
   type ComponentMethods<Props, Controller, Methods extends object = {}> = {
