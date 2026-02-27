@@ -240,9 +240,7 @@ const CounterList = (counters) => (
 );
 ```
 
-This form reuses components sequentially, which may cause issues with CSS animations
-and focus, in which case you should use a keyed repeater by passing `key` which can
-be a string or a function:
+This form reuses components sequentially, which may cause issues with CSS animations and focus, in which case you should use a keyed repeater by passing `key` which can be a string or a function:
 
 ```tsx
 const TaskList = (tasks) => (
@@ -540,6 +538,10 @@ Of course you could equally access it as `self.props` but it's free to add so wh
 
 The controller.
 
+##### stub
+
+This simply provides type support for the stubs, provided you set `stub` in `Uses`.
+
 ### Controllers
 
 The `render` function _actually_ looks like this:
@@ -801,12 +803,12 @@ Stubs let you implement parts of the DOM in derived components, or vice versa:
 ```tsx
 const CounterList: Uses<iCounterList, Controller> = () => (
   <div>
-    <stub:stats />
-    <stub:counters />
+    <stub.stats />
+    <stub.counters />
   </div>
 );
 
-CounterList.stubs = {
+CounterList.stub = {
   stats: (_, { self }) => (
     <span>Total: {self.total()}</span>
   ),
@@ -819,7 +821,7 @@ CounterList.stubs = {
 
 const HighestCounterList = extendComponent(CounterList);
 
-HighestCounterList.stubs.stats = ({ counters }) => (
+HighestCounterList.stub.stats = ({ counters }) => (
   <span>Highest: {self.highest()}</span>
 );
 
@@ -837,7 +839,7 @@ A base component may also implement stubs it doesn't reference, and leave it to 
 ```tsx
 const BaseCounterList = () => <div>OVERRIDE ME</div>;
 
-BaseCounterList.stubs = {
+BaseCounterList.stub = {
   highest: (_, { self }) => <span>Highest: {self.highest()}</span>,
   total: (_, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
@@ -858,9 +860,9 @@ BaseCounterList.methods = {
 
 const HighestCounterList = extendComponent(BaseCounterList, () => (
   <div>
-    <stub:counters />
+    <stub.counters />
     <hr />
-    <stub:highest />
+    <stub.highest />
   </div>
 ));
 ```
@@ -868,6 +870,17 @@ const HighestCounterList = extendComponent(BaseCounterList, () => (
 > So long as the final component definition has an implementation (its own or inherited) for each stub it references, it will work.
 
 Stubs are a flexible way to organise reusable component skeletons or parts, which again, helps reduce duplication, errors and bundle size.
+
+Stubs accept `props` and `ctrl` and can be repeated like nested components:
+
+```tsx
+const CounterList: Uses<iCounterList> = (counters) => (
+  <div>
+    <stub.stats />
+    <stub.counter.repeat props={counters} />
+  </div>
+);
+```
 
 ### Router
 
