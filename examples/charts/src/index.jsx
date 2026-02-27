@@ -80,7 +80,7 @@ ChartCanvas.methods = {
 
 const ChartList = charts => (
   <div>
-    <ChartCanvas.repeat items={charts} />
+    <ChartCanvas.repeat props={charts} />
   </div>
 );
 

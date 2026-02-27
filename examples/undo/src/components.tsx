@@ -25,11 +25,11 @@ export const TaskList: Uses<iTask[], Controller, TaskListMethods> = (
   { event, ctrl, self }
 ) => (
   <div class="tasklist">
-    <UndoRedoBtns.nest />
+    <UndoRedoBtns />
     <div style="margin-top: 10px">
       <span>Completed: {ctrl.tasks.filter(t => t.done).length}</span>
       <div style="margin-top: 10px">
-        <Task.repeat items={ctrl.tasks} />
+        <Task.repeat props={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />

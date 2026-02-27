@@ -21,7 +21,7 @@ export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
     <div if={!ctrl.loading}>
       <span>Completed: {ctrl.completedTasksCount()}</span>
       <div style="margin-top: 10px">
-        <Task.repeat items={ctrl.tasks} />
+        <Task.repeat props={ctrl.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.txtInputKeyUp(event)} />
