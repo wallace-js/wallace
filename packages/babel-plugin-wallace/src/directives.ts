@@ -120,7 +120,7 @@ class FixedDirective extends Directive {
 class HideDirective extends Directive {
   static attributeName = "hide";
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setVisibilityToggle(value.expression, false, false);
+    node.setVisibilityToggle(value.expression, true, false);
   }
 }
 
@@ -135,7 +135,7 @@ class IfDirective extends Directive {
   static attributeName = "if";
   static allowOnNested = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setVisibilityToggle(value.expression, true, true);
+    node.setVisibilityToggle(value.expression, false, true);
   }
 }
 
@@ -200,7 +200,7 @@ class RefDirective extends Directive {
 class ShowDirective extends Directive {
   static attributeName = "show";
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setVisibilityToggle(value.expression, true, false);
+    node.setVisibilityToggle(value.expression, false, false);
   }
 }
 

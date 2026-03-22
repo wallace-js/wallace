@@ -57,7 +57,7 @@ const ComponentPrototype = {
         detacher = displayToggle.d;
         if (query !== undefined) {
           lookupTrue = !!lookups[query](props, this);
-          shouldBeVisible = displayToggle.r ? lookupTrue : !lookupTrue;
+          shouldBeVisible = displayToggle.r ? !lookupTrue : lookupTrue;
         }
         if (detacher) {
           detacher.apply(element, shouldBeVisible, elements, stash);
