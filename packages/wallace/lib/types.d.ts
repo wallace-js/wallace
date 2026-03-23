@@ -346,7 +346,6 @@ So long as the rendered component has all its stubs defined somewhere, it will w
 
 Notes:
 
- - Stubs receive the same props and controller as their containing component.
  - Stubs are separate components, so cannot access methods on the containing component
    through `self` (use the controller for that kind of thing).
 
@@ -657,6 +656,7 @@ declare module "wallace" {
     ref: { [key: string]: HTMLElement };
     part: { [key: string]: Part };
     base: Component<Props, Controller>;
+    dismount(): void;
   } & Component<Props, Controller> &
     Methods;
 
@@ -795,22 +795,30 @@ declare module "wallace" {
   export function route<Props>(
     path: string,
     componentDef: ComponentFunction<Props>,
-    converter: RouteConverter<Props>
+    converter?: RouteConverter<Props>,
+    cleanup?: RouteCleanup<Props>
   ): Route<Props>;
 
   type RouteConverter<Props> = (routedata: RouteData) => Props;
+  type RouteCleanup<Props> = (component: ComponentInstance<Props>) => void;
 
-  export type Route<Props> = [string, ComponentFunction<Props>, RouteConverter<Props>?];
+  export type Route<Props> = [
+    string,
+    ComponentFunction<Props>,
+    RouteConverter<Props>?,
+    RouteCleanup<Props>?
+  ];
   export type RouterProps = {
-    routes: readonly Route<unknown>[];
-    atts?: Record<string, unknown>;
+    routes: readonly Route<any>[];
+    atts?: Record<string, any>;
     error?: (error: Error, router: Router) => void;
   };
 
-  export class Router extends Component {
-    static nest?({ props }: { props?: RouterProps }): JSX.Element;
+  export type Router = ComponentFunction<RouterProps> & {
     mount(component: Component<any>): void;
-  }
+  };
+
+  export const Router: Router;
 }
 
 type MustBeExpression = Exclude<any, string>;
@@ -935,6 +943,48 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    */
   fixed?: string;
+
+  /**
+   * ## Wallace directive: help
+   *
+   * Does nothing other than show this tooltip.
+   *
+   * ### Directives:
+   *
+   * - `apply` runs a callback to modify an element.
+   * - `bind` updates a value when an input is changed.
+   * - `class:xyz` defines a set of classes to be toggled.
+   * - `css` shorthand for `fixed:class`.
+   * - `ctrl` specifies ctrl for nested/repeated components.
+   * - `event` changes the event which `bind` reacts to.
+   * - `fixed:xyz` sets a attribute from an expression at definition.
+   * - `hide` sets an element or component's hidden property.
+   * - `html` Set the element's `innnerHTML` property.
+   * - `if` excludes an element from the DOM.
+   * - `key` specifies a key for repeated components.
+   * - `on[EventName]` creates an event handler (note the code is copied).
+   * - `part:xyz` saves a reference to part of a component so it can be updated.
+   * - `props` specifies props for stubs, nested or repeated components.
+   * - `ref:xyz` saves a reference to an element or nested component.
+   * - `show` sets and element or component's hidden property.
+   * - `style:xyz` sets a specific style property.
+   * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
+   *   `xyz`.
+   * - `unique` can be set on components which are only used once for better performance.
+   *
+   * See more by hovering on a specific directive.
+   * Qualifiers like `class:danger` break the tool tip. Try `class x:danger`.
+   *
+   * ### Nesting syntax:
+   *
+   *   ```
+   *   <MyComponent props={singleProps} />
+   *   <MyComponent.repeat props={arrayOfProps} />
+   *   <MyComponent.repeat props={arrayOfProps} key="id"/>
+   *   <MyComponent.repeat props={arrayOfProps} key={(i) => i.id}/>
+   *   ```
+   */
+  help?: boolean;
 
   /** ## Wallace directive: hide
    *
@@ -1061,6 +1111,19 @@ interface DirectiveAttributes extends AllDomEvents {
 // LibraryManagedAttributes work.
 export {};
 
+type NativeIntrinsicElements = {
+  [K in keyof HTMLElementTagNameMap]: DirectiveAttributes & {
+    style?: string;
+    class?: string;
+    [attr: string]: any;
+  };
+};
+
+// WARNING - check that your changes here don't break standard html autocomplete
+// in JSX. The following should autocomplete button and allow style:
+//
+// <button style="width:20px" >
+
 declare global {
   namespace JSX {
     // This allows <Foo props={x} if={y} />
@@ -1069,43 +1132,7 @@ declare global {
     type LibraryManagedAttributes<C, P> =
       C extends ComponentFunction<infer Props, any, any, any> ? Wrapper<Props> : P;
 
-    interface IntrinsicElements {
-      /**
-       * Nesting syntax:
-       *   ```
-       *   <MyComponent props={singleProps} />
-       *   <MyComponent.repeat props={arrayOfProps} />
-       *   <MyComponent.repeat props={arrayOfProps} key="id"/>
-       *   <MyComponent.repeat props={arrayOfProps} key={(i) => i.id}/>
-       *   ```
-       *
-       * Available Wallace directives:
-       *
-       * - `apply` runs a callback to modify an element.
-       * - `bind` updates a value when an input is changed.
-       * - `class:xyz` defines a set of classes to be toggled.
-       * - `css` shorthand for `fixed:class`.
-       * - `ctrl` specifies ctrl for nested/repeated components.
-       * - `event` changes the event which `bind` reacts to.
-       * - `fixed:xyz` sets a attribute from an expression at definition.
-       * - `hide` sets an element or component's hidden property.
-       * - `html` Set the element's `innnerHTML` property.
-       * - `if` excludes an element from the DOM.
-       * - `key` specifies a key for repeated components.
-       * - `on[EventName]` creates an event handler (note the code is copied).
-       * - `part:xyz` saves a reference to part of a component so it can be updated.
-       * - `props` specifies props for stubs, nested or repeated components.
-       * - `ref:xyz` saves a reference to an element or nested component.
-       * - `show` sets and element or component's hidden property.
-       * - `style:xyz` sets a specific style property.
-       * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
-       *   `xyz`.
-       * - `unique` can be set on components which are only used once for better performance.
-       *
-       * You will get more details by hovering on the directive itself, but unfortunetely
-       * the tool tip won't display when you use a qualifier, like `class:danger`. To see
-       * it you cantemporarily change it to something `class x:danger`.
-       */
+    interface IntrinsicElements extends NativeIntrinsicElements {
       [elemName: string]: DirectiveAttributes & Record<string, any>;
     }
     interface Element {}
