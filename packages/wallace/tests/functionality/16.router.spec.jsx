@@ -16,6 +16,9 @@ if (wallaceConfig.flags.allowBase) {
   async function setHash(hash, event = "hashchange") {
     window.location.hash = hash;
     window.dispatchEvent(new Event(event));
+
+    // Flush microtasks + async/await chains
+    await Promise.resolve();
     await Promise.resolve();
   }
 
@@ -60,9 +63,16 @@ if (wallaceConfig.flags.allowBase) {
     });
 
     test("Unknown route shows error", async () => {
-      const component = testMount(Router, props);
+      const error = jest.fn();
+      testMount(Router, {
+        ...props,
+        error
+      });
+
       await setHash("/xyz");
-      expect(component).toRender(`<div>Router unable to match path "/xyz"</div>`);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
     });
   });
 
@@ -95,7 +105,7 @@ if (wallaceConfig.flags.allowBase) {
       expect(cleanup).not.toHaveBeenCalled();
       await setHash("/page2");
       expect(component).toRender("<div><div>Page2</div></div>");
-      expect(cleanup.mock.calls[0][0].component.el.outerHTML).toBe("<div>Page1</div>");
+      expect(cleanup.mock.calls[0][0].el.outerHTML).toBe("<div>Page1</div>");
       await setHash("/page1");
       expect(component).toRender("<div><div>Page1</div></div>");
       expect(cleanup.mock.calls.length).toBe(1);
