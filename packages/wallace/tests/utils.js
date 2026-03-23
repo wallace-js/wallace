@@ -83,11 +83,14 @@ function createDiv(id) {
   return div;
 }
 
+const mountedComponents = new Set();
 /**
  * Mounts a component to the JSDOM.
  */
 function testMount(cls, props, ctrl) {
-  return mount(createDiv(), cls, props, ctrl);
+  const instance = mount(createDiv(), cls, props, ctrl);
+  mountedComponents.add(instance);
+  return instance;
 }
 
 /**
@@ -247,6 +250,29 @@ expect.extend({
       };
     }
   }
+});
+
+afterEach(() => {
+  mountedComponents.forEach(component => {
+    try {
+      // Call framework lifecycle cleanup if it exists
+      if (typeof component.dismount === "function") {
+        component.dismount();
+      }
+
+      // Fallback: remove DOM
+      if (component.el && component.el.parentNode) {
+        component.el.parentNode.removeChild(component.el);
+      }
+    } catch (err) {
+      console.error("Error during component teardown:", err);
+    }
+  });
+
+  mountedComponents.clear();
+
+  // Optional: reset hash to avoid cross-test triggering
+  window.location.hash = "";
 });
 
 module.exports = {
