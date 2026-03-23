@@ -24,10 +24,20 @@ export const Router = () => <div></div>;
 
 Object.assign(Router.prototype, {
   render(props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
-    const defaultError = (error, router) => (router.el.innerHTML = error.message);
-    this.error = props.error || defaultError;
+    this._alive = true;
+    this.error =
+      props.error ||
+      (error => {
+        throw error;
+      });
     this.current = null;
-    events.forEach(e => window.addEventListener(e, () => this.onHashChange()));
+    // events.forEach(e => window.addEventListener(e, () => this.onHashChange()));
+    this.handlers = events.map(e => {
+      const handler = () => this.onHashChange();
+      window.addEventListener(e, handler);
+      return { e, handler };
+    });
+
     if (props.atts) {
       Object.keys(props.atts).forEach(k => {
         this.el.setAttribute(k, props.atts[k]);
@@ -49,6 +59,7 @@ Object.assign(Router.prototype, {
             routeData,
             /* #INCLUDE-IF: allowCtrl */ this.ctrl
           );
+          if (!this._alive) return;
           this.current && this.current.cleanup();
           this.mount(component);
           this.current = route;
@@ -56,6 +67,7 @@ Object.assign(Router.prototype, {
         }
         i++;
       }
+      if (!this._alive) return;
       throw new Error(`Router unable to match path "${path}"`);
     } catch (error) {
       this.error(error, this);
@@ -64,6 +76,19 @@ Object.assign(Router.prototype, {
   mount(component) {
     this.el.textContent = "";
     this.el.appendChild(component.el);
+  },
+  /* #INCLUDE-IF: allowDismount */
+  dismount() {
+    this._alive = false;
+    if (this.current) {
+      this.current.cleanup();
+    }
+    this.base.dismount.call(this);
+    if (this._handlers) {
+      this._handlers.forEach(({ e, handler }) => {
+        window.removeEventListener(e, handler);
+      });
+    }
   }
 });
 
@@ -108,10 +133,10 @@ Route.prototype = {
     return this.component;
   },
   /**
-   * Allows user to delete component or perform other cleanup.
+   * Allows user to dismount component or perform other cleanup.
    */
   cleanup() {
-    this._cleanup(this);
+    this._cleanup(this.component);
   }
 };
 
