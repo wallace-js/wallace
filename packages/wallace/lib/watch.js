@@ -9,12 +9,11 @@ export function watch(target, callback) {
   const handler = {
     get(target, key) {
       if (key == "isProxy") return true;
-      const prop = target[key],
-        propType = typeof prop;
-      if (propType == "undefined") return;
-      if (propType === "object") return new Proxy(prop, handler);
+      const value = target[key],
+        typeOfValue = typeof value;
+      if (typeOfValue === "object") return new Proxy(value, handler);
       if (
-        typeof target[key] === "function" &&
+        typeOfValue === "function" &&
         Array.isArray(target) &&
         MUTATING_METHODS.includes(key)
       ) {
@@ -24,10 +23,10 @@ export function watch(target, callback) {
           return result;
         };
       }
-      if (target instanceof Date && propType === "function") {
-        return prop.bind(target);
+      if (target instanceof Date && typeOfValue === "function") {
+        return value.bind(target);
       }
-      return prop;
+      return value;
     },
     set(target, key, value) {
       target[key] = value;
