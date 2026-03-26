@@ -19,11 +19,18 @@ import {
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
-  static allowNull = true;
   static allowString = false;
   static mayAccessElement = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
+  }
+}
+
+class AssignDirective extends Directive {
+  static attributeName = "assign";
+  static allowString = false;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.component.assignTo = value.expression;
   }
 }
 
@@ -32,6 +39,22 @@ class BindDirective extends Directive {
   static allowQualifier = true;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.setBindInstruction(value.expression, qualifier);
+  }
+}
+
+class BindDateDirective extends Directive {
+  static attributeName = "bindDate";
+  apply(node: TagNode, value: NodeValue, _base: string) {
+    node.setBindInstruction(value.expression, "valueAsDate");
+    node.addFixedAttribute("type", "date");
+  }
+}
+
+class BindNumberDirective extends Directive {
+  static attributeName = "bindNumber";
+  apply(node: TagNode, value: NodeValue, _base: string) {
+    node.setBindInstruction(value.expression, "valueAsNumber");
+    node.addFixedAttribute("type", "number");
   }
 }
 
@@ -72,25 +95,6 @@ class CtrlDirective extends Directive {
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
     node.setCtrl(value.expression);
-  }
-}
-
-/**
- * This is a hack to enable a Proxy of a Date to be passed to `valueAsDate`.
- * It is not a documented directive.
- */
-class ValueAsDateDirective extends Directive {
-  static attributeName = "valueAsDate";
-  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    if (value.type === "expression") {
-      node.requiredImport(IMPORTABLES.toDateString);
-      node.watchAttribute(
-        "value",
-        t.callExpression(t.identifier(IMPORTABLES.toDateString), [value.expression])
-      );
-    } else if (value.type === "string") {
-      node.addFixedAttribute("valueAsDate", value.value);
-    }
   }
 }
 
@@ -248,13 +252,34 @@ class UniqueDirective extends Directive {
   }
 }
 
+/**
+ * This is a hack to enable a Proxy of a Date to be passed to `valueAsDate`.
+ * It is not a documented directive.
+ */
+class ValueAsDateDirective extends Directive {
+  static attributeName = "valueAsDate";
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    if (value.type === "expression") {
+      node.requiredImport(IMPORTABLES.toDateString);
+      node.watchAttribute(
+        "value",
+        t.callExpression(t.identifier(IMPORTABLES.toDateString), [value.expression])
+      );
+    } else if (value.type === "string") {
+      node.addFixedAttribute("valueAsDate", value.value);
+    }
+  }
+}
+
 export const builtinDirectives = [
   ApplyDirective,
+  AssignDirective,
   BindDirective,
+  BindDateDirective,
+  BindNumberDirective,
   ClassDirective,
   CssDirective,
   CtrlDirective,
-  ValueAsDateDirective,
   EventDirective,
   FixedDirective,
   HideDirective,
@@ -268,5 +293,6 @@ export const builtinDirectives = [
   ShowDirective,
   StyleDirective,
   ToggleDirective,
-  UniqueDirective
+  UniqueDirective,
+  ValueAsDateDirective
 ];

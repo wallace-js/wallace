@@ -5,6 +5,7 @@ const ComponentPrototype = {
   render: function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
     this.props = props;
     /* #INCLUDE-IF: allowCtrl */ this.ctrl = ctrl;
+    if (this.assign) this.assign();
     this.update();
   },
 
@@ -152,12 +153,14 @@ export const defineComponent = (
   watches,
   queries,
   contructor,
+  assign,
   /* #INCLUDE-IF: allowDismount */ dismountKeys,
   inheritFrom
 ) => {
   const ComponentDefinition = initConstructor(contructor, inheritFrom || ComponentBase);
   const proto = ComponentDefinition.prototype;
   throwAway.innerHTML = html;
+  proto.assign = assign;
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;
