@@ -1,4 +1,14 @@
-const MUTATING_METHODS = ["push", "pop", "shift", "unshift", "splice", "reverse", "sort"];
+// These potentially trigger multiple `set` operations, so are handled separately to
+// ensure the callback only fires once.
+const ARRAY_MUTATING_METHODS = [
+  "push",
+  "pop",
+  "shift",
+  "unshift",
+  "splice",
+  "reverse",
+  "sort"
+];
 /**
  * Returns a proxy which calls a callback when the object or its nested objects are
  * modified.
@@ -15,7 +25,7 @@ export function watch(target, callback) {
       if (
         typeOfValue === "function" &&
         Array.isArray(target) &&
-        MUTATING_METHODS.includes(key)
+        ARRAY_MUTATING_METHODS.includes(key)
       ) {
         return (...args) => {
           const result = target[key](...args);

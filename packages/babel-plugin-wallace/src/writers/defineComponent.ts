@@ -1,5 +1,5 @@
 import * as t from "@babel/types";
-import type { CallExpression } from "@babel/types";
+import type { CallExpression, ExpressionStatement, LVal } from "@babel/types";
 import { Component } from "../models";
 import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES, IMPORTABLES } from "../constants";
@@ -165,6 +165,30 @@ function buildConstructor(
   );
 }
 
+function assignExpression(left: LVal, right: Expression): ExpressionStatement {
+  return t.expressionStatement(t.assignmentExpression("=", left, right));
+}
+function buildAssignFunction(component: Component, assignTo: LVal): FunctionExpression {
+  return t.functionExpression(
+    null,
+    [],
+    t.blockStatement([
+      // This feels stupid, but the bundler sorts it out.
+      t.variableDeclaration("const", [
+        t.variableDeclarator(
+          component.propsIdentifier,
+          t.memberExpression(t.identifier("this"), t.identifier("props"))
+        )
+      ]),
+
+      t.variableDeclaration("const", [
+        t.variableDeclarator(component.componentIdentifier, t.identifier("this"))
+      ]),
+      assignExpression(assignTo, t.identifier("this"))
+    ])
+  );
+}
+
 function buildDismountKeys(componentDefinition: ComponentDefinitionData) {
   return t.arrayExpression(
     componentDefinition.dismountKeys.map(key => t.numericLiteral(key))
@@ -173,11 +197,15 @@ function buildDismountKeys(componentDefinition: ComponentDefinitionData) {
 
 export function buildDefineComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
-  const args: any[] = [
+  const assignTo = componentDefinition.component.assignTo;
+  const args: Expression[] = [
     componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildConstructor(componentDefinition)
+    buildConstructor(componentDefinition),
+    assignTo
+      ? buildAssignFunction(componentDefinition.component, assignTo)
+      : t.nullLiteral()
   ];
   if (wallaceConfig.flags.allowDismount) {
     args.push(buildDismountKeys(componentDefinition));

@@ -6,7 +6,7 @@ import type {
   JSXText,
   Expression
 } from "@babel/types";
-import { stringLiteral } from "@babel/types";
+import { stringLiteral, LVal } from "@babel/types";
 import type { Scope } from "@babel/traverse";
 import { HTML_SPLITTER } from "../constants";
 import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
@@ -53,6 +53,7 @@ export class Component {
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
   unique: boolean = false;
+  assignTo?: LVal;
   constructor(
     module: Module,
     scope: Scope,
