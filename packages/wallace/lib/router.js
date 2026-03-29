@@ -1,5 +1,5 @@
 /*
-The Router is a component which mounts other components based on hash (URL bit after #).
+The Router is a component which mounts other components based on URL hash.
 
 It currently expects the route to be made of chunks separated by / which are either
 text or placeholders:
@@ -31,7 +31,6 @@ Object.assign(Router.prototype, {
         throw error;
       });
     this.current = null;
-    // events.forEach(e => window.addEventListener(e, () => this.onHashChange()));
     this.handlers = events.map(e => {
       const handler = () => this.onHashChange();
       window.addEventListener(e, handler);

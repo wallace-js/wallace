@@ -32,6 +32,7 @@ if (wallaceConfig.flags.allowStubs) {
 
 describe("Nodes are bound to keys", () => {
   test.each(permutations)("%s", (_, Container) => {
+    Container.prototype.dismount = function () {};
     const component = testMount(Container, [
       { i: "red" },
       { i: "yellow" },

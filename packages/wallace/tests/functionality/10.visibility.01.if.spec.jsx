@@ -142,6 +142,8 @@ describe.each([1, 2, 3, 4, 5])(
       if (permutation > 3) return;
     }
 
+    Foo.prototype.dismount = function () {};
+
     const component = testMount(Foo);
 
     test("have correct initial positions", () => {
