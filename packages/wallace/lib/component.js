@@ -6,6 +6,7 @@ const ComponentPrototype = {
     this.props = props;
     /* #INCLUDE-IF: allowCtrl */ this.ctrl = ctrl;
     if (this.assign) this.assign();
+    // (f = this.prototype.assign) && f.call(this);
     this.update();
   },
 
