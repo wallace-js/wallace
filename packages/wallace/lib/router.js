@@ -24,6 +24,18 @@ export const Router = () => <div></div>;
 
 Object.assign(Router.prototype, {
   render(props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
+    if (wallaceConfig.flags.allowBase) {
+    } else {
+      throw new Error(
+        "Flag `allowBase` must be set to true in the config for this feature."
+      );
+    }
+    if (wallaceConfig.flags.allowDismount) {
+    } else {
+      throw new Error(
+        "Flag `allowDismount` must be set to true in the config for this feature."
+      );
+    }
     this._alive = true;
     this.error =
       props.error ||
