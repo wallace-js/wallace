@@ -255,12 +255,10 @@ expect.extend({
 afterEach(() => {
   mountedComponents.forEach(component => {
     try {
-      // Call framework lifecycle cleanup if it exists
       if (typeof component.dismount === "function") {
+        /* #INCLUDE-IF: allowDismount */
         component.dismount();
       }
-
-      // Fallback: remove DOM
       if (component.el && component.el.parentNode) {
         component.el.parentNode.removeChild(component.el);
       }
@@ -270,8 +268,6 @@ afterEach(() => {
   });
 
   mountedComponents.clear();
-
-  // Optional: reset hash to avoid cross-test triggering
   window.location.hash = "";
 });
 
