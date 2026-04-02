@@ -45,7 +45,6 @@ export class Component {
   #currentNodeAddress: Array<number> = [];
   module: Module;
   scope: Scope;
-  // TODO: should this still exist?
   baseComponent?: Expression;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
@@ -54,7 +53,6 @@ export class Component {
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
   unique: boolean = false;
-  // TODO: make these setable only once
   assignTo?: LVal;
   watchProps?: { callback?: Expression };
   watchCtrl?: { callback?: Expression };

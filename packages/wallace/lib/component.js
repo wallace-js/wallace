@@ -8,8 +8,6 @@ const defaultSetFunction = function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
 
 const ComponentPrototype = {
   render: function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
-    // if (this.assign) this.assign();
-    // (f = this.prototype.assign) && f.call(this);
     this.set(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
     this.update();
   },
