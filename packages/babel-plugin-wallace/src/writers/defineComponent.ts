@@ -1,6 +1,6 @@
 import * as t from "@babel/types";
 import type { CallExpression, ExpressionStatement, LVal } from "@babel/types";
-import { Component } from "../models";
+import { Component, Module } from "../models";
 import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES, IMPORTABLES } from "../constants";
 import type {
@@ -168,24 +168,55 @@ function buildConstructor(
 function assignExpression(left: LVal, right: Expression): ExpressionStatement {
   return t.expressionStatement(t.assignmentExpression("=", left, right));
 }
-function buildAssignFunction(component: Component, assignTo: LVal): FunctionExpression {
+
+function getWatchCallback(
+  module: Module,
+  name: string,
+  watch?: { callback?: Expression }
+) {
+  module.requireImport(IMPORTABLES.watch);
+  console.log(watch);
+  const callback = t.arrowFunctionExpression(
+    [],
+    watch.callback ||
+      t.callExpression(t.memberExpression(t.thisExpression(), t.identifier("update")), [])
+  );
+  return t.callExpression(t.identifier(IMPORTABLES.watch), [
+    t.identifier(name),
+    callback
+  ]);
+}
+
+function getComponentPropertyAssignment(
+  module: Module,
+  name: string,
+  watch?: { callback?: Expression }
+) {
+  const left = t.memberExpression(t.thisExpression(), t.identifier(name));
+  const right = watch ? getWatchCallback(module, name, watch) : t.identifier(name);
+  return assignExpression(left, right);
+}
+
+// TOOD: make it use actual ctrl from arg once I've sorted renaming.
+function buildSetFunction(componentDefinition: ComponentDefinitionData) {
+  const component = componentDefinition.component;
+  const { assignTo, watchProps, watchCtrl, module } = component;
+
+  const statements: any[] = [
+    t.variableDeclaration("const", [
+      t.variableDeclarator(component.componentIdentifier, t.identifier("this")),
+      t.variableDeclarator(component.propsIdentifier, t.identifier("props"))
+    ]),
+    getComponentPropertyAssignment(module, "props", watchProps),
+    getComponentPropertyAssignment(module, "ctrl", watchCtrl)
+  ];
+  if (assignTo) {
+    statements.push(assignExpression(assignTo, t.identifier("this")));
+  }
   return t.functionExpression(
     null,
-    [],
-    t.blockStatement([
-      // This feels stupid, but the bundler sorts it out.
-      t.variableDeclaration("const", [
-        t.variableDeclarator(
-          component.propsIdentifier,
-          t.memberExpression(t.identifier("this"), t.identifier("props"))
-        )
-      ]),
-
-      t.variableDeclaration("const", [
-        t.variableDeclarator(component.componentIdentifier, t.identifier("this"))
-      ]),
-      assignExpression(assignTo, t.identifier("this"))
-    ])
+    [t.identifier("props"), t.identifier("ctrl")],
+    t.blockStatement(statements)
   );
 }
 
@@ -197,16 +228,17 @@ function buildDismountKeys(componentDefinition: ComponentDefinitionData) {
 
 export function buildDefineComponentCall(component: Component): CallExpression {
   const componentDefinition = consolidateComponent(component);
-  const assignTo = componentDefinition.component.assignTo;
-  const args: Expression[] = [
+
+  const args: any[] = [
     componentDefinition.html,
     buildWatchesArg(componentDefinition),
     buildLookupsArg(componentDefinition),
-    buildConstructor(componentDefinition),
-    assignTo
-      ? buildAssignFunction(componentDefinition.component, assignTo)
-      : t.nullLiteral()
+    buildConstructor(componentDefinition)
   ];
+  const setFunctionArg = componentDefinition.component.needsCustomSetMethod()
+    ? buildSetFunction(componentDefinition)
+    : t.numericLiteral(0);
+  args.push(setFunctionArg);
   if (wallaceConfig.flags.allowDismount) {
     args.push(buildDismountKeys(componentDefinition));
   }

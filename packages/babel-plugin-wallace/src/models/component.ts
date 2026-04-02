@@ -45,7 +45,8 @@ export class Component {
   #currentNodeAddress: Array<number> = [];
   module: Module;
   scope: Scope;
-  baseComponent: Expression | undefined;
+  // TODO: should this still exist?
+  baseComponent?: Expression;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
   propsIdentifier: Identifier;
@@ -53,7 +54,10 @@ export class Component {
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
   unique: boolean = false;
+  // TODO: make these setable only once
   assignTo?: LVal;
+  watchProps?: { callback?: Expression };
+  watchCtrl?: { callback?: Expression };
   constructor(
     module: Module,
     scope: Scope,
@@ -103,6 +107,9 @@ export class Component {
   #addNode(node: ExtractedNode, path: NodePath, tracker: WalkTracker) {
     this.#addElement(node.getElement(), path, tracker);
     this.extractedNodes.push(node);
+  }
+  needsCustomSetMethod() {
+    return this.assignTo || this.watchCtrl || this.watchProps;
   }
   processJSXElement(
     path: NodePath<JSXElement>,

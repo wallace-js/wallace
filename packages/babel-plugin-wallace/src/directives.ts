@@ -19,7 +19,6 @@ import {
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
-  static allowString = false;
   static mayAccessElement = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
@@ -28,7 +27,6 @@ class ApplyDirective extends Directive {
 
 class AssignDirective extends Directive {
   static attributeName = "assign";
-  static allowString = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.component.assignTo = value.expression;
   }
@@ -39,22 +37,6 @@ class BindDirective extends Directive {
   static allowQualifier = true;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.setBindInstruction(value.expression, qualifier);
-  }
-}
-
-class BindDateDirective extends Directive {
-  static attributeName = "bindDate";
-  apply(node: TagNode, value: NodeValue, _base: string) {
-    node.setBindInstruction(value.expression, "valueAsDate");
-    node.addFixedAttribute("type", "date");
-  }
-}
-
-class BindNumberDirective extends Directive {
-  static attributeName = "bindNumber";
-  apply(node: TagNode, value: NodeValue, _base: string) {
-    node.setBindInstruction(value.expression, "valueAsNumber");
-    node.addFixedAttribute("type", "number");
   }
 }
 
@@ -271,12 +253,31 @@ class ValueAsDateDirective extends Directive {
   }
 }
 
+/**
+ * The qualifier is the property to watch, either props or ctrl.
+ * The expression is the callback (optional).
+ */
+class WatchDirective extends Directive {
+  static attributeName = "watch";
+  static allowQualifier = true;
+  static allowNull = true;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    const q = qualifier || "props",
+      callback = value.expression;
+    if (q === "props") {
+      node.component.watchProps = { callback };
+    } else if (q === "ctrl") {
+      node.component.watchCtrl = { callback };
+    } else {
+      throw new Error("Qualifier must be props or ctrl");
+    }
+  }
+}
+
 export const builtinDirectives = [
   ApplyDirective,
   AssignDirective,
   BindDirective,
-  BindDateDirective,
-  BindNumberDirective,
   ClassDirective,
   CssDirective,
   CtrlDirective,
@@ -294,5 +295,6 @@ export const builtinDirectives = [
   StyleDirective,
   ToggleDirective,
   UniqueDirective,
-  ValueAsDateDirective
+  ValueAsDateDirective,
+  WatchDirective
 ];
