@@ -632,7 +632,6 @@ declare module "wallace" {
     : ComponentFunction<T>;
 
   interface CompoundTypes {
-    __compound: true;
     props?: any;
     ctrl?: any;
     methods?: object;
@@ -725,12 +724,11 @@ declare module "wallace" {
   export function extendComponent<
     Props = any,
     Controller = any,
-    Methods extends object = {},
-    Stubs extends StubDefinition = {}
+    Methods extends object = {}
   >(
-    base: ComponentFunction<Props, Controller, Methods, Stubs>,
-    componentFunc?: ComponentFunction<Props, Controller, Methods, Stubs>
-  ): ComponentFunction<Props, Controller, Methods, Stubs>;
+    base: ComponentFunction<Props, Controller, Methods>,
+    componentFunc?: ComponentFunction<Props, Controller, Methods>
+  ): ComponentFunction<Props, Controller, Methods>;
 
   /**
    * *Replaces* element with an instance of componentDefinition and renders it.
