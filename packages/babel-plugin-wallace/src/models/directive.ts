@@ -14,21 +14,47 @@ export interface NodeValue {
 
 export type Qualifier = string | undefined;
 
+export enum QualifierMode {
+  Required,
+  Optional,
+  SetsValue, // sets value as string if supplied
+  NotAllowed
+}
+
+export enum ValueMode {
+  StringRequired,
+  StringOptional,
+  ExpressionRequired,
+  ExpressionOptional,
+  EitherRequired,
+  EitherOptional,
+  NotAllowed
+}
+
+const ValidModesForSetsValue = [
+  ValueMode.StringRequired,
+  ValueMode.StringOptional,
+  ValueMode.EitherRequired,
+  ValueMode.EitherOptional
+];
+
 export class Directive {
   static attributeName: string;
   static help: string;
-  static allowExpression = true;
-  static allowNull = false;
-  static allowString = false;
-  static allowQualifier = false;
-  static requireQualifier = false;
+  // static allowExpression = true;
+  // static allowNull = false;
+  // static allowString = false;
+  // static allowQualifier = false;
+  // static requireQualifier = false;
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = false;
   static allowOnRepeated = false;
   static allowOnNormalElement = true;
   static mayAccessComponent = true;
   static mayAccessElement = false;
   static mayAccessEvent = false;
-  static allowedTypes: { [key: string]: NodeValue["type"] };
+  // static allowedTypes: { [key: string]: NodeValue["type"] };
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {}
   validate(
     node: TagNode,
@@ -38,55 +64,152 @@ export class Directive {
     component: Component
   ) {
     const constructor = this.constructor as typeof Directive;
-    this.validateType(node, value, constructor);
+    this.validateTypeAndQualifier(node, value, qualifier, constructor);
     this.validateNestedAndRepeat(node, constructor);
-    this.validateQualifier(node, qualifier, constructor);
     this.validateScopeVariablAccess(node, value, constructor, component);
   }
-  validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
-    const { attributeName, allowExpression, allowString, allowNull } = constructor;
-    const allowedTypes = [
-      allowExpression && "expression",
-      allowString && "string",
-      allowNull && "null"
-    ].filter(Boolean);
-    if (!allowedTypes.includes(value.type)) {
+  validateTypeAndQualifier(
+    node: TagNode,
+    value: NodeValue,
+    qualifier: Qualifier,
+    constructor: typeof Directive
+  ) {
+    /*
+      check if SetsValue, then remaining qualifier checks.
+
+    */
+    const { qualifierMode, valueMode } = constructor;
+
+    // Validate special case for SetsValue.
+    if (qualifierMode === QualifierMode.SetsValue && qualifier) {
+      ensureValidValueModeForSetsValue(valueMode, constructor);
+      if (value.expression || value.value) {
+        error(
+          node.path,
+          ERROR_MESSAGES.DIRECTIVE_REQUIRES_QUALIFIER_OR_VALUE(constructor.attributeName)
+        );
+      }
+      value.value = qualifier;
+    }
+
+    // Standard qualifer validation.
+    if (qualifierMode === QualifierMode.Required && !qualifier) {
       error(
         node.path,
-        ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(attributeName, allowedTypes, value.type)
+        ERROR_MESSAGES.DIRECTIVE_REQUIRES_QUALIFIER(constructor.attributeName)
       );
     }
+    if (qualifierMode === QualifierMode.NotAllowed && qualifier) {
+      error(
+        node.path,
+        ERROR_MESSAGES.DIRECTIVE_DISALLOWS_QUALIFIER(constructor.attributeName)
+      );
+    }
+
+    if (value.value && value.expression) {
+      throw new Error("Internal error: directive got both a value and expression");
+    }
+
+    // Validate value
+    switch (valueMode) {
+      case ValueMode.StringRequired:
+        if (!value.value)
+          error(
+            node.path,
+            ERROR_MESSAGES.DIRECTIVE_VALUE_REQUIRED("string", constructor.attributeName)
+          );
+        break;
+      case ValueMode.StringOptional:
+        if (value.expression)
+          error(
+            node.path,
+            ERROR_MESSAGES.DIRECTIVE_VALUE_REQUIRED("string", constructor.attributeName)
+          );
+        break;
+      case ValueMode.ExpressionRequired:
+        if (!value.expression)
+          error(
+            node.path,
+            ERROR_MESSAGES.DIRECTIVE_VALUE_REQUIRED(
+              "expression",
+              constructor.attributeName
+            )
+          );
+        break;
+      case ValueMode.ExpressionOptional:
+        if (value.value)
+          error(
+            node.path,
+            ERROR_MESSAGES.DIRECTIVE_VALUE_REQUIRED(
+              "expression",
+              constructor.attributeName
+            )
+          );
+        break;
+      case ValueMode.EitherRequired:
+        if (!(value.expression || value.value))
+          error(
+            node.path,
+            ERROR_MESSAGES.DIRECTIVE_EITHER_VALUE_REQUIRED(constructor.attributeName)
+          );
+        break;
+      case ValueMode.EitherOptional:
+        // Do nothing
+        break;
+      case ValueMode.NotAllowed:
+        if (value.expression || value.value) {
+          error(
+            node.path,
+            ERROR_MESSAGES.DIRECTIVE_NO_VALUE_ALLOWED(constructor.attributeName)
+          );
+        }
+        break;
+    }
   }
+  // validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
+  //   const { attributeName, allowExpression, allowString, allowNull } = constructor;
+  //   const allowedTypes = [
+  //     allowExpression && "expression",
+  //     allowString && "string",
+  //     allowNull && "null"
+  //   ].filter(Boolean);
+  //   if (!allowedTypes.includes(value.type)) {
+  //     error(
+  //       node.path,
+  //       ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(attributeName, allowedTypes, value.type)
+  //     );
+  //   }
+  // }
   validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
     const { attributeName, allowOnRepeated, allowOnNested } = constructor;
     if (!allowOnRepeated && node.isRepeatedComponent) {
       error(
         node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT(attributeName)
+        ERROR_MESSAGES.DIRECTIVE_NOT_ALLOWED_ON_REPEATED_ELEMENT(attributeName)
       );
     }
     if (!allowOnNested && node.isNestedComponent) {
       error(
         node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT(attributeName)
+        ERROR_MESSAGES.DIRECTIVE_NOT_ALLOWED_ON_NESTED_ELEMENT(attributeName)
       );
     }
   }
-  validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
-    let { attributeName, allowQualifier, requireQualifier } = constructor;
-    if (requireQualifier) {
-      allowQualifier = true;
-    }
-    if (requireQualifier && !qualifier) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER(attributeName)
-      );
-    }
-    if (!allowQualifier && qualifier) {
-      error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
-    }
-  }
+  // validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
+  //   let { attributeName, allowQualifier, requireQualifier } = constructor;
+  //   if (requireQualifier) {
+  //     allowQualifier = true;
+  //   }
+  //   if (requireQualifier && !qualifier) {
+  //     error(
+  //       node.path,
+  //       ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER(attributeName)
+  //     );
+  //   }
+  //   if (!allowQualifier && qualifier) {
+  //     error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
+  //   }
+  // }
   /* 
   Ensures the expression only accesses the scope variables it is allowed to.
 
@@ -177,4 +300,16 @@ function getReferencedScopedVariables(path: NodePath, component: Component): str
     }
   });
   return Array.from(refs);
+}
+
+function ensureValidValueModeForSetsValue(
+  valueMode: ValueMode,
+  constructor: typeof Directive
+) {
+  if (!ValidModesForSetsValue.includes(valueMode)) {
+    throw new Error(
+      `Invalid directive configuration for ${constructor.attributeName}. 
+When qualifierMode is 'SetsValue' then valueMode must be one of: ${ValidModesForSetsValue}.`
+    );
+  }
 }

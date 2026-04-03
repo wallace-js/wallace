@@ -1,7 +1,7 @@
 import { testMount } from "../utils";
 
 describe("Specification", () => {
-  test("refs doesn' allow expression", () => {
+  test("disallows expression", () => {
     const src = `
     const A = () => (
     <div>
@@ -10,7 +10,7 @@ describe("Specification", () => {
   );
   `;
     expect(src).toCompileWithError(
-      "The `ref` directive value must be of type null. Found: expression."
+      "The `ref` directive requires a value of type `string`."
     );
   });
 

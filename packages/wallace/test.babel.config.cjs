@@ -1,4 +1,4 @@
-const { Directive } = require("babel-plugin-wallace");
+const { Directive, QualifierMode, ValueMode } = require("babel-plugin-wallace");
 const { flags } = require("./flags.cjs");
 
 /**
@@ -9,9 +9,8 @@ const { flags } = require("./flags.cjs");
  */
 class TestDirectiveInConfig extends Directive {
   static attributeName = "test-directive";
-  static allowNull = true;
-  static allowString = true;
-  static allowQualifier = true;
+  static qualifierMode = QualifierMode.Optional;
+  static valueMode = ValueMode.EitherOptional;
   apply(node, value, qualifier, base) {
     node.addFixedAttribute("value-value", value.value);
     node.addFixedAttribute("value-expression", value.expression);
