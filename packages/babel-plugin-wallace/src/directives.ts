@@ -9,7 +9,14 @@
 import * as t from "@babel/types";
 import { wallaceConfig, FlagValue } from "./config";
 import { ERROR_MESSAGES, error } from "./errors";
-import { Directive, TagNode, NodeValue, Qualifier } from "./models";
+import {
+  Directive,
+  TagNode,
+  NodeValue,
+  Qualifier,
+  ValueMode,
+  QualifierMode
+} from "./models";
 import {
   WATCH_CALLBACK_ARGS,
   SPECIAL_SYMBOLS,
@@ -19,6 +26,8 @@ import {
 
 class ApplyDirective extends Directive {
   static attributeName = "apply";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static mayAccessElement = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addWatch(SPECIAL_SYMBOLS.noLookup, value.expression);
@@ -27,16 +36,18 @@ class ApplyDirective extends Directive {
 
 class AssignDirective extends Directive {
   static attributeName = "assign";
-  static allowQualifier = true;
-  static allowNull = true;
+  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    // TODO: handle string
     node.component.assignTo = qualifier || value.expression;
   }
 }
 
 class BindDirective extends Directive {
   static attributeName = "bind";
-  static allowQualifier = true;
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Optional;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.setBindInstruction(value.expression, qualifier);
   }
@@ -44,8 +55,8 @@ class BindDirective extends Directive {
 
 class ClassDirective extends Directive {
   static attributeName = "class";
-  static allowString = true;
-  static allowQualifier = true;
+  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Optional;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
       node.addClassToggleTarget(
@@ -65,6 +76,8 @@ class ClassDirective extends Directive {
 
 class CssDirective extends Directive {
   static attributeName = "css";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static mayAccessComponent = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.addStaticAttribute("class", value.expression);
@@ -73,6 +86,8 @@ class CssDirective extends Directive {
 
 class CtrlDirective extends Directive {
   static attributeName = "ctrl";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = true;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
@@ -84,9 +99,8 @@ class CtrlDirective extends Directive {
 
 class EventDirective extends Directive {
   static attributeName = "event";
-  static allowExpression = false;
-  static allowNull = true;
-  static requireQualifier = true;
+  static valueMode: ValueMode = ValueMode.StringRequired;
+  static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     const eventName = qualifier || value.value;
     if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
@@ -98,7 +112,8 @@ class EventDirective extends Directive {
 
 class FixedDirective extends Directive {
   static attributeName = "fixed";
-  static requireQualifier = true;
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Required;
   static mayAccessComponent = false;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.addStaticAttribute(qualifier, value.expression);
@@ -107,6 +122,8 @@ class FixedDirective extends Directive {
 
 class HideDirective extends Directive {
   static attributeName = "hide";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, true, false);
   }
@@ -114,6 +131,8 @@ class HideDirective extends Directive {
 
 class HtmlDirective extends Directive {
   static attributeName = "html";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.watchAttribute("innerHTML", value.expression);
   }
@@ -121,6 +140,8 @@ class HtmlDirective extends Directive {
 
 class IfDirective extends Directive {
   static attributeName = "if";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, false, true);
@@ -129,7 +150,8 @@ class IfDirective extends Directive {
 
 class KeyDirective extends Directive {
   static attributeName = "key";
-  static allowString = true;
+  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
@@ -137,9 +159,11 @@ class KeyDirective extends Directive {
   }
 }
 
+// TODO: change to be on:click
 class OnEventDirective extends Directive {
   static attributeName = "on*";
-  static allowString = true;
+  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static mayAccessElement = true;
   static mayAccessEvent = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, base: string) {
@@ -153,19 +177,20 @@ class OnEventDirective extends Directive {
 
 class PartDirective extends Directive {
   static attributeName = "part";
+  static valueMode: ValueMode = ValueMode.StringRequired;
+  static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   static allowOnNested = true;
   static allowOnRepeated = true;
-  static allowNull = true;
-  static allowExpression = false;
-  static requireQualifier = true;
-  apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
-    node.setPart(qualifier);
+    node.setPart(qualifier || value.value);
   }
 }
 
 class PropsDirective extends Directive {
   static attributeName = "props";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = true;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
@@ -176,17 +201,18 @@ class PropsDirective extends Directive {
 
 class RefDirective extends Directive {
   static attributeName = "ref";
+  static valueMode: ValueMode = ValueMode.StringRequired;
+  static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   static allowOnNested = true;
-  static allowNull = true;
-  static allowExpression = false;
-  static requireQualifier = true;
-  apply(node: TagNode, _value: NodeValue, qualifier: Qualifier, _base: string) {
-    node.setRef(qualifier);
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.setRef(qualifier || value.value);
   }
 }
 
 class ShowDirective extends Directive {
   static attributeName = "show";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setVisibilityToggle(value.expression, false, false);
   }
@@ -194,8 +220,8 @@ class ShowDirective extends Directive {
 
 class StyleDirective extends Directive {
   static attributeName = "style";
-  static allowString = true;
-  static allowQualifier = true;
+  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Optional;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     if (qualifier) {
       if (value.type === "string") {
@@ -218,7 +244,8 @@ class StyleDirective extends Directive {
 
 class ToggleDirective extends Directive {
   static attributeName = "toggle";
-  static requireQualifier = true;
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Required;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     if (!qualifier) {
       throw new Error("Toggle must have a qualifier");
@@ -229,8 +256,8 @@ class ToggleDirective extends Directive {
 
 class UniqueDirective extends Directive {
   static attributeName = "unique";
-  static allowExpression = false;
-  static allowNull = true;
+  static valueMode: ValueMode = ValueMode.NotAllowed;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   apply(node: TagNode, _value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.component.unique = true;
   }

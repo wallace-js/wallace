@@ -1,24 +1,10 @@
-import { Module } from "./module";
-import { Directive, NodeValue, Qualifier } from "./directive";
-import { Component, WalkTracker } from "./component";
-import {
+export { Module } from "./module";
+export { Directive, NodeValue, Qualifier, ValueMode, QualifierMode } from "./directive";
+export { Component, WalkTracker } from "./component";
+export {
   ExtractedNode,
   TagNode,
   DynamicTextNode,
   PlainTextNode,
   VisibilityToggle
 } from "./node";
-
-export {
-  Component,
-  VisibilityToggle,
-  Directive,
-  NodeValue,
-  ExtractedNode,
-  TagNode,
-  DynamicTextNode,
-  PlainTextNode,
-  Module,
-  Qualifier,
-  WalkTracker
-};

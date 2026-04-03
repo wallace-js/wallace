@@ -23,7 +23,7 @@ describe("Bind directive", () => {
       )
     `;
     expect(code).toCompileWithError(
-      "The `bind` directive value must be of type expression. Found: null."
+      "The `bind` directive requires a value of type `expression`."
     );
   });
 
@@ -31,23 +31,14 @@ describe("Bind directive", () => {
     const code = `
       const Bar = () => (
         <input bind="Foo" />
-      )
-    `;
+        )
+        `;
     expect(code).toCompileWithError(
-      "The `bind` directive value must be of type expression. Found: string."
+      "The `bind` directive requires a value of type `expression`."
     );
   });
 
-  test("allows raw", () => {
-    const code = `
-      const Bar = (user) => (
-        <input bind={user.name} />
-      )
-    `;
-    expect(code).toCompileWithoutError();
-  });
-
-  test("allows alternative property", () => {
+  test("allows qualifier", () => {
     const code = `
       const Bar = (user) => (
         <input bind:checked={user.name} />
@@ -69,15 +60,14 @@ describe("Event specification", () => {
     );
   });
 
-  // TODO: add more once we have fixed validation
-  test("disallows expression", () => {
+  test("disallows value and qualifier", () => {
     const code = `
       const Foo = (user) => (
-        <input event:keyup={user.name} />
+        <input event:keyup="keyup" />
       )
     `;
     expect(code).toCompileWithError(
-      "The `event` directive value must be of type null. Found: expression."
+      "The `event` directive requires a qualifier or value, not both."
     );
   });
 
@@ -104,14 +94,14 @@ describe("Event specification", () => {
     expect(code).toCompileWithoutError();
   });
 
-  // test("allows valid event name as string", () => {
-  //   const code = `
-  //     const Bar = (user) => (
-  //       <input bind={user.name} event="keyup" />
-  //     )
-  //   `;
-  //   expect(code).toCompileWithoutError();
-  // });
+  test("allows valid event name as string", () => {
+    const code = `
+      const Bar = (user) => (
+        <input bind={user.name} event="keyup" />
+      )
+    `;
+    expect(code).toCompileWithoutError();
+  });
 });
 
 test("Change event updates data", () => {
