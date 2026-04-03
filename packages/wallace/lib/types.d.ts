@@ -821,6 +821,7 @@ declare module "wallace" {
   export const Router: Router;
 }
 
+type OptionalExpression<T> = T | boolean;
 type MustBeExpression = Exclude<any, string>;
 
 /**
@@ -1179,7 +1180,7 @@ interface DirectiveAttributes extends AllDomEvents {
    *
    * May only be used on the root element. Modifies the `set` method.
    */
-  watch?: any;
+  watch?: OptionalExpression<CallableFunction>;
 }
 
 // This makes this a module, which is needed to declare global, which is needed to make

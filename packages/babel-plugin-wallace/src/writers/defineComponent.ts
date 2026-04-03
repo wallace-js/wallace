@@ -169,18 +169,14 @@ function assignExpression(left: LVal, right: Expression): ExpressionStatement {
   return t.expressionStatement(t.assignmentExpression("=", left, right));
 }
 
-function getWatchCallback(
-  module: Module,
-  name: string,
-  watch?: { callback?: Expression }
-) {
-  if (watch.callback) return watch.callback;
+function buildWatchCall(module: Module, name: string, watch?: { callback?: Expression }) {
   module.requireImport(IMPORTABLES.watch);
-  const callback = t.arrowFunctionExpression(
-    [],
+  const callback =
     watch.callback ||
+    t.arrowFunctionExpression(
+      [],
       t.callExpression(t.memberExpression(t.thisExpression(), t.identifier("update")), [])
-  );
+    );
   return t.callExpression(t.identifier(IMPORTABLES.watch), [
     t.identifier(name),
     callback
@@ -193,11 +189,11 @@ function getComponentPropertyAssignment(
   watch?: { callback?: Expression }
 ) {
   const left = t.memberExpression(t.thisExpression(), t.identifier(name));
-  const right = watch ? getWatchCallback(module, name, watch) : t.identifier(name);
+  const right = watch ? buildWatchCall(module, name, watch) : t.identifier(name);
   return assignExpression(left, right);
 }
 
-// TOOD: make it use actual ctrl from arg once I've sorted renaming.
+// TOOD: revisit once we rename per directive.
 function buildSetFunction(componentDefinition: ComponentDefinitionData) {
   const component = componentDefinition.component;
   const { assignTo, watchProps, module } = component;
