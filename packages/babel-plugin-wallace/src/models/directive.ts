@@ -46,11 +46,13 @@ export class Directive {
   static allowOnNested = false;
   static allowOnRepeated = false;
   static allowOnNormalElement = true;
-  static mustBeOnRoot = true;
+  static mustBeOnRoot = false;
   static mayAccessComponent = true;
   static mayAccessElement = false;
   static mayAccessEvent = false;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {}
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
+    throw new Error("apply not implemented on directive");
+  }
   validate(
     node: TagNode,
     value: NodeValue,

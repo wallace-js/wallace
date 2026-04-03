@@ -44,7 +44,6 @@ export const ERROR_MESSAGES = {
   DIRECTIVE_MUST_BE_ON_ROOT_ELEMENT: (directive: string) => {
     return `The \`${directive}\` directive may only be used on the root element.`;
   },
-  DIRECTIVE_WATCH_VALUE_INVALID: `The \`watch\` directive value must be "props", "ctrl" or empty.`,
   EVENT_USED_WITHOUT_BIND:
     "The `event` directive must be used with the `bind` directive.",
   FLAG_REQUIRED: (flag: string) => {

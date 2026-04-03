@@ -874,8 +874,8 @@ interface DirectiveAttributes extends AllDomEvents {
    * );
    * ```
    *
-   * DO NOT ASSIGN to a property on a watched object which updates that component or a
-   * parent, as you will create an infinite loop.
+   * Be careful not to assign to a watched property which updates this component or a
+   * parent, as that will create an infinite loop.
    *
    * May only be used on the root element. Modifies the `set` method.
    */
@@ -1145,14 +1145,8 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: watch
    *
-   * Watches the props or the controller by generating a custom `set` method on the
-   * coomponent definition. So this:
-   *
-   * ```
-   * const Foo = () => <div watch></div>;
-   * ```
-   *
-   * Results in this `set` method:
+   * Wraps the props in a `watch` call which updates the component by overriding the
+   * `set` method:
    *
    * ```
    * function set(props, ctrl) {
@@ -1161,13 +1155,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * }
    * ```
    *
-   * To do this for the controller, use a qualifier:
-   *
-   * ```
-   * const Foo = () => <div watch:ctrl></div>;
-   * ```
-   *
-   * You can provide an expression to set the callback:
+   * You can provide a different callback to `watch`:
    *
    * ```
    * const MyComponent = () => (
