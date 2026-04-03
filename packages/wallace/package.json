@@ -1,6 +1,6 @@
 {
   "name": "wallace",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "author": "Andrew Buchan",
   "description": "An insanely small, fast, intuitive and extendable front-end framework",
   "homepage": "https://wallace.js.org",
@@ -15,7 +15,7 @@
     "test": "jest --clearCache && jest"
   },
   "dependencies": {
-    "babel-plugin-wallace": "^0.17.0",
+    "babel-plugin-wallace": "^0.17.1",
     "browserify": "^17.0.1"
   },
   "gitHead": "68448abf3b0c7ddb6560ae1b6acf3f460f4e5082"
