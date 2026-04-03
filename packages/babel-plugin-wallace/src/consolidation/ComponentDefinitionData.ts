@@ -33,7 +33,7 @@ export class ComponentDefinitionData {
   html: Expression;
   watches: Array<ComponentWatch> = [];
   dynamicElements: Expression[] = [];
-  baseComponent: Expression | undefined;
+  baseComponent?: Expression;
   lookups: Map<number, ArrowFunctionExpression> = new Map();
   refs: string[] = [];
   parts: Array<Part> = [];

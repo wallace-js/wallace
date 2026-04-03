@@ -41,6 +41,9 @@ export const ERROR_MESSAGES = {
   DIRECTIVE_NO_VALUE_ALLOWED: (directive: string) => {
     return `The \`${directive}\` directive does not allow a value.`;
   },
+  DIRECTIVE_MUST_BE_ON_ROOT_ELEMENT: (directive: string) => {
+    return `The \`${directive}\` directive may only be used on the root element.`;
+  },
   EVENT_USED_WITHOUT_BIND:
     "The `event` directive must be used with the `bind` directive.",
   FLAG_REQUIRED: (flag: string) => {

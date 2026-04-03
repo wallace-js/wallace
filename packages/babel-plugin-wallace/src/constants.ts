@@ -13,7 +13,8 @@ export enum IMPORTABLES {
   onEvent = "onEvent",
   SequentialRepeater = "SequentialRepeater",
   KeyedRepeater = "KeyedRepeater",
-  toDateString = "toDateString"
+  toDateString = "toDateString",
+  watch = "watch"
 }
 
 /**
