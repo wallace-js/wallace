@@ -1,6 +1,7 @@
+import { extendComponent } from "wallace";
 import { testMount } from "../utils";
 
-describe("assign directive", () => {
+describe("specification", () => {
   test("not allowed on non-root component", () => {
     const code = `
       const Foo = () => (
@@ -10,51 +11,63 @@ describe("assign directive", () => {
       )
     `;
     expect(code).toCompileWithError(
-      "The `assign` directive may only be used on root elements."
+      "The `assign` directive may only be used on the root element."
     );
   });
 
-  test("may not provide string", () => {
-    const code = `const Foo = () => <div assign="foo"></div>`;
-    expect(code).toCompileWithError(
-      "The `assign` directive value must be of type expression or null. Found: string."
-    );
-  });
-
-  test("may not be null string", () => {
+  test("must supply a value", () => {
     const code = `const Foo = () => <div assign></div>`;
-    expect(code).toCompileWithError(
-      "The `assign` directive value must be of type expression. Found: null."
-    );
+    expect(code).toCompileWithError("The `assign` directive requires a value.");
   });
 
-  // test("may not provide string", () => {
-  //   const code = `
-  //     const Foo = () => (
-  //       <div>
-  //         <span assign:foo>bar</span>
-  //       </div>
-  //     )
-  //   `;
-  //   expect(code).toCompileWithError(
-  //     "The `assign` directive may only be used on root elements."
-  //   );
-  // });
-  // test("removes its attribute", () => {
-  //   const A = () => <div foo="bar" test-directive></div>;
-  //   const component = testMount(A);
-  //   expect(component.el.getAttribute("test-directive")).toBeNull();
-  //   expect(component.el.getAttribute("foo")).toBe("bar");
-  // });
+  test("may supply a string", () => {
+    const code = `const Foo = () => <div assign="foo"></div>`;
+    expect(code).toCompileWithoutError();
+  });
 
-  // test("reads base", () => {
-  //   const A = () => <div test-directive></div>;
-  //   expect(testMount(A).el.getAttribute("base")).toBe("test-directive");
-  // });
+  test("may supply a qualifier", () => {
+    const code = `const Foo = () => <div assign="foo"></div>`;
+    expect(code).toCompileWithoutError();
+  });
 
-  /*
-  Check it isn't inherited.
-  use qualifier OR expression but not both.
-  defaults to field on
-   */
+  test("may supply an expression", () => {
+    const code = `const Foo = () => <div assign={foo}></div>`;
+    expect(code).toCompileWithoutError();
+  });
+});
+
+describe("behaviour", () => {
+  test("assigns to expression", () => {
+    let foo;
+    const MyComponent = () => <div assign={foo}></div>;
+    const component = testMount(MyComponent);
+
+    expect(component).toStrictEqual(foo);
+  });
+
+  test("assigns to props with string", () => {
+    const props = {};
+    const MyComponent = props => <div assign="x"></div>;
+    const component = testMount(MyComponent, props);
+
+    expect(component).toStrictEqual(props.x);
+  });
+
+  test("assigns to props with qualifier", () => {
+    const props = {};
+    const MyComponent = props => <div assign:x></div>;
+    const component = testMount(MyComponent, props);
+
+    expect(component).toStrictEqual(props.x);
+  });
+
+  test("assignment is not inherited", () => {
+    const props = {};
+
+    const Parent = props => <div assign:x></div>;
+    const MyComponent = extendComponent(Parent, () => <div></div>);
+    testMount(MyComponent, props);
+
+    expect(props.x).toBeUndefined();
+  });
 });

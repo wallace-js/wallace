@@ -46,6 +46,7 @@ export class Directive {
   static allowOnNested = false;
   static allowOnRepeated = false;
   static allowOnNormalElement = true;
+  static mustBeOnRoot = true;
   static mayAccessComponent = true;
   static mayAccessElement = false;
   static mayAccessEvent = false;
@@ -59,7 +60,7 @@ export class Directive {
   ) {
     const constructor = this.constructor as typeof Directive;
     this.validateTypeAndQualifier(node, value, qualifier, constructor);
-    this.validateNestedAndRepeat(node, constructor);
+    this.validateLocation(node, constructor);
     this.validateScopeVariablAccess(node, value, constructor, component);
   }
   validateTypeAndQualifier(
@@ -156,8 +157,8 @@ export class Directive {
         break;
     }
   }
-  validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
-    const { attributeName, allowOnRepeated, allowOnNested } = constructor;
+  validateLocation(node: TagNode, constructor: typeof Directive) {
+    const { attributeName, allowOnRepeated, allowOnNested, mustBeOnRoot } = constructor;
     if (!allowOnRepeated && node.isRepeatedComponent) {
       error(
         node.path,
@@ -169,6 +170,9 @@ export class Directive {
         node.path,
         ERROR_MESSAGES.DIRECTIVE_NOT_ALLOWED_ON_NESTED_ELEMENT(attributeName)
       );
+    }
+    if (mustBeOnRoot && node.parent) {
+      error(node.path, ERROR_MESSAGES.DIRECTIVE_MUST_BE_ON_ROOT_ELEMENT(attributeName));
     }
   }
   /*

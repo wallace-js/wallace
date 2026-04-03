@@ -174,8 +174,8 @@ function getWatchCallback(
   name: string,
   watch?: { callback?: Expression }
 ) {
+  if (watch.callback) return watch.callback;
   module.requireImport(IMPORTABLES.watch);
-  console.log(watch);
   const callback = t.arrowFunctionExpression(
     [],
     watch.callback ||
@@ -200,18 +200,23 @@ function getComponentPropertyAssignment(
 // TOOD: make it use actual ctrl from arg once I've sorted renaming.
 function buildSetFunction(componentDefinition: ComponentDefinitionData) {
   const component = componentDefinition.component;
-  const { assignTo, watchProps, watchCtrl, module } = component;
+  const { assignTo, watchProps, module } = component;
 
   const statements: any[] = [
     t.variableDeclaration("const", [
       t.variableDeclarator(component.componentIdentifier, t.identifier("this")),
       t.variableDeclarator(component.propsIdentifier, t.identifier("props"))
     ]),
-    getComponentPropertyAssignment(module, "props", watchProps),
-    getComponentPropertyAssignment(module, "ctrl", watchCtrl)
+    getComponentPropertyAssignment(module, "props", watchProps)
   ];
   if (assignTo) {
-    statements.push(assignExpression(assignTo, t.identifier("this")));
+    let actualValue: LVal;
+    if (typeof assignTo === "string") {
+      actualValue = t.memberExpression(component.propsIdentifier, t.identifier(assignTo));
+    } else {
+      actualValue = assignTo;
+    }
+    statements.push(assignExpression(actualValue, t.identifier("this")));
   }
   return t.functionExpression(
     null,

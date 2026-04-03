@@ -39,8 +39,7 @@ class AssignDirective extends Directive {
   static valueMode: ValueMode = ValueMode.EitherRequired;
   static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
-    // TODO: handle string
-    node.component.assignTo = qualifier || value.expression;
+    node.component.assignTo = value.expression || value.value;
   }
 }
 
@@ -282,24 +281,12 @@ class ValueAsDateDirective extends Directive {
   }
 }
 
-/**
- * The qualifier is the property to watch, either props or ctrl.
- * The expression is the callback (optional).
- */
 class WatchDirective extends Directive {
   static attributeName = "watch";
-  static allowQualifier = true;
-  static allowNull = true;
-  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
-    const q = qualifier || "props",
-      callback = value.expression;
-    if (q === "props") {
-      node.component.watchProps = { callback };
-    } else if (q === "ctrl") {
-      node.component.watchCtrl = { callback };
-    } else {
-      throw new Error("Qualifier must be props or ctrl");
-    }
+  static valueMode: ValueMode = ValueMode.ExpressionOptional;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.component.watchProps = { callback: value.expression };
   }
 }
 

@@ -53,9 +53,8 @@ export class Component {
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
   unique: boolean = false;
-  assignTo?: LVal;
+  assignTo?: LVal | string;
   watchProps?: { callback?: Expression };
-  watchCtrl?: { callback?: Expression };
   constructor(
     module: Module,
     scope: Scope,
@@ -107,7 +106,7 @@ export class Component {
     this.extractedNodes.push(node);
   }
   needsCustomSetMethod() {
-    return this.assignTo || this.watchCtrl || this.watchProps;
+    return this.assignTo || this.watchProps;
   }
   processJSXElement(
     path: NodePath<JSXElement>,
