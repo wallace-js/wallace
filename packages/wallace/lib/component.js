@@ -1,10 +1,14 @@
 const throwAway = document.createElement("template");
 const NO_LOOKUP = "__";
 
+const defaultSetFunction = function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
+  this.props = props;
+  /* #INCLUDE-IF: allowCtrl */ this.ctrl = ctrl;
+};
+
 const ComponentPrototype = {
   render: function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
-    this.props = props;
-    /* #INCLUDE-IF: allowCtrl */ this.ctrl = ctrl;
+    this.set(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
     this.update();
   },
 
@@ -152,12 +156,14 @@ export const defineComponent = (
   watches,
   queries,
   contructor,
+  setFunction,
   /* #INCLUDE-IF: allowDismount */ dismountKeys,
   inheritFrom
 ) => {
   const ComponentDefinition = initConstructor(contructor, inheritFrom || ComponentBase);
   const proto = ComponentDefinition.prototype;
   throwAway.innerHTML = html;
+  proto.set = setFunction || defaultSetFunction;
   proto._w = watches;
   proto._q = queries;
   proto._t = throwAway.content.firstChild;

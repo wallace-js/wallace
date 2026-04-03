@@ -6,7 +6,7 @@ import type {
   JSXText,
   Expression
 } from "@babel/types";
-import { stringLiteral } from "@babel/types";
+import { stringLiteral, LVal } from "@babel/types";
 import type { Scope } from "@babel/traverse";
 import { HTML_SPLITTER } from "../constants";
 import { buildConcat, getPlaceholderExpression } from "../ast-helpers";
@@ -45,7 +45,7 @@ export class Component {
   #currentNodeAddress: Array<number> = [];
   module: Module;
   scope: Scope;
-  baseComponent: Expression | undefined;
+  baseComponent?: Expression;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
   propsIdentifier: Identifier;
@@ -53,6 +53,8 @@ export class Component {
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
   unique: boolean = false;
+  assignTo?: LVal | string;
+  watchProps?: { callback?: Expression };
   constructor(
     module: Module,
     scope: Scope,
@@ -102,6 +104,9 @@ export class Component {
   #addNode(node: ExtractedNode, path: NodePath, tracker: WalkTracker) {
     this.#addElement(node.getElement(), path, tracker);
     this.extractedNodes.push(node);
+  }
+  needsCustomSetMethod() {
+    return this.assignTo || this.watchProps;
   }
   processJSXElement(
     path: NodePath<JSXElement>,

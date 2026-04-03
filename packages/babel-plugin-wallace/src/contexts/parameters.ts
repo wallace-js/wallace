@@ -110,6 +110,7 @@ function extractFinalPropsName(path: NodePath<Function>): PropsMap {
   return propVariableMap;
 }
 
+// TODO: this really needs to be done on a per-directive basis as it can vary.
 function mapAndRenameXargs(path: NodePath<Function>, component: Component) {
   const renameMapping: { [key: string]: string } = {};
   renameMapping[XARGS.event] = XARGS.event;

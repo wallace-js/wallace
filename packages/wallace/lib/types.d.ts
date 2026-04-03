@@ -821,6 +821,7 @@ declare module "wallace" {
   export const Router: Router;
 }
 
+type OptionalExpression<T> = T | boolean;
 type MustBeExpression = Exclude<any, string>;
 
 /**
@@ -848,6 +849,37 @@ interface DirectiveAttributes extends AllDomEvents {
    *
    */
   apply?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: assign
+   *
+   * Assigns the component instance to a value during `render`, typically on the props
+   * or the controller.
+   *
+   * You can either use an expression:
+   *
+   * ```
+   * const MyComponent = ({ id }, { ctrl }) => (
+   *   <div assign={ctrl.register[id]}>
+   *   </div>
+   * );
+   * ```
+   *
+   * Or use a qualifier, which is read as being a field on the props:
+   *
+   * ```
+   * const MyComponent = () => (
+   *   <div assign:c>
+   *   </div>
+   * );
+   * ```
+   *
+   * Be careful not to assign to a watched property which updates this component or a
+   * parent, as that will create an infinite loop.
+   *
+   * May only be used on the root element. Modifies the `set` method.
+   */
+  assign?: ComponentInstance;
 
   /**
    * ## Wallace directive: bind
@@ -952,6 +984,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * ### Directives:
    *
    * - `apply` runs a callback to modify an element.
+   * - `assign` assigns the component instance to a value.
    * - `bind` updates a value when an input is changed.
    * - `class:xyz` defines a set of classes to be toggled.
    * - `css` shorthand for `fixed:class`.
@@ -971,6 +1004,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
    *   `xyz`.
    * - `unique` can be set on components which are only used once for better performance.
+   * - `watch` watches the props or the controller.
    *
    * See more by hovering on a specific directive.
    * Qualifiers like `class:danger` break the tool tip. Try `class x:danger`.
@@ -1103,8 +1137,38 @@ interface DirectiveAttributes extends AllDomEvents {
    * ## Wallace directive: unique
    *
    * Performance optimisation that can be applied to a component which is only used once.
+   *
+   * May only be used on the root element.
    */
   unique?: boolean;
+
+  /**
+   * ## Wallace directive: watch
+   *
+   * Wraps the props in a `watch` call which updates the component by overriding the
+   * `set` method:
+   *
+   * ```
+   * function set(props, ctrl) {
+   *   this.props = watch(props, () => this.update());
+   *   this.ctrl = ctrl;
+   * }
+   * ```
+   *
+   * You can provide a different callback to `watch`:
+   *
+   * ```
+   * const MyComponent = () => (
+   *   <div watch={(target, key, value) => foo()}></div>
+   * );
+   * ```
+   *
+   * For more complex use cases, import the `watch` function and use it in an overriden
+   * `render` method.
+   *
+   * May only be used on the root element. Modifies the `set` method.
+   */
+  watch?: OptionalExpression<CallableFunction>;
 }
 
 // This makes this a module, which is needed to declare global, which is needed to make
