@@ -34,6 +34,15 @@ class ApplyDirective extends Directive {
   }
 }
 
+class AssignDirective extends Directive {
+  static attributeName = "assign";
+  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static qualifierMode: QualifierMode = QualifierMode.SetsValue;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.component.assignTo = value.expression || value.value;
+  }
+}
+
 class BindDirective extends Directive {
   static attributeName = "bind";
   static valueMode: ValueMode = ValueMode.ExpressionRequired;
@@ -84,25 +93,6 @@ class CtrlDirective extends Directive {
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
     node.setCtrl(value.expression);
-  }
-}
-
-/**
- * This is a hack to enable a Proxy of a Date to be passed to `valueAsDate`.
- * It is not a documented directive.
- */
-class ValueAsDateDirective extends Directive {
-  static attributeName = "valueAsDate";
-  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    if (value.type === "expression") {
-      node.requiredImport(IMPORTABLES.toDateString);
-      node.watchAttribute(
-        "value",
-        t.callExpression(t.identifier(IMPORTABLES.toDateString), [value.expression])
-      );
-    } else if (value.type === "string") {
-      node.addFixedAttribute("valueAsDate", value.value);
-    }
   }
 }
 
@@ -272,13 +262,41 @@ class UniqueDirective extends Directive {
   }
 }
 
+/**
+ * This is a hack to enable a Proxy of a Date to be passed to `valueAsDate`.
+ * It is not a documented directive.
+ */
+class ValueAsDateDirective extends Directive {
+  static attributeName = "valueAsDate";
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    if (value.type === "expression") {
+      node.requiredImport(IMPORTABLES.toDateString);
+      node.watchAttribute(
+        "value",
+        t.callExpression(t.identifier(IMPORTABLES.toDateString), [value.expression])
+      );
+    } else if (value.type === "string") {
+      node.addFixedAttribute("valueAsDate", value.value);
+    }
+  }
+}
+
+class WatchDirective extends Directive {
+  static attributeName = "watch";
+  static valueMode: ValueMode = ValueMode.ExpressionOptional;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.component.watchProps = { callback: value.expression };
+  }
+}
+
 export const builtinDirectives = [
   ApplyDirective,
+  AssignDirective,
   BindDirective,
   ClassDirective,
   CssDirective,
   CtrlDirective,
-  ValueAsDateDirective,
   EventDirective,
   FixedDirective,
   HideDirective,
@@ -292,5 +310,7 @@ export const builtinDirectives = [
   ShowDirective,
   StyleDirective,
   ToggleDirective,
-  UniqueDirective
+  UniqueDirective,
+  ValueAsDateDirective,
+  WatchDirective
 ];
