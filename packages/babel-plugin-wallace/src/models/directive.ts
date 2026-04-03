@@ -39,8 +39,8 @@ export class Directive {
   ) {
     const constructor = this.constructor as typeof Directive;
     this.validateType(node, value, constructor);
-    this.validateNestedAndRepeat(node, constructor);
     this.validateQualifier(node, qualifier, constructor);
+    this.validateNestedAndRepeat(node, constructor);
     this.validateScopeVariablAccess(node, value, constructor, component);
   }
   validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
@@ -57,21 +57,6 @@ export class Directive {
       );
     }
   }
-  validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
-    const { attributeName, allowOnRepeated, allowOnNested } = constructor;
-    if (!allowOnRepeated && node.isRepeatedComponent) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT(attributeName)
-      );
-    }
-    if (!allowOnNested && node.isNestedComponent) {
-      error(
-        node.path,
-        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT(attributeName)
-      );
-    }
-  }
   validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
     let { attributeName, allowQualifier, requireQualifier } = constructor;
     if (requireQualifier) {
@@ -85,6 +70,21 @@ export class Directive {
     }
     if (!allowQualifier && qualifier) {
       error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
+    }
+  }
+  validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
+    const { attributeName, allowOnRepeated, allowOnNested } = constructor;
+    if (!allowOnRepeated && node.isRepeatedComponent) {
+      error(
+        node.path,
+        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT(attributeName)
+      );
+    }
+    if (!allowOnNested && node.isNestedComponent) {
+      error(
+        node.path,
+        ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT(attributeName)
+      );
     }
   }
   /* 

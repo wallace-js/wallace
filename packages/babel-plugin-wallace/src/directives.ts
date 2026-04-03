@@ -27,8 +27,10 @@ class ApplyDirective extends Directive {
 
 class AssignDirective extends Directive {
   static attributeName = "assign";
-  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.component.assignTo = value.expression;
+  static allowQualifier = true;
+  static allowNull = true;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.component.assignTo = qualifier || value.expression;
   }
 }
 
