@@ -7,9 +7,7 @@ describe("Event directive", () => {
         <button onClick />
       )
     `;
-    expect(code).toCompileWithError(
-      "The `on*` directive value must be of type expression or string. Found: null."
-    );
+    expect(code).toCompileWithError("The `on*` directive requires a value.");
   });
 
   test("with string value creates normal event", () => {

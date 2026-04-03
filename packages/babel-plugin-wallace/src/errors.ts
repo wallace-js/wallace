@@ -9,24 +9,37 @@ export const ERROR_MESSAGES = {
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
+  // TODO: remove
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use `if` directive on root element.",
-  CANNOT_USE_DIRECTIVE_ON_NESTED_ELEMENT: (directive: string) => {
+  DIRECTIVE_NOT_ALLOWED_ON_NESTED_ELEMENT: (directive: string) => {
     return `The \`${directive}\` directive may not be used on nested elements.`;
   },
-  CANNOT_USE_DIRECTIVE_ON_REPEATED_ELEMENT: (directive: string) => {
+  DIRECTIVE_NOT_ALLOWED_ON_REPEATED_ELEMENT: (directive: string) => {
     return `The \`${directive}\` directive may not be used on repeated elements.`;
-  },
-  CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER: (directive: string) => {
-    return `The \`${directive}\` directive must have a qualifier.`;
-  },
-  CANNOT_USE_DIRECTIVE_WITH_QUALIFIER: (directive: string) => {
-    return `The \`${directive}\` directive may not have a qualifier.`;
   },
   DIRECTIVE_ALREADY_DEFINED: (directive: string) => {
     return `The \`${directive}\` directive has already been defined on this node.`;
   },
+  DIRECTIVE_REQUIRES_QUALIFIER: (directive: string) => {
+    return `The \`${directive}\` directive must have a qualifier.`;
+  },
+  DIRECTIVE_DISALLOWS_QUALIFIER: (directive: string) => {
+    return `The \`${directive}\` directive may not have a qualifier.`;
+  },
   DIRECTIVE_MAY_NOT_ACCESS_SCOPE_VAR: (directive: string, name: string) => {
     return `The \`${directive}\` directive may not access scoped variable \`${name}\`.`;
+  },
+  DIRECTIVE_REQUIRES_QUALIFIER_OR_VALUE: (directive: string) => {
+    return `The \`${directive}\` directive requires a qualifier or value, not both.`;
+  },
+  DIRECTIVE_EITHER_VALUE_REQUIRED: (directive: string) => {
+    return `The \`${directive}\` directive requires a value.`;
+  },
+  DIRECTIVE_VALUE_REQUIRED: (type: string, directive: string) => {
+    return `The \`${directive}\` directive requires a value of type \`${type}\`.`;
+  },
+  DIRECTIVE_NO_VALUE_ALLOWED: (directive: string) => {
+    return `The \`${directive}\` directive does not allow a value.`;
   },
   EVENT_USED_WITHOUT_BIND:
     "The `event` directive must be used with the `bind` directive.",
@@ -43,11 +56,6 @@ export const ERROR_MESSAGES = {
   INVALID_EVENT_NAME: (event: string) =>
     `\`${event}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`,
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
-  DIRECTIVE_INVALID_TYPE: (directive: string, allowed: string[], actual: string) => {
-    return allowed.length
-      ? `The \`${directive}\` directive value must be of type ${allowed.join(" or ")}. Found: ${actual}.`
-      : `The \`${directive}\` directive value must be of type ${allowed[0]}. Found: ${actual}.`;
-  },
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
   JSX_ELEMENTS_NOT_ALLOWED_IN_EXPRESSIONS: "JSX elements are not allowed in expressions.",

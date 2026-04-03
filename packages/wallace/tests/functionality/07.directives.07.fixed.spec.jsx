@@ -1,35 +1,24 @@
 import { testMount } from "../utils";
 
 describe("Fixed specification", () => {
-  test("disallows null", () => {
+  test("disallows no value", () => {
     const code = `
       const Bar = () => (
         <div fixed></div>
       )
     `;
-    expect(code).toCompileWithError(
-      "The \`fixed\` directive value must be of type expression. Found: null."
-    );
+    expect(code).toCompileWithError("The `fixed` directive must have a qualifier.");
   });
 
   test("disallows string", () => {
     const code = `
       const Bar = () => (
-        <div fixed="foo"></div>
+        <div fixed:class="foo"></div>
       )
     `;
     expect(code).toCompileWithError(
-      "The \`fixed\` directive value must be of type expression. Found: string."
+      "The `fixed` directive requires a value of type `expression`."
     );
-  });
-
-  test("disallows expression without qualifier", () => {
-    const code = `
-      const Foo = () => (
-        <div fixed={x}></div>
-      )
-    `;
-    expect(code).toCompileWithError("The \`fixed\` directive must have a qualifier.");
   });
 
   test("allows expression with qualifier", () => {
@@ -41,6 +30,15 @@ describe("Fixed specification", () => {
     expect(code).toCompileWithoutError();
   });
 
+  test("disallows expression without qualifier", () => {
+    const code = `
+      const Foo = () => (
+        <div fixed={x}></div>
+      )
+    `;
+    expect(code).toCompileWithError("The `fixed` directive must have a qualifier.");
+  });
+
   test("disallows access to props", () => {
     const code = `
       const Foo = ({foo}) => (
@@ -48,7 +46,7 @@ describe("Fixed specification", () => {
       )
     `;
     expect(code).toCompileWithError(
-      "The \`fixed\` directive may not access scoped variable `props`."
+      "The `fixed` directive may not access scoped variable `props`."
     );
   });
 
