@@ -17,7 +17,7 @@ export type Qualifier = string | undefined;
 export enum QualifierMode {
   Required,
   Optional,
-  SetsValue, // sets value as string if supplied
+  SetsValue,
   NotAllowed
 }
 
@@ -41,11 +41,6 @@ const ValidModesForSetsValue = [
 export class Directive {
   static attributeName: string;
   static help: string;
-  // static allowExpression = true;
-  // static allowNull = false;
-  // static allowString = false;
-  // static allowQualifier = false;
-  // static requireQualifier = false;
   static valueMode: ValueMode = ValueMode.ExpressionRequired;
   static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = false;
@@ -54,7 +49,6 @@ export class Directive {
   static mayAccessComponent = true;
   static mayAccessElement = false;
   static mayAccessEvent = false;
-  // static allowedTypes: { [key: string]: NodeValue["type"] };
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {}
   validate(
     node: TagNode,
@@ -74,10 +68,6 @@ export class Directive {
     qualifier: Qualifier,
     constructor: typeof Directive
   ) {
-    /*
-      check if SetsValue, then remaining qualifier checks.
-
-    */
     const { qualifierMode, valueMode } = constructor;
 
     // Validate special case for SetsValue.
@@ -166,20 +156,6 @@ export class Directive {
         break;
     }
   }
-  // validateType(node: TagNode, value: NodeValue, constructor: typeof Directive) {
-  //   const { attributeName, allowExpression, allowString, allowNull } = constructor;
-  //   const allowedTypes = [
-  //     allowExpression && "expression",
-  //     allowString && "string",
-  //     allowNull && "null"
-  //   ].filter(Boolean);
-  //   if (!allowedTypes.includes(value.type)) {
-  //     error(
-  //       node.path,
-  //       ERROR_MESSAGES.DIRECTIVE_INVALID_TYPE(attributeName, allowedTypes, value.type)
-  //     );
-  //   }
-  // }
   validateNestedAndRepeat(node: TagNode, constructor: typeof Directive) {
     const { attributeName, allowOnRepeated, allowOnNested } = constructor;
     if (!allowOnRepeated && node.isRepeatedComponent) {
@@ -195,22 +171,7 @@ export class Directive {
       );
     }
   }
-  // validateQualifier(node: TagNode, qualifier: Qualifier, constructor: typeof Directive) {
-  //   let { attributeName, allowQualifier, requireQualifier } = constructor;
-  //   if (requireQualifier) {
-  //     allowQualifier = true;
-  //   }
-  //   if (requireQualifier && !qualifier) {
-  //     error(
-  //       node.path,
-  //       ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITHOUT_QUALIFIER(attributeName)
-  //     );
-  //   }
-  //   if (!allowQualifier && qualifier) {
-  //     error(node.path, ERROR_MESSAGES.CANNOT_USE_DIRECTIVE_WITH_QUALIFIER(attributeName));
-  //   }
-  // }
-  /* 
+  /*
   Ensures the expression only accesses the scope variables it is allowed to.
 
   In code like this:
