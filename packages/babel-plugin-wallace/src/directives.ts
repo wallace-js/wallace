@@ -21,7 +21,8 @@ import {
   WATCH_CALLBACK_ARGS,
   SPECIAL_SYMBOLS,
   IMPORTABLES,
-  DOM_EVENTS_LOWERCASE
+  DOM_EVENTS_LOWERCASE,
+  INPUT_TYPE_VALUES
 } from "./constants";
 
 class ApplyDirective extends Directive {
@@ -50,6 +51,20 @@ class BindDirective extends Directive {
   static qualifierMode: QualifierMode = QualifierMode.Optional;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     node.setBindInstruction(value.expression, qualifier);
+  }
+}
+
+class BindAsDirective extends Directive {
+  static attributeName = "bind-as";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Required;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    if (INPUT_TYPE_VALUES.hasOwnProperty(qualifier)) {
+      node.setBindInstruction(value.expression, INPUT_TYPE_VALUES[qualifier]);
+      node.addFixedAttribute("type", qualifier);
+    } else {
+      error(node.path, ERROR_MESSAGES.INVALID_BIND_AS_FIELD(qualifier));
+    }
   }
 }
 
@@ -297,6 +312,7 @@ export const builtinDirectives = [
   ApplyDirective,
   AssignDirective,
   BindDirective,
+  BindAsDirective,
   ClassDirective,
   CssDirective,
   CtrlDirective,
