@@ -267,7 +267,7 @@ Hubs often reference:
 - One or more components to be updated after data changes.
 - Other controllers they need access to like services or modal containers.
 
-Components sometimes only use a hub, and no model.
+Components sometimes only use a controller, and no model.
 
 ```tsx
 class TaskHub {

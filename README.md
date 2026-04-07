@@ -332,7 +332,7 @@ CounterList.prototype.render = function (model) {
 };
 ```
 
-But that's a really ugly React-like approach which involves mutating model and their interface. Wallace has much cleaner approach using a "hub" as we'll see later.
+But that's a really ugly React-like approach which involves mutating model and their interface. Wallace has much cleaner approach using a "controller" as we'll see later.
 
 Wallace also provides a neater and safer way to set properties on the prototype:
 
