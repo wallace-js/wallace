@@ -895,6 +895,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    * <input type="text" value={name} onChange={name = event.target.value} />
    * ```
+   *
    * By default it watches the `change` event, but you can specify a different one using
    * the `event` directive:
    *
@@ -909,6 +910,39 @@ interface DirectiveAttributes extends AllDomEvents {
    * ```
    */
   bind?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: bind-as
+   *
+   * Set input type and binding to the property you likely want for that input type:
+   *
+   * ```
+   * <input bind-as:checkbox={foo} />
+   * <input bind-as:date={foo} />
+   * <input bind-as:number={foo} />
+   * <input bind-as:range={foo} />
+   * ```
+   *
+   * Is the equivalent of this:
+   *
+   * ```
+   * <input type="checkbox" bind:checked={foo} />
+   * <input type="date" bind:valueAsDate={foo} />
+   * <input type="number" bind:valueAsNumber={foo} />
+   * <input type="range" bind:valueAsNumber={foo} />
+   * ```
+   *
+   * Other types like `month`, `time` and `datetime-local` are not supported as they
+   * don't use the properties you'd expect.
+   *
+   * Like `bind` it watches the `change` event, but you can specify a different one with
+   * the `event` directive:
+   *
+   * ```
+   * <input bind-as:range={foo} event:input />
+   * ```
+   */
+  "bind-as"?: MustBeExpression;
 
   /**
    * ## Wallace directive: class

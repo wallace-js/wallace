@@ -77,6 +77,15 @@ export enum SPECIAL_SYMBOLS {
   patch = "patch"
 }
 
+// We don't support date-related types like time, week or datetime-local as they don't
+// use valueAsDate as you'd expect.
+export const INPUT_TYPE_VALUES = {
+  checkbox: "checked",
+  date: "valueAsDate",
+  number: "valueAsNumber",
+  range: "valueAsNumber"
+};
+
 export const DOM_EVENTS = [
   "Abort",
   "AnimationCancel",

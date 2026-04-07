@@ -1,5 +1,5 @@
 import type { NodePath } from "@babel/core";
-import { XARGS } from "./constants";
+import { INPUT_TYPE_VALUES, XARGS } from "./constants";
 
 const ALLOWED_XARGS: string[] = Object.values(XARGS).map(n => `"${n}"`);
 
@@ -56,6 +56,9 @@ export const ERROR_MESSAGES = {
     <stub.foo ...>         // A nested stub
     <stub.foo.repeat ...>   // A repeated stub
   `,
+  INVALID_BIND_AS_FIELD: (field: string) =>
+    `\`${field}\` is not a valid value. Must be one of : ${Object.keys(INPUT_TYPE_VALUES).join(", ")}.
+    As other inputs may not bind to the value you think.`,
   INVALID_EVENT_NAME: (event: string) =>
     `\`${event}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`,
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
