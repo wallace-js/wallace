@@ -6,7 +6,7 @@ import { Component } from "../models";
 import { XARGS, COMPONENT_PROPERTIES } from "../constants";
 import { error, ERROR_MESSAGES } from "../errors";
 
-interface PropsMap {
+interface ModelMap {
   [key: string]: string;
 }
 
@@ -43,8 +43,8 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
       if (t.isObjectProperty(prop)) {
         if (t.isIdentifier(prop.value) && t.isIdentifier(prop.key)) {
           const name = prop.key.name;
-          if (name === COMPONENT_PROPERTIES.ctrl) {
-            wallaceConfig.ensureFlagIstrue(path, FlagValue.allowCtrl);
+          if (name === COMPONENT_PROPERTIES.hub) {
+            wallaceConfig.ensureFlagIstrue(path, FlagValue.allowHub);
           }
           if (!allowed.includes(name)) {
             error(path, ERROR_MESSAGES.ILLEGAL_XARG(name));
@@ -64,12 +64,12 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
 
 function renamePropKeysInsideFunction(
   path: NodePath<Function>,
-  propVariableMap: PropsMap,
-  propsVar: string
+  propVariableMap: ModelMap,
+  modelVar: string
 ) {
   // Babel lets us set identifier names that look like member expressions, however...
   for (const [key, value] of Object.entries(propVariableMap)) {
-    path.scope.rename(key, value === null ? propsVar : `${propsVar}.${value}`);
+    path.scope.rename(key, value === null ? modelVar : `${modelVar}.${value}`);
   }
   // We are now left with identifiers like `_p2.name` which messes up further renaming
   // as that is seen as a single identifier rather than a memberExpression, so
@@ -84,16 +84,16 @@ function renamePropKeysInsideFunction(
   });
 }
 
-function extractFinalPropsName(path: NodePath<Function>): PropsMap {
-  const propVariableMap: PropsMap = {};
-  const propsParam = path.node.params[0];
-  if (t.isObjectPattern(propsParam)) {
+function extractFinalModelName(path: NodePath<Function>): ModelMap {
+  const variableMap: ModelMap = {};
+  const modelParam = path.node.params[0];
+  if (t.isObjectPattern(modelParam)) {
     // key: prop on original object, may be an ObjectPattern
     // value: as used in function
-    for (const prop of propsParam.properties) {
+    for (const prop of modelParam.properties) {
       if (t.isObjectProperty(prop)) {
         if (t.isIdentifier(prop.value) && t.isIdentifier(prop.key)) {
-          propVariableMap[prop.value.name] = prop.key.name;
+          variableMap[prop.value.name] = prop.key.name;
         } else {
           // ObjectPattern - TODO: allow further deconstruction.
           throw new Error(`Unexpected prop value type: ${prop.type}`);
@@ -102,12 +102,12 @@ function extractFinalPropsName(path: NodePath<Function>): PropsMap {
         throw new Error(`Unexpected prop key type: ${prop.type}`);
       }
     }
-  } else if (t.isIdentifier(propsParam)) {
-    propVariableMap[propsParam.name] = null;
+  } else if (t.isIdentifier(modelParam)) {
+    variableMap[modelParam.name] = null;
   } else {
-    throw new Error(`Unexpected props param type: ${propsParam.type}`);
+    throw new Error(`Unexpected model param type: ${modelParam.type}`);
   }
-  return propVariableMap;
+  return variableMap;
 }
 
 // TODO: this really needs to be done on a per-directive basis as it can vary.
@@ -115,10 +115,10 @@ function mapAndRenameXargs(path: NodePath<Function>, component: Component) {
   const renameMapping: { [key: string]: string } = {};
   renameMapping[XARGS.event] = XARGS.event;
   renameMapping[XARGS.element] = XARGS.element;
-  renameMapping[XARGS.props] = component.propsIdentifier.name;
+  renameMapping[XARGS.model] = component.modelIdentifier.name;
   renameMapping[XARGS.component] = component.componentIdentifier.name;
-  renameMapping[XARGS.controller] =
-    `${component.componentIdentifier.name}.${COMPONENT_PROPERTIES.ctrl}`;
+  renameMapping[XARGS.hub] =
+    `${component.componentIdentifier.name}.${COMPONENT_PROPERTIES.hub}`;
 
   for (const [key, value] of Object.entries(renameMapping)) {
     if (path.scope.hasOwnBinding(key)) {
@@ -139,8 +139,8 @@ export function processFunctionParameters(
   if (path.node.params.length < 1) {
     return;
   }
-  const propVariableMap = extractFinalPropsName(path);
+  const propVariableMap = extractFinalModelName(path);
   checkForIllegalNamesInExtraArgs(path);
-  renamePropKeysInsideFunction(path, propVariableMap, component.propsIdentifier.name);
+  renamePropKeysInsideFunction(path, propVariableMap, component.modelIdentifier.name);
   mapAndRenameXargs(path, component);
 }

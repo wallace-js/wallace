@@ -40,34 +40,34 @@ describe("specification", () => {
 
 describe("behaviour", () => {
   test("watches udpates component by default", () => {
-    const props = { foo: 1 };
-    const MyComponent = props => <div watch>{props.foo}</div>;
-    const component = testMount(MyComponent, props);
+    const model = { foo: 1 };
+    const MyComponent = model => <div watch>{model.foo}</div>;
+    const component = testMount(MyComponent, model);
     expect(component).toRender(`<div>1</div>`);
-    component.props.foo = 2;
+    component.model.foo = 2;
     expect(component).toRender(`<div>2</div>`);
   });
 
   test("can specify callback", () => {
-    const props = { foo: 1 };
+    const model = { foo: 1 };
     let callCount = 0;
-    const MyComponent = props => <div watch={() => callCount++}>{props.foo}</div>;
-    const component = testMount(MyComponent, props);
+    const MyComponent = model => <div watch={() => callCount++}>{model.foo}</div>;
+    const component = testMount(MyComponent, model);
     expect(component).toRender(`<div>1</div>`);
     expect(callCount).toBe(0);
-    component.props.foo = 2;
+    component.model.foo = 2;
     expect(component).toRender(`<div>1</div>`);
     expect(callCount).toBe(1);
   });
 
   test("watch is not inherited", () => {
-    const props = { x: 1 };
+    const model = { x: 1 };
 
-    const Parent = props => <div watch></div>;
-    const MyComponent = extendComponent(Parent, props => <div>{props.x}</div>);
-    const component = testMount(MyComponent, props);
+    const Parent = model => <div watch></div>;
+    const MyComponent = extendComponent(Parent, model => <div>{model.x}</div>);
+    const component = testMount(MyComponent, model);
     expect(component).toRender(`<div>1</div>`);
-    component.props.x = 2;
+    component.model.x = 2;
     expect(component).toRender(`<div>1</div>`);
   });
 });

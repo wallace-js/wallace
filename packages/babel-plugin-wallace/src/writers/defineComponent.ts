@@ -121,7 +121,7 @@ function buildConstructor(
   });
 
   const expressions: any[] = [
-    assignThis(COMPONENT_PROPERTIES.props, emptyObject()),
+    assignThis(COMPONENT_PROPERTIES.model, emptyObject()),
     assignThis(
       COMPONENT_PROPERTIES.watchLength,
       t.memberExpression(
@@ -140,8 +140,8 @@ function buildConstructor(
     );
   }
 
-  if (wallaceConfig.flags.allowCtrl) {
-    expressions.unshift(assignThis(COMPONENT_PROPERTIES.ctrl, emptyObject()));
+  if (wallaceConfig.flags.allowHub) {
+    expressions.unshift(assignThis(COMPONENT_PROPERTIES.hub, emptyObject()));
   }
 
   if (componentDefinition.dynamicElements.length > 0) {
@@ -196,19 +196,19 @@ function getComponentPropertyAssignment(
 // TOOD: revisit once we rename per directive.
 function buildSetFunction(componentDefinition: ComponentDefinitionData) {
   const component = componentDefinition.component;
-  const { assignTo, watchProps, module } = component;
+  const { assignTo, watchModel, module } = component;
 
   const statements: any[] = [
     t.variableDeclaration("const", [
       t.variableDeclarator(component.componentIdentifier, t.identifier("this")),
-      t.variableDeclarator(component.propsIdentifier, t.identifier("props"))
+      t.variableDeclarator(component.modelIdentifier, t.identifier("model"))
     ]),
-    getComponentPropertyAssignment(module, "props", watchProps)
+    getComponentPropertyAssignment(module, "model", watchModel)
   ];
   if (assignTo) {
     let actualValue: LVal;
     if (typeof assignTo === "string") {
-      actualValue = t.memberExpression(component.propsIdentifier, t.identifier(assignTo));
+      actualValue = t.memberExpression(component.modelIdentifier, t.identifier(assignTo));
     } else {
       actualValue = assignTo;
     }
@@ -216,7 +216,7 @@ function buildSetFunction(componentDefinition: ComponentDefinitionData) {
   }
   return t.functionExpression(
     null,
-    [t.identifier("props"), t.identifier("ctrl")],
+    [t.identifier("model"), t.identifier("hub")],
     t.blockStatement(statements)
   );
 }

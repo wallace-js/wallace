@@ -1,27 +1,27 @@
 import { Uses } from "wallace";
 import { iTask } from "./types";
-import { TaskListController } from "./controllers";
+import { TaskListHub } from "./hubs";
 
-const Task: Uses<iTask, TaskListController> = ({ text, done, id }, { ctrl }) => (
+const Task: Uses<iTask, TaskListHub> = ({ text, done, id }, { hub }) => (
   <div>
     <input
       type="checkbox"
       checked={done}
-      onChange={ctrl.toggleTask({ id, done: !done })}
+      onChange={hub.toggleTask({ id, done: !done })}
     />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
+export const TaskList: Uses<null, TaskListHub, TaskListMethods> = (
   _,
-  { ctrl, self, event }
+  { hub, self, event }
 ) => (
   <div class="tasklist">
-    <div if={!ctrl.loading}>
-      <span>Completed: {ctrl.completedTasksCount()}</span>
+    <div if={!hub.loading}>
+      <span>Completed: {hub.completedTasksCount()}</span>
       <div style="margin-top: 10px">
-        <Task.repeat props={ctrl.tasks} />
+        <Task.repeat model={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.txtInputKeyUp(event)} />
@@ -29,7 +29,7 @@ export const TaskList: Uses<null, TaskListController, TaskListMethods> = (
       </div>
     </div>
 
-    <div if={ctrl.loading || ctrl.saving} class="loader"></div>
+    <div if={hub.loading || hub.saving} class="loader"></div>
   </div>
 );
 
@@ -39,13 +39,13 @@ interface TaskListMethods {
 
 TaskList.methods = {
   render() {
-    this.ctrl = new TaskListController(this);
+    this.hub = new TaskListHub(this);
     this.update(); // Ensures spinner displays while loading.
-    this.ctrl.init();
+    this.hub.init();
   },
   txtInputKeyUp(event: any) {
     if (event.key === "Enter") {
-      this.ctrl.addTask(event.target.value);
+      this.hub.addTask(event.target.value);
       event.target.value = "";
     }
   }

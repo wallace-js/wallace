@@ -1,7 +1,7 @@
 import { testMount } from "../utils";
 
-describe("Props", () => {
-  test("allows no props if none specified", () => {
+describe("Model", () => {
+  test("allows no model if none specified", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
@@ -17,7 +17,7 @@ describe("Props", () => {
 
   // TODO: make this work.
 
-  // test("disallows props if none specified", () => {
+  // test("disallows model if none specified", () => {
   //   expect(`
   //     import { mount, Uses } from "wallace";
 
@@ -25,21 +25,21 @@ describe("Props", () => {
 
   //     const Bar: Uses = () => (
   //       <div>
-  //         <Foo props={4} />
+  //         <Foo model={4} />
   //       </div>
   //     );
   //   `).toHaveTypeErrors([]);
   // });
 
-  test("diallows no props if props are specified", () => {
+  test("diallows no model if model are specified", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
-    interface Props {
+    interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
@@ -47,26 +47,26 @@ describe("Props", () => {
       </div>
     );
   `).toHaveTypeErrors([
-      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Props>'."
+      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Model>'."
     ]);
   });
 
-  test("diallows invalid props if they are specified", () => {
+  test("diallows invalid model if they are specified", () => {
     expect(`
       import { mount, Uses } from "wallace";
 
-      interface Props {
+      interface Model {
         clicks: number;
       }
 
-      const Foo: Uses<Props> = () => (<div></div>);
+      const Foo: Uses<Model> = () => (<div></div>);
 
       const Bar: Uses = () => (
         <div>
-          <Foo props={5} />
+          <Foo model={5} />
         </div>
       );
-    `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Props'."]);
+    `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Model'."]);
   });
 });
 
@@ -89,15 +89,15 @@ describe("Other directives", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
-    interface Props {
+    interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
-        <Foo props={{clicks: 5}} part="foo"/>
+        <Foo model={{clicks: 5}} part="foo"/>
       </div>
     );
     const bar = mount("main", Bar);
@@ -109,22 +109,22 @@ describe("Other directives", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
-    interface Props {
+    interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
-        <Foo props={{ clicks: 1 }} ${directive}="clicks" />
+        <Foo model={{ clicks: 1 }} ${directive}="clicks" />
       </div>
     );
   `).toHaveTypeErrors([
       `
-    Type '{ props: { clicks: number; }; ${directive}: string; }' is not assignable to
-    type 'IntrinsicAttributes & Wrapper<Props>'. Property '${directive}' does not exist
-    on type 'IntrinsicAttributes & Wrapper<Props>'.
+    Type '{ model: { clicks: number; }; ${directive}: string; }' is not assignable to
+    type 'IntrinsicAttributes & Wrapper<Model>'. Property '${directive}' does not exist
+    on type 'IntrinsicAttributes & Wrapper<Model>'.
     `
     ]);
   });

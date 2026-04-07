@@ -92,8 +92,8 @@ export class ExtractedNode {
   #visibilityToggle?: VisibilityToggle;
   #ref?: string;
   #part?: string;
-  #props?: Expression;
-  #ctrl?: Expression;
+  #model?: Expression;
+  #hub?: Expression;
   constructor(
     path: NodePath<ValidElementType>,
     address: Array<number>,
@@ -145,23 +145,23 @@ export class ExtractedNode {
       `${WATCH_CALLBACK_ARGS.element}.textContent = ${WATCH_CALLBACK_ARGS.newValue}`
     );
   }
-  setCtrl(expression: Expression) {
-    if (this.#ctrl) {
-      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("ctrl"));
+  setHub(expression: Expression) {
+    if (this.#hub) {
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("hub"));
     }
-    this.#ctrl = expression;
+    this.#hub = expression;
   }
-  getCtrl(): Expression {
-    return this.#ctrl;
+  getHub(): Expression {
+    return this.#hub;
   }
-  setProps(expression: Expression) {
-    if (this.#props) {
-      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("props"));
+  setModel(expression: Expression) {
+    if (this.#model) {
+      error(this.path, ERROR_MESSAGES.DIRECTIVE_ALREADY_DEFINED("model"));
     }
-    this.#props = expression;
+    this.#model = expression;
   }
-  getProps(): Expression | undefined {
-    return this.#props;
+  getModel(): Expression | undefined {
+    return this.#model;
   }
   setVisibilityToggle(expression: Expression, reverse: boolean, detach: boolean) {
     if (this.#visibilityToggle) {

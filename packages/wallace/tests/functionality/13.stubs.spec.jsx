@@ -14,10 +14,10 @@ if (wallaceConfig.flags.allowStubs) {
   });
 
   test("Can define stub and implement it on same component", () => {
-    const Foo = ({}, { props }) => (
+    const Foo = ({}, { model }) => (
       <div>
         hello
-        <stub.display props={props} />
+        <stub.display model={model} />
       </div>
     );
     Foo.stub.display = ({ name }) => <span>{name}</span>;
@@ -26,10 +26,10 @@ if (wallaceConfig.flags.allowStubs) {
   });
 
   test("Can define stub and only implement it on child", () => {
-    const BaseComponent = (_, { props }) => (
+    const BaseComponent = (_, { model }) => (
       <div>
         hello
-        <stub.display props={props} />
+        <stub.display model={model} />
       </div>
     );
     const Child = extendComponent(BaseComponent);
@@ -39,10 +39,10 @@ if (wallaceConfig.flags.allowStubs) {
   });
 
   test("Can define stub and not implement it on child", () => {
-    const BaseComponent = (_, { props }) => (
+    const BaseComponent = (_, { model }) => (
       <div>
         hello
-        <stub.display props={props} />
+        <stub.display model={model} />
       </div>
     );
     BaseComponent.stub.display = ({ name }) => <span>{name}</span>;
@@ -55,10 +55,10 @@ if (wallaceConfig.flags.allowStubs) {
     const BaseComponent = () => <div></div>;
     BaseComponent.stub.display = ({ name }) => <span>{name}</span>;
 
-    const Child = extendComponent(BaseComponent, (_, { props }) => (
+    const Child = extendComponent(BaseComponent, (_, { model }) => (
       <div>
         goodbye
-        <stub.display props={props} />
+        <stub.display model={model} />
       </div>
     ));
 
@@ -67,9 +67,9 @@ if (wallaceConfig.flags.allowStubs) {
   });
 
   test("Stubs is sepearate object from parent", () => {
-    const BaseComponent = (_, { props }) => (
+    const BaseComponent = (_, { model }) => (
       <div>
-        <stub.display props={props} />
+        <stub.display model={model} />
       </div>
     );
     BaseComponent.stub.display = ({ name }) => <h3>Parent {name}</h3>;
@@ -80,12 +80,12 @@ if (wallaceConfig.flags.allowStubs) {
     expect(component).toRender(`<div><h3>Parent <span>beaver</span></h3></div>`);
   });
 
-  test("Can specify props", () => {
-    const myProps = { name: "Fox" };
+  test("Can specify model", () => {
+    const myModel = { name: "Fox" };
     const BaseComponent = () => (
       <div>
         hello
-        <stub.display props={myProps} />
+        <stub.display model={myModel} />
       </div>
     );
     const Child = extendComponent(BaseComponent);
@@ -94,17 +94,17 @@ if (wallaceConfig.flags.allowStubs) {
     expect(component).toRender(`<div>hello <span>Fox</span></div>`);
   });
 
-  if (wallaceConfig.flags.allowControllers) {
-    test("Can specify ctrl", () => {
-      const myCtrl = { name: "Fox" };
+  if (wallaceConfig.flags.allowHubs) {
+    test("Can specify hub", () => {
+      const myHub = { name: "Fox" };
       const BaseComponent = () => (
         <div>
           hello
-          <stub.display ctrl={myCtrl} />
+          <stub.display hub={myHub} />
         </div>
       );
       const Child = extendComponent(BaseComponent);
-      Child.stub.display = (_, { ctrl }) => <span>{ctrl.name}</span>;
+      Child.stub.display = (_, { hub }) => <span>{hub.name}</span>;
       const component = testMount(Child);
       expect(component).toRender(`<div>hello <span>Fox</span></div>`);
     });
@@ -112,10 +112,10 @@ if (wallaceConfig.flags.allowStubs) {
 
   // keyed mode is tested along with repeater keyed tests.
   test("Can repeat", () => {
-    const myProps = [{ name: "Fox" }, { name: "Badger" }];
+    const myModel = [{ name: "Fox" }, { name: "Badger" }];
     const BaseComponent = () => (
       <div>
-        <stub.display.repeat props={myProps} />
+        <stub.display.repeat model={myModel} />
       </div>
     );
     const Child = extendComponent(BaseComponent);

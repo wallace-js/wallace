@@ -99,16 +99,16 @@ class CssDirective extends Directive {
   }
 }
 
-class CtrlDirective extends Directive {
-  static attributeName = "ctrl";
+class HubDirective extends Directive {
+  static attributeName = "hub";
   static valueMode: ValueMode = ValueMode.ExpressionRequired;
   static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = true;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowCtrl);
-    node.setCtrl(value.expression);
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowHub);
+    node.setHub(value.expression);
   }
 }
 
@@ -202,15 +202,15 @@ class PartDirective extends Directive {
   }
 }
 
-class PropsDirective extends Directive {
-  static attributeName = "props";
+class ModelDirective extends Directive {
+  static attributeName = "model";
   static valueMode: ValueMode = ValueMode.ExpressionRequired;
   static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static allowOnNested = true;
   static allowOnRepeated = true;
   static allowOnNormalElement = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setProps(value.expression);
+    node.setModel(value.expression);
   }
 }
 
@@ -304,7 +304,7 @@ class WatchDirective extends Directive {
   static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static mustBeOnRoot = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.component.watchProps = { callback: value.expression };
+    node.component.watchModel = { callback: value.expression };
   }
 }
 
@@ -315,7 +315,7 @@ export const builtinDirectives = [
   BindAsDirective,
   ClassDirective,
   CssDirective,
-  CtrlDirective,
+  HubDirective,
   EventDirective,
   FixedDirective,
   HideDirective,
@@ -324,7 +324,7 @@ export const builtinDirectives = [
   KeyDirective,
   OnEventDirective,
   PartDirective,
-  PropsDirective,
+  ModelDirective,
   RefDirective,
   ShowDirective,
   StyleDirective,

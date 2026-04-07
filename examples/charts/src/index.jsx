@@ -3,7 +3,7 @@ import { mount } from "wallace";
 import {
   Chart,
   BarElement,
-  BarController,
+  BarHub,
   CategoryScale,
   LinearScale,
   Filler,
@@ -14,7 +14,7 @@ import {
 
 Chart.register(
   BarElement,
-  BarController,
+  BarHub,
   CategoryScale,
   Filler,
   Legend,
@@ -55,12 +55,12 @@ const ChartCanvas = ({ label }) => (
 );
 
 ChartCanvas.methods = {
-  render(props) {
-    this.props = this.sortData(props);
+  render(model) {
+    this.model = this.sortData(model);
     this.update();
     // The canvas isn't attached to the DOM yet, so we use a crude timeout.
     setTimeout(() => {
-      buildChart(this.ref.canvas, this.props);
+      buildChart(this.ref.canvas, this.model);
     }, 100);
   },
   sortData(data) {
@@ -80,13 +80,13 @@ ChartCanvas.methods = {
 
 const ChartList = charts => (
   <div>
-    <ChartCanvas.repeat props={charts} />
+    <ChartCanvas.repeat model={charts} />
   </div>
 );
 
 ChartList.methods = {
-  render(props) {
-    this.props = getCharts(props);
+  render(model) {
+    this.model = getCharts(model);
     this.update();
   }
 };

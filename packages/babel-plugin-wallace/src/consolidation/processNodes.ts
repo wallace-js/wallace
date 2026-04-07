@@ -217,9 +217,9 @@ function addNestedComponentWatch(
   node: ExtractedNode,
   componentWatch: ComponentWatch
 ) {
-  const callbackArgs = [node.getProps() || t.objectExpression([])];
-  if (wallaceConfig.flags.allowCtrl) {
-    callbackArgs.push(getCtrlExpression(node, componentDefinition.component));
+  const callbackArgs = [node.getModel() || t.objectExpression([])];
+  if (wallaceConfig.flags.allowHub) {
+    callbackArgs.push(getHubExpression(node, componentDefinition.component));
   }
 
   componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
@@ -318,10 +318,10 @@ function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {
   });
 }
 
-function getCtrlExpression(node: ExtractedNode, component: Component) {
+function getHubExpression(node: ExtractedNode, component: Component) {
   return (
-    node.getCtrl() ||
-    memberExpression(component.componentIdentifier, identifier(COMPONENT_PROPERTIES.ctrl))
+    node.getHub() ||
+    memberExpression(component.componentIdentifier, identifier(COMPONENT_PROPERTIES.hub))
   );
 }
 
@@ -397,10 +397,10 @@ function processRepeater(
 ) {
   const component = componentDefinition.component,
     repeatKey = node.repeatKey,
-    repeatProps = node.getProps(),
+    repeatModel = node.getModel(),
     componentCls = getNestedComponentCls(componentDefinition, node);
 
-  if (!repeatProps) {
+  if (!repeatModel) {
     error(node.path, ERROR_MESSAGES.REPEAT_WITHOUT_PROPS);
   }
 
@@ -435,9 +435,9 @@ function processRepeater(
     componentDefinition.dismountKeys.push(stashKey);
   }
 
-  const callbackArgs = [identifier(WATCH_AlWAYS_CALLBACK_ARGS.element), repeatProps];
-  if (wallaceConfig.flags.allowCtrl) {
-    callbackArgs.push(getCtrlExpression(node, component));
+  const callbackArgs = [identifier(WATCH_AlWAYS_CALLBACK_ARGS.element), repeatModel];
+  if (wallaceConfig.flags.allowHub) {
+    callbackArgs.push(getHubExpression(node, component));
   }
   componentWatch.add(SPECIAL_SYMBOLS.noLookup, [
     expressionStatement(
@@ -497,14 +497,14 @@ function processEventListeners(
   const component = componentDefinition.component;
   // TODO: improve this, as we are basically renaming things specifically for the
   // build function that have already been renamed, which can get confusing.
-  // It also needs to rename ctrl and props explicitly as it doesn't seem to
+  // It also needs to rename hub and model explicitly as it doesn't seem to
   // rename component when it's a member expression.
   const eventVariableMapping: { [key: string]: string } = {
     [component.componentIdentifier.name]: COMPONENT_PROPERTIES.tmpThis,
-    [component.componentIdentifier.name + "." + COMPONENT_PROPERTIES.ctrl]:
-      `${COMPONENT_PROPERTIES.tmpThis}.${COMPONENT_PROPERTIES.ctrl}`,
-    [component.propsIdentifier.name]:
-      `${COMPONENT_PROPERTIES.tmpThis}.${COMPONENT_PROPERTIES.props}`
+    [component.componentIdentifier.name + "." + COMPONENT_PROPERTIES.hub]:
+      `${COMPONENT_PROPERTIES.tmpThis}.${COMPONENT_PROPERTIES.hub}`,
+    [component.modelIdentifier.name]:
+      `${COMPONENT_PROPERTIES.tmpThis}.${COMPONENT_PROPERTIES.model}`
   };
   if (component.xargMapping.hasOwnProperty(XARGS.element)) {
     eventVariableMapping[EVENT_CALLBACK_ARGS.element] =

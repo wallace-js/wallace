@@ -1,7 +1,7 @@
 import { testMount } from "../utils";
 
 describe("Component definition with Uses", () => {
-  test("can specify no props", () => {
+  test("can specify no model", () => {
     expect(`
       import { mount, Uses } from "wallace";
 
@@ -10,54 +10,54 @@ describe("Component definition with Uses", () => {
     `).toHaveNoTypeErrors();
   });
 
-  test("can specify props", () => {
+  test("can specify model", () => {
     expect(`
       import { mount, Uses } from "wallace";
 
-      interface FooProps {
+      interface FooModel {
         clicks: number;
       }
 
-      const Foo: Uses<FooProps> = () => (<div></div>);
+      const Foo: Uses<FooModel> = () => (<div></div>);
       const foo = mount("main", Foo);
-      foo.props.clicks = 1;
-      foo.props.clicks = 'a';
+      foo.model.clicks = 1;
+      foo.model.clicks = 'a';
     `).toHaveTypeErrors(["Type 'string' is not assignable to type 'number'."]);
   });
 
-  test("can specify controller", () => {
+  test("can specify hub", () => {
     expect(`
       import { mount, Uses } from "wallace";
 
-      interface Controller {
+      interface Hub {
         things: number;
       }
 
-      const Foo: Uses<{ctrl: Controller}> = () => (<div></div>);
+      const Foo: Uses<{hub: Hub}> = () => (<div></div>);
       const foo = mount("main", Foo);
-      foo.ctrl.things = 1;
-      foo.ctrl.things = 'a';
+      foo.hub.things = 1;
+      foo.hub.things = 'a';
     `).toHaveTypeErrors(["Type 'string' is not assignable to type 'number'."]);
   });
 
-  test("can specify props and controller", () => {
+  test("can specify model and hub", () => {
     expect(`
       import { mount, Uses } from "wallace";
 
-      interface FooProps {
+      interface FooModel {
         clicks: number;
       }
 
-      interface Controller {
+      interface Hub {
         things: number;
       }
 
-      const Foo: Uses<{props: FooProps, ctrl: Controller}> = () => (<div></div>);
+      const Foo: Uses<{model: FooModel, hub: Hub}> = () => (<div></div>);
       const foo = mount("main", Foo);
-      foo.ctrl.things = 1;
-      foo.props.clicks = 1;
-      foo.props.clicks = 'a';
-      foo.ctrl.things = 'a';
+      foo.hub.things = 1;
+      foo.model.clicks = 1;
+      foo.model.clicks = 'a';
+      foo.hub.things = 'a';
     `).toHaveTypeErrors([
       "Type 'string' is not assignable to type 'number'.",
       "Type 'string' is not assignable to type 'number'."

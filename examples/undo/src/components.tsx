@@ -1,6 +1,6 @@
 import { Uses } from "wallace";
 import { iTask, TaskListMethods } from "./types";
-import { Controller } from "./controller";
+import { Hub } from "./hubs";
 
 const Task: Uses<iTask> = ({ text, done }) => (
   <div>
@@ -9,27 +9,27 @@ const Task: Uses<iTask> = ({ text, done }) => (
   </div>
 );
 
-const UndoRedoBtns: Uses<null, Controller> = (_, { ctrl }) => (
+const UndoRedoBtns: Uses<null, Hub> = (_, { hub }) => (
   <div>
-    <button disabled={ctrl.previousStates.length <= 1} onClick={ctrl.undo()}>
+    <button disabled={hub.previousStates.length <= 1} onClick={hub.undo()}>
       Undo
     </button>
-    <button disabled={ctrl.undoneStates.length === 0} onClick={ctrl.redo()}>
+    <button disabled={hub.undoneStates.length === 0} onClick={hub.redo()}>
       Redo
     </button>
   </div>
 );
 
-export const TaskList: Uses<iTask[], Controller, TaskListMethods> = (
+export const TaskList: Uses<iTask[], Hub, TaskListMethods> = (
   _,
-  { event, ctrl, self }
+  { event, hub, self }
 ) => (
   <div class="tasklist">
     <UndoRedoBtns />
     <div style="margin-top: 10px">
-      <span>Completed: {ctrl.tasks.filter(t => t.done).length}</span>
+      <span>Completed: {hub.tasks.filter(t => t.done).length}</span>
       <div style="margin-top: 10px">
-        <Task.repeat props={ctrl.tasks} />
+        <Task.repeat model={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
@@ -40,15 +40,15 @@ export const TaskList: Uses<iTask[], Controller, TaskListMethods> = (
 );
 
 TaskList.methods = {
-  render(props) {
-    this.ctrl = new Controller(this, props);
-    this.ctrl.stateMoved();
+  render(model) {
+    this.hub = new Hub(this, model);
+    this.hub.stateMoved();
   },
   addTaskKeyup(event: KeyboardEvent) {
     const target = event.target as HTMLInputElement;
     const text = target.value;
     if (event.key === "Enter" && text.length > 0) {
-      this.ctrl.tasks.push({ text, done: false });
+      this.hub.tasks.push({ text, done: false });
       target.value = "";
     }
   }

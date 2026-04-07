@@ -22,9 +22,9 @@ export enum IMPORTABLES {
  * The value is not indicative of the final variable name.
  */
 export enum XARGS {
-  controller = "ctrl",
+  hub = "hub",
   component = "self",
-  props = "props",
+  model = "model",
   event = "event",
   element = "element",
   stub = "stub"
@@ -34,14 +34,14 @@ export enum WATCH_CALLBACK_ARGS {
   newValue = "n",
   oldValue = "o",
   element = XARGS.element,
-  props = "p",
+  model = "p",
   component = "c"
 }
 
 export enum WATCH_AlWAYS_CALLBACK_ARGS {
   element = XARGS.element,
   // We use the component-specific instances as they may get renamed.
-  // props = "props",
+  // model = "model",
   // component = "component",
   stash = "stash"
 }
@@ -62,8 +62,8 @@ export enum COMPONENT_PROPERTIES {
   watches = "_w",
   watchLength = "_l",
   root = "el",
-  ctrl = "ctrl",
-  props = "props",
+  hub = "hub",
+  model = "model",
   ref = "ref",
   part = "part",
   render = "render",

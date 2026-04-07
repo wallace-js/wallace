@@ -9,18 +9,18 @@ There are two mechanisms for testing TypeScript:
 Using the `toHaveTypeErrors` and `toHaveNoTypeErrors` on a source code string:
 
 ```js
-test('can specify props', () => {
+test('can specify model', () => {
   expect(`
     import { mount, Uses } from "wallace";
 
-    interface FooProps {
+    interface FooModel {
       clicks: number;
     }
 
-    const Foo: Uses<FooProps> = () => (<div></div>);
+    const Foo: Uses<FooModel> = () => (<div></div>);
     const foo = mount("main", Foo);
-    foo.props.clicks = 1;
-    foo.props.clicks = 'a';
+    foo.model.clicks = 1;
+    foo.model.clicks = 'a';
   `).toHaveTypeErrors([
     "Type 'string' is not assignable to type 'number'."
   ]);

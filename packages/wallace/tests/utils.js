@@ -87,8 +87,8 @@ const mountedComponents = new Set();
 /**
  * Mounts a component to the JSDOM.
  */
-function testMount(cls, props, ctrl) {
-  const instance = mount(createDiv(), cls, props, ctrl);
+function testMount(cls, model, hub) {
+  const instance = mount(createDiv(), cls, model, hub);
   mountedComponents.add(instance);
   return instance;
 }

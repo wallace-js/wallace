@@ -408,7 +408,7 @@ module.exports = {
 
 However, this plugin must work if either of those presets are missing (and to a degree, if others are added) so it is important to test changes with each permutation.
 
-The plugin must work whether `@babel/preset-env` is set or not, meaning we cannot rely on those transformations happening, which is unfortunate as it would simplify things like props destructuring.
+The plugin must work whether `@babel/preset-env` is set or not, meaning we cannot rely on those transformations happening, which is unfortunate as it would simplify things like model destructuring.
 
 There should be tests which check this, but if making changes to the visitors then it is worth checking explicitly.
 
@@ -533,7 +533,7 @@ Say the structure is as follows:
 
 Having the guidelines, yet being able to break them, solves some dilemmas:
 
-- In `1.defining.spec.jsx` we cover the valid ways to define components, including functions and classes and single or deconstructed props. According to rule 4, this means all subsequent suites must cater for those permutations, so that makes that decision easier.
+- In `1.defining.spec.jsx` we cover the valid ways to define components, including functions and classes and single or deconstructed model. According to rule 4, this means all subsequent suites must cater for those permutations, so that makes that decision easier.
 - In `02.rendering.spec.jsx` we use mounting, which goes against rule 3, however we're not testing
 - Refs are perhaps less primary than visibility, but really help testing that, so we slot them in before.
 - Rule 3 tells us we test refs apply to nested components in `9.nesting.spec.jsx` not `6.refs.spec.jsx`.
@@ -623,7 +623,7 @@ test('JSX not allowed in expressions', () => {
   const code = `
     const Foo = () => (
       <center>
-        {props.texts.map((paragraph, i) => (
+        {model.texts.map((paragraph, i) => (
           <p key={i}>{paragraph}</p>
         ))}
       </center>

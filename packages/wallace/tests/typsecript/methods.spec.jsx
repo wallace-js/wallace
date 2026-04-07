@@ -4,29 +4,29 @@ describe("Definition", () => {
   test("is a proxy for prototype", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
-    interface Controller {
+    interface Hub {
       times: number;
     }
     
-    const Bar: Uses<{props: Props, ctrl: Controller}> = () => <div></div>;
+    const Bar: Uses<{model: Model, hub: Hub}> = () => <div></div>;
 
-    Bar.methods.render = function (props, ctrl) {
-      const a = props.clicks / 2;
-      const b = ctrl.times / 2;
-      const c = this.props.clicks / 2;
-      const d = this.ctrl.times / 2;
+    Bar.methods.render = function (model, hub) {
+      const a = model.clicks / 2;
+      const b = hub.times / 2;
+      const c = this.model.clicks / 2;
+      const d = this.hub.times / 2;
       this.update();
     }
     
     Bar.methods = { 
-      render (props, ctrl) {
-        const a = props.clicks / 2;
-        const b = ctrl.times / 2;
-        const c = this.props.clicks / 2;
-        const d = this.ctrl.times / 2;
+      render (model, hub) {
+        const a = model.clicks / 2;
+        const b = hub.times / 2;
+        const c = this.model.clicks / 2;
+        const d = this.hub.times / 2;
         this.update();
       }
     }
@@ -36,55 +36,55 @@ describe("Definition", () => {
   test("Recognises methods in render", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
     interface Methods {
       getName: () => string;
     }
 
-    const Bar: Uses<{props: Props, methods: Methods}> = () => <div></div>;
+    const Bar: Uses<{model: Model, methods: Methods}> = () => <div></div>;
 
-    Bar.methods.render = function (props, ctrl) {
+    Bar.methods.render = function (model, hub) {
       this.getName().toUpperCase();
     }
     
     Bar.methods = { 
-      render (props, ctrl) {
+      render (model, hub) {
         this.getName().toUpperCase();
         this.foo();
       }
     }
     `).toHaveTypeErrors([
-      `Property 'foo' does not exist on type 'ComponentInstance<Props, unknown, Methods>'.`
+      `Property 'foo' does not exist on type 'ComponentInstance<Model, unknown, Methods>'.`
     ]);
   });
 
   test("Recognises component in methods", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
     interface Methods {
       getName: () => string;
     }
-    interface Controller {
+    interface Hub {
       times: number;
     }
     
-    const Bar: Uses<{props: Props, ctrl: Controller, methods: Methods}> = () => <div></div>;
+    const Bar: Uses<{model: Model, hub: Hub, methods: Methods}> = () => <div></div>;
 
     Bar.methods.getName = function () {
-      const c = this.props.clicks / 2;
-      const d = this.ctrl.times / 2;
+      const c = this.model.clicks / 2;
+      const d = this.hub.times / 2;
       this.update();
     }
     
     Bar.methods = { 
       getName () {
-        const c = this.props.clicks / 2;
-        const d = this.ctrl.times / 2;
+        const c = this.model.clicks / 2;
+        const d = this.hub.times / 2;
         this.update();
       }
     }
@@ -94,14 +94,14 @@ describe("Definition", () => {
   test("Recognises methods in self", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
     interface Methods {
       getName: () => string;
     }
 
-    const Bar: Uses<{props: Props, methods: Methods}> = ({clicks}, {self}) => (
+    const Bar: Uses<{model: Model, methods: Methods}> = ({clicks}, {self}) => (
       <div>
         {self.getName()}
         {clicks}
@@ -109,7 +109,7 @@ describe("Definition", () => {
       </div>
     );
     `).toHaveTypeErrors([
-      `Property 'nope' does not exist on type 'ComponentInstance<Props, unknown, Methods>'.`
+      `Property 'nope' does not exist on type 'ComponentInstance<Model, unknown, Methods>'.`
     ]);
   });
 });

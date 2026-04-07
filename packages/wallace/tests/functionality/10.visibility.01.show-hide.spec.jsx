@@ -103,9 +103,9 @@ describe("Nested components", () => {
     const Counters = () => (
       <div>
         <div show={showTarget}>
-          <UpdateCounter props={c1} ref:target />
+          <UpdateCounter model={c1} ref:target />
         </div>
-        <UpdateCounter props={c2} ref:other />
+        <UpdateCounter model={c2} ref:other />
       </div>
     );
     const component = testMount(Counters);
@@ -145,7 +145,7 @@ describe("Repeated components", () => {
     const AnimalList = () => (
       <div show={showAnimals}>
         <div class="list">
-          <Animal.repeat props={getAnimals()} />
+          <Animal.repeat model={getAnimals()} />
         </div>
       </div>
     );

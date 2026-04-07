@@ -23,8 +23,8 @@ export const flagVisitor = {
    * Conditionally removes statement/expressions/identifiers etc...
    * based on leading comments:
    *
-   *   #INCLUDE-IF: allowCtrl
-   *   #EXCLUDE-IF: allowCtrl
+   *   #INCLUDE-IF: allowHub
+   *   #EXCLUDE-IF: allowHub
    *
    * WARNING: NOT RELIABLE! It sometimes knocks out subsequent nodes, so only use on
    * ende nodes.

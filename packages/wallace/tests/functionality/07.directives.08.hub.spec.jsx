@@ -1,16 +1,16 @@
 import { testMount } from "../utils";
 
-if (wallaceConfig.flags.allowCtrl) {
+if (wallaceConfig.flags.allowHub) {
   test("Can use with nested component", () => {
-    const Fox = (_, { ctrl }) => <div>Fox {ctrl}</div>;
+    const Fox = (_, { hub }) => <div>Fox {hub}</div>;
     const AnimalList = (_, { self }) => (
       <div>
-        <Fox ctrl={self.foxCtrl} />
+        <Fox hub={self.foxHub} />
       </div>
     );
-    AnimalList.prototype.render = function (props) {
-      this.props = props;
-      this.foxCtrl = 6;
+    AnimalList.prototype.render = function (model) {
+      this.model = model;
+      this.foxHub = 6;
       this.update();
     };
     const component = testMount(AnimalList);
@@ -23,15 +23,15 @@ if (wallaceConfig.flags.allowCtrl) {
 
   test("Can use with repeated component", () => {
     const animals = ["cat", "dog", "fox"];
-    const Animal = (name, { ctrl }) => <div>{name + " " + ctrl}</div>;
+    const Animal = (name, { hub }) => <div>{name + " " + hub}</div>;
     const AnimalList = (_, { self }) => (
       <div>
-        <Animal.repeat props={animals} ctrl={self.tmpCtrl} />
+        <Animal.repeat model={animals} hub={self.tmpHub} />
       </div>
     );
-    AnimalList.prototype.render = function (props) {
-      this.props = props;
-      this.tmpCtrl = 6;
+    AnimalList.prototype.render = function (model) {
+      this.model = model;
+      this.tmpHub = 6;
       this.update();
     };
     const component = testMount(AnimalList);

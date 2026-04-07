@@ -13,7 +13,7 @@
   3. Nesting
   4. Repeating
   5. Directives
-  6. Controllers
+  6. Hubs
   7. Inheritance
   8. Stubs
   9. TypeScript
@@ -37,12 +37,12 @@ The function body must be a single JSX expression, returned, and nothing else.
 
 The function takes two arguments, both optional:
 
-1. **props** - which *may* be destructured.
+1. **model** - which *may* be destructured.
 2. **xargs** - which *must* be destructured to exactly one level, as shown:
 
 ```tsx
-const MyComponent = ({title}, {ctrl, event}) => (
-  <button onClick={ctrl.doSomething(event)}>
+const MyComponent = ({title}, {hub, event}) => (
+  <button onClick={hub.doSomething(event)}>
     {title}
   </button>
 );
@@ -50,8 +50,8 @@ const MyComponent = ({title}, {ctrl, event}) => (
 
 The **xargs** contains:
 
-- `ctrl` refers to the controller.
-- `props` refers to the props, in case you want the non-destructured version too.
+- `hub` refers to the hub.
+- `model` refers to the model, in case you want the non-destructured version too.
 - `self` refers to the component instance (as `this` is not allowed).
 - `event` refers to the event in an event callback.
 - `element` refers to the element in an event callback, or in `apply`.
@@ -66,15 +66,15 @@ The function will be replaced by a very different one during compilation, theref
 You mount the root component of your tree using `mount`:
 
 ```tsx
-const root = mount("root", MyComponent, props, ctrl);
+const root = mount("root", MyComponent, model, hub);
 ```
 
 The arguments are:
 
 1. Element or id string.
 2. Component definition.
-3. props for the element (optional)
-4. controller (optional)
+3. model for the element (optional)
+4. hub (optional)
 
 `mount` returns the component instance, allowing you to call its methods:
 
@@ -86,14 +86,14 @@ root.update();
 
 Components have two public methods:
 
-#### render(props, ctrl)
+#### render(model, hub)
 
 Called from "above" by `mount` or when nesting other components. Here it is:
 
 ```tsx
-render(props, ctrl) {
-  this.props = props;
-  this.ctrl = ctrl;
+render(model, hub) {
+  this.model = model;
+  this.hub = hub;
   this.update();
 }
 ```
@@ -110,8 +110,8 @@ component definition:
 
 ```tsx
 MyComponent.methods = {
-  render(props) {
-    this.ctrl = new MyController(this, props);
+  render(model) {
+    this.hub = new MyHub(this, model);
     this.update();
   },
   getName() {
@@ -130,8 +130,8 @@ You can use `this.base` to access methods on the base `Component` class:
 
 ```tsx
 MyComponent.methods = {
-  render(props) {
-    this.base.render.call(this, props, ctrl);
+  render(model) {
+    this.base.render.call(this, model, hub);
   }
 };
 ```
@@ -146,8 +146,8 @@ so use `self` from the **xargs** in component functions.
 
 Component instances have the following fields:
 
-- `props` the data for this component instance.
-- `ctrl` the controller object.
+- `model` the data for this component instance.
+- `hub` the hub object.
 - `el` the component instance's root element.
 
 Optionally:
@@ -155,16 +155,16 @@ Optionally:
 - `ref` an object containing named elements or nested components.
 - `part` an object containing named parts.
 
-Both `props` and `ctrl` are set during the `render` method before calling `update`.
+Both `model` and `hub` are set during the `render` method before calling `update`.
 There are no restrictions on types but typically:
 
-- `props` is an object with primitive data.
-- `ctrl` is an instance of a custom class.
+- `model` is an object with primitive data.
+- `hub` is an instance of a custom class.
 
 Nested components will receive:
 
-- The same `ctrl` as the parent.
-- The `props` specified in JSX.
+- The same `hub` as the parent.
+- The `model` specified in JSX.
 
 ## 2. JSX
 
@@ -182,14 +182,14 @@ Other than that, its standard JSX, except for three special cases:
 
 ## 3. Nesting
 
-To nest a component use its name and pass `props` if needed:
+To nest a component use its name and pass `model` if needed:
 
 ```tsx
 const Task = (task) => (<div></div>);
 
 const TopTasks = (tasks) => (
   <div>
-    <Task props={tasks[0]} />
+    <Task model={tasks[0]} />
   </div>
 );
 ```
@@ -201,15 +201,15 @@ Notes:
 
 ## 4. Repeating
 
-To repeat a component use its name followed by `.repeat` and pass `props` which must
-be an Array of the props the component uses:
+To repeat a component use its name followed by `.repeat` and pass `model` which must
+be an Array of the model the component uses:
 
 ```tsx
 const Task = (task) => (<div></div>);
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} />
+    <Task.repeat model={tasks} />
   </div>
 );
 ```
@@ -221,13 +221,13 @@ be a string or a function:
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} key="id"/>
+    <Task.repeat model={tasks} key="id"/>
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} key={(x) => x.id}/>
+    <Task.repeat model={tasks} key={(x) => x.id}/>
   </div>
 );
 ```
@@ -250,30 +250,30 @@ temporarily change it to something `class x:danger`.
 
 You can define your own directives in your babel config.
 
-## 6. Controllers
+## 6. Hubs
 
-A controller is just an object you create which gets passed down to every nested
+A hub is just an object you create which gets passed down to every nested
 component, making it a convenient place to handle:
 
 - Event handlers.
 - Fetching data.
-- Sorting, filtering and formatting props.
+- Sorting, filtering and formatting model.
 - Coordinating updates.
 
-This lets you use props purely for data.
+This lets you use model purely for data.
 
-Controllers often reference:
+Hubs often reference:
 
 - One or more components to be updated after data changes.
 - Other controllers they need access to like services or modal containers.
 
-Components sometimes only use a controller, and no props.
+Components sometimes only use a hub, and no model.
 
 ```tsx
-class TaskController {
-  constructor (rootComponent, dbController) {
+class TaskHub {
+  constructor (rootComponent, dbHub) {
     this.root = rootComponent;
-    this.db = dbController;
+    this.db = dbHub;
   }
   getTasks () {
     return this.db.fetch(...);
@@ -287,15 +287,15 @@ class TaskController {
 
 const Task = (task) => (<div>{task.name}</div>);
 
-const TaskList = (_, {ctrl}) => (
+const TaskList = (_, {hub}) => (
   <div>
-    <Task.repeat props={ctrl.getTasks()} />
+    <Task.repeat model={hub.getTasks()} />
   </div>
 );
 
 TaskList.methods = {
-  render(_, ctrl) {
-    this.ctrl = new TaskController(this, ctrl);
+  render(_, hub) {
+    this.hub = new TaskHub(this, hub);
     this.update();
   }
 };
@@ -347,11 +347,11 @@ So long as the rendered component has all its stubs defined somewhere, it will w
 Notes:
 
  - Stubs are separate components, so cannot access methods on the containing component
-   through `self` (use the controller for that kind of thing).
+   through `self` (use the hub for that kind of thing).
 
 ## 9. TypeScript
 
-The `Uses` lets you annotate a component's props and other types. It must be placed
+The `Uses` lets you annotate a component's model and other types. It must be placed
 right after the component name (not inside the parameters):
 
 ```tsx
@@ -364,21 +364,21 @@ interface iTask {
 const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
 ```
 
-This ensure you pass correct props during mounting, nesting and repeating:
+This ensure you pass correct model during mounting, nesting and repeating:
 
 ```
 const TaskList: Uses<iTask[]> = (tasks) => (
   <div>
     First task:
-    <Task props={tasks[0]} />
-    <Task.repeat props={tasks.slice(1)} />
+    <Task model={tasks[0]} />
+    <Task.repeat model={tasks.slice(1)} />
   </div>
 );
 
 mount("main", TaskList, [{test: 'foo'}]);
 ```
 
-If you require no props, pass `null`:
+If you require no model, pass `null`:
 
 ```tsx
 const Task: Uses<null> = () => <div>Hello</div>;
@@ -388,11 +388,11 @@ const Task: Uses<null> = () => <div>Hello</div>;
 
 You can alternatively pass a compound type which lets you specify other things:
 
-### Controller
+### Hub
 
 ```tsx
-const Task: Uses<{ctrl: Controller}> = (_, { ctrl }) => (
-  <div>{ctrl.getName()}</div>
+const Task: Uses<{hub: Hub}> = (_, { hub }) => (
+  <div>{hub.getName()}</div>
 );
 ```
 
@@ -413,8 +413,8 @@ const Task: Uses<{methods: TaskMethods}> = (_, { self }) => (
 
 Task.methods = {
   getName() { return 'wallace' },
-  render(props, ctrl) {  // types are already known
-    this.props = { ...props, notallowed: 1 };  // type error
+  render(model, hub) {  // types are already known
+    this.model = { ...model, notallowed: 1 };  // type error
   }
 };
 ```
@@ -424,21 +424,21 @@ in addition to standard methods like `render`, which are already typed for you.
 
 ### Stubs
 
-You can specify the props and controller of each stub:
+You can specify the model and hub of each stub:
 
 ```tsx
 interface ParentTypes {
-  ctrl: Controller;
+  hub: Hub;
   stub: {
     foo: Uses<iDay>;
-    bar: Uses<{props: iDay, ctrl: Controller}>;
+    bar: Uses<{model: iDay, hub: Hub}>;
   };
 }
 
 const Parent: Uses<ParentTypes> = (_, { stub }) => (
   <div>
-    <stub.foo props={data[0]} /> 
-    <stub.foo.repeat props={data} /> 
+    <stub.foo model={data[0]} /> 
+    <stub.foo.repeat model={data} /> 
   </div>
 );
 ```
@@ -454,7 +454,7 @@ const Child = extendComponent(Parent);
 You may specify different types:
 
 ```tsx
-const Child = extendComponent<newProps, Controller, Methods>(Parent);
+const Child = extendComponent<newModel, Hub, Methods>(Parent);
 ```
 
  However:
@@ -467,9 +467,9 @@ const Child = extendComponent<newProps, Controller, Methods>(Parent);
 
 Wallace defines some other types you may use:
 
- - `Component<Props, Controller, Methods>` - the base component class (it is a 
+ - `Component<Model, Hub, Methods>` - the base component class (it is a 
     constructor, not a class)
- - `ComponentInstance<Props, Controller, Methods>` - a component instance.
+ - `ComponentInstance<Model, Hub, Methods>` - a component instance.
 
 ## 10. Helpers
 
@@ -490,7 +490,7 @@ const Bar = extendComponent(Base, () => <div></div>);
 Mounts an instance of a component to the DOM:
 
 ```
-mount("elementId", MyComponent, props, ctrl);
+mount("elementId", MyComponent, model, hub);
 ```
 
 ### watch
@@ -519,7 +519,7 @@ You can toggle flags in your babel config to disable certain features for cuttin
 performance and bundle size:
 
 1.  `allowBase` - allows use of `base` in components.
-2.  `allowCtrl` - allows use of `ctrl` in components.
+2.  `allowHub` - allows use of `hub` in components.
 3.  `allowDismount` - allows components to handle dismounting.
 4.  `allowMethods` - allows use of `methods` helper to components.
 5.  `allowParts` - allows use of parts.
@@ -537,7 +537,7 @@ module.exports = {
       "babel-plugin-wallace",
       {
         flags: {
-          allowCtrl: true,
+          allowHub: true,
           allowStubs: false
         },
       }
@@ -569,46 +569,42 @@ declare module "wallace" {
    * A component function.
    */
   interface ComponentFunction<
-    Props = any,
-    Controller = any,
+    Model = any,
+    Hub = any,
     Methods extends object = {},
     Stubs extends StubDefinition = {}
   > {
     (
-      props?: Props,
+      model?: Model,
       xargs?: {
-        ctrl: Controller;
-        props: Props;
-        self: ComponentInstance<Props, Controller, Methods>;
+        hub: Hub;
+        model: Model;
+        self: ComponentInstance<Model, Hub, Methods>;
         stub: StubInterface<Stubs>;
         event: Event;
         element: HTMLElement;
       }
     ): JSX.Element;
     repeat?({
-      props,
-      ctrl,
+      model,
+      hub,
       part,
       key
     }: {
-      props: Array<Props>;
-      ctrl?: Controller;
+      model: Array<Model>;
+      hub?: Hub;
       part?: string;
-      key?: keyof Props | ((item: Props) => any);
+      key?: keyof Model | ((item: Model) => any);
     }): JSX.Element;
-    methods?: ComponentMethods<Props, Controller, Methods> &
-      ThisType<ComponentInstance<Props, Controller, Methods>>;
-    readonly prototype: ComponentInstance<Props, Controller>;
+    methods?: ComponentMethods<Model, Hub, Methods> &
+      ThisType<ComponentInstance<Model, Hub, Methods>>;
+    readonly prototype: ComponentInstance<Model, Hub>;
     readonly stub?: Stubs;
   }
 
-  type ComponentMethods<Props, Controller, Methods extends object = {}> = {
-    render?(
-      this: ComponentInstance<Props, Controller, Methods>,
-      props: Props,
-      ctrl: Controller
-    ): void;
-    update?(this: ComponentInstance<Props, Controller, Methods>): void;
+  type ComponentMethods<Model, Hub, Methods extends object = {}> = {
+    render?(this: ComponentInstance<Model, Hub, Methods>, model: Model, hub: Hub): void;
+    update?(this: ComponentInstance<Model, Hub, Methods>): void;
     [key: string]: any;
   };
 
@@ -619,7 +615,7 @@ declare module "wallace" {
    * const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
    * ```
    *
-   * If you require no props, set it to `null`:
+   * If you require no model, set it to `null`:
    *
    * ```tsx
    * const Task: Uses<null> = () => <div>Hello</div>;
@@ -628,12 +624,12 @@ declare module "wallace" {
    * See cheat sheet by hovering over the module import for more details.
    */
   type Uses<T = any> = T extends CompoundTypes
-    ? ComponentFunction<T["props"], T["ctrl"], T["methods"], T["stub"]>
+    ? ComponentFunction<T["model"], T["hub"], T["methods"], T["stub"]>
     : ComponentFunction<T>;
 
   interface CompoundTypes {
-    props?: any;
-    ctrl?: any;
+    model?: any;
+    hub?: any;
     methods?: object;
     stub?: StubDefinition;
   }
@@ -645,32 +641,28 @@ declare module "wallace" {
   /**
    * The type for a component instance.
    */
-  export type ComponentInstance<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  > = {
+  export type ComponentInstance<Model = any, Hub = any, Methods extends object = {}> = {
     el: HTMLElement;
-    props: Props;
-    ctrl: Controller;
+    model: Model;
+    hub: Hub;
     ref: { [key: string]: HTMLElement };
     part: { [key: string]: Part };
-    base: Component<Props, Controller>;
+    base: Component<Model, Hub>;
     dismount(): void;
-  } & Component<Props, Controller> &
+  } & Component<Model, Hub> &
     Methods;
 
   /**
    * The component constructor function (typed as a class, but isn't).
    */
-  export class Component<Props = any, Controller = any> {
+  export class Component<Model = any, Hub = any> {
     /**
      * The base render method looks like this:
      *
      * ```
-     * render(props?: Props, ctrl?: Controller) {
-     *   this.props = props;
-     *   this.ctrl = ctrl;
+     * render(model?: Model, hub?: Hub) {
+     *   this.model = model;
+     *   this.hub = hub;
      *   this.update();
      * }
      * ```
@@ -678,13 +670,13 @@ declare module "wallace" {
      * You can override like so:
      *
      * ```
-     * render(props?: Props, ctrl?: Controller) {
+     * render(model?: Model, hub?: Hub) {
      *   // do your thing
-     *   this.base.render.call(this, props, ctrl);
+     *   this.base.render.call(this, model, hub);
      * }
      * ```
      */
-    render(props?: Props, ctrl?: Controller): void;
+    render(model?: Model, hub?: Hub): void;
     /**
      * Updates the DOM.
      *
@@ -703,14 +695,14 @@ declare module "wallace" {
   /**
    * Creates a component instance and renders it.
    * @param def
-   * @param props
-   * @param ctrl
+   * @param model
+   * @param hub
    */
-  export function createComponent<Props, Controller, Methods extends object = {}>(
-    def: ComponentFunction<Props, Controller, Methods>,
-    props?: Props,
-    ctrl?: Controller
-  ): ComponentInstance<Props, Controller, Methods>;
+  export function createComponent<Model, Hub, Methods extends object = {}>(
+    def: ComponentFunction<Model, Hub, Methods>,
+    model?: Model,
+    hub?: Hub
+  ): ComponentInstance<Model, Hub, Methods>;
 
   /**
    * Use to define a new component which extends another component, meaning it will
@@ -721,26 +713,22 @@ declare module "wallace" {
    * @param base The component definition to inherit from.
    * @param componentFunc A JSX function to override the DOM.
    */
-  export function extendComponent<
-    Props = any,
-    Controller = any,
-    Methods extends object = {}
-  >(
-    base: ComponentFunction<Props, Controller, Methods>,
-    componentFunc?: ComponentFunction<Props, Controller, Methods>
-  ): ComponentFunction<Props, Controller, Methods>;
+  export function extendComponent<Model = any, Hub = any, Methods extends object = {}>(
+    base: ComponentFunction<Model, Hub, Methods>,
+    componentFunc?: ComponentFunction<Model, Hub, Methods>
+  ): ComponentFunction<Model, Hub, Methods>;
 
   /**
    * *Replaces* element with an instance of componentDefinition and renders it.
    *
    * Note that the original element is removed along with its attributes (class, id...).
    */
-  export function mount<Props = any, Controller = any, Methods extends object = {}>(
+  export function mount<Model = any, Hub = any, Methods extends object = {}>(
     element: string | HTMLElement,
-    componentDefinition: ComponentFunction<Props, Controller, Methods>,
-    props?: Props,
-    ctrl?: Controller
-  ): ComponentInstance<Props, Controller, Methods>;
+    componentDefinition: ComponentFunction<Model, Hub, Methods>,
+    model?: Model,
+    hub?: Hub
+  ): ComponentInstance<Model, Hub, Methods>;
 
   /**
    * Returns a Proxy of an object which throws an error when it, or its nested objects
@@ -792,29 +780,29 @@ declare module "wallace" {
     url: string;
   };
 
-  export function route<Props>(
+  export function route<Model>(
     path: string,
-    componentDef: ComponentFunction<Props>,
-    converter?: RouteConverter<Props>,
-    cleanup?: RouteCleanup<Props>
-  ): Route<Props>;
+    componentDef: ComponentFunction<Model>,
+    converter?: RouteConverter<Model>,
+    cleanup?: RouteCleanup<Model>
+  ): Route<Model>;
 
-  type RouteConverter<Props> = (routedata: RouteData) => Props;
-  type RouteCleanup<Props> = (component: ComponentInstance<Props>) => void;
+  type RouteConverter<Model> = (routedata: RouteData) => Model;
+  type RouteCleanup<Model> = (component: ComponentInstance<Model>) => void;
 
-  export type Route<Props> = [
+  export type Route<Model> = [
     string,
-    ComponentFunction<Props>,
-    RouteConverter<Props>?,
-    RouteCleanup<Props>?
+    ComponentFunction<Model>,
+    RouteConverter<Model>?,
+    RouteCleanup<Model>?
   ];
-  export type RouterProps = {
+  export type RouterModel = {
     routes: readonly Route<any>[];
     atts?: Record<string, any>;
     error?: (error: Error, router: Router) => void;
   };
 
-  export type Router = ComponentFunction<RouterProps> & {
+  export type Router = ComponentFunction<RouterModel> & {
     mount(component: Component<any>): void;
   };
 
@@ -853,19 +841,19 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: assign
    *
-   * Assigns the component instance to a value during `render`, typically on the props
-   * or the controller.
+   * Assigns the component instance to a value during `render`, typically on the model
+   * or the hub.
    *
    * You can either use an expression:
    *
    * ```
-   * const MyComponent = ({ id }, { ctrl }) => (
-   *   <div assign={ctrl.register[id]}>
+   * const MyComponent = ({ id }, { hub }) => (
+   *   <div assign={hub.register[id]}>
    *   </div>
    * );
    * ```
    *
-   * Or use a qualifier, which is read as being a field on the props:
+   * Or use a qualifier, which is read as being a field on the model:
    *
    * ```
    * const MyComponent = () => (
@@ -973,15 +961,15 @@ interface DirectiveAttributes extends AllDomEvents {
   css?: string;
 
   /**
-   * ## Wallace directive: ctrl
+   * ## Wallace directive: hub
    *
-   * Specifies alternative `ctrl` for stubs, nested or repeated components.
+   * Specifies alternative `hub` for stubs, nested or repeated components.
    *
    * ```
-   * <MyComponent ctrl={altController} />
+   * <MyComponent hub={altHub} />
    * ```
    */
-  ctrl?: any;
+  hub?: any;
 
   /**
    * ## Wallace directive: event
@@ -1000,7 +988,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * ## Wallace directive: fixed
    *
    * Sets the value of an attribute from an expression at point of component definition,
-   * as such the expression may not access props or xargs. See also `css` directive.
+   * as such the expression may not access model or xargs. See also `css` directive.
    *
    * Requires a qualifer, which is the name of the attribute to set.
    *
@@ -1022,7 +1010,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `bind` updates a value when an input is changed.
    * - `class:xyz` defines a set of classes to be toggled.
    * - `css` shorthand for `fixed:class`.
-   * - `ctrl` specifies ctrl for nested/repeated components.
+   * - `hub` specifies hub for nested/repeated components.
    * - `event` changes the event which `bind` reacts to.
    * - `fixed:xyz` sets a attribute from an expression at definition.
    * - `hide` sets an element or component's hidden property.
@@ -1031,14 +1019,14 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `key` specifies a key for repeated components.
    * - `on[EventName]` creates an event handler (note the code is copied).
    * - `part:xyz` saves a reference to part of a component so it can be updated.
-   * - `props` specifies props for stubs, nested or repeated components.
+   * - `model` specifies model for stubs, nested or repeated components.
    * - `ref:xyz` saves a reference to an element or nested component.
    * - `show` sets and element or component's hidden property.
    * - `style:xyz` sets a specific style property.
    * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
    *   `xyz`.
    * - `unique` can be set on components which are only used once for better performance.
-   * - `watch` watches the props or the controller.
+   * - `watch` watches the model or the hub.
    *
    * See more by hovering on a specific directive.
    * Qualifiers like `class:danger` break the tool tip. Try `class x:danger`.
@@ -1046,10 +1034,10 @@ interface DirectiveAttributes extends AllDomEvents {
    * ### Nesting syntax:
    *
    *   ```
-   *   <MyComponent props={singleProps} />
-   *   <MyComponent.repeat props={arrayOfProps} />
-   *   <MyComponent.repeat props={arrayOfProps} key="id"/>
-   *   <MyComponent.repeat props={arrayOfProps} key={(i) => i.id}/>
+   *   <MyComponent model={singleModel} />
+   *   <MyComponent.repeat model={arrayOfModel} />
+   *   <MyComponent.repeat model={arrayOfModel} key="id"/>
+   *   <MyComponent.repeat model={arrayOfModel} key={(i) => i.id}/>
    *   ```
    */
   help?: boolean;
@@ -1102,13 +1090,13 @@ interface DirectiveAttributes extends AllDomEvents {
   part?: string | null;
 
   /**
-   * ## Wallace directive: props
+   * ## Wallace directive: model
    *
-   * Specifies props for a stub, nested or repeated component - in which case it means
-   * an Array of the props used by the component.
+   * Specifies model for a stub, nested or repeated component - in which case it means
+   * an Array of the model used by the component.
    *
    */
-  props?: MustBeExpression;
+  model?: MustBeExpression;
 
   /**
    * ## Wallace directive: ref
@@ -1179,13 +1167,13 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: watch
    *
-   * Wraps the props in a `watch` call which updates the component by overriding the
+   * Wraps the model in a `watch` call which updates the component by overriding the
    * `set` method:
    *
    * ```
-   * function set(props, ctrl) {
-   *   this.props = watch(props, () => this.update());
-   *   this.ctrl = ctrl;
+   * function set(model, hub) {
+   *   this.model = watch(model, () => this.update());
+   *   this.hub = hub;
    * }
    * ```
    *
@@ -1224,11 +1212,11 @@ type NativeIntrinsicElements = {
 
 declare global {
   namespace JSX {
-    // This allows <Foo props={x} if={y} />
-    type Wrapper<Props> = Props | { props: Props; if?: boolean; part?: string };
+    // This allows <Foo model={x} if={y} />
+    type Wrapper<Model> = Model | { model: Model; if?: boolean; part?: string };
 
     type LibraryManagedAttributes<C, P> =
-      C extends ComponentFunction<infer Props, any, any, any> ? Wrapper<Props> : P;
+      C extends ComponentFunction<infer Model, any, any, any> ? Wrapper<Model> : P;
 
     interface IntrinsicElements extends NativeIntrinsicElements {
       [elemName: string]: DirectiveAttributes & Record<string, any>;

@@ -21,7 +21,7 @@ export function SequentialRepeater(
  * Performance is important.
  */
 SequentialRepeater.prototype = {
-  patch: function (parent, items, /* #INCLUDE-IF: allowCtrl */ ctrl) {
+  patch: function (parent, items, /* #INCLUDE-IF: allowHub */ hub) {
     const componentDefinition = this.d,
       /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       previousChildCount = this.c,
@@ -61,7 +61,7 @@ SequentialRepeater.prototype = {
         pool.push(component);
         poolCount++;
       }
-      component.render(items[i], /* #INCLUDE-IF: allowCtrl */ ctrl);
+      component.render(items[i], /* #INCLUDE-IF: allowHub */ hub);
       if (i >= previousChildCount) {
         parent.insertBefore(component.el, nextElement);
       }

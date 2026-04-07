@@ -6,7 +6,7 @@ import { fetchTasks, addTask, toggleTask } from "./store";
  * Base class for controllers that load with asynchronous calls.
  * Components can inspect the `loading` and `saving` properties.
  */
-class AsyncLoadController {
+class AsyncLoadHub {
   root: Component<any>;
   loading: boolean;
   saving: boolean;
@@ -32,7 +32,7 @@ class AsyncLoadController {
   }
 }
 
-export class TaskListController extends AsyncLoadController {
+export class TaskListHub extends AsyncLoadHub {
   tasks: iTask[];
   constructor(root: Component<any>) {
     super(root);

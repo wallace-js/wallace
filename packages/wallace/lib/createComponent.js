@@ -1,9 +1,9 @@
 export const createComponent = (
   ComponentFunction,
-  props,
-  /* #INCLUDE-IF: allowCtrl */ ctrl
+  model,
+  /* #INCLUDE-IF: allowHub */ hub
 ) => {
   const component = new ComponentFunction();
-  component.render(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
+  component.render(model, /* #INCLUDE-IF: allowHub */ hub);
   return component;
 };

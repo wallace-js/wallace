@@ -1,13 +1,13 @@
 import { testMount } from "../utils";
 
-describe("Props", () => {
-  test("force props to be specified", () => {
+describe("Model", () => {
+  test("force model to be specified", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
@@ -15,66 +15,66 @@ describe("Props", () => {
       </div>
     );
   `).toHaveTypeErrors([
-      `Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<{ props:
-      Props[]; ctrl?: any; part?: string; key?: "clicks" | ((item: Props) => any); }>'.`
+      `Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<{ model:
+      Model[]; hub?: any; part?: string; key?: "clicks" | ((item: Model) => any); }>'.`
     ]);
   });
 
-  test("disallows invalid props", () => {
+  test("disallows invalid model", () => {
     expect(`
       import { mount, Uses } from "wallace"
-      interface Props {
+      interface Model {
         clicks: number;
       }
-      const Foo: Uses<Props> = () => (<div></div>);
+      const Foo: Uses<Model> = () => (<div></div>);
 
       const Bar: Uses = () => (
         <div>
-          <Foo.repeat props={[1]}/>
+          <Foo.repeat model={[1]}/>
         </div>
       );
-    `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Props'."]);
+    `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Model'."]);
   });
 
-  test("allows valid props", () => {
+  test("allows valid model", () => {
     expect(`
       import { mount, Uses } from "wallace";
-      interface Props {
+      interface Model {
         clicks: number;
       }
-      const Foo: Uses<Props> = () => (<div></div>);
+      const Foo: Uses<Model> = () => (<div></div>);
 
       const Bar: Uses = () => (
         <div>
-          <Foo.repeat props={[{clicks: 1}]}/>
+          <Foo.repeat model={[{clicks: 1}]}/>
         </div>
       );
     `).toHaveNoTypeErrors();
   });
 
-  test("props are passed through correctly", () => {
+  test("model are passed through correctly", () => {
     expect(`
       import { mount, Uses } from "wallace";
-      interface Props {
+      interface Model {
         clicks: number;
       }
-      const Foo: Uses<Props> = () => (<div></div>);
+      const Foo: Uses<Model> = () => (<div></div>);
 
-      const Bar: Uses<Props[]> = (items) => (
+      const Bar: Uses<Model[]> = (items) => (
         <div>
-          <Foo.repeat props={items}/>
+          <Foo.repeat model={items}/>
         </div>
       );
     `).toHaveNoTypeErrors();
   });
 
-  test("Can repeat without props", () => {
+  test("Can repeat without model", () => {
     expect(`
       import { mount, Uses } from "wallace";
       const Child: Uses = () => <div>Hello</div>;
       const Parent: Uses = () => (
         <div>
-          <Child.repeat props={Array(3)} />
+          <Child.repeat model={Array(3)} />
         </div>
       );
     `).toHaveNoTypeErrors();
@@ -85,14 +85,14 @@ describe("key directive", () => {
   test("allows valid key value", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
-        <Foo.repeat props={[{clicks: 1}]} key="clicks"/>
+        <Foo.repeat model={[{clicks: 1}]} key="clicks"/>
       </div>
     );
   `).toHaveNoTypeErrors();
@@ -101,18 +101,18 @@ describe("key directive", () => {
   test("disallows invalid key value", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
-        <Foo.repeat props={[{clicks: 1}]} key="x" />
+        <Foo.repeat model={[{clicks: 1}]} key="x" />
       </div>
     );
   `).toHaveTypeErrors([
-      `Type '"x"' is not assignable to type '"clicks" | ((item: Props) => any)'.`
+      `Type '"x"' is not assignable to type '"clicks" | ((item: Model) => any)'.`
     ]);
   });
 });
@@ -121,14 +121,14 @@ describe("Other directives", () => {
   test("allows part directive as string", () => {
     expect(`
     import { mount, Uses } from "wallace";
-    interface Props {
+    interface Model {
       clicks: number;
     }
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
 
     const Bar: Uses = () => (
       <div>
-        <Foo.repeat part="foo" props={[{clicks: 1}]} />
+        <Foo.repeat part="foo" model={[{clicks: 1}]} />
       </div>
     );
     const bar = mount("main", Bar);
@@ -140,24 +140,24 @@ describe("Other directives", () => {
     expect(`
     import { mount, Uses } from "wallace";
 
-    interface Props {
+    interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Props> = () => (<div></div>);
+    const Foo: Uses<Model> = () => (<div></div>);
     const clicks = true;
     const Bar: Uses = () => (
       <div>
-        <Foo.repeat props={[{ clicks: 1 }]} ${directive}={clicks} />
+        <Foo.repeat model={[{ clicks: 1 }]} ${directive}={clicks} />
       </div>
     );
   `).toHaveTypeErrors([
       `
-    Type '{ props: { clicks: number; }[]; ${directive}: boolean; }' is not assignable to
-    type 'IntrinsicAttributes & Wrapper<{ props: Props[]; ctrl?: any; part?: string;
-    key?: "clicks" | ((item: Props) => any); }>'. Property '${directive}' does not exist
-    on type 'IntrinsicAttributes & Wrapper<{ props: Props[]; ctrl?: any; part?: string;
-    key?: "clicks" | ((item: Props) => any); }>'.
+    Type '{ model: { clicks: number; }[]; ${directive}: boolean; }' is not assignable to
+    type 'IntrinsicAttributes & Wrapper<{ model: Model[]; hub?: any; part?: string;
+    key?: "clicks" | ((item: Model) => any); }>'. Property '${directive}' does not exist
+    on type 'IntrinsicAttributes & Wrapper<{ model: Model[]; hub?: any; part?: string;
+    key?: "clicks" | ((item: Model) => any); }>'.
     `
     ]);
   });

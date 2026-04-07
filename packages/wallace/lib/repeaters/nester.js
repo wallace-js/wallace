@@ -5,8 +5,8 @@ export function Nester(componentDefinition) {
 }
 
 Nester.prototype = {
-  send: function (props, ctrl) {
-    this.get().render(props, ctrl);
+  send: function (model, hub) {
+    this.get().render(model, hub);
   },
   get: function () {
     if (!this.i) {

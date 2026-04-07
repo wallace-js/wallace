@@ -6,9 +6,9 @@ import { transform, testMount } from "../utils";
 describe("Defining functions in equivalent ways compiles to same output", () => {
   const expectedOutput = transform(`const Foo = () => <div>Hello {name}</div>`).code;
   test.each([
-    ["function without props", `const Foo = () => <div>Hello {name}</div>`],
-    ["function with normal props", `const Foo = (foo) => <div>Hello {name}</div>`],
-    ["function with destructured props", `const Foo = ({foo}) => <div>Hello {name}</div>`]
+    ["function without model", `const Foo = () => <div>Hello {name}</div>`],
+    ["function with normal model", `const Foo = (foo) => <div>Hello {name}</div>`],
+    ["function with destructured model", `const Foo = ({foo}) => <div>Hello {name}</div>`]
   ])("%s", (condition, code) => {
     expect(transform(code).code).toBe(expectedOutput);
   });
@@ -45,7 +45,7 @@ test("JSX not allowed in expressions", () => {
   const code = `
     const Foo = () => (
       <center>
-        {props.texts.map((paragraph, i) => (
+        {model.texts.map((paragraph, i) => (
           <p key={i}>{paragraph}</p>
         ))}
       </center>
