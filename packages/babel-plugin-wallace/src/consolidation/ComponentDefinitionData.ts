@@ -72,7 +72,7 @@ export class ComponentDefinitionData {
     return identifier(name);
   }
   getLookupCallBackParams(): Array<Identifier> {
-    return [this.component.propsIdentifier, this.component.componentIdentifier];
+    return [this.component.modelIdentifier, this.component.componentIdentifier];
   }
   wrapDynamicElementCall(
     key: number,

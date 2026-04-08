@@ -35,24 +35,24 @@ if (wallaceConfig.flags.allowBase) {
     });
 
     describe("Routing basics", () => {
-      const props = {
+      const model = {
         routes: [route("/page1", Page1), route("/page2", Page2)]
       };
 
       test("Initial render", async () => {
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         expect(component).toRender("<div></div>");
       });
 
       test("On page load", async () => {
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         expect(component).toRender("<div></div>");
         await setHash("/page1", "load");
         expect(component).toRender("<div><div>Page1</div></div>");
       });
 
       test("Goes to correct page", async () => {
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         await setHash("/page2");
         expect(component).toRender("<div><div>Page2</div></div>");
         await setHash("/page1");
@@ -66,7 +66,7 @@ if (wallaceConfig.flags.allowBase) {
       test("Unknown route shows error", async () => {
         const error = jest.fn();
         testMount(Router, {
-          ...props,
+          ...model,
           error
         });
 
@@ -79,17 +79,17 @@ if (wallaceConfig.flags.allowBase) {
 
     describe("Router customisation", () => {
       test("Can configure div", async () => {
-        const props = {
+        const model = {
           atts: { id: "foo", class: "danger" },
           routes: []
         };
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         expect(component).toRender(`<div id="foo" class="danger"></div>`);
       });
 
       test("Can provide cleanup", async () => {
         const cleanup = jest.fn();
-        const props = {
+        const model = {
           routes: [
             route(
               "/page1",
@@ -100,7 +100,7 @@ if (wallaceConfig.flags.allowBase) {
             route("/page2", Page2)
           ]
         };
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         await setHash("/page1");
         expect(component).toRender("<div><div>Page1</div></div>");
         expect(cleanup).not.toHaveBeenCalled();
@@ -113,11 +113,11 @@ if (wallaceConfig.flags.allowBase) {
       });
 
       test("Can provide custom error handler", async () => {
-        const props = {
+        const model = {
           error: (error, router) => (router.el.innerHTML = error.message.substring(0, 3)),
           routes: []
         };
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         await setHash("/xyz");
         expect(component).toRender(`<div>Rou</div>`);
       });
@@ -135,12 +135,12 @@ if (wallaceConfig.flags.allowBase) {
           div.appendChild(component.el);
         };
 
-        const props = {
+        const model = {
           foo: "bar",
           routes: [route("/page2", Page2)]
         };
 
-        const component = testMount(MyRouter, props);
+        const component = testMount(MyRouter, model);
         await setHash("/page2");
         expect(component).toRender(`
       <div class="container">
@@ -153,10 +153,10 @@ if (wallaceConfig.flags.allowBase) {
       });
     });
 
-    describe("Route props conversion", () => {
+    describe("Route model conversion", () => {
       const Page = ({ foo }) => <div>{foo}</div>;
       test("Works with promise and normal function", async () => {
-        const props = {
+        const model = {
           routes: [
             route("/page1/{foo}", Page, ({ args }) => ({ foo: args.foo + 1 })),
             route("/page2/{foo}", Page, ({ args }) =>
@@ -164,7 +164,7 @@ if (wallaceConfig.flags.allowBase) {
             )
           ]
         };
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         await setHash("/page1/a");
         expect(component).toRender("<div><div>a1</div></div>");
         await setHash("/page2/b");
@@ -172,14 +172,14 @@ if (wallaceConfig.flags.allowBase) {
       });
 
       test("Can read url", async () => {
-        const props = {
+        const model = {
           routes: [
             route("/page1", Page, ({ url }) => ({
               foo: url
             }))
           ]
         };
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         await setHash("/page1?name=Jonathan%20Smith&age=18");
         expect(component).toRender(
           "<div><div>/page1?name=Jonathan%20Smith&amp;age=18</div></div>"
@@ -187,14 +187,14 @@ if (wallaceConfig.flags.allowBase) {
       });
 
       test("Can read params", async () => {
-        const props = {
+        const model = {
           routes: [
             route("/page1", Page, ({ params }) => ({
               foo: params.get("name")
             }))
           ]
         };
-        const component = testMount(Router, props);
+        const component = testMount(Router, model);
         await setHash("/page1?name=Jonathan%20Smith&age=18");
         expect(component).toRender("<div><div>Jonathan Smith</div></div>");
       });
@@ -203,7 +203,7 @@ if (wallaceConfig.flags.allowBase) {
     describe("Route args conversion", () => {
       const Page = () => <div></div>;
       let args;
-      const props = {
+      const model = {
         routes: [
           route("/page1/{x:int}/{y:float}/{z:date}", Page, path => {
             args = path.args;
@@ -212,7 +212,7 @@ if (wallaceConfig.flags.allowBase) {
       };
 
       test("Converts to correct types", async () => {
-        testMount(Router, props);
+        testMount(Router, model);
         await setHash("/page1/2/5.2/2021-05-10");
         expect(args).toStrictEqual({ x: 2, y: 5.2, z: new Date("2021-05-10") });
       });

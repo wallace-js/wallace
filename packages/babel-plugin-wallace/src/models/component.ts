@@ -48,22 +48,22 @@ export class Component {
   baseComponent?: Expression;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
-  propsIdentifier: Identifier;
+  modelIdentifier: Identifier;
   componentIdentifier: Identifier;
   xargMapping: { [key: string]: string } = {};
   htmlExpressions: Expression[] = [];
   unique: boolean = false;
   assignTo?: LVal | string;
-  watchProps?: { callback?: Expression };
+  watchModel?: { callback?: Expression };
   constructor(
     module: Module,
     scope: Scope,
-    propsIdentifier: Identifier,
+    modelIdentifier: Identifier,
     componentIdentifier: Identifier
   ) {
     this.module = module;
     this.scope = scope;
-    this.propsIdentifier = propsIdentifier;
+    this.modelIdentifier = modelIdentifier;
     this.componentIdentifier = componentIdentifier;
   }
   #enterLevel(index: number) {
@@ -106,7 +106,7 @@ export class Component {
     this.extractedNodes.push(node);
   }
   needsCustomSetMethod() {
-    return this.assignTo || this.watchProps;
+    return this.assignTo || this.watchModel;
   }
   processJSXElement(
     path: NodePath<JSXElement>,

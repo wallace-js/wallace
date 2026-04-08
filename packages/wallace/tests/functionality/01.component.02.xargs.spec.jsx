@@ -1,10 +1,10 @@
 import { testMount } from "../utils";
 
 describe("Xargs", () => {
-  if (wallaceConfig.flags.allowCtrl) {
+  if (wallaceConfig.flags.allowHub) {
     test("are allowed if recognised", () => {
       const src = `
-      const A = (_, {self, ctrl, element, event, props}) => (
+      const A = (_, {self, hub, element, event, model}) => (
         <div>
         Test
         </div>
@@ -16,7 +16,7 @@ describe("Xargs", () => {
 
   test("must be a destructured object", () => {
     const src = `
-    const A = (_, ctrl) => (
+    const A = (_, hub) => (
       <div>
         Test
       </div>
@@ -34,27 +34,27 @@ describe("Xargs", () => {
     );
   `;
     expect(src).toCompileWithError(
-      'Illegal parameter in extra args: "x". You are only allowed "ctrl", "self", "props", "event", "element", "stub".'
+      'Illegal parameter in extra args: "x". You are only allowed "hub", "self", "model", "event", "element", "stub".'
     );
   });
 
   test("are not renamed if not in Xargs", () => {
-    const ctrl = 9;
-    const Foo = () => <div>Test {ctrl}</div>;
+    const hub = 9;
+    const Foo = () => <div>Test {hub}</div>;
 
     const component = testMount(Foo);
     expect(component).toRender(`<div>Test <span>9</span></div>`);
   });
 
-  if (wallaceConfig.flags.allowCtrl) {
-    test("are allowed in props if not in Xargs", () => {
-      const Foo = ({ self, ctrl, element, event, props }) => (
+  if (wallaceConfig.flags.allowHub) {
+    test("are allowed in model if not in Xargs", () => {
+      const Foo = ({ self, hub, element, event, model }) => (
         <div>
           <div>{self}</div>
-          <div>{ctrl}</div>
+          <div>{hub}</div>
           <div>{element}</div>
           <div>{event}</div>
-          <div>{props}</div>
+          <div>{model}</div>
           <button ref:btn onClick={foo(event, element)}>
             Test
           </button>
@@ -68,10 +68,10 @@ describe("Xargs", () => {
 
       const component = testMount(Foo, {
         self: 1,
-        ctrl: 2,
+        hub: 2,
         element: 3,
         event: 4,
-        props: 5
+        model: 5
       });
       expect(component).toRender(
         `<div>
@@ -91,9 +91,9 @@ describe("Xargs", () => {
 
 describe("Xargs access validation in directive expressions", () => {
   const eventXargs = ["event", "element"];
-  const applyXargs = ["self", "props", "element"];
-  if (wallaceConfig.flags.allowCtrl) {
-    applyXargs.push("ctrl");
+  const applyXargs = ["self", "model", "element"];
+  if (wallaceConfig.flags.allowHub) {
+    applyXargs.push("hub");
   }
   test.each(eventXargs)("Event arg '%s' is not allowed in non-event directive", xarg => {
     const src = `const Foo = (_, { ${xarg} }) => <div class={${xarg}}>Test</div>;`;
@@ -129,7 +129,7 @@ describe("Xargs access validation in directive expressions", () => {
     expect(src).toCompileWithoutError();
   });
 
-  test("may access disallowed xarg if in props", () => {
+  test("may access disallowed xarg if in model", () => {
     const src = `const Foo = ({ event }) => <div apply={event}>Test</div>;`;
     expect(src).toCompileWithoutError();
   });
@@ -176,11 +176,11 @@ describe("Xargs point to correct objects", () => {
     expect(String(e)).toBe("[object MouseEvent]");
   });
 
-  if (wallaceConfig.flags.allowCtrl) {
-    test("ctrl is ctrl", () => {
-      const Foo = (_, { ctrl }) => <div>{ctrl.name}</div>;
+  if (wallaceConfig.flags.allowHub) {
+    test("hub is hub", () => {
+      const Foo = (_, { hub }) => <div>{hub.name}</div>;
       Foo.prototype.render = function () {
-        this.ctrl = { name: "Bear" };
+        this.hub = { name: "Bear" };
         this.update();
       };
       const component = testMount(Foo);
@@ -198,14 +198,14 @@ describe("Xargs point to correct objects", () => {
     expect(component).toRender(`<div>bar</div>`);
   });
 
-  test("props are props", () => {
-    const Foo = (_, { props }) => <div>{props.foo}</div>;
+  test("model are model", () => {
+    const Foo = (_, { model }) => <div>{model.foo}</div>;
     const component = testMount(Foo, { foo: "baz" });
     expect(component).toRender(`<div>baz</div>`);
   });
 
-  test("both props are allowed", () => {
-    const Foo = ({ color }, { props }) => <div style:color={color}>{props.name}</div>;
+  test("both model are allowed", () => {
+    const Foo = ({ color }, { model }) => <div style:color={color}>{model.name}</div>;
     const component = testMount(Foo, { name: "Fox", color: "red" });
     expect(component).toRender(`<div style="color: red;">Fox</div>`);
   });

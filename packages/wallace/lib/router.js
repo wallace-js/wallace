@@ -23,7 +23,7 @@ export const route = (path, componentDef, converter, cleanup) =>
 export const Router = () => <div></div>;
 
 Object.assign(Router.prototype, {
-  render(props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
+  render(model, /* #INCLUDE-IF: allowHub */ hub) {
     if (wallaceConfig.flags.allowBase) {
     } else {
       throw new Error(
@@ -38,7 +38,7 @@ Object.assign(Router.prototype, {
     }
     this._alive = true;
     this.error =
-      props.error ||
+      model.error ||
       (error => {
         throw error;
       });
@@ -49,16 +49,16 @@ Object.assign(Router.prototype, {
       return { e, handler };
     });
 
-    if (props.atts) {
-      Object.keys(props.atts).forEach(k => {
-        this.el.setAttribute(k, props.atts[k]);
+    if (model.atts) {
+      Object.keys(model.atts).forEach(k => {
+        this.el.setAttribute(k, model.atts[k]);
       });
     }
-    this.base.render.call(this, props, /* #INCLUDE-IF: allowCtrl */ ctrl);
+    this.base.render.call(this, model, /* #INCLUDE-IF: allowHub */ hub);
   },
   async onHashChange() {
     const path = location.hash.slice(1) || "",
-      routes = this.props.routes,
+      routes = this.model.routes,
       len = routes.length;
     let i = 0,
       routeData;
@@ -68,7 +68,7 @@ Object.assign(Router.prototype, {
         if ((routeData = route.match(path))) {
           const component = await route.getComponent(
             routeData,
-            /* #INCLUDE-IF: allowCtrl */ this.ctrl
+            /* #INCLUDE-IF: allowHub */ this.hub
           );
           if (!this._alive) return;
           this.current && this.current.cleanup();
@@ -135,12 +135,12 @@ Route.prototype = {
     }
     return { args, params: new URLSearchParams(query), url };
   },
-  async getComponent(routeData, /* #INCLUDE-IF: allowCtrl */ ctrl) {
+  async getComponent(routeData, /* #INCLUDE-IF: allowHub */ hub) {
     if (!this.component) {
       this.component = new this.def();
     }
-    const props = await this._convert(routeData);
-    this.component.render(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
+    const model = await this._convert(routeData);
+    this.component.render(model, /* #INCLUDE-IF: allowHub */ hub);
     return this.component;
   },
   /**

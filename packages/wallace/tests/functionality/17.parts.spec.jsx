@@ -77,7 +77,7 @@ if (wallaceConfig.flags.allowParts) {
       <div>
         <span>total: {items.reduce((a, b) => a + b, 0)}</span>
         <div>
-          <Foo.repeat part:foo props={items} />
+          <Foo.repeat part:foo models={items} />
         </div>
       </div>
     );

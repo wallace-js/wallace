@@ -27,7 +27,7 @@ export function KeyedRepeater(
  * Performance is important.
  */
 KeyedRepeater.prototype = {
-  patch: function (parent, items, /* #INCLUDE-IF: allowCtrl */ ctrl) {
+  patch: function (parent, items, /* #INCLUDE-IF: allowHub */ hub) {
     const componentDefinition = this.d,
       /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       ownPool = this.p,
@@ -80,7 +80,7 @@ KeyedRepeater.prototype = {
         }
         ownPool.set(itemKey, component);
       }
-      component.render(item, /* #INCLUDE-IF: allowCtrl */ ctrl);
+      component.render(item, /* #INCLUDE-IF: allowHub */ hub);
       el = component.el;
       if (untouched && !previousKeysSet.has(itemKey)) {
         frag.insertBefore(el, fragAnchor);

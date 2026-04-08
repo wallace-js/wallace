@@ -1,23 +1,23 @@
 import { testMount } from "../utils";
 
 describe("Definition", () => {
-  test("recognises props, ctrl, render, update", () => {
+  test("recognises model, hub, render, update", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes } from "wallace";
+    interface Model {
       clicks: number;
     }
-    interface Controller {
+    interface Hub {
       times: number;
     }
     
-    const Bar: Uses<{props: Props, ctrl: Controller}> = () => <div></div>;
+    const Bar: Takes<Model, Hub> = () => <div></div>;
 
-    Bar.prototype.render = function (props, ctrl) {
-      const a = props.clicks / 2;
-      const b = ctrl.times / 2;
-      const c = this.props.clicks / 2;
-      const d = this.ctrl.times / 2;
+    Bar.prototype.render = function (model, hub) {
+      const a = model.clicks / 2;
+      const b = hub.times / 2;
+      const c = this.model.clicks / 2;
+      const d = this.hub.times / 2;
       this.update();
     }
     `).toHaveNoTypeErrors();
@@ -25,11 +25,11 @@ describe("Definition", () => {
 
   test("cannot assign to prototype", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    const Bar: Uses = () => <div></div>;
+    import { mount, Takes } from "wallace";
+    const Bar: Takes = () => <div></div>;
 
     Bar.prototype = {
-      render: function (props, ctrl) {}
+      render: function (model, hub) {}
     }
     `).toHaveTypeErrors([
       "Cannot assign to 'prototype' because it is a read-only property."
@@ -39,8 +39,8 @@ describe("Definition", () => {
   // TODO: fix this
   // test("recognises parts", () => {
   //   expect(`
-  //   import { mount, Uses } from "wallace";
-  //   const Bar: Uses = () => (
+  //   import { mount, Takes } from "wallace";
+  //   const Bar: Takes = () => (
   //     <div>
   //       <div part="foo">foo</div>
   //     </div>

@@ -182,10 +182,10 @@ export class Directive {
 
   In code like this:
 
-      const Foo = ({ age }, { ctrl, self, element, event, props }) => (
+      const Foo = ({ age }, { hub, self, element, event, model }) => (
         <div 
           onClick={doXYZ(element, event)}
-          class={[ctrl, self, age, props.foo, self.bar]}>
+          class={[hub, self, age, model.foo, self.bar]}>
         </div>
       );
 
@@ -194,19 +194,19 @@ export class Directive {
       {
         event: 'event',
         element: 'element',
-        _props: 'props',
+        _model: 'model',
         _component: 'self',
-        '_component.ctrl': 'ctrl'
+        '_component.hub': 'hub'
       }
 
   And logging (idPath.node.name, ">>", name) in getReferencedScopedVariables prints:
 
       element >> element
       event >> event
-      _component.ctrl >> ctrl
+      _component.hub >> hub
       _component >> self
-      _props >> props
-      _props >> props
+      _model >> model
+      _model >> model
       _component >> self
 
   Note that `doXYZ` is excluded, as the function scope doesn't have its own binding.
@@ -239,7 +239,7 @@ export class Directive {
       accesError(XARGS.event);
     }
     if (!mayAccessComponent) {
-      const componentRefs = [XARGS.props, XARGS.component, XARGS.controller];
+      const componentRefs = [XARGS.model, XARGS.component, XARGS.hub];
       componentRefs.forEach(name => {
         if (refs.includes(name)) {
           accesError(name);
@@ -255,12 +255,12 @@ function getReferencedScopedVariables(path: NodePath, component: Component): str
     Identifier(idPath) {
       if (idPath.isReferencedIdentifier() && idPath.scope.hasBinding(idPath.node.name)) {
         // An identifier doesn't normally need to be split, as it's just the fist part,
-        // but we have renamed some to things like `_component.ctrl` so be mindful.
+        // but we have renamed some to things like `_component.hub` so be mindful.
         let name = idPath.node.name;
         if (component.xargMapping[idPath.node.name]) {
           name = component.xargMapping[idPath.node.name];
-        } else if (name === component.propsIdentifier.name) {
-          name = XARGS.props;
+        } else if (name === component.modelIdentifier.name) {
+          name = XARGS.model;
         }
         refs.add(name);
       }

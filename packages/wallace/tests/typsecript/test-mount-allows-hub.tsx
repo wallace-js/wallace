@@ -16,5 +16,5 @@ const FunctionWithModel: Takes<Model> = ({ clicks }) => (
   </div>
 );
 
-mount("a", FunctionWithoutModel);
-mount("b", FunctionWithModel);
+mount("a", FunctionWithoutModel, null, {});
+mount("b", FunctionWithModel, undefined, 8);

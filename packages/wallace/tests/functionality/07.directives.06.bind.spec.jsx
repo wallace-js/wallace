@@ -106,18 +106,18 @@ describe("Event specification", () => {
 
 test("Change event updates data", () => {
   const MyComponent = ({ text }) => <input ref:tbx type="text" bind={text} />;
-  MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update());
+  MyComponent.prototype.render = function (model) {
+    this.model = watch(model, () => this.update());
     this.update();
   };
-  const props = { text: "foo" };
-  const component = testMount(MyComponent, props);
+  const model = { text: "foo" };
+  const component = testMount(MyComponent, model);
   const input = component.ref.tbx;
   expect(input.value).toBe("foo");
 
   mimicUserInput(input, "bar");
 
-  expect(props.text).toBe("bar");
+  expect(model.text).toBe("bar");
 });
 
 test("Value updates to match data", () => {
@@ -168,31 +168,31 @@ describe("Alternative event", () => {
       <input ref:tbx type="text" bind={text} event:keyup />;
     </div>
   );
-  MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update());
+  MyComponent.prototype.render = function (model) {
+    this.model = watch(model, () => this.update());
     this.update();
   };
 
   test("Triggering event updates data", () => {
-    const props = { text: "foo" };
-    const component = testMount(MyComponent, props);
+    const model = { text: "foo" };
+    const component = testMount(MyComponent, model);
     const input = component.ref.tbx;
     expect(input.value).toBe("foo");
 
     mimicUserInput(input, "bar", "value", "keyup");
 
-    expect(props.text).toBe("bar");
+    expect(model.text).toBe("bar");
   });
 
   test("Triggering wrong event doesn't update data", () => {
-    const props = { text: "foo" };
-    const component = testMount(MyComponent, props);
+    const model = { text: "foo" };
+    const component = testMount(MyComponent, model);
     const input = component.ref.tbx;
     expect(input.value).toBe("foo");
 
     mimicUserInput(input, "bar", "value", "change");
 
-    expect(props.text).toBe("foo");
+    expect(model.text).toBe("foo");
   });
 });
 
@@ -202,20 +202,20 @@ describe("Alternative property", () => {
       <input ref:tbx type="number" bind:valueAsNumber={age} />;
     </div>
   );
-  MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update());
+  MyComponent.prototype.render = function (model) {
+    this.model = watch(model, () => this.update());
     this.update();
   };
 
   test("Triggering event updates data", () => {
-    const props = { age: 42 };
-    const component = testMount(MyComponent, props);
+    const model = { age: 42 };
+    const component = testMount(MyComponent, model);
     const input = component.ref.tbx;
     expect(input.value).toBe("42");
 
     mimicUserInput(input, 100);
 
-    expect(props.age).toBe(100);
+    expect(model.age).toBe(100);
   });
 });
 
@@ -230,8 +230,8 @@ describe("valueAsDate", () => {
     </div>
   );
 
-  MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update());
+  MyComponent.prototype.render = function (model) {
+    this.model = watch(model, () => this.update());
     this.update();
   };
 
@@ -239,15 +239,15 @@ describe("valueAsDate", () => {
     const oldDate = new Date("2000-06-05");
     const newDate = new Date("2020-06-05");
 
-    const props = { date: oldDate };
-    const component = testMount(MyComponent, props);
+    const model = { date: oldDate };
+    const component = testMount(MyComponent, model);
     const input = component.ref.tbx;
     expect(input.value).toBe(oldDate.toISOString().slice(0, 10));
 
     mimicUserInput(input, newDate.toISOString().slice(0, 10));
 
-    expect(props.date.getDate()).toBe(newDate.getDate());
-    expect(props.date.getMonth()).toBe(newDate.getMonth());
-    expect(props.date.getFullYear()).toBe(newDate.getFullYear());
+    expect(model.date.getDate()).toBe(newDate.getDate());
+    expect(model.date.getMonth()).toBe(newDate.getMonth());
+    expect(model.date.getFullYear()).toBe(newDate.getFullYear());
   });
 });

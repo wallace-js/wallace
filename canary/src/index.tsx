@@ -1,11 +1,11 @@
-import { mount, Uses, Router } from "wallace";
+import { mount, Takes, Router } from "wallace";
 
 interface iGreeting {
   msg: string;
   name: string;
 }
 
-const Greeting: Uses<iGreeting> = ({ msg, name }) => (
+const Greeting: Takes<iGreeting> = ({ msg, name }) => (
   <div>
     {name} says {msg}!
   </div>

@@ -105,13 +105,13 @@ describe("child component with new dom", () => {
 if (wallaceConfig.flags.allowBase) {
   describe("base field", () => {
     test("Can access base field", () => {
-      const Foo = props => (
+      const Foo = model => (
         <div>
-          <div>{props}</div>
+          <div>{model}</div>
         </div>
       );
-      Foo.prototype.render = function (props) {
-        this.base.render.call(this, props * 2);
+      Foo.prototype.render = function (model) {
+        this.base.render.call(this, model * 2);
       };
       const component = testMount(Foo, 2);
       expect(component).toRender(`

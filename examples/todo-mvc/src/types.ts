@@ -1,8 +1,8 @@
-import { TaskListController } from "./controllers";
+import { TaskListHub } from "./hubs";
 
 export interface iTask {
   id: number;
-  ctrl?: TaskListController;
+  hub?: TaskListHub;
   text: string;
   done: boolean;
 }
