@@ -1,24 +1,24 @@
 import { testMount } from "../utils";
 
-describe("Component definition with Uses", () => {
+describe("Component definition", () => {
   test("can specify no model", () => {
     expect(`
-      import { mount, Uses } from "wallace";
+      import { mount, Takes } from "wallace";
 
-      const Foo: Uses = () => (<div></div>);
+      const Foo: Takes = () => (<div></div>);
       const foo = mount("main", Foo);
     `).toHaveNoTypeErrors();
   });
 
   test("can specify model", () => {
     expect(`
-      import { mount, Uses } from "wallace";
+      import { mount, Takes } from "wallace";
 
       interface FooModel {
         clicks: number;
       }
 
-      const Foo: Uses<FooModel> = () => (<div></div>);
+      const Foo: Takes<FooModel> = () => (<div></div>);
       const foo = mount("main", Foo);
       foo.model.clicks = 1;
       foo.model.clicks = 'a';

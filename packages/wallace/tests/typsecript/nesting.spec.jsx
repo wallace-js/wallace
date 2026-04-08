@@ -3,11 +3,11 @@ import { testMount } from "../utils";
 describe("Model", () => {
   test("allows no model if none specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
 
-    const Foo: Uses = () => (<div></div>);
+    const Foo: Takes = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo />
       </div>
@@ -19,11 +19,11 @@ describe("Model", () => {
 
   // test("disallows model if none specified", () => {
   //   expect(`
-  //     import { mount, Uses } from "wallace";
+  //     import { mount, Takes } from "wallace";
 
-  //     const Foo: Uses = () => (<div></div>);
+  //     const Foo: Takes = () => (<div></div>);
 
-  //     const Bar: Uses = () => (
+  //     const Bar: Takes = () => (
   //       <div>
   //         <Foo model={4} />
   //       </div>
@@ -33,15 +33,15 @@ describe("Model", () => {
 
   test("diallows no model if model are specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
 
     interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo />
       </div>
@@ -53,15 +53,15 @@ describe("Model", () => {
 
   test("diallows invalid model if they are specified", () => {
     expect(`
-      import { mount, Uses } from "wallace";
+      import { mount, Takes } from "wallace";
 
       interface Model {
         clicks: number;
       }
 
-      const Foo: Uses<Model> = () => (<div></div>);
+      const Foo: Takes<Model> = () => (<div></div>);
 
-      const Bar: Uses = () => (
+      const Bar: Takes = () => (
         <div>
           <Foo model={5} />
         </div>
@@ -73,11 +73,11 @@ describe("Model", () => {
 describe("Other directives", () => {
   test("allows if directive as boolean", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
 
-    const Foo: Uses = () => (<div></div>);
+    const Foo: Takes = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo if={true} />
       </div>
@@ -87,15 +87,15 @@ describe("Other directives", () => {
 
   test("allows part directive as string", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
 
     interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo model={{clicks: 5}} part="foo"/>
       </div>
@@ -107,15 +107,15 @@ describe("Other directives", () => {
 
   test.each(["key", "id", "show", "hide"])("disallows %s directive", directive => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
 
     interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo model={{ clicks: 1 }} ${directive}="clicks" />
       </div>

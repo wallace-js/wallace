@@ -1,8 +1,8 @@
-import { Uses } from "wallace";
+import { Takes } from "wallace";
 import { iTask } from "./types";
 import { TaskListHub } from "./hubs";
 
-const Task: Uses<iTask, TaskListHub> = ({ text, done, id }, { hub }) => (
+const Task: Takes<iTask, TaskListHub> = ({ text, done, id }, { hub }) => (
   <div>
     <input
       type="checkbox"
@@ -13,7 +13,7 @@ const Task: Uses<iTask, TaskListHub> = ({ text, done, id }, { hub }) => (
   </div>
 );
 
-export const TaskList: Uses<null, TaskListHub, TaskListMethods> = (
+export const TaskList: Takes<null, TaskListHub, TaskListMethods> = (
   _,
   { hub, self, event }
 ) => (

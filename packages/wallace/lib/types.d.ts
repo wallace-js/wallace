@@ -346,28 +346,32 @@ So long as the rendered component has all its stubs defined somewhere, it will w
 
 Notes:
 
- - Stubs are separate components, so cannot access methods on the containing component
-   through `self` (use the hub for that kind of thing).
+- Stubs are separate components, so cannot access methods on the containing component
+  through `self` (use the hub for that kind of thing).
 
 ## 9. TypeScript
 
-The `Uses` lets you annotate a component's model and other types. It must be placed
+There are two types you can use to annotate components:
+
+### Takes
+
+Lets you annotate a component's model and hub (both optional). It must be placed
 right after the component name (not inside the parameters):
 
 ```tsx
-import { Uses } from 'wallace';
+import { Takes } from 'wallace';
 
 interface iTask {
   text: string
 }
 
-const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
+const Task: Takes<iTask> = ({text}) => <div>{text}</div>;
 ```
 
-This ensure you pass correct model during mounting, nesting and repeating:
+This ensures you pass correct model during mounting, nesting and repeating:
 
 ```
-const TaskList: Uses<iTask[]> = (tasks) => (
+const TaskList: Takes<iTask[]> = (tasks) => (
   <div>
     First task:
     <Task model={tasks[0]} />
@@ -381,27 +385,33 @@ mount("main", TaskList, [{test: 'foo'}]);
 If you require no model, pass `null`:
 
 ```tsx
-const Task: Uses<null> = () => <div>Hello</div>;
+const Task: Takes<null> = () => <div>Hello</div>;
 ```
 
-### Other types
+### Uses
 
-You can alternatively pass a compound type which lets you specify other things:
 
-### Hub
+Lets you annotate model, hub and other things the component uses. It is used in the same
+way as `Takes` except you pass types as an object rather than sequentially, whose fields
+are all optional:
 
 ```tsx
-const Task: Uses<{hub: Hub}> = (_, { hub }) => (
-  <div>{hub.getName()}</div>
-);
+import type { Uses } from 'wallace';
+
+const Task: Uses<{
+  model: Model,
+  hub: Hub,
+  methods: Methods,
+  stub: Stub
+}> = () => <div></div>;
 ```
 
-### Methods
+#### Methods
 
 Custom methods of the component are available `self`:
 
 ```tsx
-import { Uses } from 'wallace';
+import type { Uses } from 'wallace';
 
 interface TaskMethods () {
   getName(): string;
@@ -422,16 +432,18 @@ Task.methods = {
 The type will pass into the object passed into `methods` so it recognises custom methods
 in addition to standard methods like `render`, which are already typed for you.
 
-### Stubs
+#### Stubs
 
 You can specify the model and hub of each stub:
 
 ```tsx
+import type { Takes, Uses } from 'wallace';
+
 interface ParentTypes {
   hub: Hub;
   stub: {
-    foo: Uses<iDay>;
-    bar: Uses<{model: iDay, hub: Hub}>;
+    foo: Takes<iDay>;
+    bar: Takes<iDay, Hub}>;
   };
 }
 
@@ -457,7 +469,7 @@ You may specify different types:
 const Child = extendComponent<newModel, Hub, Methods>(Parent);
 ```
 
- However:
+However:
 
 1. You must specify all those that are specified on base - as omitted types default
    to `any`.
@@ -609,39 +621,59 @@ declare module "wallace" {
   };
 
   /**
-   * A type which must be placed as shown:
+   * A type which annotates the model and hub (both optional) which the component takes.
+   *
+   * It must be placed as shown:
    *
    * ```tsx
-   * const Task: Uses<iTask> = ({text}) => <div>{text}</div>;
+   * import type { Takes } from 'wallace';
+   * const Task: Takes<iTask> = ({text}) => <div>{text}</div>;
    * ```
    *
    * If you require no model, set it to `null`:
    *
    * ```tsx
-   * const Task: Uses<null> = () => <div>Hello</div>;
+   * const Task: Takes<null> = () => <div>Hello</div>;
    * ```
-   *
-   * See cheat sheet by hovering over the module import for more details.
    */
-  type Uses<T = any> = T extends CompoundTypes
-    ? ComponentFunction<T["model"], T["hub"], T["methods"], T["stub"]>
+  type Takes<Model = unknown, Hub = unknown> = ComponentFunction<Model, Hub>;
+
+  /**
+   * A type which annotates the model, hub, methods and stubs (all optional) which the
+   * component uses.
+   *
+   * It must be placed as shown:
+   *
+   * ```tsx
+   * import type { Uses } from 'wallace';
+   *
+   * const Task: Uses<{
+   *    model: Model,
+   *    hub: Hub,
+   *    methods: Methods,
+   *    stub: Stub
+   * }> = () => <div></div>;
+   * ```
+   */
+  type Uses<T = any> = T extends object
+    ? T extends { model: any } | { hub: any } | { methods: any } | { stub: any }
+      ? ComponentFunction<
+          T extends { model: any } ? T["model"] : any,
+          T extends { hub: any } ? T["hub"] : any,
+          T extends { methods: any } ? T["methods"] : {},
+          T extends { stub: any } ? T["stub"] : {}
+        >
+      : ComponentFunction<T>
     : ComponentFunction<T>;
 
-  interface CompoundTypes {
-    model?: any;
-    hub?: any;
-    methods?: object;
-    stub?: StubDefinition;
-  }
-
-  export interface Part {
+  interface Part {
     update(): void;
   }
 
   /**
    * The type for a component instance.
    */
-  export type ComponentInstance<Model = any, Hub = any, Methods extends object = {}> = {
+  type ComponentInstance<Model = any, Hub = any, Methods extends object = {}> = {
     el: HTMLElement;
     model: Model;
     hub: Hub;
@@ -655,7 +687,7 @@ declare module "wallace" {
   /**
    * The component constructor function (typed as a class, but isn't).
    */
-  export class Component<Model = any, Hub = any> {
+  class Component<Model = any, Hub = any> {
     /**
      * The base render method looks like this:
      *
@@ -698,7 +730,7 @@ declare module "wallace" {
    * @param model
    * @param hub
    */
-  export function createComponent<Model, Hub, Methods extends object = {}>(
+  function createComponent<Model, Hub, Methods extends object = {}>(
     def: ComponentFunction<Model, Hub, Methods>,
     model?: Model,
     hub?: Hub
@@ -713,7 +745,7 @@ declare module "wallace" {
    * @param base The component definition to inherit from.
    * @param componentFunc A JSX function to override the DOM.
    */
-  export function extendComponent<Model = any, Hub = any, Methods extends object = {}>(
+  function extendComponent<Model = any, Hub = any, Methods extends object = {}>(
     base: ComponentFunction<Model, Hub, Methods>,
     componentFunc?: ComponentFunction<Model, Hub, Methods>
   ): ComponentFunction<Model, Hub, Methods>;
@@ -723,7 +755,7 @@ declare module "wallace" {
    *
    * Note that the original element is removed along with its attributes (class, id...).
    */
-  export function mount<Model = any, Hub = any, Methods extends object = {}>(
+  function mount<Model = any, Hub = any, Methods extends object = {}>(
     element: string | HTMLElement,
     componentDefinition: ComponentFunction<Model, Hub, Methods>,
     model?: Model,
@@ -739,7 +771,7 @@ declare module "wallace" {
    * watchedObj[0] = 'foo';  // throws error.
    * ```
    */
-  export function protect<T>(target: T): T;
+  function protect<T>(target: T): T;
 
   type WatchCallback = (target: any, key: string, value: any) => void;
 
@@ -772,15 +804,15 @@ declare module "wallace" {
    * @param {*} callback - A callback function.
    * @returns a Proxy of the object.
    */
-  export function watch<T>(target: T, callback: WatchCallback): T;
+  function watch<T>(target: T, callback: WatchCallback): T;
 
-  export type RouteData = {
+  type RouteData = {
     args: { [key: string]: any };
     params: URLSearchParams;
     url: string;
   };
 
-  export function route<Model>(
+  function route<Model>(
     path: string,
     componentDef: ComponentFunction<Model>,
     converter?: RouteConverter<Model>,
@@ -790,23 +822,23 @@ declare module "wallace" {
   type RouteConverter<Model> = (routedata: RouteData) => Model;
   type RouteCleanup<Model> = (component: ComponentInstance<Model>) => void;
 
-  export type Route<Model> = [
+  type Route<Model> = [
     string,
     ComponentFunction<Model>,
     RouteConverter<Model>?,
     RouteCleanup<Model>?
   ];
-  export type RouterModel = {
+  type RouterModel = {
     routes: readonly Route<any>[];
     atts?: Record<string, any>;
     error?: (error: Error, router: Router) => void;
   };
 
-  export type Router = ComponentFunction<RouterModel> & {
+  type Router = ComponentFunction<RouterModel> & {
     mount(component: Component<any>): void;
   };
 
-  export const Router: Router;
+  const Router: Router;
 }
 
 type OptionalExpression<T> = T | boolean;

@@ -1,15 +1,15 @@
-import { Uses } from "wallace";
+import { Takes } from "wallace";
 import { iTask, TaskListMethods } from "./types";
 import { Hub } from "./hubs";
 
-const Task: Uses<iTask> = ({ text, done }) => (
+const Task: Takes<iTask> = ({ text, done }) => (
   <div>
     <input type="checkbox" bind={done} />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-const UndoRedoBtns: Uses<null, Hub> = (_, { hub }) => (
+const UndoRedoBtns: Takes<null, Hub> = (_, { hub }) => (
   <div>
     <button disabled={hub.previousStates.length <= 1} onClick={hub.undo()}>
       Undo
@@ -20,7 +20,7 @@ const UndoRedoBtns: Uses<null, Hub> = (_, { hub }) => (
   </div>
 );
 
-export const TaskList: Uses<iTask[], Hub, TaskListMethods> = (
+export const TaskList: Takes<iTask[], Hub, TaskListMethods> = (
   _,
   { event, hub, self }
 ) => (

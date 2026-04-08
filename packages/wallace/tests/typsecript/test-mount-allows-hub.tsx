@@ -1,16 +1,16 @@
-import { mount, Uses } from "wallace";
+import { mount, Takes } from "wallace";
 
 interface Model {
   clicks: number;
 }
 
-const FunctionWithoutModel: Uses<null> = () => (
+const FunctionWithoutModel: Takes<null> = () => (
   <div>
     <p>Whatever</p>
   </div>
 );
 
-const FunctionWithModel: Uses<Model> = ({ clicks }) => (
+const FunctionWithModel: Takes<Model> = ({ clicks }) => (
   <div>
     <p>Clicked {1 + clicks} times</p>
   </div>

@@ -262,22 +262,22 @@ But you don't need to remember all this. JSX elements have a tool tip which remi
 
 ### TypeScript
 
-The `Uses` type specifies a component's model (and other things as we'll see later) which are best defined as an interface for clarity and reuse:
+The `Takes` type specifies a component's model (and other things as we'll see later) which are best defined as an interface for clarity and reuse:
 
 ```tsx
-import { mount, Uses } from 'wallace';
+import { mount, Takes } from 'wallace';
 
 interface iCounter {
   count: number;
 }
 
-const Counter: Uses<iCounter> = ({ count }) => (
+const Counter: Takes<iCounter> = ({ count }) => (
   <div>
     <button onClick={count++}>{count}</button>
   </div>
 );
 
-const CounterList: Uses<iCounter[]> = (counters) => (
+const CounterList: Takes<iCounter[]> = (counters) => (
   <div>
     <Counter model={counters[0]} />
     <Counter.repeat model={counters} />
@@ -299,7 +299,7 @@ const Counter = (model: iCounter) => (
 );
 ```
 
-That only works within that function, but not elsewhere as ensured by `Uses`.
+That only works within that function, but not elsewhere as ensured by `Takes`.
 
 ### Rendering
 
@@ -354,7 +354,7 @@ typeof CounterList.methods.update; // function
 To see reactivity working more clearly, let's display the total across all counters:
 
 ```tsx
-const CounterList: Uses<iCounter[]> = (counters) => (
+const CounterList: Takes<iCounter[]> = (counters) => (
   <div>
     <span>Total: {counters.reduce((t, c) => t + c.count, 0)}</span>
     <Counter.repeat model={counters} />
@@ -399,7 +399,7 @@ interface iCounterList {
   things: string;
 }
 
-const CounterList: Uses<iCounterList> = ({ counters, things }) => (
+const CounterList: Takes<iCounterList> = ({ counters, things }) => (
   <div>
     <span>
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
@@ -428,7 +428,7 @@ Fortunately, this is very easy to resolve in Wallace, thanks to parts.
 Parts let you update sections of a component. Let's combine this with reading the arguments passed to the `watch` callback to only update the `span` as we type in the text box:
 
 ```tsx
-const CounterList: Uses<iCounterList> = ({ counters, things }) => (
+const CounterList: Takes<iCounterList> = ({ counters, things }) => (
   <div>
     <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
@@ -458,7 +458,7 @@ You can also access the raw DOM element, or nested component using `ref`:
 However, you probably don't want to do access the DOM element this way. If you do need to access the element (for the handful of valid reasons you might want to) then you are better using the `apply` directive:
 
 ```tsx
-const Counter: Uses<iCounter> = ({ count }, { element }) => (
+const Counter: Takes<iCounter> = ({ count }, { element }) => (
   <div>
     <button apply={modifyBtn(element, count)} onClick={count++}>
       {count}
@@ -540,7 +540,7 @@ The hub.
 
 ##### stub
 
-This simply provides type support for the stubs, provided you set `stub` in `Uses`.
+This simply provides type support for the stubs, provided you set `stub` in `Takes`.
 
 ### Hubs
 
@@ -579,7 +579,7 @@ CounterList.methods = {
 A component passes its own value as 2nd argument when calling `render` on nested components, which assuming they don't then set it to something else, means they all point to the same object, allowing them to call its functions:
 
 ```tsx
-const Counter: Uses<iCounter> = ({ count }, { hub }) => (
+const Counter: Takes<iCounter> = ({ count }, { hub }) => (
   <div>
     <button onClick={count++}>{count}</button>
     <button onClick={hub.applyToAll(count)}>...</button>
@@ -595,15 +595,15 @@ It also helps performance as there's less mapping of arrays to shoehorn extra bi
 
 ### Hubs II
 
-If `hub` is a plain object then you'll need create an interface to get type support for it, which you pass into the second slot of `Uses`:
+If `hub` is a plain object then you'll need create an interface to get type support for it, which you pass into the second slot of `Takes`:
 
 ```tsx
 interface Hub {
   applyToAll: (number) => void;
 }
 
-const Counter: Uses<iCounter, Hub> = ({ count }, { hub }) => ();
-const CounterList: Uses<iCounterList, Hub> = ({ count }) => ();
+const Counter: Takes<iCounter, Hub> = ({ count }, { hub }) => ();
+const CounterList: Takes<iCounterList, Hub> = ({ count }) => ();
 ```
 
 > We don't access `hub` in the `CounterList` JSX so might be tempted to omit it, but don't, as the type carries through to `this.hub` which we access in `render`, so that helps.
@@ -740,7 +740,7 @@ interface Methods {
   total: () => number;
 }
 
-const CounterList: Uses<iCounterList, Hub, Methods> = (
+const CounterList: Takes<iCounterList, Hub, Methods> = (
   { counters, things },
   { self }
 ) => (
@@ -763,7 +763,7 @@ CounterList.methods = {
 };
 ```
 
-There's no escaping the need for an interface with component methods, but at least you don't need to add `render` and `update` as they are added in by `Uses`.
+There's no escaping the need for an interface with component methods, but at least you don't need to add `render` and `update` as they are added in by `Takes`.
 
 We can extend the `CounterList` using the `extendComponent` helper, which inherits the base's methods, and lets us override them if needed:
 
@@ -801,7 +801,7 @@ You still inherit the methods, like `total` as before. But if you're going to do
 Stubs let you implement parts of the DOM in derived components, or vice versa:
 
 ```tsx
-const CounterList: Uses<iCounterList, Hub> = () => (
+const CounterList: Takes<iCounterList, Hub> = () => (
   <div>
     <stub.stats />
     <stub.counters />
@@ -874,7 +874,7 @@ Stubs are a flexible way to organise reusable component skeletons or parts, whic
 Stubs accept `model` and `hub` and can be repeated like nested components:
 
 ```tsx
-const CounterList: Uses<iCounterList> = (counters) => (
+const CounterList: Takes<iCounterList> = (counters) => (
   <div>
     <stub.stats />
     <stub.counter.repeat model={counters} />

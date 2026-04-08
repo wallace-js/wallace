@@ -3,13 +3,13 @@ import { testMount } from "../utils";
 describe("Model", () => {
   test("force model to be specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
     interface Model {
       clicks: number;
     }
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo.repeat />
       </div>
@@ -22,13 +22,13 @@ describe("Model", () => {
 
   test("disallows invalid model", () => {
     expect(`
-      import { mount, Uses } from "wallace"
+      import { mount, Takes } from "wallace"
       interface Model {
         clicks: number;
       }
-      const Foo: Uses<Model> = () => (<div></div>);
+      const Foo: Takes<Model> = () => (<div></div>);
 
-      const Bar: Uses = () => (
+      const Bar: Takes = () => (
         <div>
           <Foo.repeat model={[1]}/>
         </div>
@@ -38,13 +38,13 @@ describe("Model", () => {
 
   test("allows valid model", () => {
     expect(`
-      import { mount, Uses } from "wallace";
+      import { mount, Takes } from "wallace";
       interface Model {
         clicks: number;
       }
-      const Foo: Uses<Model> = () => (<div></div>);
+      const Foo: Takes<Model> = () => (<div></div>);
 
-      const Bar: Uses = () => (
+      const Bar: Takes = () => (
         <div>
           <Foo.repeat model={[{clicks: 1}]}/>
         </div>
@@ -54,13 +54,13 @@ describe("Model", () => {
 
   test("model are passed through correctly", () => {
     expect(`
-      import { mount, Uses } from "wallace";
+      import { mount, Takes } from "wallace";
       interface Model {
         clicks: number;
       }
-      const Foo: Uses<Model> = () => (<div></div>);
+      const Foo: Takes<Model> = () => (<div></div>);
 
-      const Bar: Uses<Model[]> = (items) => (
+      const Bar: Takes<Model[]> = (items) => (
         <div>
           <Foo.repeat model={items}/>
         </div>
@@ -70,9 +70,9 @@ describe("Model", () => {
 
   test("Can repeat without model", () => {
     expect(`
-      import { mount, Uses } from "wallace";
-      const Child: Uses = () => <div>Hello</div>;
-      const Parent: Uses = () => (
+      import { mount, Takes } from "wallace";
+      const Child: Takes = () => <div>Hello</div>;
+      const Parent: Takes = () => (
         <div>
           <Child.repeat model={Array(3)} />
         </div>
@@ -84,13 +84,13 @@ describe("Model", () => {
 describe("key directive", () => {
   test("allows valid key value", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
     interface Model {
       clicks: number;
     }
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo.repeat model={[{clicks: 1}]} key="clicks"/>
       </div>
@@ -100,13 +100,13 @@ describe("key directive", () => {
 
   test("disallows invalid key value", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
     interface Model {
       clicks: number;
     }
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo.repeat model={[{clicks: 1}]} key="x" />
       </div>
@@ -120,13 +120,13 @@ describe("key directive", () => {
 describe("Other directives", () => {
   test("allows part directive as string", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
     interface Model {
       clicks: number;
     }
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
 
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo.repeat part="foo" model={[{clicks: 1}]} />
       </div>
@@ -138,15 +138,15 @@ describe("Other directives", () => {
 
   test.each(["id", "show", "hide"])("disallows %s directive", directive => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
 
     interface Model {
       clicks: number;
     }
 
-    const Foo: Uses<Model> = () => (<div></div>);
+    const Foo: Takes<Model> = () => (<div></div>);
     const clicks = true;
-    const Bar: Uses = () => (
+    const Bar: Takes = () => (
       <div>
         <Foo.repeat model={[{ clicks: 1 }]} ${directive}={clicks} />
       </div>

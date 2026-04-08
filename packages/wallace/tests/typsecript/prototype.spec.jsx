@@ -3,7 +3,7 @@ import { testMount } from "../utils";
 describe("Definition", () => {
   test("recognises model, hub, render, update", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
     interface Model {
       clicks: number;
     }
@@ -11,7 +11,7 @@ describe("Definition", () => {
       times: number;
     }
     
-    const Bar: Uses<{model: Model, hub: Hub}> = () => <div></div>;
+    const Bar: Takes<Model, Hub> = () => <div></div>;
 
     Bar.prototype.render = function (model, hub) {
       const a = model.clicks / 2;
@@ -25,8 +25,8 @@ describe("Definition", () => {
 
   test("cannot assign to prototype", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    const Bar: Uses = () => <div></div>;
+    import { mount, Takes } from "wallace";
+    const Bar: Takes = () => <div></div>;
 
     Bar.prototype = {
       render: function (model, hub) {}
@@ -39,8 +39,8 @@ describe("Definition", () => {
   // TODO: fix this
   // test("recognises parts", () => {
   //   expect(`
-  //   import { mount, Uses } from "wallace";
-  //   const Bar: Uses = () => (
+  //   import { mount, Takes } from "wallace";
+  //   const Bar: Takes = () => (
   //     <div>
   //       <div part="foo">foo</div>
   //     </div>

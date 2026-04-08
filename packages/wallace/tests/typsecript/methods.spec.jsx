@@ -3,7 +3,7 @@ import { testMount } from "../utils";
 describe("Definition", () => {
   test("is a proxy for prototype", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes } from "wallace";
     interface Model {
       clicks: number;
     }
@@ -11,7 +11,7 @@ describe("Definition", () => {
       times: number;
     }
     
-    const Bar: Uses<{model: Model, hub: Hub}> = () => <div></div>;
+    const Bar: Takes<Model, Hub> = () => <div></div>;
 
     Bar.methods.render = function (model, hub) {
       const a = model.clicks / 2;

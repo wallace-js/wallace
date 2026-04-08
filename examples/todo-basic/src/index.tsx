@@ -1,4 +1,4 @@
-import { mount, Uses, watch } from "wallace";
+import { mount, Takes, watch } from "wallace";
 
 interface iTask {
   text: string;
@@ -9,14 +9,14 @@ interface TaskListMethods {
   addTaskKeyup(event: KeyboardEvent): void;
 }
 
-const Task: Uses<iTask> = ({ text, done }) => (
+const Task: Takes<iTask> = ({ text, done }) => (
   <div>
     <input type="checkbox" bind={done} />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) => (
+const TaskList: Takes<iTask[], null, TaskListMethods> = (tasks, { event, self }) => (
   <div class="tasklist">
     <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">

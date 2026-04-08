@@ -3,12 +3,12 @@ import { testMount } from "../utils";
 describe("Definition", () => {
   test("diallows invalid key", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.bar />
       </div>
@@ -21,12 +21,12 @@ describe("Definition", () => {
 
   test("key is recognised on component stub property", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = () => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = () => (
       <div>
       </div>
     );
@@ -41,12 +41,12 @@ describe("Definition", () => {
 
   test("model are recognised on component stub", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = () => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = () => (
       <div>
       </div>
     );
@@ -62,9 +62,9 @@ describe("Definition", () => {
 describe("Model", () => {
   test("allows no model if none specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
 
-    const Bar: Uses<{stub: {foo: Uses}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes}}> = (_, { stub }) => (
       <div>
         <stub.foo />
       </div>
@@ -74,12 +74,12 @@ describe("Model", () => {
 
   test("diallows no model if model are specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.foo />
       </div>
@@ -91,12 +91,12 @@ describe("Model", () => {
 
   test("diallows invalid model if they are specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.foo model={5} />
       </div>
@@ -108,12 +108,12 @@ describe("Model", () => {
 describe("Other directives", () => {
   test("allows if directive as boolean", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.foo model={{clicks: 5}} if={true} />
       </div>
@@ -123,12 +123,12 @@ describe("Other directives", () => {
 
   test("allows part directive as string", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.foo model={{clicks: 5}} part="p1" />
       </div>
@@ -140,12 +140,12 @@ describe("Other directives", () => {
 
   test.each(["key", "id", "show", "hide"])("disallows %s directive", directive => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
     interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Model>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.foo model={{ clicks: 1 }} ${directive}="clicks" />
       </div>
