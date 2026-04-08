@@ -15,7 +15,7 @@ describe("Definition", () => {
     );
     `).toHaveTypeErrors([
       `Property 'bar' does not exist on type 'StubInterface<{ foo: 
-      ComponentFunction<Model, any, {}, {}>; }>'.`
+      Takes<Model>; }>'.`
     ]);
   });
 
@@ -34,8 +34,7 @@ describe("Definition", () => {
     Bar.stub.foo = (model) => <div>Bar{model.clicks}</div>;
     Bar.stub.bar = (model) => <div>Bar{model.clicks}</div>;
     `).toHaveTypeErrors([
-      `Property 'bar' does not exist on type '{ foo: 
-      ComponentFunction<Model, any, {}, {}>; }'.`
+      `Property 'bar' does not exist on type '{ foo: Takes<Model>; }'.`
     ]);
   });
 

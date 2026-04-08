@@ -401,7 +401,7 @@ function processRepeater(
     componentCls = getNestedComponentCls(componentDefinition, node);
 
   if (!repeatModel) {
-    error(node.path, ERROR_MESSAGES.REPEAT_WITHOUT_PROPS);
+    error(node.path, ERROR_MESSAGES.REPEAT_WITHOUT_MODELS);
   }
 
   const detacherInfo = node.parent.detacherIdentifier

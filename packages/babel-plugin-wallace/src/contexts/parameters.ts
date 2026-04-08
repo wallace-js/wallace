@@ -62,7 +62,7 @@ function checkForIllegalNamesInExtraArgs(path: NodePath<Function>) {
   }
 }
 
-function renamePropKeysInsideFunction(
+function renameModelKeysInsideFunction(
   path: NodePath<Function>,
   propVariableMap: ModelMap,
   modelVar: string
@@ -141,6 +141,6 @@ export function processFunctionParameters(
   }
   const propVariableMap = extractFinalModelName(path);
   checkForIllegalNamesInExtraArgs(path);
-  renamePropKeysInsideFunction(path, propVariableMap, component.modelIdentifier.name);
+  renameModelKeysInsideFunction(path, propVariableMap, component.modelIdentifier.name);
   mapAndRenameXargs(path, component);
 }

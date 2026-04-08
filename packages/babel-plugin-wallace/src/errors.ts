@@ -75,7 +75,7 @@ export const ERROR_MESSAGES = {
   REFS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT: "Refs must be unique within each component.",
   PARTS_MUST_BE_UNIQUE_WITHIN_EACH_COMPONENT:
     "Parts must be unique within each component.",
-  REPEAT_WITHOUT_PROPS: "Repeated component must specifiy model.",
+  REPEAT_WITHOUT_MODELS: "Repeated component must specifiy `models` directive.",
   REPEAT_ONLY_ON_NESTED_CLASS: "Repeat only allowed on nested component elements.",
   REPEAT_DIRECTIVE_WITH_SIBLINGS:
     "Repeat may not have sibling elements if `allowRepeaterSiblings` flag is false.",

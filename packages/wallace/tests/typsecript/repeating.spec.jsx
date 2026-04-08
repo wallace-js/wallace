@@ -15,8 +15,9 @@ describe("Model", () => {
       </div>
     );
   `).toHaveTypeErrors([
-      `Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<{ model:
-      Model[]; hub?: any; part?: string; key?: "clicks" | ((item: Model) => any); }>'.`
+      `Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<{
+      models: Model[]; hub?: unknown; part?: string; key?: "clicks"
+       | ((item: Model) => any); }>'.`
     ]);
   });
 
@@ -153,11 +154,11 @@ describe("Other directives", () => {
     );
   `).toHaveTypeErrors([
       `
-    Type '{ model: { clicks: number; }[]; ${directive}: boolean; }' is not assignable to
-    type 'IntrinsicAttributes & Wrapper<{ model: Model[]; hub?: any; part?: string;
-    key?: "clicks" | ((item: Model) => any); }>'. Property '${directive}' does not exist
-    on type 'IntrinsicAttributes & Wrapper<{ model: Model[]; hub?: any; part?: string;
-    key?: "clicks" | ((item: Model) => any); }>'.
+    Type '{ models: { clicks: number; }[]; ${directive}: boolean; }' is not assignable
+    to type 'IntrinsicAttributes & Wrapper<{ models: Model[]; hub?: unknown; part?: 
+    string; key?: "clicks" | ((item: Model) => any); }>'. Property '${directive}' does 
+    not exist on type 'IntrinsicAttributes & Wrapper<{ models: Model[]; hub?: unknown; 
+    part?: string; key?: "clicks" | ((item: Model) => any); }>'.
     `
     ]);
   });

@@ -598,12 +598,12 @@ declare module "wallace" {
       }
     ): JSX.Element;
     repeat?({
-      model,
+      models,
       hub,
       part,
       key
     }: {
-      model: Array<Model>;
+      models: Array<Model>;
       hub?: Hub;
       part?: string;
       key?: keyof Model | ((item: Model) => any);
@@ -636,7 +636,7 @@ declare module "wallace" {
    * const Task: Takes<null> = () => <div>Hello</div>;
    * ```
    */
-  type Takes<Model = unknown, Hub = unknown> = ComponentFunction<Model, Hub>;
+  type Takes<Model = {}, Hub = unknown> = ComponentFunction<Model, Hub>;
 
   /**
    * A type which annotates the model, hub, methods and stubs (all optional) which the
@@ -655,17 +655,16 @@ declare module "wallace" {
    * }> = () => <div></div>;
    * ```
    */
-  type Uses<T = any> = T extends object
+  type Uses<T = {}> = T extends object
     ? T extends { model: any } | { hub: any } | { methods: any } | { stub: any }
       ? ComponentFunction<
-          T extends { model: any } ? T["model"] : any,
-          T extends { hub: any } ? T["hub"] : any,
+          T extends { model: any } ? T["model"] : {},
+          T extends { hub: any } ? T["hub"] : unknown,
           T extends { methods: any } ? T["methods"] : {},
           T extends { stub: any } ? T["stub"] : {}
         >
       : ComponentFunction<T>
     : ComponentFunction<T>;
-
   interface Part {
     update(): void;
   }
@@ -1256,7 +1255,9 @@ declare global {
     interface Element {}
     interface ElementClass {}
     interface IntrinsicAttributes {}
-    interface ElementAttributesProperty {}
+    interface ElementAttributesProperty {
+      model: {};
+    }
   }
 
   /**
