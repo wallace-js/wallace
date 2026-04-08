@@ -37,7 +37,7 @@ if (wallaceConfig.flags.allowHub) {
     const Foo = (i, { hub }) => <div>{hub.multiply(i)}</div>;
     const Bar = () => (
       <div>
-        <Foo.repeat model={[1, 2, 3]} />
+        <Foo.repeat models={[1, 2, 3]} />
       </div>
     );
     Bar.prototype.render = function () {

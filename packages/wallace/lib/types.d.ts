@@ -209,7 +209,7 @@ const Task = (task) => (<div></div>);
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat model={tasks} />
+    <Task.repeat models={tasks} />
   </div>
 );
 ```
@@ -221,13 +221,13 @@ be a string or a function:
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat model={tasks} key="id"/>
+    <Task.repeat models={tasks} key="id"/>
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat model={tasks} key={(x) => x.id}/>
+    <Task.repeat models={tasks} key={(x) => x.id}/>
   </div>
 );
 ```
@@ -289,7 +289,7 @@ const Task = (task) => (<div>{task.name}</div>);
 
 const TaskList = (_, {hub}) => (
   <div>
-    <Task.repeat model={hub.getTasks()} />
+    <Task.repeat models={hub.getTasks()} />
   </div>
 );
 
@@ -375,7 +375,7 @@ const TaskList: Takes<iTask[]> = (tasks) => (
   <div>
     First task:
     <Task model={tasks[0]} />
-    <Task.repeat model={tasks.slice(1)} />
+    <Task.repeat models={tasks.slice(1)} />
   </div>
 );
 
@@ -450,7 +450,7 @@ interface ParentTypes {
 const Parent: Uses<ParentTypes> = (_, { stub }) => (
   <div>
     <stub.foo model={data[0]} /> 
-    <stub.foo.repeat model={data} /> 
+    <stub.foo.repeat models={data} /> 
   </div>
 );
 ```
@@ -1067,9 +1067,9 @@ interface DirectiveAttributes extends AllDomEvents {
    *
    *   ```
    *   <MyComponent model={singleModel} />
-   *   <MyComponent.repeat model={arrayOfModel} />
-   *   <MyComponent.repeat model={arrayOfModel} key="id"/>
-   *   <MyComponent.repeat model={arrayOfModel} key={(i) => i.id}/>
+   *   <MyComponent.repeat models={arrayOfModel} />
+   *   <MyComponent.repeat models={arrayOfModel} key="id"/>
+   *   <MyComponent.repeat models={arrayOfModel} key={(i) => i.id}/>
    *   ```
    */
   help?: boolean;

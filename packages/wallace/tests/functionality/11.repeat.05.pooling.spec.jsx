@@ -12,13 +12,13 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
         ? ({ day, tasks }) => (
             <div>
               <h3>{day}</h3>
-              <Task.repeat model={tasks.filter(t => t.done)} key="id" />
+              <Task.repeat models={tasks.filter(t => t.done)} key="id" />
             </div>
           )
         : ({ day, tasks }) => (
             <div>
               <h3>{day}</h3>
-              <Task.repeat model={tasks.filter(t => t.done)} />
+              <Task.repeat models={tasks.filter(t => t.done)} />
             </div>
           );
 
@@ -28,12 +28,12 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
       const Week = keyed
         ? days => (
             <div>
-              <Day.repeat model={days} key="day" />
+              <Day.repeat models={days} key="day" />
             </div>
           )
         : days => (
             <div>
-              <Day.repeat model={days} />
+              <Day.repeat models={days} />
             </div>
           );
 

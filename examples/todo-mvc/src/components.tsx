@@ -21,7 +21,7 @@ export const TaskList: Takes<null, TaskListHub, TaskListMethods> = (
     <div if={!hub.loading}>
       <span>Completed: {hub.completedTasksCount()}</span>
       <div style="margin-top: 10px">
-        <Task.repeat model={hub.tasks} />
+        <Task.repeat models={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.txtInputKeyUp(event)} />

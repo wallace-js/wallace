@@ -19,7 +19,7 @@ describe("Conditional directive not allowed", () => {
       )
       const Foo = () => (
         <div>
-          <Bar.repeat model={[1, 2, 3]} if={true} />
+          <Bar.repeat models={[1, 2, 3]} if={true} />
         </div>
       );
     `;
@@ -293,7 +293,7 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
     let items = [];
     const Foo = () => (
       <div>
-        <Bar.repeat model={items} />
+        <Bar.repeat models={items} />
         <div if={show.includes("a")}>a</div>
         <div if={show.includes("b")}>b</div>
       </div>

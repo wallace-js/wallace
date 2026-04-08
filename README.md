@@ -203,7 +203,7 @@ const Counter = ({ count }) => (
 
 const CounterList = (counters) => (
   <div>
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
   </div>
 );
 
@@ -235,7 +235,7 @@ And special syntax for nesting and repeating:
 const CounterList = (counters) => (
   <div>
     <Counter model={counters[0]} />
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
   </div>
 );
 ```
@@ -245,13 +245,13 @@ This form reuses components sequentially, which may cause issues with CSS animat
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat model={tasks} key="id" />
+    <Task.repeat models={tasks} key="id" />
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat model={tasks} key={(x) => x.id} />
+    <Task.repeat models={tasks} key={(x) => x.id} />
   </div>
 );
 ```
@@ -280,7 +280,7 @@ const Counter: Takes<iCounter> = ({ count }) => (
 const CounterList: Takes<iCounter[]> = (counters) => (
   <div>
     <Counter model={counters[0]} />
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
   </div>
 );
 
@@ -357,7 +357,7 @@ To see reactivity working more clearly, let's display the total across all count
 const CounterList: Takes<iCounter[]> = (counters) => (
   <div>
     <span>Total: {counters.reduce((t, c) => t + c.count, 0)}</span>
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
   </div>
 );
 ```
@@ -404,7 +404,7 @@ const CounterList: Takes<iCounterList> = ({ counters, things }) => (
     <span>
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
     </span>
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
     <input type="text" bind={things} event:keyup />
   </div>
 );
@@ -432,7 +432,7 @@ const CounterList: Takes<iCounterList> = ({ counters, things }) => (
   <div>
     <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
     <input type="text" bind={things} even:keyup />
   </div>
 );
@@ -747,7 +747,7 @@ const CounterList: Takes<iCounterList, Hub, Methods> = (
   <div>
     <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
-    <Counter.repeat model={counters} />
+    <Counter.repeat models={counters} />
     <input type="text" bind={things.value} event:keyup />
   </div>
 );
@@ -785,7 +785,7 @@ const SpecialCounterList = extendComponent(
   CounterList,
   ({ counters, things }, { self }) => (
     <div>
-      <Counter.repeat model={counters} />
+      <Counter.repeat models={counters} />
       <span>Total: {self.total()}</span>
     </div>
   )
@@ -814,7 +814,7 @@ CounterList.stub = {
   ),
   counters: ({ counters }) => (
     <div>
-      <Counter.repeat model={counters} />
+      <Counter.repeat models={counters} />
     </div>
   )
 );
@@ -844,7 +844,7 @@ BaseCounterList.stub = {
   total: (_, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
     <div>
-      <Counter.repeat model={counters} />
+      <Counter.repeat models={counters} />
     </div>
   )
 };
@@ -877,7 +877,7 @@ Stubs accept `model` and `hub` and can be repeated like nested components:
 const CounterList: Takes<iCounterList> = (counters) => (
   <div>
     <stub.stats />
-    <stub.counter.repeat model={counters} />
+    <stub.counter.repeat models={counters} />
   </div>
 );
 ```

@@ -29,7 +29,7 @@ export const TaskList: Takes<iTask[], Hub, TaskListMethods> = (
     <div style="margin-top: 10px">
       <span>Completed: {hub.tasks.filter(t => t.done).length}</span>
       <div style="margin-top: 10px">
-        <Task.repeat model={hub.tasks} />
+        <Task.repeat models={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
         <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />

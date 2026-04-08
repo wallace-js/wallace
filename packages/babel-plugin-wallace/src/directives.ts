@@ -99,19 +99,6 @@ class CssDirective extends Directive {
   }
 }
 
-class HubDirective extends Directive {
-  static attributeName = "hub";
-  static valueMode: ValueMode = ValueMode.ExpressionRequired;
-  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
-  static allowOnNested = true;
-  static allowOnRepeated = true;
-  static allowOnNormalElement = false;
-  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowHub);
-    node.setHub(value.expression);
-  }
-}
-
 class EventDirective extends Directive {
   static attributeName = "event";
   static valueMode: ValueMode = ValueMode.StringRequired;
@@ -153,6 +140,19 @@ class HtmlDirective extends Directive {
   }
 }
 
+class HubDirective extends Directive {
+  static attributeName = "hub";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
+  static allowOnNested = true;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowHub);
+    node.setHub(value.expression);
+  }
+}
+
 class IfDirective extends Directive {
   static attributeName = "if";
   static valueMode: ValueMode = ValueMode.ExpressionRequired;
@@ -171,6 +171,28 @@ class KeyDirective extends Directive {
   static allowOnNormalElement = false;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
     node.setRepeatKey(value.expression || value.value);
+  }
+}
+
+class ModelDirective extends Directive {
+  static attributeName = "model";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
+  static allowOnNested = true;
+  static allowOnNormalElement = false;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.setModel(value.expression);
+  }
+}
+
+class ModelsDirective extends Directive {
+  static attributeName = "models";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
+  static allowOnRepeated = true;
+  static allowOnNormalElement = false;
+  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
+    node.setModel(value.expression);
   }
 }
 
@@ -199,18 +221,6 @@ class PartDirective extends Directive {
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
     wallaceConfig.ensureFlagIstrue(node.path, FlagValue.allowParts);
     node.setPart(qualifier || value.value);
-  }
-}
-
-class ModelDirective extends Directive {
-  static attributeName = "model";
-  static valueMode: ValueMode = ValueMode.ExpressionRequired;
-  static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
-  static allowOnNested = true;
-  static allowOnRepeated = true;
-  static allowOnNormalElement = false;
-  apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, _base: string) {
-    node.setModel(value.expression);
   }
 }
 
@@ -315,16 +325,17 @@ export const builtinDirectives = [
   BindAsDirective,
   ClassDirective,
   CssDirective,
-  HubDirective,
   EventDirective,
   FixedDirective,
   HideDirective,
   HtmlDirective,
+  HubDirective,
   IfDirective,
   KeyDirective,
+  ModelDirective,
+  ModelsDirective,
   OnEventDirective,
   PartDirective,
-  ModelDirective,
   RefDirective,
   ShowDirective,
   StyleDirective,

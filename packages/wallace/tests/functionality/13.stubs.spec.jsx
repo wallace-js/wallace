@@ -115,7 +115,7 @@ if (wallaceConfig.flags.allowStubs) {
     const myModel = [{ name: "Fox" }, { name: "Badger" }];
     const BaseComponent = () => (
       <div>
-        <stub.display.repeat model={myModel} />
+        <stub.display.repeat models={myModel} />
       </div>
     );
     const Child = extendComponent(BaseComponent);

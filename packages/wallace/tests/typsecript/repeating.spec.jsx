@@ -30,7 +30,7 @@ describe("Model", () => {
 
       const Bar: Takes = () => (
         <div>
-          <Foo.repeat model={[1]}/>
+          <Foo.repeat models={[1]}/>
         </div>
       );
     `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Model'."]);
@@ -46,7 +46,7 @@ describe("Model", () => {
 
       const Bar: Takes = () => (
         <div>
-          <Foo.repeat model={[{clicks: 1}]}/>
+          <Foo.repeat models={[{clicks: 1}]}/>
         </div>
       );
     `).toHaveNoTypeErrors();
@@ -62,7 +62,7 @@ describe("Model", () => {
 
       const Bar: Takes<Model[]> = (items) => (
         <div>
-          <Foo.repeat model={items}/>
+          <Foo.repeat models={items}/>
         </div>
       );
     `).toHaveNoTypeErrors();
@@ -74,7 +74,7 @@ describe("Model", () => {
       const Child: Takes = () => <div>Hello</div>;
       const Parent: Takes = () => (
         <div>
-          <Child.repeat model={Array(3)} />
+          <Child.repeat models={Array(3)} />
         </div>
       );
     `).toHaveNoTypeErrors();
@@ -92,7 +92,7 @@ describe("key directive", () => {
 
     const Bar: Takes = () => (
       <div>
-        <Foo.repeat model={[{clicks: 1}]} key="clicks"/>
+        <Foo.repeat models={[{clicks: 1}]} key="clicks"/>
       </div>
     );
   `).toHaveNoTypeErrors();
@@ -108,7 +108,7 @@ describe("key directive", () => {
 
     const Bar: Takes = () => (
       <div>
-        <Foo.repeat model={[{clicks: 1}]} key="x" />
+        <Foo.repeat models={[{clicks: 1}]} key="x" />
       </div>
     );
   `).toHaveTypeErrors([
@@ -128,7 +128,7 @@ describe("Other directives", () => {
 
     const Bar: Takes = () => (
       <div>
-        <Foo.repeat part="foo" model={[{clicks: 1}]} />
+        <Foo.repeat part="foo" models={[{clicks: 1}]} />
       </div>
     );
     const bar = mount("main", Bar);
@@ -148,7 +148,7 @@ describe("Other directives", () => {
     const clicks = true;
     const Bar: Takes = () => (
       <div>
-        <Foo.repeat model={[{ clicks: 1 }]} ${directive}={clicks} />
+        <Foo.repeat models={[{ clicks: 1 }]} ${directive}={clicks} />
       </div>
     );
   `).toHaveTypeErrors([

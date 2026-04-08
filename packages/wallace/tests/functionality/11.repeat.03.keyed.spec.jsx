@@ -4,13 +4,13 @@ const Child = ({ i }) => <div>{i}</div>;
 
 const KeyString = data => (
   <div>
-    <Child.repeat model={data} key={item => item.i} />
+    <Child.repeat models={data} key={item => item.i} />
   </div>
 );
 
 const KeyFunction = data => (
   <div>
-    <Child.repeat model={data} key="i" />
+    <Child.repeat models={data} key="i" />
   </div>
 );
 
@@ -22,7 +22,7 @@ const permutations = [
 if (wallaceConfig.flags.allowStubs) {
   const UsingStub = data => (
     <div>
-      <stub.child.repeat model={data} key="i" />
+      <stub.child.repeat models={data} key="i" />
     </div>
   );
 

@@ -26,7 +26,7 @@ if (wallaceConfig.flags.allowHub) {
     const Animal = (name, { hub }) => <div>{name + " " + hub}</div>;
     const AnimalList = (_, { self }) => (
       <div>
-        <Animal.repeat model={animals} hub={self.tmpHub} />
+        <Animal.repeat models={animals} hub={self.tmpHub} />
       </div>
     );
     AnimalList.prototype.render = function (model) {

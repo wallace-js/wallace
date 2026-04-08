@@ -12,7 +12,7 @@ if (wallaceConfig.flags.allowDismount) {
     );
     const AnimalList = () => (
       <div>
-        <Animal.repeat model={animals} />
+        <Animal.repeat models={animals} />
       </div>
     );
     const animals = [
