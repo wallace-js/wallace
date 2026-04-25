@@ -51,6 +51,7 @@ const MyComponent = ({title}, {hub, event}) => (
 The **xargs** contains:
 
 - `hub` refers to the hub.
+- `stub` refers to the stubs, included for typing only.
 - `model` refers to the model, in case you want the non-destructured version too.
 - `self` refers to the component instance (as `this` is not allowed).
 - `event` refers to the event in an event callback.
@@ -485,12 +486,20 @@ Wallace defines some other types you may use:
 
 ## 10. Helpers
 
-Each of these has their own JSDoc, we just lsit them here.
+Each of these has their own JSDoc, we just list them here.
 
+### createComponent
+
+Creates new component and renders it, but does not attach it:
+
+```
+const component = createComponent(Counter, {count: 0});
+document.body.appendChild(component.el);
+```
 
 ### extendComponent
 
-Define a new componend by extending another one:
+Define a new component by extending another one:
 
 ```
 const Foo = extendComponent(Base);
@@ -541,7 +550,6 @@ performance and bundle size:
 These flags default to true, unless you specify `flags` in the plugin config, in which
 case they default to false and you need to explicitly enable those you want:
 
-
 ```tsx
 module.exports = {
   plugins: [
@@ -583,7 +591,7 @@ declare module "wallace" {
   interface ComponentFunction<
     Model = any,
     Hub = any,
-    Methods extends object = {},
+    Methods extends object = ComponentMethods<Model, Hub>,
     Stubs extends StubDefinition = {}
   > {
     (
@@ -615,7 +623,8 @@ declare module "wallace" {
   }
 
   type ComponentMethods<Model, Hub, Methods extends object = {}> = {
-    render?(this: ComponentInstance<Model, Hub, Methods>, model: Model, hub: Hub): void;
+    render?(this: ComponentInstance<Model, Hub, Methods>, model: Model, hub?: Hub): void;
+    set?(this: ComponentInstance<Model, Hub, Methods>, model: Model, hub?: Hub): void;
     update?(this: ComponentInstance<Model, Hub, Methods>): void;
     [key: string]: any;
   };
@@ -692,8 +701,7 @@ declare module "wallace" {
      *
      * ```
      * render(model?: Model, hub?: Hub) {
-     *   this.model = model;
-     *   this.hub = hub;
+     *   this.set(model, hub);
      *   this.update();
      * }
      * ```
@@ -708,6 +716,20 @@ declare module "wallace" {
      * ```
      */
     render(model?: Model, hub?: Hub): void;
+    /**
+     *
+     * The base set method looks like this:
+     *
+     * ```
+     * set(model?: Model, hub?: Hub) {
+     *   this.model = model;
+     *   this.hub = hub;
+     * }
+     * ```
+     *
+     * But this may be modified by directives such as `watch` and `assign`.
+     */
+    set(model?: Model, hub?: Hub): void;
     /**
      * Updates the DOM.
      *
@@ -1039,18 +1061,20 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `apply` runs a callback to modify an element.
    * - `assign` assigns the component instance to a value.
    * - `bind` updates a value when an input is changed.
+   * - `bind-as` binds and sets input's type.
    * - `class:xyz` defines a set of classes to be toggled.
    * - `css` shorthand for `fixed:class`.
-   * - `hub` specifies hub for nested/repeated components.
    * - `event` changes the event which `bind` reacts to.
    * - `fixed:xyz` sets a attribute from an expression at definition.
    * - `hide` sets an element or component's hidden property.
    * - `html` Set the element's `innnerHTML` property.
+   * - `hub` specifies hub for nested/repeated components.
    * - `if` excludes an element from the DOM.
    * - `key` specifies a key for repeated components.
+   * - `model` specifies model for nested components.
+   * - `models` specifies models repeated components.
    * - `on[EventName]` creates an event handler (note the code is copied).
    * - `part:xyz` saves a reference to part of a component so it can be updated.
-   * - `model` specifies model for stubs, nested or repeated components.
    * - `ref:xyz` saves a reference to an element or nested component.
    * - `show` sets and element or component's hidden property.
    * - `style:xyz` sets a specific style property.
@@ -1123,11 +1147,16 @@ interface DirectiveAttributes extends AllDomEvents {
   /**
    * ## Wallace directive: model
    *
-   * Specifies model for a stub, nested or repeated component - in which case it means
-   * an Array of the model used by the component.
-   *
+   * Specifies model for a nested component.
    */
   model?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: models
+   *
+   * Specifies models for a repeated component.
+   */
+  models?: MustBeExpression;
 
   /**
    * ## Wallace directive: ref
@@ -1216,7 +1245,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * );
    * ```
    *
-   * For more complex use cases, import the `watch` function and use it in an overriden
+   * For more complex use cases, import the `watch` function and use it in an overridden
    * `render` method.
    *
    * May only be used on the root element. Modifies the `set` method.

@@ -60,14 +60,26 @@ describe("behaviour", () => {
     expect(callCount).toBe(1);
   });
 
-  test("watch is not inherited", () => {
+  // These test the inheritance behaviour of the `set` method
+  test("watch is not inherited with new definition", () => {
     const model = { x: 1 };
 
-    const Parent = model => <div watch></div>;
+    const Parent = () => <div watch></div>;
     const MyComponent = extendComponent(Parent, model => <div>{model.x}</div>);
     const component = testMount(MyComponent, model);
     expect(component).toRender(`<div>1</div>`);
     component.model.x = 2;
     expect(component).toRender(`<div>1</div>`);
+  });
+
+  test("watch is inherited when definition reused", () => {
+    const model = { x: 1 };
+
+    const Parent = model => <div watch>{model.x}</div>;
+    const MyComponent = extendComponent(Parent);
+    const component = testMount(MyComponent, model);
+    expect(component).toRender(`<div>1</div>`);
+    component.model.x = 2;
+    expect(component).toRender(`<div>2</div>`);
   });
 });

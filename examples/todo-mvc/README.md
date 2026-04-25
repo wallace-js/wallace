@@ -1,6 +1,6 @@
-# Demo: todo-mvc
+# Demo: todo-hubs
 
-[![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-mvc)
+[![StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/fork/github/wallace-js/wallace/tree/master/examples/todo-hubs)
 
 This demo showcases a simple TODO list which lets you add tasks and check them off.
 

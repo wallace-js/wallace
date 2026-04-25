@@ -1,4 +1,5 @@
-import { mount, Takes, watch } from "wallace";
+import { mount } from "wallace";
+import type { Takes, Uses } from "wallace";
 
 interface iTask {
   text: string;
@@ -11,13 +12,16 @@ interface TaskListMethods {
 
 const Task: Takes<iTask> = ({ text, done }) => (
   <div>
-    <input type="checkbox" bind={done} />
+    <input bind-as:checkbox={done} />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-const TaskList: Takes<iTask[], null, TaskListMethods> = (tasks, { event, self }) => (
-  <div class="tasklist">
+const TaskList: Uses<{ model: iTask[]; methods: TaskListMethods }> = (
+  tasks,
+  { event, self }
+) => (
+  <div watch class="tasklist">
     <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
       <Task.repeat models={tasks} />
@@ -30,10 +34,6 @@ const TaskList: Takes<iTask[], null, TaskListMethods> = (tasks, { event, self })
 );
 
 TaskList.methods = {
-  render(tasks) {
-    this.model = watch(tasks, () => this.update());
-    this.update();
-  },
   addTaskKeyup(event: KeyboardEvent) {
     const target = event.target as HTMLInputElement;
     const text = target.value;
