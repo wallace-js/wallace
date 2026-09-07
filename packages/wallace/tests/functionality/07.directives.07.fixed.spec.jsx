@@ -39,20 +39,20 @@ describe("Fixed specification", () => {
     expect(code).toCompileWithError("The `fixed` directive must have a qualifier.");
   });
 
-  test("disallows access to props", () => {
+  test("disallows access to model", () => {
     const code = `
       const Foo = ({foo}) => (
         <div fixed:class={foo} />
       )
     `;
     expect(code).toCompileWithError(
-      "The `fixed` directive may not access scoped variable `props`."
+      "The `fixed` directive may not access scoped variable `model`."
     );
   });
 
-  const xargs = ["self", "element", "event", "props"];
-  if (wallaceConfig.flags.allowCtrl) {
-    xargs.push("ctrl");
+  const xargs = ["self", "element", "event", "model"];
+  if (wallaceConfig.flags.allowHub) {
+    xargs.push("hub");
   }
 
   test.each(xargs)("disallows access to %s", xarg => {

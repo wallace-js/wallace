@@ -2,23 +2,23 @@ import { createComponent } from "wallace";
 import { testMount } from "../utils";
 
 describe("Component create", () => {
-  if (wallaceConfig.flags.allowCtrl) {
-    test("creates and renders component with ctrl", () => {
+  if (wallaceConfig.flags.allowHub) {
+    test("creates and renders component with hub", () => {
       const Foo = () => <div>Test</div>;
-      const Bar = ({ name }, { ctrl }) => (
+      const Bar = ({ name }, { hub }) => (
         <div>
           <span>{name}</span>
-          <span>{ctrl.name}</span>
+          <span>{hub.name}</span>
         </div>
       );
       const component = testMount(Foo);
-      const ctrl = { name: "Wallace" };
-      const child = createComponent(Bar, { name: "William" }, ctrl);
+      const hub = { name: "Wallace" };
+      const child = createComponent(Bar, { name: "William" }, hub);
       component.el.innerHTML = child.el.innerHTML;
       expect(component).toRender(`<div><span>William</span><span>Wallace</span></div>`);
     });
   } else {
-    test("creates and renders component without ctrl", () => {
+    test("creates and renders component without hub", () => {
       const Foo = () => <div>Test</div>;
       const Bar = ({ name }) => (
         <div>

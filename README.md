@@ -129,7 +129,7 @@ Then configure your bundler to apply those to jsx/tsx files. The [examples](http
 You can toggle flags in your babel config to disable certain features for cutting edge performance and bundle size:
 
 1.  `allowBase` - allows use of `base` in components.
-2.  `allowCtrl` - allows use of `ctrl` in components.
+2.  `allowHub` - allows use of `hub` in components.
 3.  `allowDismount` - allows components to handle dismounting.
 4.  `allowMethods` - allows use of `methods` helper to components.
 5.  `allowParts` - allows use of parts.
@@ -145,7 +145,7 @@ module.exports = {
       "babel-plugin-wallace",
       {
         flags: {
-          allowCtrl: true,
+          allowHub: true,
           allowStubs: false
         },
       }
@@ -203,7 +203,7 @@ const Counter = ({ count }) => (
 
 const CounterList = (counters) => (
   <div>
-    <Counter.repeat props={counters} />
+    <Counter.repeat models={counters} />
   </div>
 );
 
@@ -234,8 +234,8 @@ And special syntax for nesting and repeating:
 ```tsx
 const CounterList = (counters) => (
   <div>
-    <Counter props={counters[0]} />
-    <Counter.repeat props={counters} />
+    <Counter model={counters[0]} />
+    <Counter.repeat models={counters} />
   </div>
 );
 ```
@@ -245,13 +245,13 @@ This form reuses components sequentially, which may cause issues with CSS animat
 ```tsx
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} key="id" />
+    <Task.repeat models={tasks} key="id" />
   </div>
 );
 
 const TaskList = (tasks) => (
   <div>
-    <Task.repeat props={tasks} key={(x) => x.id} />
+    <Task.repeat models={tasks} key={(x) => x.id} />
   </div>
 );
 ```
@@ -262,57 +262,57 @@ But you don't need to remember all this. JSX elements have a tool tip which remi
 
 ### TypeScript
 
-The `Uses` type specifies a component's props (and other things as we'll see later) which are best defined as an interface for clarity and reuse:
+The `Takes` type specifies a component's model (and other things as we'll see later) which are best defined as an interface for clarity and reuse:
 
 ```tsx
-import { mount, Uses } from 'wallace';
+import { mount, Takes } from 'wallace';
 
 interface iCounter {
   count: number;
 }
 
-const Counter: Uses<iCounter> = ({ count }) => (
+const Counter: Takes<iCounter> = ({ count }) => (
   <div>
     <button onClick={count++}>{count}</button>
   </div>
 );
 
-const CounterList: Uses<iCounter[]> = (counters) => (
+const CounterList: Takes<iCounter[]> = (counters) => (
   <div>
-    <Counter props={counters[0]} />
-    <Counter.repeat props={counters} />
+    <Counter model={counters[0]} />
+    <Counter.repeat models={counters} />
   </div>
 );
 
 mount('main', CounterList, [{ count: 0 }]);
 ```
 
-TypeScript now warns you if you attempt to pass incorrect props at any point. Try changing `count` to a rude word anywhere in the above and you'll see TypeScript swear back at you.
+TypeScript now warns you if you attempt to pass incorrect model at any point. Try changing `count` to a rude word anywhere in the above and you'll see TypeScript swear back at you.
 
-Don't annotate the props like this:
+Don't annotate the model like this:
 
 ```tsx
-const Counter = (props: iCounter) => (
+const Counter = (model: iCounter) => (
   <div>
-    <button onClick={props.count++}>{props.count}</button>
+    <button onClick={model.count++}>{model.count}</button>
   </div>
 );
 ```
 
-That only works within that function, but not elsewhere as ensured by `Uses`.
+That only works within that function, but not elsewhere as ensured by `Takes`.
 
 ### Rendering
 
 For present purposes, the `render` method we've been calling does this:
 
 ```tsx
-function render(props) {
-  this.props = props;
+function render(model) {
+  this.model = model;
   this.update();
 }
 ```
 
-So `props` is stored on the component instance, and gets reset every `render`, which seems pointless - except that components are used in two ways:
+So `model` is stored on the component instance, and gets reset every `render`, which seems pointless - except that components are used in two ways:
 
 #### Dumb components
 
@@ -325,21 +325,21 @@ Components like `CounterList` are used to coordinate updates following changes t
 With Wallace you simply override the render method and create a callback which updates that instance, and pass that wherever it's needed, for example:
 
 ```tsx
-CounterList.prototype.render = function (props) {
+CounterList.prototype.render = function (model) {
   const update = () => this.update();
-  this.props = props.map(c => {...c, update});
+  this.model = model.map(c => {...c, update});
   this.update();
 };
 ```
 
-But that's a really ugly React-like approach which involves mutating props and their interface. Wallace has much cleaner approach using a "controller" as we'll see later.
+But that's a really ugly React-like approach which involves mutating model and their interface. Wallace has much cleaner approach using a "controller" as we'll see later.
 
 Wallace also provides a neater and safer way to set properties on the prototype:
 
 ```tsx
 CounterList.methods = {
-  render(props) {
-    this.props = props;
+  render(model) {
+    this.model = model;
     this.update();
   },
   otherMethod() {}
@@ -354,22 +354,22 @@ typeof CounterList.methods.update; // function
 To see reactivity working more clearly, let's display the total across all counters:
 
 ```tsx
-const CounterList: Uses<iCounter[]> = (counters) => (
+const CounterList: Takes<iCounter[]> = (counters) => (
   <div>
     <span>Total: {counters.reduce((t, c) => t + c.count, 0)}</span>
-    <Counter.repeat props={counters} />
+    <Counter.repeat models={counters} />
   </div>
 );
 ```
 
-To make it "reactive" we use `watch` to replace the props with a [proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) which calls a callback whenever it, or any nested object, is modified:
+To make it "reactive" we use `watch` to replace the model with a [proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) which calls a callback whenever it, or any nested object, is modified:
 
 ```tsx
 import { watch } from 'wallace';
 
 CounterList.methods = {
-  render(props) {
-    this.props = watch(props, () => this.update());
+  render(model) {
+    this.model = watch(model, () => this.update());
     this.update();
   }
 };
@@ -399,12 +399,12 @@ interface iCounterList {
   things: string;
 }
 
-const CounterList: Uses<iCounterList> = ({ counters, things }) => (
+const CounterList: Takes<iCounterList> = ({ counters, things }) => (
   <div>
     <span>
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
     </span>
-    <Counter.repeat props={counters} />
+    <Counter.repeat models={counters} />
     <input type="text" bind={things} event:keyup />
   </div>
 );
@@ -428,18 +428,18 @@ Fortunately, this is very easy to resolve in Wallace, thanks to parts.
 Parts let you update sections of a component. Let's combine this with reading the arguments passed to the `watch` callback to only update the `span` as we type in the text box:
 
 ```tsx
-const CounterList: Uses<iCounterList> = ({ counters, things }) => (
+const CounterList: Takes<iCounterList> = ({ counters, things }) => (
   <div>
     <span part:things>Total {things}: </span>
     <span>{counters.reduce((t, c) => t + c.count, 0)}</span>
-    <Counter.repeat props={counters} />
+    <Counter.repeat models={counters} />
     <input type="text" bind={things} even:keyup />
   </div>
 );
 
 CounterList.methods = {
-  render(props) {
-    this.props = watch(props, (target, key) => {
+  render(model) {
+    this.model = watch(model, (target, key) => {
       key === 'things' ? this.part.things.update() : this.update();
     });
     this.update();
@@ -458,7 +458,7 @@ You can also access the raw DOM element, or nested component using `ref`:
 However, you probably don't want to do access the DOM element this way. If you do need to access the element (for the handful of valid reasons you might want to) then you are better using the `apply` directive:
 
 ```tsx
-const Counter: Uses<iCounter> = ({ count }, { element }) => (
+const Counter: Takes<iCounter> = ({ count }, { element }) => (
   <div>
     <button apply={modifyBtn(element, count)} onClick={count++}>
       {count}
@@ -475,7 +475,7 @@ The reference to `element` came from an optional extra argument, known as xargs.
 
 ### Xargs
 
-Remember: these functions aren't real, they are dismantled during compilation, so the arguments aren't real either. Wallace treats the first argument as the props, and uses the second argument to provide several useful variables:
+Remember: these functions aren't real, they are dismantled during compilation, so the arguments aren't real either. Wallace treats the first argument as the model, and uses the second argument to provide several useful variables:
 
 ##### element
 
@@ -520,56 +520,56 @@ const Counter = ({ count }, { self }) => (
 
 Unfortunately we can't use `this` in arrow functions, but have to use `this` in methods.
 
-##### props
+##### model
 
-The props object, because you might want the destructured version for a callback or something:
+The model object, because you might want the destructured version for a callback or something:
 
 ```tsx
-const Counter = ({ count, id }, { props }) => (
+const Counter = ({ count, id }, { model }) => (
   <div>
-    <button apply={foo(props)}>{count}</button>
+    <button apply={foo(model)}>{count}</button>
   </div>
 );
 ```
 
-Of course you could equally access it as `self.props` but it's free to add so why not.
+Of course you could equally access it as `self.model` but it's free to add so why not.
 
-##### ctrl
+##### hub
 
-The controller.
+The hub.
 
 ##### stub
 
-This simply provides type support for the stubs, provided you set `stub` in `Uses`.
+This simply provides type support for the stubs, provided you set `stub` in `Takes`.
 
-### Controllers
+### Hubs
 
 The `render` function _actually_ looks like this:
 
 ```tsx
-function render(props, ctrl) {
-  this.props = props;
-  this.ctrl = ctrl;
+function render(model, hub) {
+  this.model = model;
+  this.hub = hub;
   this.update();
 }
 ```
 
-You can provide a value for `ctrl` in the 4th argument to `mount`:
+You can provide a value for `hub` in the 4th argument to `mount`:
 
 ```tsx
-const ctrl = {};
-mount('main', CounterList, [], ctrl);
+const hub = {};
+mount('main', CounterList, [], hub);
 ```
 
-But you tend to set it in `render` instead, as you can access the component in functions attached to the controller, which is what they are for:
+But you tend to set it in `render` instead, as you can access the component in functions attached to the hub, which is what they are for:
 
 ```tsx
 CounterList.methods = {
-  render(props) {
-    this.props = watch(/*...*/);
-    this.ctrl = {
+  render(model) {
+    this.model = watch(/*...*/);
+    this.hub = {
       applyToAll: (count) =>
-        this.props.forEach((c) => (c.count = count))
+        this.model.forEach((c) => (c.count = count))
     };
     this.update();
   }
@@ -579,59 +579,59 @@ CounterList.methods = {
 A component passes its own value as 2nd argument when calling `render` on nested components, which assuming they don't then set it to something else, means they all point to the same object, allowing them to call its functions:
 
 ```tsx
-const Counter: Uses<iCounter> = ({ count }, { ctrl }) => (
+const Counter: Takes<iCounter> = ({ count }, { hub }) => (
   <div>
     <button onClick={count++}>{count}</button>
-    <button onClick={ctrl.applyToAll(count)}>...</button>
+    <button onClick={hub.applyToAll(count)}>...</button>
   </div>
 );
 ```
 
 > Clicking the 2nd button sets all counters to the value of this counter.
 
-This saves you having to shoehorn functions into props at every step like React which keeps things really clean: use props for data, and the controller for everything else.
+This saves you having to shoehorn functions into model at every step like React which keeps things really clean: use model for data, and the hub for everything else.
 
 It also helps performance as there's less mapping of arrays to shoehorn extra bits into each item.
 
-### Controllers II
+### Hubs II
 
-If `ctrl` is a plain object then you'll need create an interface to get type support for it, which you pass into the second slot of `Uses`:
+If `hub` is a plain object then you'll need create an interface to get type support for it, which you pass into the second slot of `Takes`:
 
 ```tsx
-interface Controller {
+interface Hub {
   applyToAll: (number) => void;
 }
 
-const Counter: Uses<iCounter, Controller> = ({ count }, { ctrl }) => ();
-const CounterList: Uses<iCounterList, Controller> = ({ count }) => ();
+const Counter: Takes<iCounter, Hub> = ({ count }, { hub }) => ();
+const CounterList: Takes<iCounterList, Hub> = ({ count }) => ();
 ```
 
-> We don't access `ctrl` in the `CounterList` JSX so might be tempted to omit it, but don't, as the type carries through to `this.ctrl` which we access in `render`, so that helps.
+> We don't access `hub` in the `CounterList` JSX so might be tempted to omit it, but don't, as the type carries through to `this.hub` which we access in `render`, so that helps.
 
-However, you don't need an interface if you turn your controller into a class, because the class is its own type. So let's do that and move all the logic over while we're at it:
+However, you don't need an interface if you turn your hub into a class, because the class is its own type. So let's do that and move all the logic over while we're at it:
 
 ```tsx
 import { ComponentInstance, watch } from 'wallace';
 
-class Controller {
+class Hub {
   root: ComponentInstance<iCounterList>;
   constructor(
     root: ComponentInstance<iCounterList>,
-    props: iCounterList
+    model: iCounterList
   ) {
     this.root = root;
-    root.props = watch(props, (target, key) => {
+    root.model = watch(model, (target, key) => {
       key === 'things' ? root.part.things.update() : root.update();
     });
   }
   applyToAll(count) {
-    this.root.props.counters.forEach((c) => (c.count = count));
+    this.root.model.counters.forEach((c) => (c.count = count));
   }
 }
 
 CounterList.methods = {
-  render(props) {
-    this.ctrl = new Controller(this, props);
+  render(model) {
+    this.hub = new Hub(this, model);
     this.update();
   }
 };
@@ -654,16 +654,16 @@ Having your logic in plain JavaScript separate from any framework code eliminate
 To fix this we can work with the original object, which doesn't trigger an update, then call `update` when we're done:
 
 ```tsx
-class Controller {
+class Hub {
   root: ComponentInstance<iCounterList>;
   counters: iCounter[];
   constructor(
     root: ComponentInstance<iCounterList>,
-    props: iCounterList
+    model: iCounterList
   ) {
     this.root = root;
-    this.counters = props.counters;
-    root.props = watch(/*...*/);
+    this.counters = model.counters;
+    root.model = watch(/*...*/);
   }
   applyToAll(count) {
     this.counters.forEach((c) => (c.count = count));
@@ -672,20 +672,20 @@ class Controller {
 }
 ```
 
-Another thing we can do is watch different parts of the props with different callbacks:
+Another thing we can do is watch different parts of the model with different callbacks:
 
 ```tsx
-class Controller {
+class Hub {
   /*...*/
   constructor(
     root: ComponentInstance<iCounterList>,
-    props: iCounterList
+    model: iCounterList
   ) {
     this.root = root;
-    this.counters = props.counters;
-    root.props = {
+    this.counters = model.counters;
+    root.model = {
       counters: watch(this.counters, () => root.update()),
-      things: watch(props.things, () => root.part.things.update())
+      things: watch(model.things, () => root.part.things.update())
     };
   }
   /*...*/
@@ -710,17 +710,17 @@ So far we've covered reactivity where we change the data in place, but once you'
 ```tsx
 import { protect, watch, ComponentInstance } from 'wallace';
 
-class Controller {
+class Hub {
   /*...*/
   constructor(
     root: ComponentInstance<iCounterList>,
-    props: iCounterList
+    model: iCounterList
   ) {
     this.root = root;
-    this.counters = props.counters;
-    root.props = {
+    this.counters = model.counters;
+    root.model = {
       counters: protect(this.counters),
-      things: watch(props.things, () => root.part.things.update())
+      things: watch(model.things, () => root.part.things.update())
     };
   }
   /*...*/
@@ -729,41 +729,41 @@ class Controller {
 
 > Clicking on the buttons now throws an error.
 
-You would then change the buttons in `Counter` to call methods on the `Controller` which save the data to the API before updating the component, which we won't show here.
+You would then change the buttons in `Counter` to call methods on the `Hub` which save the data to the API before updating the component, which we won't show here.
 
 ### Extending
 
-To better illustrate extending components, let's pull the total calculation out to a method on the component. It should be moved to the controller, but it helps our case for now:
+To better illustrate extending components, let's pull the total calculation out to a method on the component. It should be moved to the hub, but it helps our case for now:
 
 ```tsx
 interface Methods {
   total: () => number;
 }
 
-const CounterList: Uses<iCounterList, Controller, Methods> = (
+const CounterList: Takes<iCounterList, Hub, Methods> = (
   { counters, things },
   { self }
 ) => (
   <div>
     <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
-    <Counter.repeat props={counters} />
+    <Counter.repeat models={counters} />
     <input type="text" bind={things.value} event:keyup />
   </div>
 );
 
 CounterList.methods = {
-  render(props) {
-    this.ctrl = new Controller(this, props);
+  render(model) {
+    this.hub = new Hub(this, model);
     this.update();
   },
   total() {
-    return this.props.counters.reduce((t, c) => t + c.count, 0);
+    return this.model.counters.reduce((t, c) => t + c.count, 0);
   }
 };
 ```
 
-There's no escaping the need for an interface with component methods, but at least you don't need to add `render` and `update` as they are added in by `Uses`.
+There's no escaping the need for an interface with component methods, but at least you don't need to add `render` and `update` as they are added in by `Takes`.
 
 We can extend the `CounterList` using the `extendComponent` helper, which inherits the base's methods, and lets us override them if needed:
 
@@ -773,7 +773,7 @@ import { extendComponent } from 'wallace';
 const SpecialCounterList = extendComponent(CounterList);
 
 SpecialCounterList.methods.render = function () {
-  this.ctrl = new DifferentController(this, props);
+  this.hub = new DifferentHub(this, model);
   this.update();
 };
 ```
@@ -785,7 +785,7 @@ const SpecialCounterList = extendComponent(
   CounterList,
   ({ counters, things }, { self }) => (
     <div>
-      <Counter.repeat props={counters} />
+      <Counter.repeat models={counters} />
       <span>Total: {self.total()}</span>
     </div>
   )
@@ -801,7 +801,7 @@ You still inherit the methods, like `total` as before. But if you're going to do
 Stubs let you implement parts of the DOM in derived components, or vice versa:
 
 ```tsx
-const CounterList: Uses<iCounterList, Controller> = () => (
+const CounterList: Takes<iCounterList, Hub> = () => (
   <div>
     <stub.stats />
     <stub.counters />
@@ -814,7 +814,7 @@ CounterList.stub = {
   ),
   counters: ({ counters }) => (
     <div>
-      <Counter.repeat props={counters} />
+      <Counter.repeat models={counters} />
     </div>
   )
 );
@@ -826,7 +826,7 @@ HighestCounterList.stub.stats = ({ counters }) => (
 );
 
 HighestCounterList.methods.highest = function () {
-  return Math.max(...this.props.counters.map(c => c.count))
+  return Math.max(...this.model.counters.map(c => c.count))
 }
 ```
 
@@ -844,17 +844,17 @@ BaseCounterList.stub = {
   total: (_, { self }) => <span>Total: {self.total()}</span>,
   counters: ({ counters }) => (
     <div>
-      <Counter.repeat props={counters} />
+      <Counter.repeat models={counters} />
     </div>
   )
 };
 
 BaseCounterList.methods = {
   total() {
-    return this.props.counters.reduce((t, c) => t + c.count, 0);
+    return this.model.counters.reduce((t, c) => t + c.count, 0);
   },
   highest() {
-    return Math.max(...this.props.counters.map((c) => c.count));
+    return Math.max(...this.model.counters.map((c) => c.count));
   }
 };
 
@@ -871,20 +871,20 @@ const HighestCounterList = extendComponent(BaseCounterList, () => (
 
 Stubs are a flexible way to organise reusable component skeletons or parts, which again, helps reduce duplication, errors and bundle size.
 
-Stubs accept `props` and `ctrl` and can be repeated like nested components:
+Stubs accept `model` and `hub` and can be repeated like nested components:
 
 ```tsx
-const CounterList: Uses<iCounterList> = (counters) => (
+const CounterList: Takes<iCounterList> = (counters) => (
   <div>
     <stub.stats />
-    <stub.counter.repeat props={counters} />
+    <stub.counter.repeat models={counters} />
   </div>
 );
 ```
 
 ### Router
 
-Wallace comes with a very basic built-in Router which detects changes to the URL hash. It is mounted like a component and configured by props.
+Wallace comes with a very basic built-in Router which detects changes to the URL hash. It is mounted like a component and configured by model.
 
 ```tsx
 import { mount, Router, route } from "wallace";
@@ -897,7 +897,7 @@ mount("main", Router, {routes});
 
 > Going to http://localhost:8080/#/counter/5 will display a counter set to 5.
 
-The 3rd argument to `route` is optional and converts the `RouteData` to props, which if omitted, will pass the object as-is. Here is `RouteData`:
+The 3rd argument to `route` is optional and converts the `RouteData` to model, which if omitted, will pass the object as-is. Here is `RouteData`:
 
 ```tsx
 interface RouteData {

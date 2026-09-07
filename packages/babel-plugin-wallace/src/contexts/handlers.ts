@@ -34,7 +34,7 @@ class AbstractContextHandler {
     this.component = new Component(
       this.module,
       this.path.scope,
-      scope.generateUidIdentifier("props"),
+      scope.generateUidIdentifier("model"),
       scope.generateUidIdentifier("component")
     );
     this.module.requireImport(IMPORTABLES.defineComponent);

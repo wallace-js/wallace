@@ -8,7 +8,7 @@ of the file:
 
 For example:
 
-//@25 TS2741: Property 'clicks' is missing in type 'Props[]' but required in type 'Props'.
+//@25 TS2741: Property 'clicks' is missing in type 'Model[]' but required in type 'Model'.
 
 Files which do not specify such a line are expected to pass. Additionally they may not
 have inline comments, to avoid the risk of a badly formatted line.

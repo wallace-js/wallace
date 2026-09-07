@@ -45,29 +45,29 @@ describe("behaviour", () => {
     expect(component).toStrictEqual(foo);
   });
 
-  test("assigns to props with string", () => {
-    const props = {};
-    const MyComponent = props => <div assign="x"></div>;
-    const component = testMount(MyComponent, props);
+  test("assigns to model with string", () => {
+    const model = {};
+    const MyComponent = model => <div assign="x"></div>;
+    const component = testMount(MyComponent, model);
 
-    expect(component).toStrictEqual(props.x);
+    expect(component).toStrictEqual(model.x);
   });
 
-  test("assigns to props with qualifier", () => {
-    const props = {};
-    const MyComponent = props => <div assign:x></div>;
-    const component = testMount(MyComponent, props);
+  test("assigns to model with qualifier", () => {
+    const model = {};
+    const MyComponent = model => <div assign:x></div>;
+    const component = testMount(MyComponent, model);
 
-    expect(component).toStrictEqual(props.x);
+    expect(component).toStrictEqual(model.x);
   });
 
   test("assignment is not inherited", () => {
-    const props = {};
+    const model = {};
 
-    const Parent = props => <div assign:x></div>;
+    const Parent = model => <div assign:x></div>;
     const MyComponent = extendComponent(Parent, () => <div></div>);
-    testMount(MyComponent, props);
+    testMount(MyComponent, model);
 
-    expect(props.x).toBeUndefined();
+    expect(model.x).toBeUndefined();
   });
 });

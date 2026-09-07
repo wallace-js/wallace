@@ -1,14 +1,9 @@
+//@16 error TS2345: Argument of type '{ name: string; }' is not assignable to parameter of type 'Model'.
 import { mount, Takes } from "wallace";
 
 interface Model {
   clicks: number;
 }
-
-const FunctionWithoutModel: Takes<null> = () => (
-  <div>
-    <p>Whatever</p>
-  </div>
-);
 
 const FunctionWithModel: Takes<Model> = ({ clicks }) => (
   <div>
@@ -16,5 +11,6 @@ const FunctionWithModel: Takes<Model> = ({ clicks }) => (
   </div>
 );
 
-mount("a", FunctionWithoutModel);
-mount("b", FunctionWithModel);
+const model = { name: "Pelican" };
+
+mount("b", FunctionWithModel, model);

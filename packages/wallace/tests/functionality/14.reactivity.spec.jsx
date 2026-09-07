@@ -8,8 +8,8 @@ test("Can make a component reactive", () => {
       <span>{checked ? "yep" : "nope"}</span>
     </div>
   );
-  MyComponent.prototype.render = function (props) {
-    this.props = watch(props, () => this.update());
+  MyComponent.prototype.render = function (model) {
+    this.model = watch(model, () => this.update());
     this.update();
   };
   const component = testMount(MyComponent, { checked: false });

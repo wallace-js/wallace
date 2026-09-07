@@ -19,7 +19,7 @@ describe("Conditional directive not allowed", () => {
       )
       const Foo = () => (
         <div>
-          <Bar.repeat props={[1, 2, 3]} if={true} />
+          <Bar.repeat models={[1, 2, 3]} if={true} />
         </div>
       );
     `;
@@ -82,7 +82,7 @@ describe.each([1, 2, 3, 4, 5])(
             <span if={showA}>A</span>
             <span if={showB}>B</span>
             <hr />
-            <Span if={showC} props={"C"} />
+            <Span if={showC} model={"C"} />
             <span if={showD}>D</span>
           </div>
         );
@@ -90,8 +90,8 @@ describe.each([1, 2, 3, 4, 5])(
       case 2:
         Foo = () => (
           <div>
-            <Span if={showA} props={"A"} />
-            <Span if={showB} props={"B"} />
+            <Span if={showA} model={"A"} />
+            <Span if={showB} model={"B"} />
             <hr />
             <span if={showC}>C</span>
             <span if={showD}>D</span>
@@ -101,11 +101,11 @@ describe.each([1, 2, 3, 4, 5])(
       case 3:
         Foo = () => (
           <div>
-            <Span if={showA} props={"A"} />
-            <Span if={showB} props={"B"} />
+            <Span if={showA} model={"A"} />
+            <Span if={showB} model={"B"} />
             <hr />
             <span if={showC}>C</span>
-            <Span if={showD} props={"D"} />
+            <Span if={showD} model={"D"} />
           </div>
         );
         break;
@@ -116,19 +116,19 @@ describe.each([1, 2, 3, 4, 5])(
         case 4:
           Foo = () => (
             <div>
-              <stub.span if={showA} props={"A"} />
-              <stub.span if={showB} props={"B"} />
+              <stub.span if={showA} model={"A"} />
+              <stub.span if={showB} model={"B"} />
               <hr />
               <span if={showC}>C</span>
-              <stub.span if={showD} props={"D"} />
+              <stub.span if={showD} model={"D"} />
             </div>
           );
           break;
         case 5:
           Foo = () => (
             <div>
-              <stub.span if={showA} props={"A"} />
-              <stub.span if={showB} props={"B"} />
+              <stub.span if={showA} model={"A"} />
+              <stub.span if={showB} model={"B"} />
               <hr />
               <span if={showC}>C</span>
               <span if={showD}>D</span>
@@ -293,7 +293,7 @@ if (wallaceConfig.flags.allowRepeaterSiblings) {
     let items = [];
     const Foo = () => (
       <div>
-        <Bar.repeat props={items} />
+        <Bar.repeat models={items} />
         <div if={show.includes("a")}>a</div>
         <div if={show.includes("b")}>b</div>
       </div>

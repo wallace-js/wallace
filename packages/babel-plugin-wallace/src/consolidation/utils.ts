@@ -99,13 +99,13 @@ export function buildWatchCallbackParams(component: Component, noLookup: boolean
     ? [
         identifier(WATCH_CALLBACK_ARGS.element),
         // We use these as there may have been renames - but should we?
-        component.propsIdentifier,
+        component.modelIdentifier,
         component.componentIdentifier,
         identifier(WATCH_AlWAYS_CALLBACK_ARGS.stash)
       ]
     : [
         identifier(WATCH_CALLBACK_ARGS.element),
-        identifier(WATCH_CALLBACK_ARGS.props),
+        identifier(WATCH_CALLBACK_ARGS.model),
         identifier(WATCH_CALLBACK_ARGS.component),
         identifier(WATCH_CALLBACK_ARGS.newValue)
       ];

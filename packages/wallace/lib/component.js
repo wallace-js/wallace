@@ -1,14 +1,14 @@
 const throwAway = document.createElement("template");
 const NO_LOOKUP = "__";
 
-const defaultSetFunction = function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
-  this.props = props;
-  /* #INCLUDE-IF: allowCtrl */ this.ctrl = ctrl;
+const defaultSetFunction = function (model, /* #INCLUDE-IF: allowHub */ hub) {
+  this.model = model;
+  /* #INCLUDE-IF: allowHub */ this.hub = hub;
 };
 
 const ComponentPrototype = {
-  render: function (props, /* #INCLUDE-IF: allowCtrl */ ctrl) {
-    this.set(props, /* #INCLUDE-IF: allowCtrl */ ctrl);
+  render: function (model, /* #INCLUDE-IF: allowHub */ hub) {
+    this.set(model, /* #INCLUDE-IF: allowHub */ hub);
     this.update();
   },
 
@@ -31,7 +31,7 @@ const ComponentPrototype = {
     let watch, element, displayToggle, detacher, query, lookupTrue, shouldBeVisible;
 
     const watches = this._w,
-      props = this.props,
+      model = this.model,
       previous = this._p,
       elements = this._e,
       lookups = this._q,
@@ -60,7 +60,7 @@ const ComponentPrototype = {
         query = displayToggle.q;
         detacher = displayToggle.d;
         if (query !== undefined) {
-          lookupTrue = !!lookups[query](props, this);
+          lookupTrue = !!lookups[query](model, this);
           shouldBeVisible = displayToggle.r ? !lookupTrue : lookupTrue;
         }
         if (detacher) {
@@ -77,12 +77,12 @@ const ComponentPrototype = {
           callbacks = watch.c;
         for (let key in callbacks) {
           if (key === NO_LOOKUP) {
-            callbacks[key](element, props, this, stash);
+            callbacks[key](element, model, this, stash);
           } else {
             const oldValue = prev[key],
-              newValue = lookups[key](props, this);
+              newValue = lookups[key](model, this);
             if (oldValue !== newValue) {
-              callbacks[key](element, props, this, newValue);
+              callbacks[key](element, model, this, newValue);
               prev[key] = newValue;
             }
           }

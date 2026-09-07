@@ -1,7 +1,7 @@
 import { mount } from "wallace";
 import { createDiv, tidyHTML } from "../utils";
 
-describe("Mounting without props", () => {
+describe("Mounting without model", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
   });
@@ -24,7 +24,7 @@ describe("Mounting without props", () => {
   });
 });
 
-describe("Mounting with props", () => {
+describe("Mounting with model", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
   });

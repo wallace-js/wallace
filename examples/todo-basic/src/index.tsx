@@ -1,4 +1,5 @@
-import { mount, Uses, watch } from "wallace";
+import { mount } from "wallace";
+import type { Takes, Uses } from "wallace";
 
 interface iTask {
   text: string;
@@ -9,18 +10,21 @@ interface TaskListMethods {
   addTaskKeyup(event: KeyboardEvent): void;
 }
 
-const Task: Uses<iTask> = ({ text, done }) => (
+const Task: Takes<iTask> = ({ text, done }) => (
   <div>
-    <input type="checkbox" bind={done} />
+    <input bind-as:checkbox={done} />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
 );
 
-const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) => (
-  <div class="tasklist">
+const TaskList: Uses<{ model: iTask[]; methods: TaskListMethods }> = (
+  tasks,
+  { event, self }
+) => (
+  <div watch class="tasklist">
     <span>Completed: {tasks.filter(t => t.done).length}</span>
     <div style="margin-top: 10px">
-      <Task.repeat props={tasks} />
+      <Task.repeat models={tasks} />
     </div>
     <div style="margin-top: 10px">
       <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
@@ -30,15 +34,11 @@ const TaskList: Uses<iTask[], null, TaskListMethods> = (tasks, { event, self }) 
 );
 
 TaskList.methods = {
-  render(tasks) {
-    this.props = watch(tasks, () => this.update());
-    this.update();
-  },
   addTaskKeyup(event: KeyboardEvent) {
     const target = event.target as HTMLInputElement;
     const text = target.value;
     if (event.key === "Enter" && text.length > 0) {
-      this.props.push({ text, done: false });
+      this.model.push({ text, done: false });
       target.value = "";
     }
   }

@@ -3,68 +3,67 @@ import { testMount } from "../utils";
 describe("Definition", () => {
   test("diallows invalid key", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.bar />
       </div>
     );
     `).toHaveTypeErrors([
       `Property 'bar' does not exist on type 'StubInterface<{ foo: 
-      ComponentFunction<Props, any, {}, {}>; }>'.`
+      Takes<Model>; }>'.`
     ]);
   });
 
   test("key is recognised on component stub property", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = () => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = () => (
       <div>
       </div>
     );
 
-    Bar.stub.foo = (props) => <div>Bar{props.clicks}</div>;
-    Bar.stub.bar = (props) => <div>Bar{props.clicks}</div>;
+    Bar.stub.foo = (model) => <div>Bar{model.clicks}</div>;
+    Bar.stub.bar = (model) => <div>Bar{model.clicks}</div>;
     `).toHaveTypeErrors([
-      `Property 'bar' does not exist on type '{ foo: 
-      ComponentFunction<Props, any, {}, {}>; }'.`
+      `Property 'bar' does not exist on type '{ foo: Takes<Model>; }'.`
     ]);
   });
 
-  test("props are recognised on component stub", () => {
+  test("model are recognised on component stub", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = () => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = () => (
       <div>
       </div>
     );
 
-    Bar.stub.foo = (props) => <div>
-      {props.clicks}
-      {props.nope}
+    Bar.stub.foo = (model) => <div>
+      {model.clicks}
+      {model.nope}
     </div>;
-    `).toHaveTypeErrors([`Property 'nope' does not exist on type 'Props'.`]);
+    `).toHaveTypeErrors([`Property 'nope' does not exist on type 'Model'.`]);
   });
 });
 
-describe("Props", () => {
-  test("allows no props if none specified", () => {
+describe("Model", () => {
+  test("allows no model if none specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
+    import { mount, Takes, Uses } from "wallace";
 
-    const Bar: Uses<{stub: {foo: Uses}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes}}> = (_, { stub }) => (
       <div>
         <stub.foo />
       </div>
@@ -72,50 +71,50 @@ describe("Props", () => {
   `).toHaveNoTypeErrors();
   });
 
-  test("diallows no props if props are specified", () => {
+  test("diallows no model if model are specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
         <stub.foo />
       </div>
     );
   `).toHaveTypeErrors([
-      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Props>'."
+      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Model>'."
     ]);
   });
 
-  test("diallows invalid props if they are specified", () => {
+  test("diallows invalid model if they are specified", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
-        <stub.foo props={5} />
+        <stub.foo model={5} />
       </div>
     );
-    `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Props'."]);
+    `).toHaveTypeErrors(["Type 'number' is not assignable to type 'Model'."]);
   });
 });
 
 describe("Other directives", () => {
   test("allows if directive as boolean", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
-        <stub.foo props={{clicks: 5}} if={true} />
+        <stub.foo model={{clicks: 5}} if={true} />
       </div>
     );
   `).toHaveNoTypeErrors();
@@ -123,14 +122,14 @@ describe("Other directives", () => {
 
   test("allows part directive as string", () => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
-        <stub.foo props={{clicks: 5}} part="p1" />
+        <stub.foo model={{clicks: 5}} part="p1" />
       </div>
     );
     const bar = mount("main", Bar);
@@ -140,21 +139,21 @@ describe("Other directives", () => {
 
   test.each(["key", "id", "show", "hide"])("disallows %s directive", directive => {
     expect(`
-    import { mount, Uses } from "wallace";
-    interface Props {
+    import { mount, Takes, Uses } from "wallace";
+    interface Model {
       clicks: number;
     }
 
-    const Bar: Uses<{stub: {foo: Uses<Props>}}> = (_, { stub }) => (
+    const Bar: Uses<{stub: {foo: Takes<Model>}}> = (_, { stub }) => (
       <div>
-        <stub.foo props={{ clicks: 1 }} ${directive}="clicks" />
+        <stub.foo model={{ clicks: 1 }} ${directive}="clicks" />
       </div>
     );
   `).toHaveTypeErrors([
       `
-    Type '{ props: { clicks: number; }; ${directive}: string; }' is not assignable to
-    type 'IntrinsicAttributes & Wrapper<Props>'. Property '${directive}' does not exist
-    on type 'IntrinsicAttributes & Wrapper<Props>'.
+    Type '{ model: { clicks: number; }; ${directive}: string; }' is not assignable to
+    type 'IntrinsicAttributes & Wrapper<Model>'. Property '${directive}' does not exist
+    on type 'IntrinsicAttributes & Wrapper<Model>'.
     `
     ]);
   });

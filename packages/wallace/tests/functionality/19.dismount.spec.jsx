@@ -6,13 +6,13 @@ if (wallaceConfig.flags.allowDismount) {
     const Field = value => <div>{value}</div>;
     const Animal = animal => (
       <div>
-        <Field props={animal.name} />
-        <Field props={animal.type} />
+        <Field model={animal.name} />
+        <Field model={animal.type} />
       </div>
     );
     const AnimalList = () => (
       <div>
-        <Animal.repeat props={animals} />
+        <Animal.repeat models={animals} />
       </div>
     );
     const animals = [

@@ -6,7 +6,7 @@ describe("Repeat", () => {
     const Child = animal => <div>{animal.name}</div>;
     const Parent = () => (
       <div>
-        <Child.repeat props={items} />
+        <Child.repeat models={items} />
       </div>
     );
     const component = testMount(Parent);
@@ -42,11 +42,11 @@ describe("Repeat", () => {
     expect(code).toCompileWithError(`Invalid tag format, must be one of:`);
   });
 
-  test("Can repeat without props", () => {
+  test("Can repeat without model", () => {
     const Child = () => <div>Hello</div>;
     const Parent = () => (
       <div>
-        <Child.repeat props={Array(3)} />
+        <Child.repeat models={Array(3)} />
       </div>
     );
     const component = testMount(Parent);
@@ -65,7 +65,7 @@ describe("Repeat compiles with error when", () => {
   test("repeat on root element", () => {
     const code = `
       const Parent = () => (
-        <Child.repeat props={items} />
+        <Child.repeat models={items} />
       );
     `;
     expect(code).toCompileWithError("Nested components not allowed as root element.");
@@ -75,7 +75,7 @@ describe("Repeat compiles with error when", () => {
     const code = `
     const Parent = () => (
       <div>
-        <Child.repeat props={items} id="foo" />
+        <Child.repeat models={items} id="foo" />
       </div>
     );
   `;
@@ -88,7 +88,7 @@ describe("Repeat compiles with error when", () => {
       const Parent = () => (
         <div>
           <div>signling</div>
-          <Child.repeat props={items} />
+          <Child.repeat models={items} />
         </div>
       );
     `;
@@ -100,7 +100,7 @@ describe("Repeat compiles with error when", () => {
       const Parent = () => (
         <div>
           <div>signling</div>
-          <Child.repeat props={items} />
+          <Child.repeat models={items} />
         </div>
       );
     `;
@@ -115,7 +115,7 @@ describe("Repeat compiles with error when", () => {
     const code = `
       const Parent = () => (
         <div>
-          <Child.repeat props={items} >
+          <Child.repeat models={items} >
             <div>other stuff</div>
           </Child.repeat>
         </div>

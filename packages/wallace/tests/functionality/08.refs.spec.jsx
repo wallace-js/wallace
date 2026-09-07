@@ -18,7 +18,7 @@ describe("Specification", () => {
     const src = `
     const A = () => (
     <div>
-      <Foo.repeat ref:a props={[]}/>
+      <Foo.repeat ref:a models={[]}/>
     </div>
   );
   `;

@@ -1,12 +1,12 @@
 import { testMount } from "../utils";
 
 describe("Specifying", () => {
-  test("Disallow passing a litteral object as props", () => {
+  test("Disallow passing a litteral object as model", () => {
     const code = `
     const Animal = (animal) => <div>{animal.name}</div>;
     const AnimalList = () => (
       <div>
-        <Animal props={{ name: "Fox" }} />
+        <Animal model={{ name: "Fox" }} />
       </div>
     );
   `;
@@ -50,7 +50,7 @@ describe("Specifying", () => {
 });
 
 describe("Basic use", () => {
-  test("Can nest component without props", () => {
+  test("Can nest component without model", () => {
     const Fox = () => <div>Fox</div>;
     const AnimalList = () => (
       <div>
@@ -65,12 +65,12 @@ describe("Basic use", () => {
   `);
   });
 
-  test("Can specify props", () => {
-    const myProps = { name: "Fox" };
+  test("Can specify model", () => {
+    const myModel = { name: "Fox" };
     const Animal = animal => <div class="animal">{animal.name}</div>;
     const AnimalList = () => (
       <div>
-        <Animal props={myProps} />
+        <Animal model={myModel} />
       </div>
     );
     const component = testMount(AnimalList);
@@ -83,15 +83,15 @@ describe("Basic use", () => {
   `);
   });
 
-  if (wallaceConfig.flags.allowCtrl) {
-    test("Can specify ctrl", () => {
-      const Fox = (_, { ctrl }) => <div>Fox {ctrl}</div>;
+  if (wallaceConfig.flags.allowHub) {
+    test("Can specify hub", () => {
+      const Fox = (_, { hub }) => <div>Fox {hub}</div>;
       const AnimalList = () => (
         <div>
-          <Fox ctrl={foxCtrl} />
+          <Fox hub={foxHub} />
         </div>
       );
-      const foxCtrl = 6;
+      const foxHub = 6;
       const component = testMount(AnimalList);
       expect(component).toRender(`
         <div>
@@ -154,7 +154,7 @@ describe("Component", () => {
     let show = false,
       created = 0;
     const Fox = () => <div>Fox</div>;
-    Fox.prototype.render = function (props, ctrl) {
+    Fox.prototype.render = function (model, hub) {
       created += 1;
     };
     const AnimalList = () => (
@@ -182,7 +182,7 @@ describe("Component", () => {
     let show = false,
       created = new Set();
     const Fox = () => <div>Fox</div>;
-    Fox.prototype.render = function (props, ctrl) {
+    Fox.prototype.render = function (model, hub) {
       created.add(this);
     };
     const AnimalList = () => (

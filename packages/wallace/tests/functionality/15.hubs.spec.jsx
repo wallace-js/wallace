@@ -1,8 +1,8 @@
 import { testMount } from "../utils";
 import { extendComponent } from "wallace";
 
-if (wallaceConfig.flags.allowCtrl) {
-  class Controller {
+if (wallaceConfig.flags.allowHub) {
+  class Hub {
     constructor(multiplier) {
       this.multiplier = multiplier;
     }
@@ -18,34 +18,34 @@ if (wallaceConfig.flags.allowCtrl) {
       </div>
     );
     Bar.prototype.render = function () {
-      this.ctrl = 8;
+      this.hub = 8;
       this.update();
     };
     const component = testMount(Bar);
-    test("has its controller set initially", () => {
-      expect(component.ref.foo.get().ctrl).toBe(8);
+    test("has its hub set initially", () => {
+      expect(component.ref.foo.get().hub).toBe(8);
     });
 
-    test("has its controller updated", () => {
-      component.ctrl = 10;
+    test("has its hub updated", () => {
+      component.hub = 10;
       component.update();
-      expect(component.ref.foo.get().ctrl).toBe(10);
+      expect(component.ref.foo.get().hub).toBe(10);
     });
   });
 
   describe("Repeated components", () => {
-    const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
+    const Foo = (i, { hub }) => <div>{hub.multiply(i)}</div>;
     const Bar = () => (
       <div>
-        <Foo.repeat props={[1, 2, 3]} />
+        <Foo.repeat models={[1, 2, 3]} />
       </div>
     );
     Bar.prototype.render = function () {
-      this.ctrl = new Controller(2);
+      this.hub = new Hub(2);
       this.update();
     };
     const component = testMount(Bar);
-    test("have their controller set initially", () => {
+    test("have their hub set initially", () => {
       expect(component).toRender(`
       <div>
         <div>2</div>
@@ -55,8 +55,8 @@ if (wallaceConfig.flags.allowCtrl) {
     `);
     });
 
-    test("have their controller updated", () => {
-      component.ctrl = new Controller(3);
+    test("have their hub updated", () => {
+      component.hub = new Hub(3);
       component.update();
       expect(component).toRender(`
       <div>
@@ -70,21 +70,21 @@ if (wallaceConfig.flags.allowCtrl) {
 
   if (wallaceConfig.flags.allowStubs) {
     describe("Inherited component", () => {
-      const BaseComponent = ({}, { ctrl }) => (
+      const BaseComponent = ({}, { hub }) => (
         <div>
-          <span>{ctrl.multiply(1)}</span>
+          <span>{hub.multiply(1)}</span>
           <stub.display />
         </div>
       );
       const SubComponent = extendComponent(BaseComponent);
-      SubComponent.stub.display = (_, { ctrl }) => <span>{ctrl.multiply(2)}</span>;
+      SubComponent.stub.display = (_, { hub }) => <span>{hub.multiply(2)}</span>;
       SubComponent.prototype.render = function () {
-        this.ctrl = new Controller(2);
+        this.hub = new Hub(2);
         this.update();
       };
       const component = testMount(SubComponent);
 
-      test("has its controller set initially", () => {
+      test("has its hub set initially", () => {
         expect(component).toRender(`
       <div>
         <span>2</span>
@@ -93,8 +93,8 @@ if (wallaceConfig.flags.allowCtrl) {
     `);
       });
 
-      test("has its controller updated", () => {
-        component.ctrl = new Controller(3);
+      test("has its hub updated", () => {
+        component.hub = new Hub(3);
         component.update();
         expect(component).toRender(`
       <div>
@@ -106,9 +106,9 @@ if (wallaceConfig.flags.allowCtrl) {
     });
   }
 
-  test("Can pass controller in mount", () => {
-    const Foo = (i, { ctrl }) => <div>{ctrl.multiply(i)}</div>;
-    const component = testMount(Foo, 2, new Controller(2));
+  test("Can pass hub in mount", () => {
+    const Foo = (i, { hub }) => <div>{hub.multiply(i)}</div>;
+    const component = testMount(Foo, 2, new Hub(2));
     expect(component).toRender("<div>4</div>");
   });
 } else {

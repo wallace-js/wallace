@@ -1,7 +1,7 @@
 import { ComponentInstance, watch } from "wallace";
 import { iTask } from "./types";
 
-export class Controller {
+export class Hub {
   root: ComponentInstance;
   previousStates: string[]; // Latest is always the current state.
   undoneStates: string[];
