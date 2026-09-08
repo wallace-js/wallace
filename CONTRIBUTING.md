@@ -828,23 +828,28 @@ The offset tracker stores a 0 or a -1 against each conditional element, and the 
 
 ## Publishing
 
-We use [lerna](https://lerna.js.org/) to version and publish with the following command:
+From **master** run the correct command:
 
-```
+```bash
+# correct
 npm run publish
-# This runs:
-#    lerna publish --no-private
-# DO NOT RUN:
-#    npm publish
+# incorrect
+npm publish
 ```
 
-> Lerna detects the current packages, identifies the current version and proposes the next one to choose. Once a given version is chosen, Lerna updates the `package.json` with the version number, commits the change, adds a corresponding version tag (e.g. `v1.0.0`) and pushes the commit and the tag to the remote repository.
+The custom command uses [lerna](https://lerna.js.org/) which prompts for a new version, creates the git tag and commit, and publishes the relevant packages.
 
-The process is:
+We run `npm whoami` first to check we are logged in, but don't have a way to check you can actually publish, and so it may still fail.
 
-1. Merge changes to master.
-2. From master, run the `npm run publish` command (which adds another commit).
+#### Failure
 
-Our script also runs `npm whoami` first to ensure we are logged into npm, otherwise publishing fails and the project is left in a messy state. This is why we don't publish from master branch.
+Occasionally `lerna publish` fails, typically due to authentication or expired tokens, and leaves uncommitted changes to the **package.json** files.
 
-The tag keeps that commit and all previous commits from being garbage collected, which is why we ideally put all the changes in one commit.
+These changes are just the temporary `gitHead` field Lerna adds prior to publishing to npm, which it removes once it's done, unless it fails.
+
+To fix this:
+
+1. Publish each package manually with `npm publish` (keeping the `gitHead` fields)
+2. Remove the `gitHead` fields - as they're not needed.
+
+More detail in this answer: https://stackoverflow.com/a/80001658/548736
