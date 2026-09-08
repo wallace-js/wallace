@@ -96,6 +96,9 @@ Wallace is named after [William Wallace](https://en.wikipedia.org/wiki/William_W
 
 ## Usage
 
+> [!WARNING]  
+> There have been a few changes which are not reflected here, or in the docs yet. If in doubt, refer to the built-in documentation (hover on module import).
+
 Assuming you're comfortable with ES6, you can probably learn Wallace in around 25 minutes, after which you can rely entirely on the tool tips.
 
 ### Installation

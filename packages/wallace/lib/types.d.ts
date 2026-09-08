@@ -85,24 +85,38 @@ root.update();
 
 ### 1.3 Methods
 
-Components have two public methods:
+Components have three public methods:
 
 #### render(model, hub)
 
-Called from "above" by `mount` or when nesting other components. Here it is:
+Called from "above" by `mount` or when nesting other components:
+
+```tsx
+render(model, hub) {
+  this.set(model, hub);
+  this.update();
+}
+```
+
+You can override this method.
+
+#### set(model, hub)
+
+By default it sets the `model` and `hub` fields:
 
 ```tsx
 render(model, hub) {
   this.model = model;
   this.hub = hub;
-  this.update();
 }
 ```
+
+However it may be modified by directives such as `watch` and `assign` and therefore should not be overriden.
 
 #### update()
 
 Updates the DOM. Only called internally by `render`, but you can call it from other
-places.
+places. You can override this if needed.
 
 #### Overriding
 
