@@ -869,6 +869,9 @@ declare module "wallace" {
     error?: (error: Error, router: Router) => void;
   };
 
+  /**
+   * TODO: document...
+   */
   type Router = ComponentFunction<RouterModel> & {
     mount(component: Component<any>): void;
   };

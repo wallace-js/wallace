@@ -63,7 +63,7 @@ SequentialRepeater.prototype = {
       }
       component.render(items[i], /* #INCLUDE-IF: allowHub */ hub);
       if (i >= previousChildCount) {
-        parent.insertBefore(component.el, nextElement);
+        parent.insertBefore(component.el, nextElement); //err
       }
       i++;
     }
@@ -72,7 +72,8 @@ SequentialRepeater.prototype = {
     let removeAtIndex = offset + previousChildCount - 1;
     const stopAtIndex = offset + itemsLength - 1;
     for (let i = removeAtIndex; i > stopAtIndex; i--) {
-      parent.removeChild(childNodes[i]);
+      console.log(removeAtIndex, i, childNodes[i]);
+      parent.removeChild(childNodes[i]); // err
     }
 
     /* #INCLUDE-IF: allowRepeaterSiblings */

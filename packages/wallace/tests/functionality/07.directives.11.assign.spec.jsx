@@ -70,4 +70,16 @@ describe("behaviour", () => {
 
     expect(model.x).toBeUndefined();
   });
+
+  test("preserves model and hub assignment", () => {
+    let foo;
+    let hub = { name: "hubby" };
+    let model = { name: "model" };
+    const MyComponent = (model, { hub }) => <div assign={foo}></div>;
+    const component = testMount(MyComponent, model, hub);
+
+    expect(component).toStrictEqual(foo);
+    expect(component.model).toStrictEqual(model);
+    expect(component.hub).toStrictEqual(hub);
+  });
 });

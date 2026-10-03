@@ -9,7 +9,6 @@ text or placeholders:
 It performs no validation yet, and may change to use regex in future.
 */
 
-const events = ["load", "hashchange"];
 const noMod = x => x;
 const converters = {
   int: v => parseInt(v),
@@ -24,18 +23,19 @@ export const Router = () => <div></div>;
 
 Object.assign(Router.prototype, {
   render(model, /* #INCLUDE-IF: allowHub */ hub) {
+    console.log("render");
     if (wallaceConfig.flags.allowBase) {
     } else {
       throw new Error(
         "Flag `allowBase` must be set to true in the config for this feature."
       );
     }
-    if (wallaceConfig.flags.allowDismount) {
-    } else {
-      throw new Error(
-        "Flag `allowDismount` must be set to true in the config for this feature."
-      );
-    }
+    // if (wallaceConfig.flags.allowDismount) {
+    // } else {
+    //   throw new Error(
+    //     "Flag `allowDismount` must be set to true in the config for this feature."
+    //   );
+    // }
     this._alive = true;
     this.error =
       model.error ||
@@ -43,11 +43,7 @@ Object.assign(Router.prototype, {
         throw error;
       });
     this.current = null;
-    this.handlers = events.map(e => {
-      const handler = () => this.onHashChange();
-      window.addEventListener(e, handler);
-      return { e, handler };
-    });
+    this.handler = window.addEventListener("hashchange", () => this.onHashChange());
 
     if (model.atts) {
       Object.keys(model.atts).forEach(k => {
@@ -55,6 +51,7 @@ Object.assign(Router.prototype, {
       });
     }
     this.base.render.call(this, model, /* #INCLUDE-IF: allowHub */ hub);
+    this.onHashChange();
   },
   async onHashChange() {
     const path = location.hash.slice(1) || "",
@@ -95,10 +92,8 @@ Object.assign(Router.prototype, {
       this.current.cleanup();
     }
     this.base.dismount.call(this);
-    if (this._handlers) {
-      this._handlers.forEach(({ e, handler }) => {
-        window.removeEventListener(e, handler);
-      });
+    if (this.handler) {
+      window.removeEventListener(e, this.handler);
     }
   }
 });
