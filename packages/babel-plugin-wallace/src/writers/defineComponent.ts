@@ -193,18 +193,41 @@ function getComponentPropertyAssignment(
   return assignExpression(left, right);
 }
 
-// TOOD: revisit once we rename per directive.
+/*
+Generates a function like:
+
+  function (model, hub) {
+    const _component4 = this,
+    _model4 = model;
+    this.model = model;
+    _model4.x = this;
+  }
+
+    TOOD: revisit once we rename per directive.
+*/
 function buildSetFunction(componentDefinition: ComponentDefinitionData) {
   const component = componentDefinition.component;
   const { assignTo, watchModel, module } = component;
-
+  const parameters = [t.identifier("model")];
   const statements: any[] = [
+    // This is necessary because assignTo will use the componentIdentifier
     t.variableDeclaration("const", [
       t.variableDeclarator(component.componentIdentifier, t.identifier("this")),
       t.variableDeclarator(component.modelIdentifier, t.identifier("model"))
     ]),
+
     getComponentPropertyAssignment(module, "model", watchModel)
   ];
+  if (wallaceConfig.flags.allowHub) {
+    parameters.push(t.identifier("hub"));
+    statements.push(
+      assignExpression(
+        t.memberExpression(t.thisExpression(), t.identifier("hub")),
+        t.identifier("hub")
+      )
+    );
+  }
+
   if (assignTo) {
     let actualValue: LVal;
     if (typeof assignTo === "string") {
@@ -214,11 +237,7 @@ function buildSetFunction(componentDefinition: ComponentDefinitionData) {
     }
     statements.push(assignExpression(actualValue, t.identifier("this")));
   }
-  return t.functionExpression(
-    null,
-    [t.identifier("model"), t.identifier("hub")],
-    t.blockStatement(statements)
-  );
+  return t.functionExpression(null, parameters, t.blockStatement(statements));
 }
 
 function buildDismountKeys(componentDefinition: ComponentDefinitionData) {
