@@ -46,6 +46,10 @@ tsxFiles.forEach(fileName => {
   }
 });
 
+// Each test spawns tsc, which takes several seconds, and longer when the whole suite is
+// running in parallel, so the default timeout in jest.config.js is not enough.
+const TSC_TIMEOUT = 60 * 1000;
+
 const tscCmd = name => {
   const file = path.resolve(__dirname, name);
   return `tsc --jsx preserve ${file} --noEmit`;
@@ -59,7 +63,7 @@ test.each(tsxFilesWithoutErrors)("Expect no error in $fileName", ({ fileName }, 
       done();
     }
   });
-});
+}, TSC_TIMEOUT);
 
 test.each(tsxFilesWithErrors)(
   "Expect error in $fileName",
@@ -80,5 +84,6 @@ test.each(tsxFilesWithErrors)(
         done(`Expected error on line ${lineNo}: ${errorMessage}`);
       }
     });
-  }
+  },
+  TSC_TIMEOUT
 );

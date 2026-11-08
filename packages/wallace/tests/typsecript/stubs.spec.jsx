@@ -84,7 +84,7 @@ describe("Model", () => {
       </div>
     );
   `).toHaveTypeErrors([
-      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Model>'."
+      "Type '{}' is not assignable to type 'IntrinsicAttributes & Wrapper<Model, unknown>'."
     ]);
   });
 
@@ -152,8 +152,8 @@ describe("Other directives", () => {
   `).toHaveTypeErrors([
       `
     Type '{ model: { clicks: number; }; ${directive}: string; }' is not assignable to
-    type 'IntrinsicAttributes & Wrapper<Model>'. Property '${directive}' does not exist
-    on type 'IntrinsicAttributes & Wrapper<Model>'.
+    type 'IntrinsicAttributes & Wrapper<Model, unknown>'. Property '${directive}' does not exist
+    on type 'IntrinsicAttributes & Wrapper<Model, unknown>'.
     `
     ]);
   });

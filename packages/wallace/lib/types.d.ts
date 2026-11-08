@@ -13,10 +13,10 @@
   3. Nesting
   4. Repeating
   5. Directives
-  6. Hubs
-  7. Inheritance
-  8. Stubs
-  9. TypeScript
+  6. TypeScript
+  7. Patterns
+  8. Inheritance
+  9. Stubs
  10. Helpers
  11. Flags
 
@@ -33,7 +33,18 @@ You define a component by assigning a JSX function to a value:
 const MyComponent = () => <div>Hello</div>;
 ```
 
-The function body must be a single JSX expression, returned, and nothing else.
+The function body must be a single JSX expression, returned, and nothing else. Use
+arrow functions with parentheses: `() => (<div></div>)`. Note that `() => { <div></div> }`
+is invalid as it does not return anything.
+
+Regular functions and object methods also work, so long as the body only contains the
+return statement:
+
+```tsx
+function MyComponent() {
+  return <div>Hello</div>;
+}
+```
 
 The function takes two arguments, both optional:
 
@@ -50,7 +61,7 @@ const MyComponent = ({title}, {hub, event}) => (
 
 The **xargs** contains:
 
-- `hub` refers to the hub.
+- `hub` refers to the hub (see Patterns).
 - `stub` refers to the stubs, included for typing only.
 - `model` refers to the model, in case you want the non-destructured version too.
 - `self` refers to the component instance (as `this` is not allowed).
@@ -105,7 +116,7 @@ You can override this method.
 By default it sets the `model` and `hub` fields:
 
 ```tsx
-render(model, hub) {
+set(model, hub) {
   this.model = model;
   this.hub = hub;
 }
@@ -145,7 +156,7 @@ You can use `this.base` to access methods on the base `Component` class:
 
 ```tsx
 MyComponent.methods = {
-  render(model) {
+  render(model, hub) {
     this.base.render.call(this, model, hub);
   }
 };
@@ -189,11 +200,33 @@ Wallace has two JSX rules:
 2. You cannot put JavaScript expressions before, within or around JSX - except inside
 placeholders, and only so long as it does not return further JSX.
 
-Other than that, its standard JSX, except for three special cases:
+Other than that, it's standard JSX, except for three special cases:
 
 1. Directives (attributes with special behaviours).
 2. Nesting.
 3. Stubs, for inheritance.
+
+Use `class` not `className`, and `style:color={x}` not `style={{color: x}}`.
+Fragments (`<></>`) are not supported.
+
+### Events
+
+The expression in an event handler is copied into the listener, so write the call you
+want to happen, **not** a function:
+
+```tsx
+<button onClick={hub.save()}>Save</button>         // correct: calls hub.save()
+<button onClick={() => hub.save()}>Save</button>   // wrong: silently does nothing
+<button onClick={hub.save}>Save</button>           // wrong: silently does nothing
+```
+
+Use **xargs** to access the event or element:
+
+```tsx
+const Form = (_, { hub, event }) => (
+  <form onSubmit={hub.submit(event)}></form>
+);
+```
 
 ## 3. Nesting
 
@@ -211,12 +244,16 @@ const TopTasks = (tasks) => (
 
 Notes:
 
- - You cannot use nest on the root element.
- - You cannot use `if` on a nested element, only `show` and `hide`.
+ - You cannot nest on the root element.
+ - You can use `if` on a nested element, but not `show` or `hide` (wrap it in an
+   element and put `show`/`hide` on that instead).
+ - Nested elements do not accept regular attributes (like `id` or `class`) or children.
+ - You cannot pass a literal object as model (`model={{a: 1}}`) as it would become a
+   constant. Pass a variable or expression instead.
 
 ## 4. Repeating
 
-To repeat a component use its name followed by `.repeat` and pass `model` which must
+To repeat a component use its name followed by `.repeat` and pass `models` which must
 be an Array of the model the component uses:
 
 ```tsx
@@ -250,7 +287,9 @@ const TaskList = (tasks) => (
 Notes:
 
  - You cannot use repeat on the root element.
- - You cannot toggle visibility on the repeat element.
+ - You cannot use `if`, `show`, `hide` or `ref` on the repeat element (wrap it in an
+   element and put `if`/`show`/`hide` on that instead).
+ - Never use `.map()` to produce JSX - always use `.repeat`.
 
 ## 5. Directives
 
@@ -259,16 +298,224 @@ Directives are attributes with special behaviours.
 You can see the list of available directives by hovering over any JSX element, like
 a `div`
 
-You will get more details by hovering on the directive itself, but unfortunetely the
+You will get more details by hovering on the directive itself, but unfortunately the
 tool tip won't display when you use a qualifier, like `class:danger`. To see it you can
-temporarily change it to something `class x:danger`.
+temporarily change it to something like `class x:danger`.
 
 You can define your own directives in your babel config.
 
-## 6. Hubs
+## 6. TypeScript
 
-A hub is just an object you create which gets passed down to every nested
-component, making it a convenient place to handle:
+There are two types you can use to annotate components:
+
+### Takes
+
+Lets you annotate a component's model and hub (both optional). It must be placed
+right after the component name (not inside the parameters):
+
+```tsx
+import { Takes } from 'wallace';
+
+interface iTask {
+  text: string
+}
+
+const Task: Takes<iTask> = ({text}) => <div>{text}</div>;
+```
+
+This ensures you pass correct model during mounting, nesting and repeating:
+
+```tsx
+const TaskList: Takes<iTask[]> = (tasks) => (
+  <div>
+    First task:
+    <Task model={tasks[0]} />
+    <Task.repeat models={tasks.slice(1)} />
+  </div>
+);
+
+mount("main", TaskList, [{text: 'foo'}]);  // OK
+mount("main", TaskList, [{test: 'foo'}]);  // Type error
+```
+
+If you require no model, pass `null`:
+
+```tsx
+const Task: Takes<null> = () => <div>Hello</div>;
+```
+
+The second parameter is the hub type:
+
+```tsx
+const Task: Takes<iTask, TaskHub> = ({text}, { hub }) => (
+  <div onClick={hub.select(text)}>{text}</div>
+);
+```
+
+### Uses
+
+
+Lets you annotate model, hub and other things the component uses. It is used in the same
+way as `Takes` except you pass types as an object rather than sequentially, whose fields
+are all optional:
+
+```tsx
+import type { Uses } from 'wallace';
+
+const Task: Uses<{
+  model: Model,
+  hub: Hub,
+  methods: Methods,
+  stub: Stub
+}> = () => <div></div>;
+```
+
+#### Methods
+
+Custom methods of the component are available `self`:
+
+```tsx
+import type { Uses } from 'wallace';
+
+interface TaskMethods {
+  getName(): string;
+}
+
+const Task: Uses<{methods: TaskMethods}> = (_, { self }) => (
+  <div>{self.getName()}</div>
+);
+
+Task.methods = {
+  getName() { return 'wallace' },
+  render(model, hub) {  // types are already known
+    this.model = { ...model, notallowed: 1 };  // type error
+  }
+};
+```
+
+The type will pass into the object passed into `methods` so it recognises custom methods
+in addition to standard methods like `render`, which are already typed for you.
+
+#### Stubs
+
+You can specify the model and hub of each stub:
+
+```tsx
+import type { Takes, Uses } from 'wallace';
+
+interface ParentTypes {
+  hub: Hub;
+  stub: {
+    foo: Takes<iDay>;
+    bar: Takes<iDay, Hub>;
+  };
+}
+
+const Parent: Uses<ParentTypes> = (_, { stub, hub }) => (
+  <div>
+    <stub.foo model={hub.days[0]} />
+    <stub.bar.repeat models={hub.days} />
+  </div>
+);
+```
+
+### Inheritance
+
+The `extendComponent` function transfers the types specified on the base:
+
+```tsx
+const Child = extendComponent(Parent);
+```
+
+You may specify different types:
+
+```tsx
+const Child = extendComponent<newModel, Hub, Methods>(Parent);
+```
+
+However:
+
+1. You must specify all those that are specified on base - as omitted types default
+   to `any`.
+2. Each type must extend its corresponding type on base.
+
+### Other types:
+
+Wallace defines some other types you may use:
+
+ - `Component<Model, Hub, Methods>` - the base component class (it is a 
+    constructor, not a class)
+ - `ComponentInstance<Model, Hub, Methods>` - a component instance.
+
+## 7. Patterns
+
+Keep components simple, and put your logic in plain classes. There are two patterns
+for doing this. Use one or the other: mixing them can be confusing.
+
+### 7.1 Active Models (preferred)
+
+Models are instances of classes which hold data and logic, and which hold a reference
+to their component (set by the `assign` directive) so they can update it:
+
+```tsx
+import { mount } from 'wallace';
+import type { ComponentInstance, Takes } from 'wallace';
+
+class Task {
+  component: ComponentInstance;
+  done = false;
+  constructor(public text: string, public list: TaskList) {}
+  toggle() {
+    this.done = !this.done;
+    this.component.update();
+  }
+  remove() {
+    this.list.remove(this);
+  }
+}
+
+class TaskList {
+  component: ComponentInstance;
+  tasks: Task[];
+  constructor(texts: string[]) {
+    this.tasks = texts.map(text => new Task(text, this));
+  }
+  remove(task: Task) {
+    this.tasks = this.tasks.filter(t => t !== task);
+    this.component.update();
+  }
+}
+
+const TaskRow: Takes<Task> = (task) => (
+  <li assign:component>
+    <span onClick={task.toggle()}>{task.text}</span>
+    <button onClick={task.remove()}>x</button>
+  </li>
+);
+
+const TaskListView: Takes<TaskList> = (list) => (
+  <ul assign:component>
+    <TaskRow.repeat models={list.tasks} />
+  </ul>
+);
+
+mount("main", TaskListView, new TaskList(["Shop", "Cook"]));
+```
+
+This is the preferred pattern for most apps because:
+
+- You control exactly what gets updated, e.g. toggling a task only updates its row.
+- The logic lives in plain classes, which effectively control the application, and
+  which can be tested without the DOM.
+- Components become a very simple UI layer.
+
+Models typically get a reference to their parent or a top level controller (like
+`list` above) so they can reach overall state and functions.
+
+### 7.2 Hubs (alternative)
+
+An alternative is to use a hub, which is just an object you create which gets passed
+down to every nested component, making it a convenient place to handle:
 
 - Event handlers.
 - Fetching data.
@@ -280,9 +527,9 @@ This lets you use model purely for data.
 Hubs often reference:
 
 - One or more components to be updated after data changes.
-- Other controllers they need access to like services or modal containers.
+- Other objects they need access to like services or modal containers.
 
-Components sometimes only use a controller, and no model.
+Components sometimes only use a hub, and no model.
 
 ```tsx
 class TaskHub {
@@ -316,9 +563,9 @@ TaskList.methods = {
 };
 ```
 
-## 7. Inheritance
+## 8. Inheritance
 
-You can creat new component defintion by extending another one, either preserving the
+You can create a new component definition by extending another one, either preserving the
 base's structure, or overriding it:
 
 ```tsx
@@ -332,7 +579,7 @@ const Child2 = extendComponent(Parent, ({name}) => <h3>{name}</h3>);
 
 Either way the new component definition inherits the parent *prototype* and *stubs*.
 
-## 8. Stubs
+## 9. Stubs
 
 Stubs are named placeholders for nested components which are requested in the JSX:
 
@@ -348,8 +595,8 @@ const MyComponent = () => (
 And defined on the `stub` property of the component definition:
 
 ```tsx
-MyComponent.stub.animation: () => <div>...</div>;
-MyComponent.stub.text: MyTextComponent;
+MyComponent.stub.animation = () => <div>...</div>;
+MyComponent.stub.text = MyTextComponent;
 ```
 
 Stubs are inherited and can be overridden, which means you can either:
@@ -362,141 +609,7 @@ So long as the rendered component has all its stubs defined somewhere, it will w
 Notes:
 
 - Stubs are separate components, so cannot access methods on the containing component
-  through `self` (use the hub for that kind of thing).
-
-## 9. TypeScript
-
-There are two types you can use to annotate components:
-
-### Takes
-
-Lets you annotate a component's model and hub (both optional). It must be placed
-right after the component name (not inside the parameters):
-
-```tsx
-import { Takes } from 'wallace';
-
-interface iTask {
-  text: string
-}
-
-const Task: Takes<iTask> = ({text}) => <div>{text}</div>;
-```
-
-This ensures you pass correct model during mounting, nesting and repeating:
-
-```
-const TaskList: Takes<iTask[]> = (tasks) => (
-  <div>
-    First task:
-    <Task model={tasks[0]} />
-    <Task.repeat models={tasks.slice(1)} />
-  </div>
-);
-
-mount("main", TaskList, [{test: 'foo'}]);
-```
-
-If you require no model, pass `null`:
-
-```tsx
-const Task: Takes<null> = () => <div>Hello</div>;
-```
-
-### Uses
-
-
-Lets you annotate model, hub and other things the component uses. It is used in the same
-way as `Takes` except you pass types as an object rather than sequentially, whose fields
-are all optional:
-
-```tsx
-import type { Uses } from 'wallace';
-
-const Task: Uses<{
-  model: Model,
-  hub: Hub,
-  methods: Methods,
-  stub: Stub
-}> = () => <div></div>;
-```
-
-#### Methods
-
-Custom methods of the component are available `self`:
-
-```tsx
-import type { Uses } from 'wallace';
-
-interface TaskMethods () {
-  getName(): string;
-}
-
-const Task: Uses<{methods: TaskMethods}> = (_, { self }) => (
-  <div>{self.getName()}</div>
-));
-
-Task.methods = {
-  getName() { return 'wallace' },
-  render(model, hub) {  // types are already known
-    this.model = { ...model, notallowed: 1 };  // type error
-  }
-};
-```
-
-The type will pass into the object passed into `methods` so it recognises custom methods
-in addition to standard methods like `render`, which are already typed for you.
-
-#### Stubs
-
-You can specify the model and hub of each stub:
-
-```tsx
-import type { Takes, Uses } from 'wallace';
-
-interface ParentTypes {
-  hub: Hub;
-  stub: {
-    foo: Takes<iDay>;
-    bar: Takes<iDay, Hub}>;
-  };
-}
-
-const Parent: Uses<ParentTypes> = (_, { stub }) => (
-  <div>
-    <stub.foo model={data[0]} /> 
-    <stub.foo.repeat models={data} /> 
-  </div>
-);
-```
-
-### Inheritance
-
-The `extendComponent` function transfers the types specified on the base:
-
-```tsx
-const Child = extendComponent(Parent);
-```
-
-You may specify different types:
-
-```tsx
-const Child = extendComponent<newModel, Hub, Methods>(Parent);
-```
-
-However:
-
-1. You must specify all those that are specified on base - as omitted types default
-   to `any`.
-2. Each type must extend its corresponding type on base.
-
-### Other types:
-
-Wallace defines some other types you may use:
-
- - `Component<Model, Hub, Methods>` - the base component class (it is a 
-    constructor, not a class)
- - `ComponentInstance<Model, Hub, Methods>` - a component instance.
+  through `self` (use the model or hub for that kind of thing).
 
 ## 10. Helpers
 
@@ -506,7 +619,7 @@ Each of these has their own JSDoc, we just list them here.
 
 Creates new component and renders it, but does not attach it:
 
-```
+```tsx
 const component = createComponent(Counter, {count: 0});
 document.body.appendChild(component.el);
 ```
@@ -515,16 +628,16 @@ document.body.appendChild(component.el);
 
 Define a new component by extending another one:
 
-```
+```tsx
 const Foo = extendComponent(Base);
 const Bar = extendComponent(Base, () => <div></div>);
 ```
 
 ### mount
 
-Mounts an instance of a component to the DOM:
+Replaces an element with an instance of a component (which it returns):
 
-```
+```tsx
 mount("elementId", MyComponent, model, hub);
 ```
 
@@ -533,9 +646,9 @@ mount("elementId", MyComponent, model, hub);
 Returns a Proxy of an object which calls `callback` when it, or its nested objects are
 modified:
 
-```
-const watchedObj = watch([], () => console.log('obj modified));
-watchedObj[0] = 'foo;  // Calls callback.
+```tsx
+const watchedObj = watch([], () => console.log('obj modified'));
+watchedObj[0] = 'foo';  // Calls callback.
 ```
 
 ### protect
@@ -543,10 +656,35 @@ watchedObj[0] = 'foo;  // Calls callback.
 Returns a Proxy of an object which throws an error if it, or its nested objects are
 modified.
 
-```
+```tsx
 const protectedObj = protect([]);
-watchedObj[0] = 'foo';  // throws error.
+protectedObj[0] = 'foo';  // throws error.
 ```
+
+### Router & route
+
+A component which mounts other components based on the URL hash (e.g. `#/tasks/5`).
+Requires flags `allowBase` and `allowDismount`.
+
+```tsx
+import { mount, route, Router } from "wallace";
+
+mount("main", Router, {
+  routes: [
+    route("/tasks", TaskList),
+    route("/tasks/{id:int}", TaskDetail, ({ args }) => getTask(args.id))
+  ],
+  atts: { class: "page" },        // optional attributes for the router's div
+  error: (error, router) => {}    // optional, called if no route matches
+});
+```
+
+The optional third argument to `route` converts the route data (`args`, `params` and
+`url`) into the model for the component, and may return a Promise. Placeholders may be
+converted with `:int`, `:float` or `:date`. The optional fourth argument is a cleanup
+callback which receives the component when navigating away.
+
+The hub passed to the Router is passed to the routed components.
 
 ## 11. Flags
 
@@ -629,6 +767,7 @@ declare module "wallace" {
       hub?: Hub;
       part?: string;
       key?: keyof Model | ((item: Model) => any);
+      [qualified: `part:${string}`]: boolean;
     }): JSX.Element;
     methods?: ComponentMethods<Model, Hub, Methods> &
       ThisType<ComponentInstance<Model, Hub, Methods>>;
@@ -773,7 +912,7 @@ declare module "wallace" {
 
   /**
    * Use to define a new component which extends another component, meaning it will
-   * inherit its prototye and stubs.
+   * inherit its prototype and stubs.
    *
    * If componentFunc is omitted, the new component inherits the base's DOM structure.
    *
@@ -803,7 +942,7 @@ declare module "wallace" {
    *
    * ```js
    * const protectedObj = protect([]);
-   * watchedObj[0] = 'foo';  // throws error.
+   * protectedObj[0] = 'foo';  // throws error.
    * ```
    */
   function protect<T>(target: T): T;
@@ -833,7 +972,7 @@ declare module "wallace" {
    *  - `key` - the key being set.
    *  - `value` - the value it is being set to.
    *
-   * The callback is called after the modification has occured.
+   * The callback is called after the modification has occurred.
    *
    * @param {*} target - Any object, including arrays.
    * @param {*} callback - A callback function.
@@ -1042,7 +1181,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * ## Wallace directive: event
    *
    *
-   * Must be used with the `bind` directive, and causes it do watch a different event
+   * Must be used with the `bind` directive, and causes it to watch a different event
    * (the default is `change`)
    *
    * ```
@@ -1080,17 +1219,17 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `css` shorthand for `fixed:class`.
    * - `event` changes the event which `bind` reacts to.
    * - `fixed:xyz` sets a attribute from an expression at definition.
-   * - `hide` sets an element or component's hidden property.
-   * - `html` Set the element's `innnerHTML` property.
+   * - `hide` sets an element's hidden property.
+   * - `html` Set the element's `innerHTML` property.
    * - `hub` specifies hub for nested/repeated components.
-   * - `if` excludes an element from the DOM.
+   * - `if` excludes an element or nested component from the DOM.
    * - `key` specifies a key for repeated components.
    * - `model` specifies model for nested components.
    * - `models` specifies models repeated components.
    * - `on[EventName]` creates an event handler (note the code is copied).
    * - `part:xyz` saves a reference to part of a component so it can be updated.
    * - `ref:xyz` saves a reference to an element or nested component.
-   * - `show` sets and element or component's hidden property.
+   * - `show` sets an element's hidden property.
    * - `style:xyz` sets a specific style property.
    * - `toggle:xyz` toggles `xyz` as defined by `class:xyz` on same element, or class
    *   `xyz`.
@@ -1120,7 +1259,7 @@ interface DirectiveAttributes extends AllDomEvents {
 
   /** ## Wallace directive: html
    *
-   * Set the element's `innnerHTML` property.
+   * Set the element's `innerHTML` property.
    */
   html?: MustBeExpression;
 
@@ -1286,11 +1425,21 @@ type NativeIntrinsicElements = {
 
 declare global {
   namespace JSX {
-    // This allows <Foo model={x} if={y} />
-    type Wrapper<Model> = Model | { model: Model; if?: boolean; part?: string };
+    // This allows <Foo model={x} hub={h} if={y} ref:foo part:bar />
+    type Wrapper<Model, Hub> =
+      | Model
+      | {
+          model: Model;
+          hub?: Hub;
+          if?: boolean;
+          part?: string;
+          [qualified: `ref:${string}` | `part:${string}`]: boolean;
+        };
 
     type LibraryManagedAttributes<C, P> =
-      C extends ComponentFunction<infer Model, any, any, any> ? Wrapper<Model> : P;
+      C extends ComponentFunction<infer Model, infer Hub, any, any>
+        ? Wrapper<Model, Hub>
+        : P;
 
     interface IntrinsicElements extends NativeIntrinsicElements {
       [elemName: string]: DirectiveAttributes & Record<string, any>;
