@@ -63,3 +63,17 @@ describe("Nodes are bound to keys", () => {
     `);
   });
 });
+
+describe("New items before and after existing items", () => {
+  test.each(permutations)("%s", (_, Container) => {
+    const component = testMount(Container, [{ i: "red" }]);
+    component.render([{ i: "green" }, { i: "red" }, { i: "white" }]);
+    expect(component).toRender(`
+      <div>
+        <div>green</div>
+        <div>red</div>
+        <div>white</div>
+      </div>
+    `);
+  });
+});

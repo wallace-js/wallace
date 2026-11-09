@@ -90,8 +90,9 @@ KeyedRepeater.prototype = {
       } else {
         if (itemKey !== previousKeys[i + offset]) {
           parent.insertBefore(el, anchor);
-          untouched = false;
         }
+        // Only a trailing run of new items may go in the fragment, as it gets appended.
+        untouched = false;
         anchor = el;
       }
       newKeys.push(itemKey);
@@ -127,10 +128,18 @@ KeyedRepeater.prototype = {
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
     const pool = this.p,
       sharedPool = this.s;
-    for (const [key, value] of pool.entries()) {
-      sharedPool.push(value);
-      value.dismount();
+    // Detach elements and reset state, as components in the shared pool may be moved
+    // elsewhere, and this repeater may be reused.
+    for (const component of pool.values()) {
+      component.el.remove();
+      sharedPool.push(component);
+      component.dismount();
     }
     pool.clear();
+    this.k = [];
+    /* #INCLUDE-IF: allowRepeaterSiblings */
+    if (this.a) {
+      this.a.set(this.i, -1);
+    }
   }
 };

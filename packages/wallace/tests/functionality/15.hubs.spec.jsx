@@ -44,8 +44,9 @@ if (wallaceConfig.flags.allowHub) {
       this.hub = new Hub(2);
       this.update();
     };
-    const component = testMount(Bar);
+    let component;
     test("have their hub set initially", () => {
+      component = testMount(Bar);
       expect(component).toRender(`
       <div>
         <div>2</div>

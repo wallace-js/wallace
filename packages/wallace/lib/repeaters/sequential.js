@@ -93,12 +93,19 @@ SequentialRepeater.prototype = {
       pool = this.p,
       poolCount = pool.length,
       sharedPool = this.s;
+    // Detach elements and reset state, as components in the shared pool may be moved
+    // elsewhere, and this repeater may be reused.
     while (poolCount > 0) {
       component = pool.pop();
+      component.el.remove();
       sharedPool.push(component);
       component.dismount();
       poolCount--;
     }
-    pool.length = 0;
+    this.c = 0;
+    /* #INCLUDE-IF: allowRepeaterSiblings */
+    if (this.a) {
+      this.a.set(this.i, -1);
+    }
   }
 };
