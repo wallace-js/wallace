@@ -1,6 +1,6 @@
 # Working on the Wallace repo
 
-`packages/wallace/AGENTS.md` is for people *using* Wallace (it ships with the npm package).
+`packages/wallace/AGENTS.md` is for people _using_ Wallace (it ships with the npm package).
 This file is for working on the framework itself.
 
 ## Layout
@@ -16,9 +16,9 @@ This file is for working on the framework itself.
   - `/* #INCLUDE-IF: flagName */` drops the next statement or property when the flag is off
     (see `babel-plugin-wallace/src/visitors/library.ts`).
   - `if (wallaceConfig.flags.flagName)` branches are evaluated at compile time too.
-- So every change must work with each flag on *and* off. A bug may only show up with one
+- So every change must work with each flag on _and_ off. A bug may only show up with one
   flag, e.g. `allowDismount`.
-- Some flags cause *compile* errors when they're off (e.g. a repeat with sibling elements
+- Some flags cause _compile_ errors when they're off (e.g. a repeat with sibling elements
   when `allowRepeaterSiblings` is off). Put such test components inside an
   `if (wallaceConfig.flags.x) { ... }` block. Every spec file needs at least one test in
   each configuration, so add an `else` branch with a dummy test.
@@ -40,10 +40,19 @@ Run these from `packages/wallace`:
 
   Before calling a runtime change done, run at least the default, `ALL_FLAGS_OFF`, and
   `ONE_FLAG_OFF` for each flag your change touches.
+
 - `afterEach` in `tests/utils.js` **dismounts every component mounted so far**. Call
   `testMount` inside the `test`, not in the `describe` body. Otherwise the component gets
   dismounted before its own test runs.
 - Jest may show output or stack traces from an earlier test. Use `test.only` to isolate one.
+
+## Formatting
+
+- After changing any files, including Markdown such as `AGENTS.md`, run `npm run prettier`
+  from the repo root. CI runs `npm run prettier:check` and fails on unformatted files, but
+  nothing runs it locally, so it is easy to forget.
+- Then run `npm run prettier:check`. If it reports "Unable to read file", add that path to
+  `.prettierignore` rather than ignoring the error, as the output can hide real warnings.
 
 ## Runtime internals
 

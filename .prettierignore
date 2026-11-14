@@ -1,0 +1,3 @@
+# Local Claude Code config (untracked, and unreadable inside its sandbox)
+.claude/
+.mcp.json

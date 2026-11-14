@@ -8,8 +8,8 @@ Wallace is a front-end framework which:
 
 The key points to understand are that:
 
-1. Wallace works *very* differently to React, and is also used very differently, and that you should therefore not assume *any* similarity whatsoever.
-2. The Babel plugin *replaces* component definition functions with completely different functions (not just the JSX expressions, but the entire function) which requires some wrangling to make TypeScript play nice, but can also throw users and agents who don't take this into account.
+1. Wallace works _very_ differently to React, and is also used very differently, and that you should therefore not assume _any_ similarity whatsoever.
+2. The Babel plugin _replaces_ component definition functions with completely different functions (not just the JSX expressions, but the entire function) which requires some wrangling to make TypeScript play nice, but can also throw users and agents who don't take this into account.
 
 Read the hard rules and the React comparison below before writing any code.
 
@@ -29,38 +29,42 @@ Most of these are enforced by the compiler, but some fail **silently**, so follo
 
 ## React → Wallace
 
-| React | Wallace |
-| --- | --- |
-| `props` | A single `model` (any value): `<Item model={x} />` |
-| `{items.map(i => <Item {...i} />)}` | `<Item.repeat models={items} />`, or `key="id"` for keyed |
-| `{cond && <Foo />}`, `{cond ? <A /> : <B />}` | `<Foo if={cond} />`, `<A if={cond} /><B if={!cond} />` |
-| `onClick={() => doThing(x)}` | `onClick={doThing(x)}` |
-| `onClick={e => doThing(e)}` | `(_, { event }) => ... onClick={doThing(event)}` |
-| `className="a"` | `class="a"` |
-| `className={cond ? 'a' : ''}` | `toggle:a={cond}` |
-| `style={{ color: c }}` | `style:color={c}` |
-| `value={v} onChange={e => setV(e.target.value)}` | `bind={model.v}` |
-| `useState`, `setState` | Plain data on the model, then call `update()` on the component |
-| `useRef` | `ref:name` then `component.ref.name` |
-| `useEffect`, lifecycle hooks | Override `render` via `MyComponent.methods` |
-| Context | Models hold a reference to their parent or controller (or use a hub) |
-| `<>...</>` fragments | Not supported, use a single root element |
-| `children` prop | Not supported, use stubs (see `lib/types.d.ts`) |
-| `ReactDOM.createRoot(el).render(<App />)` | `mount("elementId", App, model, hub)` |
+| React                                            | Wallace                                                              |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| `props`                                          | A single `model` (any value): `<Item model={x} />`                   |
+| `{items.map(i => <Item {...i} />)}`              | `<Item.repeat models={items} />`, or `key="id"` for keyed            |
+| `{cond && <Foo />}`, `{cond ? <A /> : <B />}`    | `<Foo if={cond} />`, `<A if={cond} /><B if={!cond} />`               |
+| `onClick={() => doThing(x)}`                     | `onClick={doThing(x)}`                                               |
+| `onClick={e => doThing(e)}`                      | `(_, { event }) => ... onClick={doThing(event)}`                     |
+| `className="a"`                                  | `class="a"`                                                          |
+| `className={cond ? 'a' : ''}`                    | `toggle:a={cond}`                                                    |
+| `style={{ color: c }}`                           | `style:color={c}`                                                    |
+| `value={v} onChange={e => setV(e.target.value)}` | `bind={model.v}`                                                     |
+| `useState`, `setState`                           | Plain data on the model, then call `update()` on the component       |
+| `useRef`                                         | `ref:name` then `component.ref.name`                                 |
+| `useEffect`, lifecycle hooks                     | Override `render` via `MyComponent.methods`                          |
+| Context                                          | Models hold a reference to their parent or controller (or use a hub) |
+| `<>...</>` fragments                             | Not supported, use a single root element                             |
+| `children` prop                                  | Not supported, use stubs (see `lib/types.d.ts`)                      |
+| `ReactDOM.createRoot(el).render(<App />)`        | `mount("elementId", App, model, hub)`                                |
 
 ## Complete example
 
 A small but complete app using the preferred Active Model pattern (see Patterns below). Use it as a reference for syntax.
 
 ```tsx
-import { mount } from "wallace";
-import type { ComponentInstance, Takes } from "wallace";
+import { mount } from 'wallace';
+import type { ComponentInstance, Takes } from 'wallace';
 
 class Task {
   component: ComponentInstance;
   done = false;
 
-  constructor(public id: number, public text: string, public list: TaskList) {}
+  constructor(
+    public id: number,
+    public text: string,
+    public list: TaskList
+  ) {}
 
   toggle() {
     this.done = !this.done;
@@ -76,23 +80,23 @@ class Task {
 class TaskList {
   component: ComponentInstance;
   tasks: Task[] = [];
-  draft = "";
+  draft = '';
   nextId = 1;
 
   get remaining() {
-    return this.tasks.filter(t => !t.done).length;
+    return this.tasks.filter((t) => !t.done).length;
   }
 
   add(event: Event) {
     event.preventDefault();
     if (!this.draft.trim()) return;
     this.tasks.push(new Task(this.nextId++, this.draft, this));
-    this.draft = "";
+    this.draft = '';
     this.component.update();
   }
 
   remove(task: Task) {
-    this.tasks = this.tasks.filter(t => t !== task);
+    this.tasks = this.tasks.filter((t) => t !== task);
     this.component.update();
   }
 
@@ -101,9 +105,13 @@ class TaskList {
   }
 }
 
-const TaskRow: Takes<Task> = task => (
+const TaskRow: Takes<Task> = (task) => (
   <li assign:component toggle:done={task.done}>
-    <input type="checkbox" checked={task.done} onChange={task.toggle()} />
+    <input
+      type="checkbox"
+      checked={task.done}
+      onChange={task.toggle()}
+    />
     <span>{task.text}</span>
     <button onClick={task.remove()}>x</button>
   </li>
@@ -123,7 +131,7 @@ const TaskApp: Takes<TaskList> = (list, { event }) => (
   </div>
 );
 
-mount("main", TaskApp, new TaskList());
+mount('main', TaskApp, new TaskList());
 ```
 
 Notes:
@@ -163,7 +171,7 @@ To satisfy TypeScript we use custom types which "lie" about the types, so that T
 These types are `Takes<Model, Hub>` (both optional) and `Uses<{model, hub, methods, stub}>` (all optional):
 
 ```tsx
-import type { Takes } from "wallace";
+import type { Takes } from 'wallace';
 
 interface User {
   name: string;
@@ -215,7 +223,7 @@ Users don't normally do this. It happens inside `mount` and when components crea
 During creation, the component instance creates its initial DOM, and traverses it to obtain references to dynamic elements, which it then updates when you call its methods:
 
 ```js
-componentInstance.render({ name: "Alice" });
+componentInstance.render({ name: 'Alice' });
 componentInstance.update();
 componentInstance.el; // The div element it created.
 ```
@@ -342,7 +350,7 @@ Components generally change their DOM structure using a combination of `if` and 
 The model passed to `render` (which is called by `mount` and when nesting) is stored on the component instance:
 
 ```tsx
-import { mount } from "wallace";
+import { mount } from 'wallace';
 
 const Greeting = ({ name }) => (
   <div>
@@ -350,15 +358,15 @@ const Greeting = ({ name }) => (
   </div>
 );
 
-const model = { name: "Alice" };
-const greeting = mount("main", Greeting, model);
+const model = { name: 'Alice' };
+const greeting = mount('main', Greeting, model);
 greeting.model === model; // true
 ```
 
 This means we can modify the model then call `update`, without passing it back in:
 
 ```js
-greeting.model.name = "Bob";
+greeting.model.name = 'Bob';
 greeting.update(); // Updates the DOM
 ```
 
@@ -373,12 +381,15 @@ There are three main ways to create dynamic or reactive applications. Use Active
 This approach involves implementing setters or methods on models, and giving them a reference to the component instance they are attached to, which can be done using the `assign` directive:
 
 ```tsx
-import type { ComponentInstance, Takes } from "wallace";
+import type { ComponentInstance, Takes } from 'wallace';
 
 class User {
   component: ComponentInstance;
   #name: string;
-  constructor(name: string, public controller: UserController) {
+  constructor(
+    name: string,
+    public controller: UserController
+  ) {
     this.#name = name;
   }
   get name() {
@@ -404,7 +415,7 @@ You typically have a top level model (called a controller, or service) which cre
 class UserController {
   users: User[];
   constructor(names: string[]) {
-    this.users = names.map(name => new User(name, this));
+    this.users = names.map((name) => new User(name, this));
   }
   saveChanges() {}
   toggleEditMode() {}
@@ -420,15 +431,15 @@ An alternative approach to giving deeply nested components access to high level 
 The `render` method takes an optional second argument which it saves on itself as `this.hub`, just like `model`. The difference is that it automatically passes that down to all nested components via `render`, so the whole tree has a reference to the same object:
 
 ```tsx
-import { mount } from "wallace";
-import type { Takes, Uses } from "wallace";
+import { mount } from 'wallace';
+import type { Takes, Uses } from 'wallace';
 
 interface User {
   name: string;
 }
 
 class Hub {
-  users: User[] = [{ name: "Alice" }, { name: "Bob" }];
+  users: User[] = [{ name: 'Alice' }, { name: 'Bob' }];
   getUsers(): User[] {
     return this.users;
   }
@@ -449,7 +460,7 @@ const GreetingList: Uses<{ hub: Hub }> = (_, { hub }) => (
   </div>
 );
 
-mount("main", GreetingList, null, new Hub());
+mount('main', GreetingList, null, new Hub());
 ```
 
 ### Watch
@@ -465,18 +476,18 @@ const Greeting = ({ name }) => (
   </div>
 );
 
-const model = { name: "Alice" };
-const greeting = mount("main", Greeting, model);
+const model = { name: 'Alice' };
+const greeting = mount('main', Greeting, model);
 greeting.model === model; // false
 ```
 
 The proxy calls `update` on the component instance when it (or any nested object) is modified through the proxy:
 
 ```js
-greeting.model.name = "Bob"; // Updates the DOM & model
-model.name === "Bob"; // true
-model.name = "Joe"; // Doesn't update the DOM
-greeting.model.name === "Joe"; // true, as the proxy sees the change
+greeting.model.name = 'Bob'; // Updates the DOM & model
+model.name === 'Bob'; // true
+model.name = 'Joe'; // Doesn't update the DOM
+greeting.model.name === 'Joe'; // true, as the proxy sees the change
 ```
 
 The point is that it responds to data being modified by the UI:
@@ -507,7 +518,7 @@ You can pass a callback to the `watch` directive, or use the `watch` helper func
 - Perform a more selective or granular update.
 - Store state for undo/redo.
 
-Note that a callback *replaces* the default behaviour, so call `self.update()` in it if you still want the component to update.
+Note that a callback _replaces_ the default behaviour, so call `self.update()` in it if you still want the component to update.
 
 This approach is most useful for cases where you just want to update the UI, such as validation, table sorting and filtering etc. But for prototyping or apps under a certain size, you can make the whole application reactive by placing a `watch` high up in the component tree.
 

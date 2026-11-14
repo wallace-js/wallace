@@ -55,15 +55,19 @@ const tscCmd = name => {
   return `tsc --jsx preserve ${file} --noEmit`;
 };
 
-test.each(tsxFilesWithoutErrors)("Expect no error in $fileName", ({ fileName }, done) => {
-  exec(tscCmd(fileName), (err, stdout) => {
-    if (err) {
-      done(stdout);
-    } else {
-      done();
-    }
-  });
-}, TSC_TIMEOUT);
+test.each(tsxFilesWithoutErrors)(
+  "Expect no error in $fileName",
+  ({ fileName }, done) => {
+    exec(tscCmd(fileName), (err, stdout) => {
+      if (err) {
+        done(stdout);
+      } else {
+        done();
+      }
+    });
+  },
+  TSC_TIMEOUT
+);
 
 test.each(tsxFilesWithErrors)(
   "Expect error in $fileName",
