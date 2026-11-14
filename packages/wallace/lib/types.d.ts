@@ -505,6 +505,31 @@ Pass the hub explicitly if the root's model is something else:
 mount("main", TicketList, tickets, new Controller());
 ```
 
+A controller can hold references to several components, so long as each one is
+assigned to its own property:
+
+```tsx
+class Controller {
+  page: ComponentInstance;
+  filters: ComponentInstance;
+}
+
+const Filters: Uses<{ hub: Controller }> = (_, { hub }) => (
+  <div assign={hub.filters}>...</div>
+);
+
+const TicketPage: Takes<Controller> = (ctrl) => (
+  <div assign:page>
+    <Filters />
+    ...
+  </div>
+);
+```
+
+Don't give two components the same assign target, such as `assign:component` on both
+the root and a section which also takes the controller as its model. The property only
+holds whichever component rendered last, and the other silently stops updating.
+
 ### 7.2 Active Models
 
 Make a model active when an item needs behaviour of its own, or should update without
@@ -1121,6 +1146,11 @@ interface DirectiveAttributes extends AllDomEvents {
    *   </div>
    * );
    * ```
+   *
+   * Each target holds one component, so don't use the same target in two components,
+   * or in a repeated component (unless it is on the model, or keyed as above). The
+   * target holds whichever component rendered last, and updates to the others are
+   * silently lost.
    *
    * Be careful not to assign to a watched property which updates this component or a
    * parent, as that will create an infinite loop.

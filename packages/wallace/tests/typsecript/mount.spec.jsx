@@ -40,6 +40,31 @@ describe("Mounting", () => {
     `).toHaveNoTypeErrors();
   });
 
+  // This is the multiple components example in lib/types.d.ts and AGENTS.md.
+  test("accepts a controller referencing several components", () => {
+    expect(`
+      import { mount } from "wallace";
+      import type { ComponentInstance, Takes, Uses } from "wallace";
+
+      class Controller {
+        page: ComponentInstance;
+        filters: ComponentInstance;
+      }
+
+      const Filters: Uses<{ hub: Controller }> = (_, { hub }) => (
+        <div assign={hub.filters}></div>
+      );
+
+      const TicketPage: Takes<Controller> = (ctrl) => (
+        <div assign:page>
+          <Filters />
+        </div>
+      );
+
+      mount("main", TicketPage, new Controller());
+    `).toHaveNoTypeErrors();
+  });
+
   test("accepts a model when the hub is not typed", () => {
     expect(`
       import { mount, Takes } from "wallace";

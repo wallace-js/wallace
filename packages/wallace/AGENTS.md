@@ -26,6 +26,7 @@ Most of these are enforced by the compiler, but some fail **silently**, so follo
 7. **Use xargs, not `this`.** The second parameter must be destructured and may only contain `hub`, `model`, `self`, `event`, `element` and `stub`: `(task, { hub, self }) => (...)`.
 8. **The root element must be a normal element**, not a nested or repeated component, and may not have `if`. The `watch`, `assign` and `unique` directives may only go on the root element.
 9. **Nested components accept `if` but not `show`/`hide`. Repeated components accept neither.** Wrap them in an element and put the directive on that.
+10. **Each `assign` target holds one component.** If two components assign to the same property (e.g. `assign:component` on the root and on a section which also takes the controller as its model), it holds whichever rendered last, and the other **silently** stops updating. Use a different property for each, e.g. `assign:page` and `assign={hub.filters}`.
 
 ## React → Wallace
 
@@ -424,6 +425,25 @@ Notes:
 1. Don't pass `hub={ctrl}` to nested components, they get it automatically.
 2. Components don't need models to hold a reference to the controller, as they have the hub. Only add one if the models' own methods need it.
 3. If the root's model is something else, pass the hub explicitly: `mount('main', TicketList, tickets, new Controller())`.
+4. A controller can reference several components, so long as each is assigned to its own property (see hard rule 10):
+
+```tsx
+class Controller {
+  page: ComponentInstance;
+  filters: ComponentInstance;
+}
+
+const Filters: Uses<{ hub: Controller }> = (_, { hub }) => (
+  <div assign={hub.filters}>...</div>
+);
+
+const TicketPage: Takes<Controller> = (ctrl) => (
+  <div assign:page>
+    <Filters />
+    ...
+  </div>
+);
+```
 
 ### Active Models
 
