@@ -1510,15 +1510,16 @@ type NativeIntrinsicElements = {
 declare global {
   namespace JSX {
     // This allows <Foo model={x} hub={h} if={y} ref:foo part:bar />
+    // The model may be omitted if it is null, i.e. from Takes<null>. The tuples stop
+    // this applying to every model when strictNullChecks is off.
     type Wrapper<Model, Hub> =
       | Model
-      | {
-          model: Model;
+      | (([Model] extends [null] ? { model?: Model } : { model: Model }) & {
           hub?: Hub;
           if?: boolean;
           part?: string;
           [qualified: `ref:${string}` | `part:${string}`]: boolean;
-        };
+        });
 
     type LibraryManagedAttributes<C, P> =
       C extends ComponentFunction<infer Model, infer Hub, any, any>

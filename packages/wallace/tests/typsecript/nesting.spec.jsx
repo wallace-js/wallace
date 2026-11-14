@@ -51,6 +51,43 @@ describe("Model", () => {
     ]);
   });
 
+  test("allows no model if model is null", () => {
+    expect(`
+    import { mount, Takes } from "wallace";
+
+    class Hub {
+      mode: string;
+    }
+
+    const Foo: Takes<null> = () => (<div></div>);
+    const Baz: Takes<null, Hub> = (_, { hub }) => (<div>{hub.mode}</div>);
+
+    const Bar: Takes = () => (
+      <div>
+        <Foo />
+        <Foo model={null} />
+        <Foo if={true} />
+        <Baz />
+      </div>
+    );
+  `).toHaveNoTypeErrors();
+  });
+
+  test("disallows a non-null model if model is null", () => {
+    expect(`
+    import { mount, Takes } from "wallace";
+
+    const Foo: Takes<null> = () => (<div></div>);
+
+    const Bar: Takes = () => (
+      <div>
+        <Foo />
+        <Foo model={5} />
+      </div>
+    );
+  `).toHaveTypeErrors(["Type 'number' is not assignable to type 'null'."]);
+  });
+
   test("diallows invalid model if they are specified", () => {
     expect(`
       import { mount, Takes } from "wallace";
