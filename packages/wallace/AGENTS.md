@@ -29,28 +29,28 @@ Most of these are enforced by the compiler, but some fail **silently**, so follo
 
 ## React → Wallace
 
-| React                                            | Wallace                                                              |
-| ------------------------------------------------ | -------------------------------------------------------------------- |
-| `props`                                          | A single `model` (any value): `<Item model={x} />`                   |
-| `{items.map(i => <Item {...i} />)}`              | `<Item.repeat models={items} />`, or `key="id"` for keyed            |
-| `{cond && <Foo />}`, `{cond ? <A /> : <B />}`    | `<Foo if={cond} />`, `<A if={cond} /><B if={!cond} />`               |
-| `onClick={() => doThing(x)}`                     | `onClick={doThing(x)}`                                               |
-| `onClick={e => doThing(e)}`                      | `(_, { event }) => ... onClick={doThing(event)}`                     |
-| `className="a"`                                  | `class="a"`                                                          |
-| `className={cond ? 'a' : ''}`                    | `toggle:a={cond}`                                                    |
-| `style={{ color: c }}`                           | `style:color={c}`                                                    |
-| `value={v} onChange={e => setV(e.target.value)}` | `bind={model.v}`                                                     |
-| `useState`, `setState`                           | Plain data on the model, then call `update()` on the component       |
-| `useRef`                                         | `ref:name` then `component.ref.name`                                 |
-| `useEffect`, lifecycle hooks                     | Override `render` via `MyComponent.methods`                          |
-| Context                                          | Models hold a reference to their parent or controller (or use a hub) |
-| `<>...</>` fragments                             | Not supported, use a single root element                             |
-| `children` prop                                  | Not supported, use stubs (see `lib/types.d.ts`)                      |
-| `ReactDOM.createRoot(el).render(<App />)`        | `mount("elementId", App, model, hub)`                                |
+| React                                            | Wallace                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| `props`                                          | A single `model` (any value): `<Item model={x} />`             |
+| `{items.map(i => <Item {...i} />)}`              | `<Item.repeat models={items} />`, or `key="id"` for keyed      |
+| `{cond && <Foo />}`, `{cond ? <A /> : <B />}`    | `<Foo if={cond} />`, `<A if={cond} /><B if={!cond} />`         |
+| `onClick={() => doThing(x)}`                     | `onClick={doThing(x)}`                                         |
+| `onClick={e => doThing(e)}`                      | `(_, { event }) => ... onClick={doThing(event)}`               |
+| `className="a"`                                  | `class="a"`                                                    |
+| `className={cond ? 'a' : ''}`                    | `toggle:a={cond}`                                              |
+| `style={{ color: c }}`                           | `style:color={c}`                                              |
+| `value={v} onChange={e => setV(e.target.value)}` | `bind={model.v}`                                               |
+| `useState`, `setState`                           | Plain data on the model, then call `update()` on the component |
+| `useRef`                                         | `ref:name` then `component.ref.name`                           |
+| `useEffect`, lifecycle hooks                     | Override `render` via `MyComponent.methods`                    |
+| Context                                          | A controller passed down as the `hub` (see Patterns)           |
+| `<>...</>` fragments                             | Not supported, use a single root element                       |
+| `children` prop                                  | Not supported, use stubs (see `lib/types.d.ts`)                |
+| `ReactDOM.createRoot(el).render(<App />)`        | `mount("elementId", App, model, hub)` (hub defaults to model)  |
 
 ## Complete example
 
-A small but complete app using the preferred Active Model pattern (see Patterns below). Use it as a reference for syntax.
+A small but complete app using active models (see Patterns below). Use it as a reference for syntax.
 
 ```tsx
 import { mount } from 'wallace';
@@ -137,6 +137,7 @@ mount('main', TaskApp, new TaskList());
 Notes:
 
 - `assign:component` sets `model.component` to the component instance, so each model can update its own component.
+- Each task holds a reference to its list because its own `toggle` method needs to update the summary. Components can reach the list through the hub without this (see Patterns).
 - Toggling a task only updates that task's row and the summary (using `part:summary`), not the whole app.
 - `bind={list.draft}` keeps the input and `list.draft` in sync, and `event:input` makes it update on every keystroke rather than on `change`.
 - `key="id"` makes the repeater keep each component tied to the same item. Without a key, components are reused by position, which is faster, but can confuse focus, CSS transitions or any state held in the DOM.
@@ -374,11 +375,59 @@ The `render` method sets the model and hub, then calls `update`. A component onl
 
 ## Patterns
 
-There are three main ways to create dynamic or reactive applications. Use Active Models unless there is a good reason not to.
+Components take two inputs, and each has its own job:
 
-### Active Models (preferred)
+- **model** is what the component shows. It differs for each instance, e.g. each repeated item.
+- **hub** is the app the component lives in. It is shared, and passed down to nested components automatically. Put state and behaviour which isn't specific to one item on the hub.
 
-This approach involves implementing setters or methods on models, and giving them a reference to the component instance they are attached to, which can be done using the `assign` directive:
+Follow this rule unless there is a good reason not to. It avoids having to decide how to get the controller to each component, and works with models which are plain data, such as types shared with an API.
+
+### Controller as hub (standard)
+
+Create a controller class with the app's state and behaviour, and mount the root component with it. `mount` uses the model as the hub when you don't pass one, so the root receives the controller as its model, and every nested component receives it as its hub:
+
+```tsx
+import { mount } from 'wallace';
+import type { ComponentInstance, Takes } from 'wallace';
+import type { Ticket } from './schemas';
+
+class Controller {
+  component: ComponentInstance;
+  tickets: Ticket[] = [];
+  editing = false;
+  close(ticket: Ticket) {
+    ticket.closed = true;
+    this.component.update();
+  }
+}
+
+const TicketRow: Takes<Ticket, Controller> = (ticket, { hub }) => (
+  <li>
+    {ticket.title}
+    <button if={hub.editing} onClick={hub.close(ticket)}>
+      Close
+    </button>
+  </li>
+);
+
+const TicketList: Takes<Controller> = (ctrl) => (
+  <ul assign:component>
+    <TicketRow.repeat models={ctrl.tickets} />
+  </ul>
+);
+
+mount('main', TicketList, new Controller());
+```
+
+Notes:
+
+1. Don't pass `hub={ctrl}` to nested components, they get it automatically.
+2. Components don't need models to hold a reference to the controller, as they have the hub. Only add one if the models' own methods need it.
+3. If the root's model is something else, pass the hub explicitly: `mount('main', TicketList, tickets, new Controller())`.
+
+### Active Models
+
+Make a model active when an item needs behaviour of its own, or should update without updating its parent. This involves implementing setters or methods on models, and giving them a reference to the component instance they are attached to, which can be done using the `assign` directive:
 
 ```tsx
 import type { ComponentInstance, Takes } from 'wallace';
@@ -386,10 +435,7 @@ import type { ComponentInstance, Takes } from 'wallace';
 class User {
   component: ComponentInstance;
   #name: string;
-  constructor(
-    name: string,
-    public controller: UserController
-  ) {
+  constructor(name: string) {
     this.#name = name;
   }
   get name() {
@@ -401,67 +447,16 @@ class User {
   }
 }
 
-const Greeting: Takes<User> = ({ name }) => (
+const Greeting: Takes<User, Controller> = ({ name }, { hub }) => (
   <div assign:component>
-    <h1>Hello {name}</h1>
-    <input bind={name} />
-  </div>
-);
-```
-
-You typically have a top level model (called a controller, or service) which creates models for nested components, which get a reference to it so they can access overall state and functions:
-
-```tsx
-class UserController {
-  users: User[];
-  constructor(names: string[]) {
-    this.users = names.map((name) => new User(name, this));
-  }
-  saveChanges() {}
-  toggleEditMode() {}
-}
-```
-
-This is the preferred pattern for most apps as it gives you more granular control, which you inevitably end up needing. The logic stays almost entirely in the model classes, which effectively control the application and treat components as the dumb UI layer, which ends up very simple. The framework-controlled code and your logic are also separate, which reduces the guesswork in figuring out what is broken.
-
-### Hubs (alternative)
-
-An alternative approach to giving deeply nested components access to high level controllers is to use the hub mechanism.
-
-The `render` method takes an optional second argument which it saves on itself as `this.hub`, just like `model`. The difference is that it automatically passes that down to all nested components via `render`, so the whole tree has a reference to the same object:
-
-```tsx
-import { mount } from 'wallace';
-import type { Takes, Uses } from 'wallace';
-
-interface User {
-  name: string;
-}
-
-class Hub {
-  users: User[] = [{ name: 'Alice' }, { name: 'Bob' }];
-  getUsers(): User[] {
-    return this.users;
-  }
-  saveChanges() {}
-}
-
-const Greeting: Takes<User, Hub> = ({ name }, { hub }) => (
-  <div>
     <h1>Hello {name}</h1>
     <input bind={name} />
     <button onClick={hub.saveChanges()}>Save</button>
   </div>
 );
-
-const GreetingList: Uses<{ hub: Hub }> = (_, { hub }) => (
-  <div>
-    <Greeting.repeat models={hub.getUsers()} />
-  </div>
-);
-
-mount('main', GreetingList, null, new Hub());
 ```
+
+This gives more granular control over updates, e.g. renaming a user only updates its own component. Active models work alongside a controller hub: components still receive the hub, so only give models a reference to the controller if the models themselves need it.
 
 ### Watch
 
@@ -522,7 +517,7 @@ Note that a callback _replaces_ the default behaviour, so call `self.update()` i
 
 This approach is most useful for cases where you just want to update the UI, such as validation, table sorting and filtering etc. But for prototyping or apps under a certain size, you can make the whole application reactive by placing a `watch` high up in the component tree.
 
-You can technically use any combination of these three patterns, but mixing them (especially hub and active model) can be confusing.
+These patterns can be combined: a controller hub for the app, active models for items which need their own behaviour, and `watch` for UI-only updates.
 
 Wallace is designed to:
 

@@ -86,7 +86,10 @@ The arguments are:
 1. Element or id string.
 2. Component definition.
 3. model for the element (optional)
-4. hub (optional)
+4. hub (optional, defaults to the model)
+
+If you omit the hub, the model is used as the hub. This lets you mount a controller as
+the root's model and have it passed down as the hub (see Patterns).
 
 `mount` returns the component instance, allowing you to call its methods:
 
@@ -449,13 +452,65 @@ Wallace defines some other types you may use:
 
 ## 7. Patterns
 
-Keep components simple, and put your logic in plain classes. There are two patterns
-for doing this. Use one or the other: mixing them can be confusing.
+Keep components simple, and put your logic in plain classes. Components take two inputs,
+and each has its own job:
 
-### 7.1 Active Models (preferred)
+- **model** is what the component shows. It differs for each instance, e.g. each
+  repeated item.
+- **hub** is the app the component lives in. It is shared, and passed down to nested
+  components automatically. Put state and behaviour which isn't specific to one item
+  on the hub.
 
-Models are instances of classes which hold data and logic, and which hold a reference
-to their component (set by the `assign` directive) so they can update it:
+### 7.1 Controller as hub (standard)
+
+Create a controller class with the app's state and behaviour, and mount the root
+component with it. As `mount` uses the model as the hub when you don't pass one, the
+root receives the controller as its model, and every nested component receives it as
+its hub. The models can then be plain data, such as types shared with an API:
+
+```tsx
+import { mount } from 'wallace';
+import type { ComponentInstance, Takes } from 'wallace';
+import type { Ticket } from './schemas';
+
+class Controller {
+  component: ComponentInstance;
+  tickets: Ticket[] = [];
+  editing = false;
+  close(ticket: Ticket) {
+    ticket.closed = true;
+    this.component.update();
+  }
+}
+
+const TicketRow: Takes<Ticket, Controller> = (ticket, { hub }) => (
+  <li>
+    {ticket.title}
+    <button if={hub.editing} onClick={hub.close(ticket)}>Close</button>
+  </li>
+);
+
+const TicketList: Takes<Controller> = (ctrl) => (
+  <ul assign:component>
+    <TicketRow.repeat models={ctrl.tickets} />
+  </ul>
+);
+
+mount("main", TicketList, new Controller());
+```
+
+Pass the hub explicitly if the root's model is something else:
+
+```tsx
+mount("main", TicketList, tickets, new Controller());
+```
+
+### 7.2 Active Models
+
+Make a model active when an item needs behaviour of its own, or should update without
+updating its parent. Active models are instances of classes which hold data and logic,
+and which hold a reference to their component (set by the `assign` directive) so they
+can update it:
 
 ```tsx
 import { mount } from 'wallace';
@@ -502,47 +557,30 @@ const TaskListView: Takes<TaskList> = (list) => (
 mount("main", TaskListView, new TaskList(["Shop", "Cook"]));
 ```
 
-This is the preferred pattern for most apps because:
+This gives you control over exactly what gets updated, e.g. toggling a task only updates
+its row. The logic lives in plain classes which can be tested without the DOM.
 
-- You control exactly what gets updated, e.g. toggling a task only updates its row.
-- The logic lives in plain classes, which effectively control the application, and
-  which can be tested without the DOM.
-- Components become a very simple UI layer.
+Here each task holds a reference to its list. Active models can also be combined with
+a controller hub: the components still receive the hub, so only give models a reference
+to the controller if the models themselves need it.
 
-Models typically get a reference to their parent or a top level controller (like
-`list` above) so they can reach overall state and functions.
+### 7.3 Hubs lower down the tree
 
-### 7.2 Hubs (alternative)
-
-An alternative is to use a hub, which is just an object you create which gets passed
-down to every nested component, making it a convenient place to handle:
-
-- Event handlers.
-- Fetching data.
-- Sorting, filtering and formatting model.
-- Coordinating updates.
-
-This lets you use model purely for data.
-
-Hubs often reference:
-
-- One or more components to be updated after data changes.
-- Other objects they need access to like services or modal containers.
-
-Components sometimes only use a hub, and no model.
+A component can replace the hub for its part of the tree, for example to create a hub
+which references that component:
 
 ```tsx
 class TaskHub {
-  constructor (rootComponent, dbHub) {
-    this.root = rootComponent;
-    this.db = dbHub;
+  constructor (component, parentHub) {
+    this.component = component;
+    this.db = parentHub.db;
   }
   getTasks () {
     return this.db.fetch(...);
   }
   newTask () {
     this.db.put(...).then(() => {
-      this.root.update();
+      this.component.update();
     });
   }
 }
@@ -640,6 +678,8 @@ Replaces an element with an instance of a component (which it returns):
 ```tsx
 mount("elementId", MyComponent, model, hub);
 ```
+
+The hub defaults to the model.
 
 ### watch
 
@@ -928,13 +968,27 @@ declare module "wallace" {
    * *Replaces* element with an instance of componentDefinition and renders it.
    *
    * Note that the original element is removed along with its attributes (class, id...).
+   *
+   * If `hub` is omitted, the model is used as the hub, so it must also satisfy the hub
+   * type. Pass the hub explicitly if the model is different.
    */
   function mount<Model = any, Hub = any, Methods extends object = {}>(
     element: string | HTMLElement,
     componentDefinition: ComponentFunction<Model, Hub, Methods>,
-    model?: Model,
-    hub?: Hub
+    model?: ModelAsHub<Model, Hub>
   ): ComponentInstance<Model, Hub, Methods>;
+  function mount<Model = any, Hub = any, Methods extends object = {}>(
+    element: string | HTMLElement,
+    componentDefinition: ComponentFunction<Model, Hub, Methods>,
+    model: Model,
+    hub: Hub
+  ): ComponentInstance<Model, Hub, Methods>;
+
+  /**
+   * The model type when it is also used as the hub. If the hub is untyped (`any`) this is
+   * just the model, as intersecting with `any` would disable checking of the model.
+   */
+  type ModelAsHub<Model, Hub> = 0 extends 1 & Hub ? Model : Model & Hub;
 
   /**
    * Returns a Proxy of an object which throws an error when it, or its nested objects

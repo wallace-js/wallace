@@ -52,3 +52,58 @@ describe("Mounting with model", () => {
     );
   });
 });
+
+if (wallaceConfig.flags.allowHub) {
+  describe("Mounting with hub", () => {
+    beforeEach(() => {
+      document.body.innerHTML = "";
+    });
+    const Row = (item, { hub }) => (
+      <li>
+        {hub.prefix}
+        {item}
+      </li>
+    );
+    const List = ctrl => (
+      <ul>
+        <Row.repeat models={ctrl.items} />
+      </ul>
+    );
+    const ctrl = { prefix: "#", items: ["a", "b"] };
+
+    test("hub defaults to model and is passed down", () => {
+      const component = mount(createDiv(), List, ctrl);
+      expect(component.hub).toBe(ctrl);
+      expect(component).toRender(`
+        <ul>
+          <li><span>#</span><span>a</span></li>
+          <li><span>#</span><span>b</span></li>
+        </ul>
+      `);
+    });
+
+    test("explicit hub is used instead of model", () => {
+      const hub = { prefix: "*" };
+      const component = mount(createDiv(), List, ctrl, hub);
+      expect(component.hub).toBe(hub);
+      expect(component).toRender(`
+        <ul>
+          <li><span>*</span><span>a</span></li>
+          <li><span>*</span><span>b</span></li>
+        </ul>
+      `);
+    });
+
+    test("explicit null hub is not replaced by model", () => {
+      const Empty = () => <div></div>;
+      const component = mount(createDiv(), Empty, ctrl, null);
+      expect(component.hub).toBe(null);
+    });
+  });
+} else {
+  test("Mounting without hub ignores extra arguments", () => {
+    const Animal = ({ name }) => <div>Hello {name}</div>;
+    const component = mount(createDiv(), Animal, { name: "owl" }, {});
+    expect(component.hub).toBeUndefined();
+  });
+}

@@ -4,13 +4,13 @@
  * @param {any} elementOrId Either a string representing an id, or an element.
  * @param {callable} componentDefinition The class of Component to create
  * @param {object} model The model to pass to the component (optional)
- * @param {hub} model The hub to pass to the component (optional)
+ * @param {object} hub The hub to pass to the component (optional, defaults to model)
  */
 export const mount = (
   elementOrId,
   componentDefinition,
   model,
-  /* #INCLUDE-IF: allowHub */ hub
+  /* #INCLUDE-IF: allowHub */ hub = model
 ) => {
   const component = new componentDefinition();
   component.render(model, /* #INCLUDE-IF: allowHub */ hub);
