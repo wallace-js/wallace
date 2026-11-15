@@ -12,6 +12,9 @@ Nester.prototype = {
     if (!this.i) {
       if (wallaceConfig.flags.allowDismount) {
         this.i = this.s.pop() || new this.d();
+        if (process.env.NODE_ENV !== "production") {
+          this.i._x = 0; // No longer dismounted.
+        }
       } else {
         this.i = new this.d();
       }

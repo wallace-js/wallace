@@ -66,6 +66,9 @@ SequentialRepeater.prototype = {
       } else {
         if (wallaceConfig.flags.allowDismount) {
           component = sharedPool.pop() || new componentDefinition();
+          if (process.env.NODE_ENV !== "production") {
+            component._x = 0; // No longer dismounted.
+          }
         } else {
           component = new componentDefinition();
         }

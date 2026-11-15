@@ -11,6 +11,9 @@ const defaultSetFunction = function (model, /* #INCLUDE-IF: allowHub */ hub) {
 
 const ComponentPrototype = {
   render: function (model, /* #INCLUDE-IF: allowHub */ hub) {
+    if (process.env.NODE_ENV !== "production") {
+      this._x = 0; // No longer dismounted, if it was.
+    }
     this.set(model, /* #INCLUDE-IF: allowHub */ hub);
     this.update();
   },
@@ -50,6 +53,16 @@ const ComponentPrototype = {
           `${componentName(this)}: update was called during its own update ${MAX_NESTED_UPDATES} times. ` +
             "This usually means a watched model is modified during update, e.g. by sorting it in a placeholder."
         );
+      }
+      if (wallaceConfig.flags.allowDismount) {
+        // Set by dismount, and cleared when reused. Only warn once.
+        if (this._x === 1) {
+          this._x = 2;
+          console.warn(
+            `${componentName(this)}: update was called after the component was dismounted. ` +
+              "Something still references it (e.g. through assign), but it may be reused for another model."
+          );
+        }
       }
     }
     /*
@@ -114,6 +127,9 @@ const ComponentPrototype = {
     let i = 0,
       stash = this._s,
       dismountKeys = this._d;
+    if (process.env.NODE_ENV !== "production") {
+      this._x = 1; // Dismounted, see update.
+    }
     while (i < dismountKeys.length) {
       stash[dismountKeys[i]].dismount();
       i++;

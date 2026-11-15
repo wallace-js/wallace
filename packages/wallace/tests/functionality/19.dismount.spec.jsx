@@ -57,6 +57,56 @@ if (wallaceConfig.flags.allowDismount) {
       expect(Field.pool.length).toBe(4);
     });
   });
+
+  describe("Updating a dismounted component", () => {
+    class Item {
+      component;
+      constructor(name) {
+        this.name = name;
+      }
+    }
+    const Row = item => <div assign:component>{item.name}</div>;
+    const List = items => (
+      <div>
+        <Row.repeat models={items} />
+      </div>
+    );
+    let warn;
+    beforeEach(() => {
+      warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+    afterEach(() => {
+      warn.mockRestore();
+    });
+
+    test("warns once", () => {
+      const a = new Item("a"),
+        b = new Item("b");
+      const component = testMount(List, [a, b]);
+      component.model.pop();
+      component.update();
+      b.component.update();
+      b.component.update();
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain(
+        "Row: update was called after the component was dismounted."
+      );
+    });
+
+    test("doesn't warn once reused", () => {
+      const a = new Item("a"),
+        b = new Item("b");
+      const component = testMount(List, [a, b]);
+      component.model.pop();
+      component.update();
+      const c = new Item("c");
+      component.model.push(c);
+      component.update();
+      c.component.update();
+      a.component.update();
+      expect(warn).not.toHaveBeenCalled();
+    });
+  });
 } else {
   test("at least one test", () => {
     expect(true).toBe(true);
