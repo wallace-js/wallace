@@ -31,6 +31,9 @@ This file is for working on the framework itself.
   branch which that rules out (see `envVisitor` in `visitors/library.ts`). If `NODE_ENV`
   isn't set, it is left for the bundler. Jest sets it to `test`, so tests run with the
   checks on.
+- Name the component in development messages with `componentName(component)` from
+  `lib/utils.js`. In development builds the plugin passes each component's name (e.g.
+  `TicketRow` or `Parent.stub.text`) to `defineComponent`.
 
 ## Running tests
 

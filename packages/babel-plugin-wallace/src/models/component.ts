@@ -46,6 +46,8 @@ export class Component {
   module: Module;
   scope: Scope;
   baseComponent?: Expression;
+  // Used in development messages, e.g. `TicketRow` or `Parent.stub.foo`.
+  name?: string;
   rootElement: HTMLElement;
   extractedNodes: ExtractedNode[] = [];
   modelIdentifier: Identifier;

@@ -5,7 +5,7 @@ import { IMPORTABLES } from "../constants";
 import { jsxVisitors } from "../visitors/jsx";
 import { buildDefineComponentCall } from "../writers";
 import { Component, Module } from "../models";
-import { functionReturnsOnlyJSX } from "../helpers";
+import { functionReturnsOnlyJSX, getComponentName } from "../helpers";
 import { processFunctionParameters } from "./parameters";
 
 type AnyFunction = Function & ObjectMethod;
@@ -37,9 +37,13 @@ class AbstractContextHandler {
       scope.generateUidIdentifier("model"),
       scope.generateUidIdentifier("component")
     );
+    this.component.name = this.getName();
     this.module.requireImport(IMPORTABLES.defineComponent);
     this.functionPath = this.path;
     this.isMatch = true;
+  }
+  getName(): string | undefined {
+    return getComponentName(this.path);
   }
   applyTransformations(): void {
     processFunctionParameters(this.functionPath, this.component);
@@ -67,6 +71,9 @@ class JsxFunctionInExtendComponentCall extends AbstractContextHandler {
     ) {
       this.initialiseComponent();
     }
+  }
+  getName(): string | undefined {
+    return getComponentName(this.path.parentPath);
   }
   getBaseComponent(): t.Identifier {
     // @ts-ignore
@@ -97,6 +104,9 @@ class JsxFunctionInObjectMethod extends AbstractContextHandler {
       this.keyName = path.node.key.name;
       this.initialiseComponent();
     }
+  }
+  getName(): string | undefined {
+    return this.keyName;
   }
   replaceWithDefineComponentCall() {
     this.functionPath.replaceWith(

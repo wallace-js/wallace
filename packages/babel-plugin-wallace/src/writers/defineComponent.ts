@@ -3,6 +3,7 @@ import type { CallExpression, ExpressionStatement, LVal } from "@babel/types";
 import { Component, Module } from "../models";
 import { wallaceConfig } from "../config";
 import { COMPONENT_PROPERTIES, IMPORTABLES } from "../constants";
+import { isDevelopment } from "../helpers";
 import type {
   ArrayExpression,
   FunctionExpression,
@@ -262,7 +263,11 @@ export function buildDefineComponentCall(component: Component): CallExpression {
   if (wallaceConfig.flags.allowDismount) {
     args.push(buildDismountKeys(componentDefinition));
   }
-  if (componentDefinition.baseComponent) {
+  const name = componentDefinition.component.name;
+  if (name && isDevelopment()) {
+    args.push(componentDefinition.baseComponent || t.numericLiteral(0));
+    args.push(t.stringLiteral(name));
+  } else if (componentDefinition.baseComponent) {
     args.push(componentDefinition.baseComponent);
   }
   return t.callExpression(t.identifier(IMPORTABLES.defineComponent), args);

@@ -158,10 +158,17 @@ export const defineComponent = (
   contructor,
   setFunction,
   /* #INCLUDE-IF: allowDismount */ dismountKeys,
-  inheritFrom
+  inheritFrom,
+  name
 ) => {
   const ComponentDefinition = initConstructor(contructor, inheritFrom || ComponentBase);
   const proto = ComponentDefinition.prototype;
+  if (process.env.NODE_ENV !== "production") {
+    // The plugin only passes the name in development, for use in messages.
+    if (name) {
+      Object.defineProperty(ComponentDefinition, "name", { value: name });
+    }
+  }
   throwAway.innerHTML = html;
   proto.set = setFunction || defaultSetFunction;
   proto._w = watches;
