@@ -28,6 +28,17 @@ export function KeyedRepeater(
  */
 KeyedRepeater.prototype = {
   patch: function (parent, items, /* #INCLUDE-IF: allowHub */ hub) {
+    if (process.env.NODE_ENV !== "production") {
+      if (!Array.isArray(items)) {
+        const got =
+          items === null || typeof items !== "object"
+            ? String(items)
+            : items.constructor?.name || "object";
+        throw new Error(
+          `${this.d.name || "Component"}.repeat: models must be an array, got ${got}.`
+        );
+      }
+    }
     const componentDefinition = this.d,
       /* #INCLUDE-IF: allowDismount */ sharedPool = this.s,
       ownPool = this.p,

@@ -124,3 +124,29 @@ describe("Repeat compiles with error when", () => {
     expect(code).toCompileWithError("Nested components may not have child nodes.");
   });
 });
+
+describe("Invalid models", () => {
+  const Child = ({ i }) => <div>{i}</div>;
+  const Sequential = data => (
+    <div>
+      <Child.repeat models={data} />
+    </div>
+  );
+  const Keyed = data => (
+    <div>
+      <Child.repeat models={data} key="i" />
+    </div>
+  );
+
+  test.each([
+    ["sequential", Sequential],
+    ["keyed", Keyed]
+  ])("throw in %s repeaters", (_, Container) => {
+    expect(() => testMount(Container, undefined)).toThrow(
+      "Child.repeat: models must be an array, got undefined."
+    );
+    expect(() => testMount(Container, new Map())).toThrow(
+      "Child.repeat: models must be an array, got Map."
+    );
+  });
+});
