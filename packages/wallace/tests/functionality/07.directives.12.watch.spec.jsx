@@ -83,3 +83,19 @@ describe("behaviour", () => {
     expect(component).toRender(`<div>2</div>`);
   });
 });
+
+describe("Modifying a watched model during update", () => {
+  test("throws if it loops", () => {
+    const Looping = model => <div watch>{model.list.sort().length}</div>;
+    expect(() => testMount(Looping, { list: [2, 1] })).toThrow(
+      "Looping: update was called during its own update 100 times."
+    );
+  });
+
+  test("is allowed if it settles", () => {
+    const Settling = model => (
+      <div watch>{model.ready || (model.ready = true) ? "ready" : ""}</div>
+    );
+    expect(testMount(Settling, {})).toRender(`<div>ready</div>`);
+  });
+});

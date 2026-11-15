@@ -1,5 +1,8 @@
+import { componentName } from "./utils";
+
 const throwAway = document.createElement("template");
 const NO_LOOKUP = "__";
+const MAX_NESTED_UPDATES = 100;
 
 const defaultSetFunction = function (model, /* #INCLUDE-IF: allowHub */ hub) {
   this.model = model;
@@ -36,6 +39,19 @@ const ComponentPrototype = {
       elements = this._e,
       lookups = this._q,
       stash = this._s;
+    if (process.env.NODE_ENV !== "production") {
+      // Counts nested updates of this instance, which happen if a watched model is
+      // modified during update. A few may be intended, but this many is a loop.
+      // Not decremented if an error is thrown below, so could add up over many errors.
+      this._r = (this._r || 0) + 1;
+      if (this._r > MAX_NESTED_UPDATES) {
+        this._r = 0;
+        throw new Error(
+          `${componentName(this)}: update was called during its own update ${MAX_NESTED_UPDATES} times. ` +
+            "This usually means a watched model is modified during update, e.g. by sorting it in a placeholder."
+        );
+      }
+    }
     /*
       Watches is an array of objects with keys:
         e: the element index (number)
@@ -89,6 +105,9 @@ const ComponentPrototype = {
         }
       }
       i++;
+    }
+    if (process.env.NODE_ENV !== "production") {
+      this._r--;
     }
   },
   /* #INCLUDE-IF: allowDismount */ dismount: function () {
