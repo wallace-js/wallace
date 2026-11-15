@@ -106,9 +106,9 @@ The rules are:
 1. If it is required just for testing, it goes in the root **package.json**.
 2. If it is required for the distribution of a package, it goes that package's **package.json** `dependencies` (not `devDependencies` as these do not get installed).
 
-It is easy to get this wrong, which is why we (will) have a canary test which installs just `wallace` into a project (outside of workspaces) and would fail to run babel if any packages are missing.
+It is easy to get this wrong, which is why we have a canary test (`npm run test:canary`), which packs `wallace` and `babel-plugin-wallace` as they would be published, installs them into a copy of the canary app outside the repo, then type checks and builds it.
 
-The apps in `examples/` are workspaces which depend on `"wallace": "*"`, so they use the local packages (and on StackBlitz, the latest release). `npm run test:examples` type checks and builds them. It runs in CI, after `npm run build`.
+The apps in `examples/` are workspaces which depend on `"wallace": "*"`, so they use the local packages (and on StackBlitz, the latest release). `npm run test:examples` type checks and builds them. Both run in CI, after `npm run build`.
 
 ### Inspecting generated code
 

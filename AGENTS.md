@@ -10,7 +10,8 @@ This file is for working on the framework itself.
   functions, and generates the stash, watches, detachers and repeaters that the runtime uses.
 - `examples/` — sample apps, which use the local packages. Update them when the API
   changes: `npm run test:examples` (from the root) type checks and builds them.
-- `canary/` — a sample app used to check that Wallace is installable.
+- `canary/` — checks that Wallace is installable: `npm run test:canary` installs the
+  packed packages into a copy of it outside the repo.
 
 ## Flags and conditional code
 

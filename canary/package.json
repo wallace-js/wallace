@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Wallace canary app",
   "scripts": {
-    "test": "npm i && npm run build-prod && npm run build-dev",
+    "test": "node test.mjs",
     "build-prod": "NODE_ENV=production webpack",
     "build-dev": "NODE_ENV=development webpack"
   },
@@ -18,9 +18,9 @@
     "@babel/preset-env": "^7.22.14",
     "@babel/preset-typescript": "^7.25.7",
     "babel-loader": "^9.1.3",
-    "wallace": "file:../packages/wallace",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^4.15.1",
+    "typescript": "^5.6.3"
   }
 }
