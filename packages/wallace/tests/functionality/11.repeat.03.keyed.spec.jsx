@@ -77,3 +77,29 @@ describe("New items before and after existing items", () => {
     `);
   });
 });
+
+describe("Invalid keys", () => {
+  test("throw if duplicated", () => {
+    expect(() => testMount(KeyFunction, [{ i: 1 }, { i: 2 }, { i: 1 }])).toThrow(
+      'Child.repeat: duplicate key 1 (key="i").'
+    );
+  });
+
+  test("throw if missing", () => {
+    expect(() => testMount(KeyFunction, [{ i: 1 }, { id: 2 }])).toThrow(
+      'Child.repeat: item 1 has no key (key="i").'
+    );
+  });
+
+  test("throw if missing from key function", () => {
+    expect(() => testMount(KeyString, [{ i: 1 }, { id: 2 }])).toThrow(
+      "Child.repeat: item 1 has no key (key function)."
+    );
+  });
+
+  test("throw if duplicated after an update", () => {
+    const component = testMount(KeyFunction, [{ i: 1 }, { i: 2 }]);
+    component.model.push({ i: 2 });
+    expect(() => component.update()).toThrow('Child.repeat: duplicate key 2 (key="i").');
+  });
+});

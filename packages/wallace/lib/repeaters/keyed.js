@@ -57,6 +57,26 @@ KeyedRepeater.prototype = {
       offset = previousKeysLength - itemsLength,
       i = itemsLength - 1;
 
+    if (process.env.NODE_ENV !== "production") {
+      // Duplicate or missing keys would silently corrupt the DOM.
+      const seen = new Set(),
+        keyText = useKeyName ? `key="${keyName}"` : "key function";
+      for (let j = 0; j < itemsLength; j++) {
+        const k = useKeyName ? items[j][keyName] : keyFn(items[j]);
+        if (k === undefined) {
+          throw new Error(
+            `${componentDefinition.name || "Component"}.repeat: item ${j} has no key (${keyText}).`
+          );
+        }
+        if (seen.has(k)) {
+          throw new Error(
+            `${componentDefinition.name || "Component"}.repeat: duplicate key ${String(k)} (${keyText}).`
+          );
+        }
+        seen.add(k);
+      }
+    }
+
     if (wallaceConfig.flags.allowRepeaterSiblings) {
       offsetTracker = this.a;
       initialIndex = this.i;
