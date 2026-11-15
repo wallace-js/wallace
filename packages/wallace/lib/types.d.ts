@@ -220,8 +220,8 @@ want to happen, **not** a function:
 
 ```tsx
 <button onClick={hub.save()}>Save</button>         // correct: calls hub.save()
-<button onClick={() => hub.save()}>Save</button>   // wrong: silently does nothing
-<button onClick={hub.save}>Save</button>           // wrong: silently does nothing
+<button onClick={() => hub.save()}>Save</button>   // wrong: compile error
+<button onClick={hub.save}>Save</button>           // wrong: compile error
 ```
 
 Use **xargs** to access the event or element:

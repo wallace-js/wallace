@@ -196,6 +196,27 @@ class ModelsDirective extends Directive {
   }
 }
 
+/**
+ * The expression is copied into the listener, so a function or uncalled reference
+ * compiles fine but does nothing when the event fires.
+ */
+function ensureHandlerIsCall(value: NodeValue) {
+  let expression: t.Node = value.expression;
+  while (t.isTSAsExpression(expression) || t.isTSNonNullExpression(expression)) {
+    expression = expression.expression;
+  }
+  if (t.isArrowFunctionExpression(expression) || t.isFunctionExpression(expression)) {
+    error(value.path, ERROR_MESSAGES.EVENT_HANDLER_IS_FUNCTION);
+  }
+  if (
+    t.isIdentifier(expression) ||
+    t.isMemberExpression(expression) ||
+    t.isOptionalMemberExpression(expression)
+  ) {
+    error(value.path, ERROR_MESSAGES.EVENT_HANDLER_NOT_CALLED);
+  }
+}
+
 // TODO: change to be on:click
 class OnEventDirective extends Directive {
   static attributeName = "on*";
@@ -207,6 +228,7 @@ class OnEventDirective extends Directive {
     if (value.type === "string") {
       node.addFixedAttribute(base, value.value);
     } else {
+      ensureHandlerIsCall(value);
       node.addEventListener(base.substring(2).toLowerCase(), value.expression);
     }
   }

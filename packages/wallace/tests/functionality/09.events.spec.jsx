@@ -10,6 +10,38 @@ describe("Event directive", () => {
     expect(code).toCompileWithError("The `on*` directive requires a value.");
   });
 
+  test.each([
+    ["arrow function", "() => hub.save()"],
+    ["function expression", "function () { hub.save(); }"]
+  ])("disallows %s", (_, handler) => {
+    const code = `const Bar = () => <button onClick={${handler}} />;`;
+    expect(code).toCompileWithError(
+      "Event handler must be a call, not a function, e.g. `onClick={hub.save()}` not `onClick={() => hub.save()}`, as the expression is run when the event fires."
+    );
+  });
+
+  test.each([
+    ["identifier", "save"],
+    ["member expression", "hub.save"],
+    ["optional member expression", "hub?.save"]
+  ])("disallows uncalled %s", (_, handler) => {
+    const code = `const Bar = () => <button onClick={${handler}} />;`;
+    expect(code).toCompileWithError(
+      "Event handler must be a call, e.g. `onClick={hub.save()}` not `onClick={hub.save}`, as the expression is run when the event fires."
+    );
+  });
+
+  test.each([
+    ["call", "hub.save()"],
+    ["optional call", "hub.save?.()"],
+    ["assignment", "hub.saved = true"],
+    ["update", "hub.count++"],
+    ["conditional call", "hub.ready && hub.save()"]
+  ])("allows %s", (_, handler) => {
+    const code = `const Bar = () => <button onClick={${handler}} />;`;
+    expect(code).toCompileWithoutError();
+  });
+
   test("with string value creates normal event", () => {
     const MyComponent = () => <div ref:target onClick="console.debug(999)"></div>;
     const component = testMount(MyComponent);

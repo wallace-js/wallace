@@ -103,12 +103,12 @@ describe("Xargs access validation in directive expressions", () => {
   });
 
   test("onEvent may access event", () => {
-    const src = `const Foo = (_, { event }) => <div onClick={event}>Test</div>;`;
+    const src = `const Foo = (_, { event }) => <div onClick={foo(event)}>Test</div>;`;
     expect(src).toCompileWithoutError();
   });
 
   test("onEvent may access element", () => {
-    const src = `const Foo = (_, { element }) => <div onClick={element}>Test</div>;`;
+    const src = `const Foo = (_, { element }) => <div onClick={foo(element)}>Test</div>;`;
     expect(src).toCompileWithoutError();
   });
 

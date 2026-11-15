@@ -44,6 +44,10 @@ export const ERROR_MESSAGES = {
   DIRECTIVE_MUST_BE_ON_ROOT_ELEMENT: (directive: string) => {
     return `The \`${directive}\` directive may only be used on the root element.`;
   },
+  EVENT_HANDLER_IS_FUNCTION:
+    "Event handler must be a call, not a function, e.g. `onClick={hub.save()}` not `onClick={() => hub.save()}`, as the expression is run when the event fires.",
+  EVENT_HANDLER_NOT_CALLED:
+    "Event handler must be a call, e.g. `onClick={hub.save()}` not `onClick={hub.save}`, as the expression is run when the event fires.",
   EVENT_USED_WITHOUT_BIND:
     "The `event` directive must be used with the `bind` directive.",
   FLAG_REQUIRED: (flag: string) => {
