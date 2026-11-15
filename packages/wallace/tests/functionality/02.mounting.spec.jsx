@@ -24,6 +24,31 @@ describe("Mounting without model", () => {
   });
 });
 
+describe("Mounting errors", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+  const Animal = () => <div>Hello</div>;
+
+  test("name the missing id", () => {
+    expect(() => mount("nope", Animal)).toThrow(
+      'mount: no element with id "nope" to mount Animal on.'
+    );
+  });
+
+  test("reject a missing element", () => {
+    expect(() => mount(null, Animal)).toThrow(
+      "mount: expected an element or id to mount Animal on, got null."
+    );
+  });
+
+  test("reject an element without a parent", () => {
+    expect(() => mount(document.createElement("div"), Animal)).toThrow(
+      "mount: the element to mount Animal on has no parent, so it can't be replaced."
+    );
+  });
+});
+
 describe("Mounting with model", () => {
   beforeEach(() => {
     document.body.innerHTML = "";

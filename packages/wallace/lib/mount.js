@@ -12,10 +12,25 @@ export const mount = (
   model,
   /* #INCLUDE-IF: allowHub */ hub = model
 ) => {
-  const component = new componentDefinition();
-  component.render(model, /* #INCLUDE-IF: allowHub */ hub);
   const element =
     typeof elementOrId === "string" ? document.getElementById(elementOrId) : elementOrId;
+  if (process.env.NODE_ENV !== "production") {
+    const name = componentDefinition.name || "component";
+    if (!element) {
+      throw new Error(
+        typeof elementOrId === "string"
+          ? `mount: no element with id "${elementOrId}" to mount ${name} on.`
+          : `mount: expected an element or id to mount ${name} on, got ${elementOrId}.`
+      );
+    }
+    if (!element.parentNode) {
+      throw new Error(
+        `mount: the element to mount ${name} on has no parent, so it can't be replaced.`
+      );
+    }
+  }
+  const component = new componentDefinition();
+  component.render(model, /* #INCLUDE-IF: allowHub */ hub);
   element.parentNode.replaceChild(component.el, element);
   return component;
 };
