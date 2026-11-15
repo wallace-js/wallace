@@ -128,6 +128,26 @@ if (wallaceConfig.flags.allowStubs) {
       </div>
     `);
   });
+
+  describe("Missing stubs", () => {
+    test("throw when nested", () => {
+      const Page = () => (
+        <div>
+          <stub.filters />
+        </div>
+      );
+      expect(() => testMount(Page)).toThrow('Page: stub "filters" is not defined.');
+    });
+
+    test("throw when repeated", () => {
+      const Page = () => (
+        <div>
+          <stub.rows.repeat models={[]} />
+        </div>
+      );
+      expect(() => testMount(Page)).toThrow('Page: stub "rows" is not defined.');
+    });
+  });
 } else {
   test("is not allowed without flag", () => {
     const code = `
