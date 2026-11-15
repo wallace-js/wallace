@@ -108,6 +108,8 @@ The rules are:
 
 It is easy to get this wrong, which is why we (will) have a canary test which installs just `wallace` into a project (outside of workspaces) and would fail to run babel if any packages are missing.
 
+The apps in `examples/` are workspaces which depend on `"wallace": "*"`, so they use the local packages (and on StackBlitz, the latest release). `npm run test:examples` type checks and builds them. It runs in CI, after `npm run build`.
+
 ### Inspecting generated code
 
 It is often useful to inspect the generated code, which you can do in two ways:

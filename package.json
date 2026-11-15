@@ -4,6 +4,7 @@
   "scripts": {
     "test": "npm test -w wallace",
     "test:canary": "cd canary && npm test",
+    "test:examples": "npm test -w examples",
     "build": "npm run build -w babel-plugin-wallace",
     "check": "babel $@",
     "prettier": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --write",

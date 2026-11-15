@@ -1,5 +1,5 @@
 import type { Takes, Uses } from "wallace";
-import { iTask, TaskListMethods } from "./types";
+import { iTask } from "./types";
 import { Hub } from "./hubs";
 
 const Task: Takes<iTask> = ({ text, done }) => (
@@ -20,11 +20,8 @@ const UndoRedoBtns: Uses<{ hub: Hub }> = (_, { hub }) => (
   </div>
 );
 
-export const TaskList: Uses<{ model: iTask[]; hub: Hub; methods: TaskListMethods }> = (
-  _,
-  { event, hub, self }
-) => (
-  <div class="tasklist">
+export const TaskList: Takes<Hub> = (hub, { event }) => (
+  <div assign:root class="tasklist">
     <UndoRedoBtns />
     <div style="margin-top: 10px">
       <span>Completed: {hub.tasks.filter(t => t.done).length}</span>
@@ -32,24 +29,9 @@ export const TaskList: Uses<{ model: iTask[]; hub: Hub; methods: TaskListMethods
         <Task.repeat models={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
-        <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
+        <input type="text" onKeyUp={hub.addTaskKeyup(event as KeyboardEvent)} />
         <span> (hit enter to add)</span>
       </div>
     </div>
   </div>
 );
-
-TaskList.methods = {
-  render(model) {
-    this.hub = new Hub(this, model);
-    this.hub.stateMoved();
-  },
-  addTaskKeyup(event: KeyboardEvent) {
-    const target = event.target as HTMLInputElement;
-    const text = target.value;
-    if (event.key === "Enter" && text.length > 0) {
-      this.hub.tasks.push({ text, done: false });
-      target.value = "";
-    }
-  }
-};

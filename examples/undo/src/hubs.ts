@@ -4,14 +4,13 @@ import { iTask } from "./types";
 export class Hub {
   root: ComponentInstance;
   previousStates: string[]; // Latest is always the current state.
-  undoneStates: string[];
+  undoneStates: string[] = [];
   tasks: iTask[];
-  constructor(root: ComponentInstance, tasks: iTask[]) {
-    this.root = root;
+  constructor(tasks: iTask[]) {
     this.previousStates = [JSON.stringify(tasks)];
-    this.undoneStates = [];
+    this.loadState();
   }
-  stateMoved() {
+  loadState() {
     const currentState = this.previousStates[this.previousStates.length - 1];
     this.tasks = watch(JSON.parse(currentState), () => {
       const newState = JSON.stringify(this.tasks);
@@ -22,6 +21,9 @@ export class Hub {
         this.root.update();
       }
     });
+  }
+  stateMoved() {
+    this.loadState();
     this.root.update();
   }
   undo() {
@@ -31,5 +33,13 @@ export class Hub {
   redo() {
     this.previousStates.push(this.undoneStates.pop());
     this.stateMoved();
+  }
+  addTaskKeyup(event: KeyboardEvent) {
+    const target = event.target as HTMLInputElement;
+    const text = target.value;
+    if (event.key === "Enter" && text.length > 0) {
+      this.tasks.push({ text, done: false });
+      target.value = "";
+    }
   }
 }

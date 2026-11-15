@@ -8,7 +8,9 @@ This file is for working on the framework itself.
 - `packages/wallace/lib/` — the runtime. Plain JS, shipped as is. Types are in `lib/types.d.ts`.
 - `packages/babel-plugin-wallace/src/` — the compiler (TypeScript). It replaces whole component
   functions, and generates the stash, watches, detachers and repeaters that the runtime uses.
-- `examples/`, `canary/` — sample apps.
+- `examples/` — sample apps, which use the local packages. Update them when the API
+  changes: `npm run test:examples` (from the root) type checks and builds them.
+- `canary/` — a sample app used to check that Wallace is installable.
 
 ## Flags and conditional code
 

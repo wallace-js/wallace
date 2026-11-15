@@ -3,7 +3,7 @@ import { mount } from "wallace";
 import {
   Chart,
   BarElement,
-  BarHub,
+  BarController,
   CategoryScale,
   LinearScale,
   Filler,
@@ -14,7 +14,7 @@ import {
 
 Chart.register(
   BarElement,
-  BarHub,
+  BarController,
   CategoryScale,
   Filler,
   Legend,

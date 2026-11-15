@@ -626,6 +626,9 @@ TaskList.methods = {
 };
 ```
 
+With TypeScript, `mount` requires the root's model to satisfy its hub type if you don't
+pass a hub, so create the root's hub before mounting it, as in 7.1.
+
 ## 8. Inheritance
 
 You can create a new component definition by extending another one, either preserving the
