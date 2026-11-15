@@ -25,6 +25,12 @@ This file is for working on the framework itself.
   when `allowRepeaterSiblings` is off). Put such test components inside an
   `if (wallaceConfig.flags.x) { ... }` block. Every spec file needs at least one test in
   each configuration, so add an `else` branch with a dummy test.
+- Development checks don't use flags. Put them in
+  `if (process.env.NODE_ENV !== "production") { ... }`. The plugin replaces
+  `process.env.NODE_ENV` in `lib/` with its value at compile time, and removes the
+  branch which that rules out (see `envVisitor` in `visitors/library.ts`). If `NODE_ENV`
+  isn't set, it is left for the bundler. Jest sets it to `test`, so tests run with the
+  checks on.
 
 ## Running tests
 

@@ -85,6 +85,62 @@ export const flagVisitor = {
   }
 };
 
+const isNodeEnv = (node: t.Node) =>
+  t.isMemberExpression(node) &&
+  !node.computed &&
+  t.isIdentifier(node.property, { name: "NODE_ENV" }) &&
+  t.isMemberExpression(node.object) &&
+  !node.object.computed &&
+  t.isIdentifier(node.object.object, { name: "process" }) &&
+  t.isIdentifier(node.object.property, { name: "env" });
+
+interface EnvState {
+  nodeEnv: string;
+}
+
+/**
+ * Replaces `process.env.NODE_ENV` with the value it has during compilation, so the
+ * code works with bundlers which don't define `process`, and removes `if` branches
+ * which that decides, so development checks are removed without a minifier:
+ *
+ *   if (process.env.NODE_ENV !== "production") {
+ *     // development only code
+ *   }
+ *
+ * Only use this if NODE_ENV is set, otherwise leave it for the bundler.
+ */
+export const envVisitor = {
+  IfStatement(path: NodePath<IfStatement>, state: EnvState) {
+    let replaced = false;
+    path.get("test").traverse({
+      MemberExpression(memberPath: NodePath<MemberExpression>) {
+        if (isNodeEnv(memberPath.node)) {
+          memberPath.replaceWith(t.stringLiteral(state.nodeEnv));
+          replaced = true;
+        }
+      }
+    });
+    if (!replaced) return;
+    const { confident, value } = path.get("test").evaluate();
+    if (!confident) return;
+    if (value) {
+      path.replaceWith(path.node.consequent);
+    } else if (path.node.alternate) {
+      path.replaceWith(path.node.alternate);
+    } else {
+      path.remove();
+    }
+  },
+  MemberExpression(path: NodePath<MemberExpression>, state: EnvState) {
+    if (
+      isNodeEnv(path.node) &&
+      !path.parentPath.isAssignmentExpression({ left: path.node })
+    ) {
+      path.replaceWith(t.stringLiteral(state.nodeEnv));
+    }
+  }
+};
+
 /**
  * This flattens the `update` and `_u` methods into one, which are
  * only separate to allow parts, as this inproves performance when

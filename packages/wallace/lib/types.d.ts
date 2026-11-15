@@ -19,6 +19,7 @@
   9. Stubs
  10. Helpers
  11. Flags
+ 12. Development checks
 
 For more detailed documentation go to https://wallace.js.org/docs/
 
@@ -790,6 +791,20 @@ module.exports = {
 
 The types (and therefore tool tips) are unaffected by these flags, and will treat them
 all as being true.
+
+## 12. Development checks
+
+Wallace does some extra checks during development, such as throwing a helpful error if
+you use a feature whose flag is off. These are removed if you build with `NODE_ENV` set
+to `production`:
+
+```sh
+NODE_ENV=production webpack
+```
+
+The Babel plugin replaces `process.env.NODE_ENV` in Wallace's code with its value during
+compilation, and removes the checks if it is `production`. If `NODE_ENV` isn't set when
+compiling, it is left for your bundler to replace, which webpack does based on `mode`.
 
 ---
 Report any issues to https://github.com/wallace-js/wallace
