@@ -58,7 +58,7 @@ import { mount } from 'wallace';
 import type { ComponentInstance, Takes } from 'wallace';
 
 class Task {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   done = false;
 
   constructor(
@@ -79,7 +79,7 @@ class Task {
 }
 
 class TaskList {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   tasks: Task[] = [];
   draft = '';
   nextId = 1;
@@ -137,7 +137,7 @@ mount('main', TaskApp, new TaskList());
 
 Notes:
 
-- `assign:component` sets `model.component` to the component instance, so each model can update its own component.
+- `assign:component` sets `model.component` to the component instance, so each model can update its own component. Declare it with `!` (`component!: ComponentInstance`) as TypeScript can't see that `assign` sets it, and would otherwise complain in strict mode.
 - Each task holds a reference to its list because its own `toggle` method needs to update the summary. Components can reach the list through the hub without this (see Patterns).
 - Toggling a task only updates that task's row and the summary (using `part:summary`), not the whole app.
 - `bind={list.draft}` keeps the input and `list.draft` in sync, and `event:input` makes it update on every keystroke rather than on `change`.
@@ -393,7 +393,7 @@ import type { ComponentInstance, Takes } from 'wallace';
 import type { Ticket } from './schemas';
 
 class Controller {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   tickets: Ticket[] = [];
   editing = false;
   close(ticket: Ticket) {
@@ -429,8 +429,8 @@ Notes:
 
 ```tsx
 class Controller {
-  page: ComponentInstance;
-  filters: ComponentInstance;
+  page!: ComponentInstance;
+  filters!: ComponentInstance;
 }
 
 const Filters: Uses<{ hub: Controller }> = (_, { hub }) => (
@@ -453,7 +453,7 @@ Make a model active when an item needs behaviour of its own, or should update wi
 import type { ComponentInstance, Takes } from 'wallace';
 
 class User {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   #name: string;
   constructor(name: string) {
     this.#name = name;

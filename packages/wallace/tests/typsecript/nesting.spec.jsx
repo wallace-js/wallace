@@ -56,7 +56,7 @@ describe("Model", () => {
     import { mount, Takes } from "wallace";
 
     class Hub {
-      mode: string;
+      mode = "";
     }
 
     const Foo: Takes<null> = () => (<div></div>);

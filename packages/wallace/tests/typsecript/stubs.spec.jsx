@@ -32,9 +32,9 @@ describe("Definition", () => {
     );
 
     Bar.stub.foo = (model) => <div>Bar{model.clicks}</div>;
-    Bar.stub.bar = (model) => <div>Bar{model.clicks}</div>;
+    Bar.stub.baz = () => <div>Baz</div>;
     `).toHaveTypeErrors([
-      `Property 'bar' does not exist on type '{ foo: Takes<Model>; }'.`
+      `Property 'baz' does not exist on type '{ foo: Takes<Model>; }'.`
     ]);
   });
 
