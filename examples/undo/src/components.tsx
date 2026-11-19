@@ -1,6 +1,6 @@
 import type { Takes, Uses } from "wallace";
 import { iTask } from "./types";
-import { Hub } from "./hubs";
+import { Hub } from "./hub";
 
 const Task: Takes<iTask> = ({ text, done }) => (
   <div>

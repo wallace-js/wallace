@@ -27,7 +27,7 @@ export const flagVisitor = {
    *   #EXCLUDE-IF: allowHub
    *
    * WARNING: NOT RELIABLE! It sometimes knocks out subsequent nodes, so only use on
-   * ende nodes.
+   * end nodes.
    */
   enter(path: NodePath) {
     const leadingComments = path.node.leadingComments;

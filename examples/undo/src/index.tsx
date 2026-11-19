@@ -1,6 +1,6 @@
 import { mount } from "wallace";
 import { TaskList } from "./components";
-import { Hub } from "./hubs";
+import { Hub } from "./hub";
 
 const hub = new Hub([
   { text: "Complete Wallace tutorial", done: true },
