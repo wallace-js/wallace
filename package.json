@@ -9,7 +9,8 @@
     "check": "babel $@",
     "prettier": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --write",
     "prettier:check": "prettier \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\" --check",
-    "publish": "npm whoami && lerna publish --no-private"
+    "publish": "node scripts/publish.js",
+    "publish:packages": "node scripts/publish-packages.js"
   },
   "workspaces": [
     "playground",

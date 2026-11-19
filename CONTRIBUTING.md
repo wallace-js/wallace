@@ -830,28 +830,26 @@ The offset tracker stores a 0 or a -1 against each conditional element, and the 
 
 ## Publishing
 
-From **master** run the correct command:
+From **master** run:
 
 ```bash
-# correct
 npm run publish
-# incorrect
-npm publish
 ```
 
-The custom command uses [lerna](https://lerna.js.org/) which prompts for a new version, creates the git tag and commit, and publishes the relevant packages.
+Not `npm publish`, which would try to publish the private root package. The script (`scripts/publish.js`):
 
-We run `npm whoami` first to check we are logged in, but don't have a way to check you can actually publish, and so it may still fail.
+1. Checks you are logged in to npm (run `npm login` if not), and that master is clean and up to date with origin.
+2. Runs `lerna version`, which prompts for the new version, then commits, tags and pushes it. This doesn't contact npm, so it can't fail on authentication.
+3. Publishes `babel-plugin-wallace` then `wallace` with `npm publish`. If your npm account uses a passkey or security key for 2FA, npm opens your browser to confirm, possibly once per package.
+
+We publish with npm rather than `lerna publish` because Lerna can only prompt for a one-time password, which you can't provide if your 2FA is a passkey or security key.
 
 #### Failure
 
-Occasionally `lerna publish` fails, typically due to authentication or expired tokens, and leaves uncommitted changes to the **package.json** files.
+If publishing fails, nothing needs to be undone: the release is committed and tagged, and no files were changed. Fix the problem (e.g. run `npm login`), then retry with:
 
-These changes are just the temporary `gitHead` field Lerna adds prior to publishing to npm, which it removes once it's done, unless it fails.
+```bash
+npm run publish:packages
+```
 
-To fix this:
-
-1. Publish each package manually with `npm publish` (keeping the `gitHead` fields)
-2. Remove the `gitHead` fields - as they're not needed.
-
-More detail in this answer: https://stackoverflow.com/a/80001658/548736
+This publishes the packages at the current commit, skipping versions already on npm, so it's safe to run more than once. It must be run on the release commit (it checks for the tag). Add `-- --dry-run` to see what it would do.
