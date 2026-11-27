@@ -7,7 +7,7 @@ const Task: Uses<{ model: iTask; hub: TaskListHub }> = ({ text, done, id }, { hu
     <input
       type="checkbox"
       checked={done}
-      onChange={hub.toggleTask({ id, done: !done })}
+      on:change={hub.toggleTask({ id, done: !done })}
     />
     <label style:color={done ? "grey" : "black"}>{text}</label>
   </div>
@@ -24,7 +24,7 @@ export const TaskList: Uses<{ hub: TaskListHub; methods: TaskListMethods }> = (
         <Task.repeat models={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
-        <input type="text" onKeyUp={self.txtInputKeyUp(event)} />
+        <input type="text" on:keyup={self.txtInputKeyUp(event)} />
         <span> (hit enter to add)</span>
       </div>
     </div>

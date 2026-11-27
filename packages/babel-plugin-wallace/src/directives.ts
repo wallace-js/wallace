@@ -1,6 +1,6 @@
 /**
  * These are the directives, which work by matching `attributeName`, except for the
- * event directive.
+ * deprecated `onClick` style event directive (see `visitors/attribute.ts`).
  *
  * The `help` field was supposed to be used for docs, but we're now putting this in
  * the packages/wallace/lib/types.d.ts to make it available by tool tip. When making
@@ -8,7 +8,7 @@
  */
 import * as t from "@babel/types";
 import { wallaceConfig, FlagValue } from "./config";
-import { ERROR_MESSAGES, error } from "./errors";
+import { ERROR_MESSAGES, error, warn } from "./errors";
 import {
   Directive,
   TagNode,
@@ -21,7 +21,6 @@ import {
   WATCH_CALLBACK_ARGS,
   SPECIAL_SYMBOLS,
   IMPORTABLES,
-  DOM_EVENTS_LOWERCASE,
   INPUT_TYPE_VALUES
 } from "./constants";
 
@@ -99,16 +98,24 @@ class CssDirective extends Directive {
   }
 }
 
-class EventDirective extends Directive {
-  static attributeName = "event";
+class BindOnDirective extends Directive {
+  static attributeName = "bind-on";
   static valueMode: ValueMode = ValueMode.StringRequired;
   static qualifierMode: QualifierMode = QualifierMode.SetsValue;
   apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    node.setBindEvent(qualifier || value.value);
+  }
+}
+
+/**
+ * Deprecated: use `bind-on`. Make this a compile error in a future version.
+ */
+class EventDirective extends BindOnDirective {
+  static attributeName = "event";
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, base: string) {
     const eventName = qualifier || value.value;
-    if (!DOM_EVENTS_LOWERCASE.includes(eventName)) {
-      error(node.path, ERROR_MESSAGES.INVALID_EVENT_NAME(eventName));
-    }
-    node.setBindEvent(eventName);
+    warn(node.path, ERROR_MESSAGES.EVENT_DIRECTIVE_DEPRECATED(eventName));
+    super.apply(node, value, qualifier, base);
   }
 }
 
@@ -217,20 +224,34 @@ function ensureHandlerIsCall(value: NodeValue) {
   }
 }
 
-// TODO: change to be on:click
-class OnEventDirective extends Directive {
+class OnDirective extends Directive {
+  static attributeName = "on";
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
+  static qualifierMode: QualifierMode = QualifierMode.Required;
+  static mayAccessElement = true;
+  static mayAccessEvent = true;
+  apply(node: TagNode, value: NodeValue, qualifier: Qualifier, _base: string) {
+    ensureHandlerIsCall(value);
+    node.addEventListener(qualifier, value.expression);
+  }
+}
+
+/**
+ * Deprecated: use `on:click`. Only used for `onClick={expression}`, as string values
+ * are normal attributes. Make this a compile error in a future version, rather than
+ * letting it become a normal attribute, which would silently run the handler on render.
+ */
+class DeprecatedOnEventDirective extends Directive {
   static attributeName = "on*";
-  static valueMode: ValueMode = ValueMode.EitherRequired;
+  static valueMode: ValueMode = ValueMode.ExpressionRequired;
   static qualifierMode: QualifierMode = QualifierMode.NotAllowed;
   static mayAccessElement = true;
   static mayAccessEvent = true;
   apply(node: TagNode, value: NodeValue, _qualifier: Qualifier, base: string) {
-    if (value.type === "string") {
-      node.addFixedAttribute(base, value.value);
-    } else {
-      ensureHandlerIsCall(value);
-      node.addEventListener(base.substring(2).toLowerCase(), value.expression);
-    }
+    const eventName = base.substring(2).toLowerCase();
+    warn(value.path, ERROR_MESSAGES.ON_EVENT_DEPRECATED(base, eventName));
+    ensureHandlerIsCall(value);
+    node.addEventListener(eventName, value.expression);
   }
 }
 
@@ -345,6 +366,7 @@ export const builtinDirectives = [
   AssignDirective,
   BindDirective,
   BindAsDirective,
+  BindOnDirective,
   ClassDirective,
   CssDirective,
   EventDirective,
@@ -356,7 +378,8 @@ export const builtinDirectives = [
   KeyDirective,
   ModelDirective,
   ModelsDirective,
-  OnEventDirective,
+  OnDirective,
+  DeprecatedOnEventDirective,
   PartDirective,
   RefDirective,
   ShowDirective,

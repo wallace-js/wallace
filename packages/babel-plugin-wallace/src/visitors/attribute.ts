@@ -1,7 +1,6 @@
 import type { NodePath } from "@babel/core";
 import type { JSXAttribute } from "@babel/types";
 import { wallaceConfig } from "../config";
-import { DOM_EVENT_HANDLERS } from "../constants";
 import { Component, TagNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { extractAttributeName, extractAttributeValue } from "../ast-helpers";
@@ -27,8 +26,10 @@ export const attributeVisitors = {
       return;
     }
 
-    const isEventHandler = DOM_EVENT_HANDLERS.includes(base.toLowerCase());
-    const directiveClass = isEventHandler
+    // Deprecated `onClick={...}` syntax. String values are left as normal attributes.
+    const isDeprecatedEventHandler =
+      !qualifier && extractedValue.type === "expression" && /^on[a-z]/i.test(base);
+    const directiveClass = isDeprecatedEventHandler
       ? wallaceConfig.directives["on*"]
       : wallaceConfig.directives[base];
     if (directiveClass) {

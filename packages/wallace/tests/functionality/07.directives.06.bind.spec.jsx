@@ -48,59 +48,63 @@ describe("Bind directive", () => {
   });
 });
 
-describe("Event specification", () => {
+describe("bind-on directive", () => {
   test("not allowed without bind", () => {
     const code = `
       const Foo = (user) => (
-        <input event:keyup />
+        <input bind-on:keyup />
       )
     `;
     expect(code).toCompileWithError(
-      "The `event` directive must be used with the `bind` directive."
+      "The `bind-on` directive must be used with the `bind` directive."
     );
   });
 
   test("disallows value and qualifier", () => {
     const code = `
       const Foo = (user) => (
-        <input event:keyup="keyup" />
+        <input bind-on:keyup="keyup" />
       )
     `;
     expect(code).toCompileWithError(
-      "The `event` directive requires a qualifier or value, not both."
+      "The `bind-on` directive requires a qualifier or value, not both."
     );
   });
 
-  test.each(["notavalidevent", "onClick", "KeyUp"])(
-    "disallows invalid event name: %s",
-    name => {
-      const code = `
-        const Bar = (user) => (
-          <input bind={user.name} event:${name} />
-        )
-      `;
-      expect(code).toCompileWithError(
-        `\`${name}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`
-      );
-    }
-  );
-
-  test("allows valid event name as qualifier", () => {
+  test("allows event name as qualifier", () => {
     const code = `
       const Bar = (user) => (
-        <input bind={user.name} event:keyup />
+        <input bind={user.name} bind-on:keyup />
       )
     `;
     expect(code).toCompileWithoutError();
   });
 
-  test("allows valid event name as string", () => {
+  test("allows event name as string", () => {
     const code = `
       const Bar = (user) => (
-        <input bind={user.name} event="keyup" />
+        <input bind={user.name} bind-on="keyup" />
       )
     `;
     expect(code).toCompileWithoutError();
+  });
+
+  test("deprecated event directive still works, with a warning", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const code = `
+        const Bar = (user) => (
+          <input bind={user.name} event:keyup />
+        )
+      `;
+      expect(code).toCompileWithoutError();
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain(
+        "The `event` directive is deprecated and will be removed. Use `bind-on:keyup` instead."
+      );
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
 
@@ -125,7 +129,7 @@ test("Value updates to match data", () => {
   const MyComponent = (_, { self }) => (
     <div>
       <input ref:tbx type="text" bind={data.text} />
-      <button ref:btn onClick={self.btnClick()}>
+      <button ref:btn on:click={self.btnClick()}>
         Clear
       </button>
     </div>
@@ -165,7 +169,7 @@ test("Value updates to match data", () => {
 describe("Alternative event", () => {
   const MyComponent = ({ text }) => (
     <div>
-      <input ref:tbx type="text" bind={text} event:keyup />;
+      <input ref:tbx type="text" bind={text} bind-on:keyup />;
     </div>
   );
   MyComponent.prototype.render = function (model) {
