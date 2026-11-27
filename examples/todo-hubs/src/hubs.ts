@@ -53,11 +53,13 @@ export class TaskListHub extends AsyncLoadHub {
       });
     });
   }
-  async toggleTask({ id, done }) {
+  async toggleTask({ id, done }: { id: number; done: boolean }) {
     await this._save(async () => {
       await toggleTask({ id, done }).then(changedTask => {
         const localCopy = this.tasks.find(t => t.id === changedTask.id);
-        localCopy.done = changedTask.done;
+        if (localCopy) {
+          localCopy.done = changedTask.done;
+        }
       });
     });
   }

@@ -21,6 +21,20 @@ describe("Model", () => {
     ]);
   });
 
+  test("disallows repeat on other functions", () => {
+    expect(`
+    import { mount, Takes } from "wallace";
+    const foo = () => 1;
+    const Bar: Takes = () => (
+      <div>
+        <foo.repeat models={[]} />
+      </div>
+    );
+  `).toHaveTypeErrors([
+      "JSX element type 'foo.repeat' does not have any construct or call signatures."
+    ]);
+  });
+
   test("disallows invalid model", () => {
     expect(`
       import { mount, Takes } from "wallace"

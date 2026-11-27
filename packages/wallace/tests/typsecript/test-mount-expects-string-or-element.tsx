@@ -9,6 +9,6 @@ const MyComponent: Takes<null> = () => (
 
 const c = 6;
 mount("str", MyComponent);
-mount(document.getElementById("a"), MyComponent);
+mount(document.getElementById("a")!, MyComponent);
 
 mount(c, MyComponent);

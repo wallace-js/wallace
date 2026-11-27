@@ -12,6 +12,8 @@ For example:
 
 Files which do not specify such a line are expected to pass. Additionally they may not
 have inline comments, to avoid the risk of a badly formatted line.
+
+Each file is compiled with strict on and off, and must give the same result.
 */
 import { splitOnce } from "../utils";
 import { exec } from "child_process";
@@ -40,9 +42,13 @@ tsxFiles.forEach(fileName => {
     if (isNaN(lineNo)) {
       throw new Error(`Invalid format number in ${errorChunk} must be like "//@25"`);
     }
-    tsxFilesWithErrors.push({ fileName, lineNo, errorMessage });
+    for (const strict of [false, true]) {
+      tsxFilesWithErrors.push({ fileName, strict, lineNo, errorMessage });
+    }
   } else {
-    tsxFilesWithoutErrors.push({ fileName });
+    for (const strict of [false, true]) {
+      tsxFilesWithoutErrors.push({ fileName, strict });
+    }
   }
 });
 
@@ -50,15 +56,15 @@ tsxFiles.forEach(fileName => {
 // running in parallel, so the default timeout in jest.config.js is not enough.
 const TSC_TIMEOUT = 60 * 1000;
 
-const tscCmd = name => {
+const tscCmd = (name, strict) => {
   const file = path.resolve(__dirname, name);
-  return `tsc --jsx preserve ${file} --noEmit`;
+  return `tsc --jsx preserve ${file} --noEmit${strict ? " --strict" : ""}`;
 };
 
 test.each(tsxFilesWithoutErrors)(
-  "Expect no error in $fileName",
-  ({ fileName }, done) => {
-    exec(tscCmd(fileName), (err, stdout) => {
+  "Expect no error in $fileName (strict: $strict)",
+  ({ fileName, strict }, done) => {
+    exec(tscCmd(fileName, strict), (err, stdout) => {
       if (err) {
         done(stdout);
       } else {
@@ -70,9 +76,9 @@ test.each(tsxFilesWithoutErrors)(
 );
 
 test.each(tsxFilesWithErrors)(
-  "Expect error in $fileName",
-  ({ fileName, lineNo, errorMessage }, done) => {
-    exec(tscCmd(fileName), (err, stdout) => {
+  "Expect error in $fileName (strict: $strict)",
+  ({ fileName, strict, lineNo, errorMessage }, done) => {
+    exec(tscCmd(fileName, strict), (err, stdout) => {
       if (err) {
         const [path, rest] = splitOnce(stdout, ":");
         const foundLine = splitOnce(splitOnce(path, "(")[1], ",")[0];

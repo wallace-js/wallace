@@ -475,7 +475,7 @@ import type { ComponentInstance, Takes } from 'wallace';
 import type { Ticket } from './schemas';
 
 class Controller {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   tickets: Ticket[] = [];
   editing = false;
   close(ticket: Ticket) {
@@ -511,8 +511,8 @@ assigned to its own property:
 
 ```tsx
 class Controller {
-  page: ComponentInstance;
-  filters: ComponentInstance;
+  page!: ComponentInstance;
+  filters!: ComponentInstance;
 }
 
 const Filters: Uses<{ hub: Controller }> = (_, { hub }) => (
@@ -543,7 +543,7 @@ import { mount } from 'wallace';
 import type { ComponentInstance, Takes } from 'wallace';
 
 class Task {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   done = false;
   constructor(public text: string, public list: TaskList) {}
   toggle() {
@@ -556,7 +556,7 @@ class Task {
 }
 
 class TaskList {
-  component: ComponentInstance;
+  component!: ComponentInstance;
   tasks: Task[];
   constructor(texts: string[]) {
     this.tasks = texts.map(text => new Task(text, this));
@@ -830,8 +830,8 @@ declare module "wallace" {
     Stubs extends StubDefinition = {}
   > {
     (
-      model?: Model,
-      xargs?: {
+      model: Model,
+      xargs: {
         hub: Hub;
         model: Model;
         self: ComponentInstance<Model, Hub, Methods>;
@@ -840,7 +840,7 @@ declare module "wallace" {
         element: HTMLElement;
       }
     ): JSX.Element;
-    repeat?({
+    repeat({
       models,
       hub,
       part,
@@ -852,18 +852,37 @@ declare module "wallace" {
       key?: keyof Model | ((item: Model) => any);
       [qualified: `part:${string}`]: boolean;
     }): JSX.Element;
-    methods?: ComponentMethods<Model, Hub, Methods> &
-      ThisType<ComponentInstance<Model, Hub, Methods>>;
+    // This is a proxy for the prototype, so is typed as an instance. TypeScript uses this
+    // type for `this` in functions assigned to `methods` or `methods.x`.
+    get methods(): ComponentInstance<Model, Hub, Methods>;
+    set methods(
+      methods: ComponentMethods<Model, Hub, Methods> &
+        ThisType<ComponentInstance<Model, Hub, Methods>>
+    );
     readonly prototype: ComponentInstance<Model, Hub>;
-    readonly stub?: Stubs;
+    readonly stub: Stubs;
   }
 
   type ComponentMethods<Model, Hub, Methods extends object = {}> = {
-    render?(this: ComponentInstance<Model, Hub, Methods>, model: Model, hub?: Hub): void;
-    set?(this: ComponentInstance<Model, Hub, Methods>, model: Model, hub?: Hub): void;
+    render?(
+      this: ComponentInstance<Model, Hub, Methods>,
+      model: Model,
+      ...hub: HubArg<Hub>
+    ): void;
+    set?(
+      this: ComponentInstance<Model, Hub, Methods>,
+      model: Model,
+      ...hub: HubArg<Hub>
+    ): void;
     update?(this: ComponentInstance<Model, Hub, Methods>): void;
     [key: string]: any;
   };
+
+  /**
+   * The hub parameter of `render` and `set`, which is optional unless the hub is typed.
+   * The runtime always passes it, but `instance.render(model)` sets the hub to undefined.
+   */
+  type HubArg<Hub> = unknown extends Hub ? [hub?: Hub] : [hub: Hub];
 
   /**
    * A type which annotates the model and hub (both optional) which the component takes.
@@ -917,26 +936,32 @@ declare module "wallace" {
   /**
    * The type for a component instance.
    */
-  type ComponentInstance<Model = any, Hub = any, Methods extends object = {}> = {
+  type ComponentInstance<Model = any, Hub = any, Methods extends object = {}> = Component<
+    Model,
+    Hub,
+    Methods
+  > &
+    Methods;
+
+  /**
+   * The component constructor function (typed as a class, but isn't).
+   *
+   * The methods declare `this` so that it is the instance in functions assigned to
+   * `MyComponent.methods`, even without noImplicitThis.
+   */
+  class Component<Model = any, Hub = any, Methods extends object = {}> {
     el: HTMLElement;
     model: Model;
     hub: Hub;
     ref: { [key: string]: HTMLElement };
     part: { [key: string]: Part };
-    base: Component<Model, Hub>;
+    base: Component<Model, Hub, Methods>;
     dismount(): void;
-  } & Component<Model, Hub> &
-    Methods;
-
-  /**
-   * The component constructor function (typed as a class, but isn't).
-   */
-  class Component<Model = any, Hub = any> {
     /**
      * The base render method looks like this:
      *
      * ```
-     * render(model?: Model, hub?: Hub) {
+     * render(model: Model, hub: Hub) {
      *   this.set(model, hub);
      *   this.update();
      * }
@@ -945,19 +970,23 @@ declare module "wallace" {
      * You can override like so:
      *
      * ```
-     * render(model?: Model, hub?: Hub) {
+     * render(model: Model, hub: Hub) {
      *   // do your thing
      *   this.base.render.call(this, model, hub);
      * }
      * ```
      */
-    render(model?: Model, hub?: Hub): void;
+    render(
+      this: ComponentInstance<Model, Hub, Methods>,
+      model: Model,
+      ...hub: HubArg<Hub>
+    ): void;
     /**
      *
      * The base set method looks like this:
      *
      * ```
-     * set(model?: Model, hub?: Hub) {
+     * set(model: Model, hub: Hub) {
      *   this.model = model;
      *   this.hub = hub;
      * }
@@ -965,7 +994,11 @@ declare module "wallace" {
      *
      * But this may be modified by directives such as `watch` and `assign`.
      */
-    set(model?: Model, hub?: Hub): void;
+    set(
+      this: ComponentInstance<Model, Hub, Methods>,
+      model: Model,
+      ...hub: HubArg<Hub>
+    ): void;
     /**
      * Updates the DOM.
      *
@@ -978,7 +1011,7 @@ declare module "wallace" {
      * }
      * ```
      */
-    update(): void;
+    update(this: ComponentInstance<Model, Hub, Methods>): void;
   }
 
   /**
@@ -988,7 +1021,7 @@ declare module "wallace" {
    * @param hub
    */
   function createComponent<Model, Hub, Methods extends object = {}>(
-    def: ComponentFunction<Model, Hub, Methods>,
+    def: ComponentFunction<Model, Hub, Methods, any>,
     model?: Model,
     hub?: Hub
   ): ComponentInstance<Model, Hub, Methods>;
@@ -1003,8 +1036,8 @@ declare module "wallace" {
    * @param componentFunc A JSX function to override the DOM.
    */
   function extendComponent<Model = any, Hub = any, Methods extends object = {}>(
-    base: ComponentFunction<Model, Hub, Methods>,
-    componentFunc?: ComponentFunction<Model, Hub, Methods>
+    base: ComponentFunction<Model, Hub, Methods, any>,
+    componentFunc?: ComponentFunction<Model, Hub, Methods, any>
   ): ComponentFunction<Model, Hub, Methods>;
 
   /**
@@ -1017,12 +1050,12 @@ declare module "wallace" {
    */
   function mount<Model = any, Hub = any, Methods extends object = {}>(
     element: string | HTMLElement,
-    componentDefinition: ComponentFunction<Model, Hub, Methods>,
+    componentDefinition: ComponentFunction<Model, Hub, Methods, any>,
     model?: ModelAsHub<Model, Hub>
   ): ComponentInstance<Model, Hub, Methods>;
   function mount<Model = any, Hub = any, Methods extends object = {}>(
     element: string | HTMLElement,
-    componentDefinition: ComponentFunction<Model, Hub, Methods>,
+    componentDefinition: ComponentFunction<Model, Hub, Methods, any>,
     model: Model,
     hub: Hub
   ): ComponentInstance<Model, Hub, Methods>;
@@ -1172,6 +1205,9 @@ interface DirectiveAttributes extends AllDomEvents {
    *
    * Be careful not to assign to a watched property which updates this component or a
    * parent, as that will create an infinite loop.
+   *
+   * In TypeScript, declare a class field which is assigned to with `!`, i.e.
+   * `component!: ComponentInstance`, otherwise strict mode reports it is not initialised.
    *
    * May only be used on the root element. Modifies the `set` method.
    */
@@ -1526,6 +1562,16 @@ type NativeIntrinsicElements = {
 // <button style="width:20px" >
 
 declare global {
+  // ComponentFunction requires `repeat`, `methods` and `stub` so that reading them
+  // doesn't add `undefined` with strictNullChecks. A component is an arrow function,
+  // which only has these properties if Function does. Typing them as `never` stops their
+  // use elsewhere.
+  interface Function {
+    readonly repeat: never;
+    readonly methods: never;
+    readonly stub: never;
+  }
+
   namespace JSX {
     // This allows <Foo model={x} hub={h} if={y} ref:foo part:bar />
     // The model may be omitted if it is null, i.e. from Takes<null>. The tuples stop

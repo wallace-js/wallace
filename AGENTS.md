@@ -9,7 +9,26 @@ This file is for working on the framework itself.
 - `packages/babel-plugin-wallace/src/` — the compiler (TypeScript). It replaces whole component
   functions, and generates the stash, watches, detachers and repeaters that the runtime uses.
 - `examples/` — sample apps, which use the local packages. Update them when the API
-  changes: `npm run test:examples` (from the root) type checks and builds them.
+  changes: `npm run test:examples` (from the root) type checks (with `strict` on) and
+  builds them.
+- `docs/` — contributor docs, one file per topic. These are replacing `CONTRIBUTING.md`,
+  which is older and partly out of date.
+
+## Keeping the docs up to date
+
+- Whenever you change how something works, or why, update the matching file in `docs/`
+  as part of the same change. Add a new file if no topic fits.
+- `docs/TypeScript.md` explains the types in `lib/types.d.ts`, including the unexpected
+  parts (such as `repeat`, `methods` and `stub` on every function). Read it before
+  changing the types, and update it whenever they change.
+- Also update `packages/wallace/AGENTS.md`, the JSDoc in `lib/types.d.ts` and the
+  examples when the way users write code changes.
+
+## Types
+
+- The types must work with `strict` on and off. The tests in
+  `packages/wallace/tests/typsecript` compile every case in both modes. See
+  `docs/TypeScript.md`.
 - `canary/` — checks that Wallace is installable: `npm run test:canary` installs the
   packed packages into a copy of it outside the repo.
 

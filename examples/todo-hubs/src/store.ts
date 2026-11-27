@@ -22,9 +22,12 @@ export async function addTask(text: string) {
   return newTask;
 }
 
-export async function toggleTask({ id, done }) {
+export async function toggleTask({ id, done }: { id: number; done: boolean }) {
   await new Promise(r => setTimeout(r, 500));
   const task = tasks.find(t => t.id === id);
+  if (!task) {
+    throw new Error(`No task with id ${id}`);
+  }
   task.done = done;
   return task;
 }

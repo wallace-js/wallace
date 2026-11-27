@@ -79,7 +79,7 @@ describe("Documented patterns", () => {
       }
 
       class Controller {
-        component: ComponentInstance;
+        component!: ComponentInstance;
         tickets: Ticket[] = [];
         editing = false;
         close(ticket: Ticket) {
@@ -113,8 +113,8 @@ describe("Documented patterns", () => {
       import type { ComponentInstance, Takes, Uses } from "wallace";
 
       class Controller {
-        page: ComponentInstance;
-        filters: ComponentInstance;
+        page!: ComponentInstance;
+        filters!: ComponentInstance;
       }
 
       const Filters: Uses<{ hub: Controller }> = (_, { hub }) => (

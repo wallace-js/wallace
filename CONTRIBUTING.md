@@ -2,7 +2,8 @@
 
 This contains documentation for contributors.
 
-Several things may be out of date.
+Several things may be out of date. These docs are gradually moving to the [doc](doc)
+directory, which also has newer topics such as [TypeScript](docs/TypeScript.md).
 
 ## Quick start
 

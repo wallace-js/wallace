@@ -2,10 +2,10 @@ import { ComponentInstance, watch } from "wallace";
 import { iTask } from "./types";
 
 export class Hub {
-  root: ComponentInstance;
+  root!: ComponentInstance; // Set by assign:root.
   previousStates: string[]; // Latest is always the current state.
   undoneStates: string[] = [];
-  tasks: iTask[];
+  tasks!: iTask[]; // Set by loadState().
   constructor(tasks: iTask[]) {
     this.previousStates = [JSON.stringify(tasks)];
     this.loadState();
@@ -27,12 +27,18 @@ export class Hub {
     this.root.update();
   }
   undo() {
-    this.undoneStates.push(this.previousStates.pop());
-    this.stateMoved();
+    // Keep the first state, which is the one we started with.
+    if (this.previousStates.length > 1) {
+      this.undoneStates.push(this.previousStates.pop()!);
+      this.stateMoved();
+    }
   }
   redo() {
-    this.previousStates.push(this.undoneStates.pop());
-    this.stateMoved();
+    const state = this.undoneStates.pop();
+    if (state !== undefined) {
+      this.previousStates.push(state);
+      this.stateMoved();
+    }
   }
   addTaskKeyup(event: KeyboardEvent) {
     const target = event.target as HTMLInputElement;

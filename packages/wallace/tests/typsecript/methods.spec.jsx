@@ -79,6 +79,7 @@ describe("Definition", () => {
       const c = this.model.clicks / 2;
       const d = this.hub.times / 2;
       this.update();
+      return "";
     }
     
     Bar.methods = { 
@@ -86,6 +87,7 @@ describe("Definition", () => {
         const c = this.model.clicks / 2;
         const d = this.hub.times / 2;
         this.update();
+        return "";
       }
     }
     `).toHaveNoTypeErrors();
@@ -110,6 +112,24 @@ describe("Definition", () => {
     );
     `).toHaveTypeErrors([
       `Property 'nope' does not exist on type 'ComponentInstance<Model, unknown, Methods>'.`
+    ]);
+  });
+
+  test("Checks methods assigned individually", () => {
+    expect(`
+    import { mount, Uses } from "wallace";
+    interface Methods {
+      getName: () => string;
+    }
+
+    const Bar: Uses<{methods: Methods}> = () => <div></div>;
+
+    Bar.methods.getName = function () {
+      return 1;
+    }
+    `).toHaveTypeErrors([
+      `Type '() => number' is not assignable to type '() => string'.
+      Type 'number' is not assignable to type 'string'.`
     ]);
   });
 });

@@ -38,9 +38,10 @@ const getCompilerHost = () => {
  * Run the source code through tsc to find type errors.
  *
  * @param source a sample of source code
+ * @param strict whether to compile with strict on
  * @returns an array of error messages
  */
-function tsCompile(source) {
+function tsCompile(source, strict) {
   const fileName = "module.tsx";
   const compilerHost = getCompilerHost();
   const originalReadFile = compilerHost.readFile;
@@ -54,7 +55,8 @@ function tsCompile(source) {
     }
     return originalGetSourceFile.call(compilerHost, f, langVersion, ...rest);
   };
-  const program = ts.createProgram([fileName], hostOptions, compilerHost);
+  const options = { ...hostOptions, strict };
+  const program = ts.createProgram([fileName], options, compilerHost);
   const diagnostics = ts.getPreEmitDiagnostics(program);
 
   return diagnostics.map(d => {
@@ -206,9 +208,14 @@ expect.extend({
     if (!Array.isArray(expectedErrors)) {
       throw new Error("toHaveTypeErrors requires an array of expected errors");
     }
-    const errors = tsCompile(src)
-      .map(e => e.split("):")[1].replaceAll(/\s+/g, " ").trim())
-      .sort();
+    // Strict mode adds `| undefined` to optional properties in messages.
+    const errorsIn = strict =>
+      tsCompile(src, strict)
+        .map(e => e.split("):")[1].replaceAll(/\s+/g, " ").trim())
+        .map(e => (strict ? e.replaceAll(" | undefined", "") : e))
+        .sort();
+    const errors = errorsIn(false);
+    const strictErrors = errorsIn(true);
     const expected = expectedErrors.map(e => e.replaceAll(/\s+/g, " ").trim()).sort();
 
     if (errors.length === 0) {
@@ -220,18 +227,22 @@ expect.extend({
     }
     const expectedStr = expected.join("\n");
     const errorsStr = errors.join("\n");
-    if (expectedStr === errorsStr) {
+    const strictErrorsStr = strictErrors.join("\n");
+    if (expectedStr === errorsStr && expectedStr === strictErrorsStr) {
       return { pass: true };
     }
-    console.log(errorsStr);
+    const failedStr = expectedStr === errorsStr ? strictErrorsStr : errorsStr;
+    const mode = expectedStr === errorsStr ? "strict" : "non-strict";
+    console.log(failedStr);
     return {
       pass: false,
       message: () => {
-        const diffString = diff(expectedStr, errorsStr, {
+        const diffString = diff(expectedStr, failedStr, {
           expand: this.expand
         });
         return (
           this.utils.matcherHint(".toHaveTypeErrors") +
+          `\n\nIn ${mode} mode` +
           (diffString ? `\n\nDifference:\n\n${diffString}` : "") +
           "\n\nIGNORE WHAT FOLLOWS - JEST OFTEN POINTS TO CODE FROM PREVIOUS TEST"
         );
@@ -239,16 +250,19 @@ expect.extend({
     };
   },
   toHaveNoTypeErrors(src) {
-    const errors = tsCompile(src);
-    if (errors.length === 0) {
-      return { pass: true };
-    } else {
-      return {
-        pass: false,
-        message: () =>
-          `Expected no errors but got ${errors.length}:\n\n` + errors.join("\n")
-      };
+    for (const strict of [false, true]) {
+      const errors = tsCompile(src, strict);
+      if (errors.length > 0) {
+        const mode = strict ? "strict" : "non-strict";
+        return {
+          pass: false,
+          message: () =>
+            `Expected no errors in ${mode} mode but got ${errors.length}:\n\n` +
+            errors.join("\n")
+        };
+      }
     }
+    return { pass: true };
   }
 });
 
