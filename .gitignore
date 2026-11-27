@@ -67,3 +67,4 @@ web_modules/
 # These are for playing around with
 /playground/src
 
+**/*.claude
