@@ -147,6 +147,47 @@ describe("Conditional display", () => {
       </div>
     `);
   });
+
+  test("does not skip the watches of following siblings when hidden", () => {
+    let show = false;
+    const Fox = () => <div>Fox</div>;
+    const AnimalList = () => (
+      <div>
+        <Fox if={show} />
+        <div class={show ? "ready" : "loading"}>
+          <h1 if={show}>Title</h1>
+          <p if={!show}>Loading</p>
+        </div>
+      </div>
+    );
+    const component = testMount(AnimalList);
+    expect(component).toRender(`
+      <div>
+        <div class="loading">
+          <p>Loading</p>
+        </div>
+      </div>
+    `);
+    show = true;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div>Fox</div>
+        <div class="ready">
+          <h1>Title</h1>
+        </div>
+      </div>
+    `);
+    show = false;
+    component.update();
+    expect(component).toRender(`
+      <div>
+        <div class="loading">
+          <p>Loading</p>
+        </div>
+      </div>
+    `);
+  });
 });
 
 describe("Component", () => {

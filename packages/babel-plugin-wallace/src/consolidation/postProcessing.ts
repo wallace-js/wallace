@@ -11,9 +11,14 @@ export function postProcessing(componentDefinition: ComponentDefinitionData) {
   const { watches, parts } = componentDefinition;
   const nestedCounts = {};
   watches.forEach((watch, index) => {
-    nestedCounts[index] = watches
-      .slice(index)
-      .filter(w => arrayStartsWith(watch.address, w.address)).length;
+    // A nested or repeated component has no element of its own, so its address is
+    // that of its next sibling element. It has no watches under it in this component.
+    const { isNestedComponent, isRepeatedComponent } = watch.node;
+    nestedCounts[index] =
+      isNestedComponent || isRepeatedComponent
+        ? 0
+        : watches.slice(index).filter(w => arrayStartsWith(watch.address, w.address))
+            .length;
   });
   watches.forEach((watch, index) => {
     if (watch.shieldInfo) {
