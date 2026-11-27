@@ -268,6 +268,10 @@ const Greeting = ({ name }) => (
 );
 ```
 
+### Attributes
+
+A static attribute value (`for="x"`) goes into the HTML. A dynamic one (`for={x}`) sets the DOM property on each update (`element.htmlFor = x`). Where the attribute and property names differ, you may use either: `for`/`htmlFor`, `class`/`className`, `readonly`/`readOnly`, `tabindex`/`tabIndex`, `maxlength`/`maxLength`, `colspan`/`colSpan` and so on. Prefer the HTML names.
+
 ### Nesting
 
 Wallace has special syntax for nesting and repeating:

@@ -19,8 +19,62 @@ function isValidPropertyName(str) {
   return /^(?!\d)[\w$]+$/.test(str);
 }
 
+/**
+ * HTML attributes whose DOM property has a different name. Users may write either in
+ * JSX, and must get the same result whether the value is static or dynamic:
+ *
+ *   - Static values go into the template, so need the attribute name.
+ *   - Dynamic values set a property, so need the property name.
+ *
+ * Without this, `<label htmlFor="x">` produces an `htmlfor` attribute and
+ * `<label for={x}>` sets `element.for`, both of which silently do nothing.
+ */
+const ATTRIBUTE_TO_PROPERTY: Record<string, string> = {
+  accesskey: "accessKey",
+  class: "className",
+  colspan: "colSpan",
+  contenteditable: "contentEditable",
+  crossorigin: "crossOrigin",
+  datetime: "dateTime",
+  enterkeyhint: "enterKeyHint",
+  for: "htmlFor",
+  formaction: "formAction",
+  formenctype: "formEnctype",
+  formmethod: "formMethod",
+  formnovalidate: "formNoValidate",
+  formtarget: "formTarget",
+  inputmode: "inputMode",
+  ismap: "isMap",
+  maxlength: "maxLength",
+  minlength: "minLength",
+  novalidate: "noValidate",
+  readonly: "readOnly",
+  referrerpolicy: "referrerPolicy",
+  rowspan: "rowSpan",
+  tabindex: "tabIndex",
+  usemap: "useMap"
+};
+
+const PROPERTY_TO_ATTRIBUTE: Record<string, string> = Object.fromEntries(
+  Object.entries(ATTRIBUTE_TO_PROPERTY).map(([att, prop]) => [prop, att])
+);
+
+/**
+ * Returns the DOM property name for an attribute, e.g. `for` -> `htmlFor`.
+ */
+export function toPropertyName(attName: string): string {
+  return ATTRIBUTE_TO_PROPERTY[attName.toLowerCase()] || attName;
+}
+
+/**
+ * Returns the HTML attribute name for a property, e.g. `htmlFor` -> `for`.
+ */
+export function toAttributeName(name: string): string {
+  return PROPERTY_TO_ATTRIBUTE[name] || name;
+}
+
 export function setAttributeCallback(attName: string): string {
-  attName = attName === "class" ? "className" : attName;
+  attName = toPropertyName(attName);
   return isValidPropertyName(attName)
     ? `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`
     : `${WATCH_CALLBACK_ARGS.element}.setAttribute('${attName}', ${WATCH_CALLBACK_ARGS.newValue})`;

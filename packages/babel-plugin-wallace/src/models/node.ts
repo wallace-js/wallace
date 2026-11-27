@@ -7,7 +7,12 @@ import type {
   Identifier,
   NewExpression
 } from "@babel/types";
-import { createElement, createTextNode, setAttributeCallback } from "../utils";
+import {
+  createElement,
+  createTextNode,
+  setAttributeCallback,
+  toAttributeName
+} from "../utils";
 import { ERROR_MESSAGES, error } from "../errors";
 import {
   HTML_SPLITTER,
@@ -236,7 +241,7 @@ export class TagNode extends ExtractedNode {
   getElement(): HTMLElement | Text {
     const element = createElement(this.tagName);
     this.attributes.forEach(({ name, value }) => {
-      element.setAttribute(name, value || "");
+      element.setAttribute(toAttributeName(name), value || "");
     });
     this.element = element;
     return this.element;
