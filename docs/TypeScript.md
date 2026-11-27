@@ -186,7 +186,8 @@ such as `on:item-selected` fall through to the index signature.
 
 TypeScript doesn't show JSDoc for the keys of a mapped type with an `as` clause, so
 hovering `on:click` shows no help. That's the same as other qualified directives such
-as `bind:checked`. The help is on the `AllDomEvents` type instead. Listing each event
+as `bind:checked`. The help is on the `on` directive in `DirectiveAttributes`, like
+every other directive, and shows when hovering `on`. Listing each event
 by hand (as we did for `onClick` etc.) would bring the tooltips back, at the cost of
 around 1000 lines.
 

@@ -1280,6 +1280,18 @@ interface DirectiveAttributes extends AllDomEvents {
   "bind-as"?: MustBeExpression;
 
   /**
+   * ## Wallace directive: bind-on
+   *
+   * Must be used with the `bind` directive, and causes it to watch a different event
+   * (the default is `change`)
+   *
+   * ```
+   * <input type="text" bind={name} bind-on:keyup />
+   * ```
+   */
+  "bind-on"?: string;
+
+  /**
    * ## Wallace directive: class
    *
    * Without a qualifier this acts as a normal attribute:
@@ -1319,18 +1331,6 @@ interface DirectiveAttributes extends AllDomEvents {
   hub?: any;
 
   /**
-   * ## Wallace directive: bind-on
-   *
-   * Must be used with the `bind` directive, and causes it to watch a different event
-   * (the default is `change`)
-   *
-   * ```
-   * <input type="text" bind={name} bind-on:keyup />
-   * ```
-   */
-  "bind-on"?: string;
-
-  /**
    * @deprecated Use `bind-on`, e.g. `bind-on:keyup`.
    */
   event?: string;
@@ -1360,9 +1360,9 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `assign` assigns the component instance to a value.
    * - `bind` updates a value when an input is changed.
    * - `bind-as` binds and sets input's type.
+   * - `bind-on:xyz` changes the event which `bind` reacts to.
    * - `class:xyz` defines a set of classes to be toggled.
    * - `css` shorthand for `fixed:class`.
-   * - `event` changes the event which `bind` reacts to.
    * - `fixed:xyz` sets a attribute from an expression at definition.
    * - `hide` sets an element's hidden property.
    * - `html` Set the element's `innerHTML` property.
@@ -1371,7 +1371,7 @@ interface DirectiveAttributes extends AllDomEvents {
    * - `key` specifies a key for repeated components.
    * - `model` specifies model for nested components.
    * - `models` specifies models repeated components.
-   * - `on[EventName]` creates an event handler (note the code is copied).
+   * - `on:xyz` creates an event handler (note the code is copied).
    * - `part:xyz` saves a reference to part of a component so it can be updated.
    * - `ref:xyz` saves a reference to an element or nested component.
    * - `show` sets an element's hidden property.
@@ -1455,6 +1455,22 @@ interface DirectiveAttributes extends AllDomEvents {
    * Specifies models for a repeated component.
    */
   models?: MustBeExpression;
+
+  /**
+   * ## Wallace directive: on
+   *
+   * Adds an event listener. Note the code is copied into the listener, so write the
+   * call, not a function. Use xargs to access the event or element:
+   *
+   * ```
+   * const MyComponent = (_, { event }) => (
+   *    <button on:click={clickHandler(event)} />
+   * );
+   * ```
+   *
+   * Requires a qualifier, but you lose the tooltip in that format.
+   */
+  on?: MustBeExpression;
 
   /**
    * ## Wallace directive: ref
@@ -1609,20 +1625,10 @@ declare global {
   }
 
   /**
-   * ## Wallace directive: on
-   *
-   * Adds an event listener. Note the code is copied into the listener, so write the
-   * call, not a function. Use xargs to access the event or element:
-   *
-   * ```
-   * const MyComponent = (_, { event }) => (
-   *    <button on:click={clickHandler(event)} />
-   * );
-   * ```
-   *
-   * This lists every DOM event (`on:click` etc.) for autocomplete. TypeScript doesn't
-   * show JSDoc for keys of mapped types, hence the docs here. Other events, such as
-   * `on:item-selected`, are allowed by the `[attr: string]: any` on elements.
+   * This lists every DOM event (`on:click` etc.) for autocomplete only. The docs are on
+   * the `on` directive, as TypeScript doesn't show JSDoc for keys of mapped types. Other
+   * events, such as `on:item-selected`, are allowed by the `[attr: string]: any` on
+   * elements.
    */
   type AllDomEvents = {
     [K in keyof HTMLElementEventMap as `on:${K}`]?: MustBeExpression;
