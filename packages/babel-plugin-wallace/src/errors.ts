@@ -45,11 +45,13 @@ export const ERROR_MESSAGES = {
     return `The \`${directive}\` directive may only be used on the root element.`;
   },
   EVENT_HANDLER_IS_FUNCTION:
-    "Event handler must be a call, not a function, e.g. `onClick={hub.save()}` not `onClick={() => hub.save()}`, as the expression is run when the event fires.",
+    "Event handler must be a call, not a function, e.g. `on:click={hub.save()}` not `on:click={() => hub.save()}`, as the expression is run when the event fires.",
   EVENT_HANDLER_NOT_CALLED:
-    "Event handler must be a call, e.g. `onClick={hub.save()}` not `onClick={hub.save}`, as the expression is run when the event fires.",
+    "Event handler must be a call, e.g. `on:click={hub.save()}` not `on:click={hub.save}`, as the expression is run when the event fires.",
   EVENT_USED_WITHOUT_BIND:
-    "The `event` directive must be used with the `bind` directive.",
+    "The `bind-on` directive must be used with the `bind` directive.",
+  EVENT_DIRECTIVE_DEPRECATED: (event: string) =>
+    `The \`event\` directive is deprecated and will be removed. Use \`bind-on:${event}\` instead.`,
   FLAG_REQUIRED: (flag: string) => {
     return `Flag \`${flag}\` must be set to true in the config for this feature.`;
   },
@@ -63,8 +65,8 @@ export const ERROR_MESSAGES = {
   INVALID_BIND_AS_FIELD: (field: string) =>
     `\`${field}\` is not a valid value. Must be one of : ${Object.keys(INPUT_TYPE_VALUES).join(", ")}.
     As other inputs may not bind to the value you think.`,
-  INVALID_EVENT_NAME: (event: string) =>
-    `\`${event}\` is not a valid event. Must be lowercase without \`on\` prefix. E.g. \`event:keyup\`.`,
+  ON_EVENT_DEPRECATED: (attribute: string, event: string) =>
+    `\`${attribute}={...}\` is deprecated and will become a compile error. Use \`on:${event}={...}\` instead.`,
   NESTED_COMPONENT_MUST_BE_CAPTIALIZED: "Nested component must be capitalized.",
   PLACEHOLDER_MAY_NOT_BE_LITERAL_OBJECT:
     "Literal objects in placeholders not allowed as they will become constants.",
@@ -92,6 +94,10 @@ export const ERROR_MESSAGES = {
 
 export function error(path: NodePath<any>, errorMessage: string) {
   throw path.buildCodeFrameError(errorMessage);
+}
+
+export function warn(path: NodePath<any>, message: string) {
+  console.warn(path.buildCodeFrameError(`Wallace: ${message}`).message);
 }
 
 export function ensure(condition: boolean, path: NodePath<any>, errorMessage: string) {

@@ -19,7 +19,7 @@ Most of these are enforced by the compiler, but some fail **silently**, so follo
 
 1. **A component is a function whose body is a single JSX expression.** No statements, no hooks, no early returns. Prefer arrow functions with parentheses: `() => (<div></div>)`. Regular functions also work, so long as the body is only `return <div></div>;`. `() => { <div></div> }` is invalid (it returns nothing), as is any code before the `return`.
 2. **No JSX inside `{}` placeholders.** Never use `.map()` to create elements: use `<Item.repeat models={items} />`. Never use `&&` or a ternary to choose elements: use the `if` directive. Placeholders may contain any JavaScript that doesn't produce JSX, like `{items.map(i => i.name).join(", ")}`.
-3. **Event handlers take the call, not a function.** The expression is copied into the listener. `onClick={hub.save()}` is correct. `onClick={() => hub.save()}` and `onClick={hub.save}` are compile errors, as they would do nothing. Use the `event` and `element` xargs to access the event or element: `onSubmit={hub.add(event)}`.
+3. **Event handlers use `on:eventname` and take the call, not a function.** Write `on:click`, `on:submit`, `on:keyup` etc. (any event name works, including custom events like `on:item-selected`). `onClick={...}` is deprecated and will become a compile error. The expression is copied into the listener. `on:click={hub.save()}` is correct. `on:click={() => hub.save()}` and `on:click={hub.save}` are compile errors, as they would do nothing. Use the `event` and `element` xargs to access the event or element: `on:submit={hub.add(event)}`.
 4. **Components receive one "model", not props.** Nest with `<Item model={x} />` and repeat with `<Item.repeat models={xs} />`. Nested components accept no regular attributes (`id`, `class`, etc.) and no children.
 5. **No literal objects in placeholders**: `model={{a: 1}}` and `style={{color: 'red'}}` are compile errors. Use a variable, or `style:color={x}`.
 6. **Nothing updates by itself.** The DOM only changes when `update()` (or `render()`) is called on a component or one of its ancestors, or when a `watch`ed model is modified. Calling `update()` on a component updates its whole subtree.
@@ -35,8 +35,8 @@ Most of these are enforced by the compiler, but some fail **silently**, so follo
 | `props`                                          | A single `model` (any value): `<Item model={x} />`             |
 | `{items.map(i => <Item {...i} />)}`              | `<Item.repeat models={items} />`, or `key="id"` for keyed      |
 | `{cond && <Foo />}`, `{cond ? <A /> : <B />}`    | `<Foo if={cond} />`, `<A if={cond} /><B if={!cond} />`         |
-| `onClick={() => doThing(x)}`                     | `onClick={doThing(x)}`                                         |
-| `onClick={e => doThing(e)}`                      | `(_, { event }) => ... onClick={doThing(event)}`               |
+| `onClick={() => doThing(x)}`                     | `on:click={doThing(x)}`                                        |
+| `onClick={e => doThing(e)}`                      | `(_, { event }) => ... on:click={doThing(event)}`              |
 | `className="a"`                                  | `class="a"`                                                    |
 | `className={cond ? 'a' : ''}`                    | `toggle:a={cond}`                                              |
 | `style={{ color: c }}`                           | `style:color={c}`                                              |
@@ -111,17 +111,17 @@ const TaskRow: Takes<Task> = (task) => (
     <input
       type="checkbox"
       checked={task.done}
-      onChange={task.toggle()}
+      on:change={task.toggle()}
     />
     <span>{task.text}</span>
-    <button onClick={task.remove()}>x</button>
+    <button on:click={task.remove()}>x</button>
   </li>
 );
 
 const TaskApp: Takes<TaskList> = (list, { event }) => (
   <div assign:component>
-    <form onSubmit={list.add(event)}>
-      <input type="text" bind={list.draft} event:input />
+    <form on:submit={list.add(event)}>
+      <input type="text" bind={list.draft} bind-on:input />
       <button>Add</button>
     </form>
     <p if={list.tasks.length === 0}>Nothing to do.</p>
@@ -140,7 +140,7 @@ Notes:
 - `assign:component` sets `model.component` to the component instance, so each model can update its own component. Declare it with `!` (`component!: ComponentInstance`) as TypeScript can't see that `assign` sets it, and would otherwise complain in strict mode.
 - Each task holds a reference to its list because its own `toggle` method needs to update the summary. Components can reach the list through the hub without this (see Patterns).
 - Toggling a task only updates that task's row and the summary (using `part:summary`), not the whole app.
-- `bind={list.draft}` keeps the input and `list.draft` in sync, and `event:input` makes it update on every keystroke rather than on `change`.
+- `bind={list.draft}` keeps the input and `list.draft` in sync, and `bind-on:input` makes it update on every keystroke rather than on `change`.
 - `key="id"` makes the repeater keep each component tied to the same item. Without a key, components are reused by position, which is faster, but can confuse focus, CSS transitions or any state held in the DOM.
 
 ## Referencing `lib/types.d.ts`
@@ -323,10 +323,10 @@ The above is the equivalent of:
 <input type="range" bind:valueAsNumber={count} />
 ```
 
-Others complement other directives, such as `event` which changes the event which `bind` listens to (the default is `change`):
+Others complement other directives, such as `bind-on` which changes the event which `bind` listens to (the default is `change`):
 
 ```tsx
-<input bind-as:range={count} event:input />
+<input bind-as:range={count} bind-on:input />
 ```
 
 Some control whether elements are shown:
@@ -405,7 +405,7 @@ class Controller {
 const TicketRow: Takes<Ticket, Controller> = (ticket, { hub }) => (
   <li>
     {ticket.title}
-    <button if={hub.editing} onClick={hub.close(ticket)}>
+    <button if={hub.editing} on:click={hub.close(ticket)}>
       Close
     </button>
   </li>
@@ -471,7 +471,7 @@ const Greeting: Takes<User, Controller> = ({ name }, { hub }) => (
   <div assign:component>
     <h1>Hello {name}</h1>
     <input bind={name} />
-    <button onClick={hub.saveChanges()}>Save</button>
+    <button on:click={hub.saveChanges()}>Save</button>
   </div>
 );
 ```

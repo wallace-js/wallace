@@ -91,7 +91,7 @@ describe("Documented patterns", () => {
       const TicketRow: Takes<Ticket, Controller> = (ticket, { hub }) => (
         <li>
           {ticket.title}
-          <button if={hub.editing} onClick={hub.close(ticket)}>Close</button>
+          <button if={hub.editing} on:click={hub.close(ticket)}>Close</button>
         </li>
       );
 

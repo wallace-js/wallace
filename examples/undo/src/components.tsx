@@ -11,10 +11,10 @@ const Task: Takes<iTask> = ({ text, done }) => (
 
 const UndoRedoBtns: Uses<{ hub: Hub }> = (_, { hub }) => (
   <div>
-    <button disabled={hub.previousStates.length <= 1} onClick={hub.undo()}>
+    <button disabled={hub.previousStates.length <= 1} on:click={hub.undo()}>
       Undo
     </button>
-    <button disabled={hub.undoneStates.length === 0} onClick={hub.redo()}>
+    <button disabled={hub.undoneStates.length === 0} on:click={hub.redo()}>
       Redo
     </button>
   </div>
@@ -29,7 +29,7 @@ export const TaskList: Takes<Hub> = (hub, { event }) => (
         <Task.repeat models={hub.tasks} />
       </div>
       <div style="margin-top: 10px">
-        <input type="text" onKeyUp={hub.addTaskKeyup(event as KeyboardEvent)} />
+        <input type="text" on:keyup={hub.addTaskKeyup(event as KeyboardEvent)} />
         <span> (hit enter to add)</span>
       </div>
     </div>

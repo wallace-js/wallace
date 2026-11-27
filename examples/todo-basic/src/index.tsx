@@ -27,7 +27,7 @@ const TaskList: Uses<{ model: iTask[]; methods: TaskListMethods }> = (
       <Task.repeat models={tasks} />
     </div>
     <div style="margin-top: 10px">
-      <input type="text" onKeyUp={self.addTaskKeyup(event as KeyboardEvent)} />
+      <input type="text" on:keyup={self.addTaskKeyup(event as KeyboardEvent)} />
       <span> (hit enter to add)</span>
     </div>
   </div>

@@ -184,7 +184,7 @@ export class Directive {
 
       const Foo = ({ age }, { hub, self, element, event, model }) => (
         <div 
-          onClick={doXYZ(element, event)}
+          on:click={doXYZ(element, event)}
           class={[hub, self, age, model.foo, self.bar]}>
         </div>
       );

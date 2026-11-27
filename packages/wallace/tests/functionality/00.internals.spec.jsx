@@ -34,7 +34,7 @@ describe("Watches", () => {
   test(" are not created for events", () => {
     const Dog = () => (
       <div>
-        <span onClick={foo()}>woof</span>
+        <span on:click={foo()}>woof</span>
       </div>
     );
     expect(Dog.prototype._w.length).toBe(0);

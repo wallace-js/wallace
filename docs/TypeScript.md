@@ -177,6 +177,19 @@ when nesting it, via `JSX.Wrapper`. The model may be omitted if it is `null` (fr
 `Takes<null>`). The check is written as `[Model] extends [null]` because a bare
 `Model extends null` is true for every model when `strictNullChecks` is off.
 
+### Event attributes
+
+Elements accept any attribute through `[attr: string]: any`, so `AllDomEvents` doesn't
+make anything compile that wouldn't otherwise. It exists for autocomplete: a mapped type
+over `HTMLElementEventMap` adds `on:click`, `on:keyup` etc. as known keys. Custom events
+such as `on:item-selected` fall through to the index signature.
+
+TypeScript doesn't show JSDoc for the keys of a mapped type with an `as` clause, so
+hovering `on:click` shows no help. That's the same as other qualified directives such
+as `bind:checked`. The help is on the `AllDomEvents` type instead. Listing each event
+by hand (as we did for `onClick` etc.) would bring the tooltips back, at the cost of
+around 1000 lines.
+
 ### `mount` without a hub
 
 When `mount` is given no hub it uses the model as the hub, so the model must satisfy

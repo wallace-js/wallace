@@ -55,7 +55,7 @@ describe("Xargs", () => {
           <div>{element}</div>
           <div>{event}</div>
           <div>{model}</div>
-          <button ref:btn onClick={foo(event, element)}>
+          <button ref:btn on:click={foo(event, element)}>
             Test
           </button>
         </div>
@@ -103,12 +103,12 @@ describe("Xargs access validation in directive expressions", () => {
   });
 
   test("onEvent may access event", () => {
-    const src = `const Foo = (_, { event }) => <div onClick={foo(event)}>Test</div>;`;
+    const src = `const Foo = (_, { event }) => <div on:click={foo(event)}>Test</div>;`;
     expect(src).toCompileWithoutError();
   });
 
   test("onEvent may access element", () => {
-    const src = `const Foo = (_, { element }) => <div onClick={foo(element)}>Test</div>;`;
+    const src = `const Foo = (_, { element }) => <div on:click={foo(element)}>Test</div>;`;
     expect(src).toCompileWithoutError();
   });
 
@@ -151,7 +151,7 @@ describe("Xargs point to correct objects", () => {
     let e;
     const Foo = (_, { element }) => (
       <div>
-        <button ref:btn onClick={(e = element)}>
+        <button ref:btn on:click={(e = element)}>
           Test
         </button>
       </div>
@@ -166,7 +166,7 @@ describe("Xargs point to correct objects", () => {
     let e;
     const Foo = (_, { event }) => (
       <div>
-        <button ref:btn onClick={(e = event)}>
+        <button ref:btn on:click={(e = event)}>
           Test
         </button>
       </div>

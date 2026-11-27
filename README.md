@@ -169,7 +169,7 @@ Wallace controls the DOM with components, which you define as functions that ret
 ```tsx
 const Counter = ({ count }) => (
   <div>
-    <button onClick={count++}>{count}</button>
+    <button on:click={count++}>{count}</button>
   </div>
 );
 ```
@@ -200,7 +200,7 @@ import { mount } from 'wallace';
 
 const Counter = ({ count }) => (
   <div>
-    <button onClick={count++}>{count}</button>
+    <button on:click={count++}>{count}</button>
   </div>
 );
 
@@ -224,8 +224,8 @@ Instead of placing logic _around_ elements, you control structure from _within_ 
 ```tsx
 const Counter = ({ count }) => (
   <div>
-    <button onClick={count++}>{count}</button>
-    <button if={count > 2} onClick={(count = 0)}>
+    <button on:click={count++}>{count}</button>
+    <button if={count > 2} on:click={(count = 0)}>
       reset
     </button>
   </div>
@@ -276,7 +276,7 @@ interface iCounter {
 
 const Counter: Takes<iCounter> = ({ count }) => (
   <div>
-    <button onClick={count++}>{count}</button>
+    <button on:click={count++}>{count}</button>
   </div>
 );
 
@@ -297,7 +297,7 @@ Don't annotate the model like this:
 ```tsx
 const Counter = (model: iCounter) => (
   <div>
-    <button onClick={model.count++}>{model.count}</button>
+    <button on:click={model.count++}>{model.count}</button>
   </div>
 );
 ```
@@ -408,7 +408,7 @@ const CounterList: Takes<iCounterList> = ({ counters, things }) => (
       Total {things}: {counters.reduce((t, c) => t + c.count, 0)}
     </span>
     <Counter.repeat models={counters} />
-    <input type="text" bind={things} event:keyup />
+    <input type="text" bind={things} bind-on:keyup />
   </div>
 );
 
@@ -420,7 +420,7 @@ mount('main', CounterList, {
 
 > The UI displays `Total sheep: 0` and changes as you type in the input.
 
-The `bind` directive normally responds to the `change` event, but we used a qualifier to change it to `keyup` so you don't need to leave the text box to see the change.
+The `bind` directive normally responds to the `change` event, but we used `bind-on:keyup` to change it to `keyup` so you don't need to leave the text box to see the change.
 
 But there's an issue: the entire component updates every time you type in the text box. Even though there's no DOM change in the counters, that's still a load of unnecessary churn. You'd never notice it in a small demo, but might in a larger app.
 
@@ -463,7 +463,7 @@ However, you probably don't want to do access the DOM element this way. If you d
 ```tsx
 const Counter: Takes<iCounter> = ({ count }, { element }) => (
   <div>
-    <button apply={modifyBtn(element, count)} onClick={count++}>
+    <button apply={modifyBtn(element, count)} on:click={count++}>
       {count}
     </button>
   </div>
@@ -500,8 +500,8 @@ A reference to the event in a callback that allows it. Like element, it points t
 ```tsx
 const Counter = (_, { event }) => (
   <div>
-    <button onClick={foo(event as ClickEvent)}>+</button>
-    <input onKeyUp={bar(event as KeyUpEvent)} />
+    <button on:click={foo(event as ClickEvent)}>+</button>
+    <input on:keyup={bar(event as KeyUpEvent)} />
   </div>
 );
 
@@ -516,7 +516,7 @@ A reference to the component instance, useful for accessing methods:
 ```tsx
 const Counter = ({ count }, { self }) => (
   <div>
-    <button onClick={(count++, self.update())}>{count}</button>
+    <button on:click={(count++, self.update())}>{count}</button>
   </div>
 );
 ```
@@ -584,8 +584,8 @@ A component passes its own value as 2nd argument when calling `render` on nested
 ```tsx
 const Counter: Takes<iCounter> = ({ count }, { hub }) => (
   <div>
-    <button onClick={count++}>{count}</button>
-    <button onClick={hub.applyToAll(count)}>...</button>
+    <button on:click={count++}>{count}</button>
+    <button on:click={hub.applyToAll(count)}>...</button>
   </div>
 );
 ```
@@ -751,7 +751,7 @@ const CounterList: Takes<iCounterList, Hub, Methods> = (
     <span part:things>Total {things.value}: </span>
     <span>{self.total()}</span>
     <Counter.repeat models={counters} />
-    <input type="text" bind={things.value} event:keyup />
+    <input type="text" bind={things.value} bind-on:keyup />
   </div>
 );
 
