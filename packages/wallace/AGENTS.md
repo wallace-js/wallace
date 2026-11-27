@@ -268,6 +268,10 @@ const Greeting = ({ name }) => (
 );
 ```
 
+### Attributes
+
+Use HTML attribute names, not DOM property names: `for` not `htmlFor`, `class` not `className`, `readonly` not `readOnly`, `tabindex` not `tabIndex`, `maxlength` not `maxLength`, `colspan` not `colSpan` and so on. The DOM names are compile errors. A static value (`for="x"`) goes into the HTML, and a dynamic one (`for={x}`) sets the DOM property on each update (`element.htmlFor = x`).
+
 ### Nesting
 
 Wallace has special syntax for nesting and repeating:

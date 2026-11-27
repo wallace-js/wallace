@@ -4,6 +4,7 @@ import { wallaceConfig } from "../config";
 import { Component, TagNode } from "../models";
 import { ERROR_MESSAGES, error } from "../errors";
 import { extractAttributeName, extractAttributeValue } from "../ast-helpers";
+import { getHtmlAttributeName } from "../utils";
 
 interface State {
   extractedNode: TagNode;
@@ -39,6 +40,10 @@ export const attributeVisitors = {
     } else {
       if (!allowAttributes) {
         error(path, ERROR_MESSAGES.NESTED_COMPONENT_WITH_ATTRIBUTES);
+      }
+      const htmlName = getHtmlAttributeName(base);
+      if (htmlName) {
+        error(path, ERROR_MESSAGES.USE_HTML_ATTRIBUTE_NAME(base, htmlName));
       }
       const attName = qualifier ? `${base}:${qualifier}` : base;
       switch (extractedValue.type) {

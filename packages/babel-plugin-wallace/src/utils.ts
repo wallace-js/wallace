@@ -19,8 +19,60 @@ function isValidPropertyName(str) {
   return /^(?!\d)[\w$]+$/.test(str);
 }
 
+/**
+ * HTML attributes whose DOM property has a different name. Users must write the HTML
+ * name in JSX (`for`, not `htmlFor`). Static values go into the template as is, and
+ * dynamic values set the property, so `for={x}` becomes `element.htmlFor = x`.
+ *
+ * Any other spelling (`htmlFor`, `className`, `readOnly`, `Tabindex` etc.) is a compile
+ * error, as it would otherwise fail silently in one of the two cases.
+ */
+const ATTRIBUTE_TO_PROPERTY: Record<string, string> = {
+  accesskey: "accessKey",
+  class: "className",
+  colspan: "colSpan",
+  contenteditable: "contentEditable",
+  crossorigin: "crossOrigin",
+  datetime: "dateTime",
+  enterkeyhint: "enterKeyHint",
+  for: "htmlFor",
+  formaction: "formAction",
+  formenctype: "formEnctype",
+  formmethod: "formMethod",
+  formnovalidate: "formNoValidate",
+  formtarget: "formTarget",
+  inputmode: "inputMode",
+  ismap: "isMap",
+  maxlength: "maxLength",
+  minlength: "minLength",
+  novalidate: "noValidate",
+  readonly: "readOnly",
+  referrerpolicy: "referrerPolicy",
+  rowspan: "rowSpan",
+  tabindex: "tabIndex",
+  usemap: "useMap"
+};
+
+const PROPERTY_TO_ATTRIBUTE: Record<string, string> = Object.fromEntries(
+  Object.entries(ATTRIBUTE_TO_PROPERTY).map(([att, prop]) => [prop, att])
+);
+
+/**
+ * If `name` is a wrong spelling of an attribute in `ATTRIBUTE_TO_PROPERTY`, returns the
+ * HTML name to use instead, e.g. `htmlFor` -> `for`, `readOnly` -> `readonly`.
+ */
+export function getHtmlAttributeName(name: string): string | undefined {
+  if (PROPERTY_TO_ATTRIBUTE[name]) {
+    return PROPERTY_TO_ATTRIBUTE[name];
+  }
+  const lower = name.toLowerCase();
+  if (name !== lower && ATTRIBUTE_TO_PROPERTY[lower]) {
+    return lower;
+  }
+}
+
 export function setAttributeCallback(attName: string): string {
-  attName = attName === "class" ? "className" : attName;
+  attName = ATTRIBUTE_TO_PROPERTY[attName] || attName;
   return isValidPropertyName(attName)
     ? `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`
     : `${WATCH_CALLBACK_ARGS.element}.setAttribute('${attName}', ${WATCH_CALLBACK_ARGS.newValue})`;

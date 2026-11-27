@@ -9,6 +9,8 @@ export const ERROR_MESSAGES = {
   CLASS_METHOD_MUST_BE_PROPERTY_JSX:
     "Function returning JSX in a class must be assigned to property 'jsx'",
   CAPITALISED_COMPONENT_NAME: "Component name must be capitalized.",
+  USE_HTML_ATTRIBUTE_NAME: (name: string, htmlName: string) =>
+    `Use the HTML attribute name \`${htmlName}\`, not \`${name}\`.`,
   // TODO: remove
   CANNOT_USE_IF_ON_ROOT_ELEMENT: "Cannot use `if` directive on root element.",
   DIRECTIVE_NOT_ALLOWED_ON_NESTED_ELEMENT: (directive: string) => {
