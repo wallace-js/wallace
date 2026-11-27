@@ -20,14 +20,12 @@ function isValidPropertyName(str) {
 }
 
 /**
- * HTML attributes whose DOM property has a different name. Users may write either in
- * JSX, and must get the same result whether the value is static or dynamic:
+ * HTML attributes whose DOM property has a different name. Users must write the HTML
+ * name in JSX (`for`, not `htmlFor`). Static values go into the template as is, and
+ * dynamic values set the property, so `for={x}` becomes `element.htmlFor = x`.
  *
- *   - Static values go into the template, so need the attribute name.
- *   - Dynamic values set a property, so need the property name.
- *
- * Without this, `<label htmlFor="x">` produces an `htmlfor` attribute and
- * `<label for={x}>` sets `element.for`, both of which silently do nothing.
+ * Any other spelling (`htmlFor`, `className`, `readOnly`, `Tabindex` etc.) is a compile
+ * error, as it would otherwise fail silently in one of the two cases.
  */
 const ATTRIBUTE_TO_PROPERTY: Record<string, string> = {
   accesskey: "accessKey",
@@ -60,21 +58,21 @@ const PROPERTY_TO_ATTRIBUTE: Record<string, string> = Object.fromEntries(
 );
 
 /**
- * Returns the DOM property name for an attribute, e.g. `for` -> `htmlFor`.
+ * If `name` is a wrong spelling of an attribute in `ATTRIBUTE_TO_PROPERTY`, returns the
+ * HTML name to use instead, e.g. `htmlFor` -> `for`, `readOnly` -> `readonly`.
  */
-export function toPropertyName(attName: string): string {
-  return ATTRIBUTE_TO_PROPERTY[attName.toLowerCase()] || attName;
-}
-
-/**
- * Returns the HTML attribute name for a property, e.g. `htmlFor` -> `for`.
- */
-export function toAttributeName(name: string): string {
-  return PROPERTY_TO_ATTRIBUTE[name] || name;
+export function getHtmlAttributeName(name: string): string | undefined {
+  if (PROPERTY_TO_ATTRIBUTE[name]) {
+    return PROPERTY_TO_ATTRIBUTE[name];
+  }
+  const lower = name.toLowerCase();
+  if (name !== lower && ATTRIBUTE_TO_PROPERTY[lower]) {
+    return lower;
+  }
 }
 
 export function setAttributeCallback(attName: string): string {
-  attName = toPropertyName(attName);
+  attName = ATTRIBUTE_TO_PROPERTY[attName] || attName;
   return isValidPropertyName(attName)
     ? `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`
     : `${WATCH_CALLBACK_ARGS.element}.setAttribute('${attName}', ${WATCH_CALLBACK_ARGS.newValue})`;

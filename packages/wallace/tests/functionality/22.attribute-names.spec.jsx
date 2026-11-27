@@ -1,12 +1,12 @@
 import { testMount } from "../utils";
 
 /**
- * Attributes whose DOM property has a different name (`for` / `htmlFor`) must work with
- * either spelling, whether the value is static (goes in the template) or dynamic (sets
- * the property).
+ * Attributes must use their HTML name (`for`, not `htmlFor`). Static values go into the
+ * template, and dynamic values set the DOM property, which may have a different name.
+ * Other spellings are compile errors, as they would silently fail in one of the cases.
  */
 
-describe("Label for and htmlFor", () => {
+describe("Label for", () => {
   test("Static `for` links the label", () => {
     const Form = () => (
       <div>
@@ -17,20 +17,6 @@ describe("Label for and htmlFor", () => {
     const component = testMount(Form);
     const label = component.el.querySelector("label");
     expect(label.getAttribute("for")).toBe("name");
-    expect(label.control).toBe(component.el.querySelector("input"));
-  });
-
-  test("Static `htmlFor` links the label", () => {
-    const Form = () => (
-      <div>
-        <label htmlFor="name">Name</label>
-        <input id="name" />
-      </div>
-    );
-    const component = testMount(Form);
-    const label = component.el.querySelector("label");
-    expect(label.getAttribute("for")).toBe("name");
-    expect(label.hasAttribute("htmlfor")).toBe(false);
     expect(label.control).toBe(component.el.querySelector("input"));
   });
 
@@ -51,44 +37,14 @@ describe("Label for and htmlFor", () => {
     expect(label.getAttribute("for")).toBe("b");
     expect(label.control).toBe(component.el.querySelector("input"));
   });
-
-  test("Dynamic `htmlFor` links the label", () => {
-    const Form = ({ id }) => (
-      <div>
-        <label htmlFor={id}>Name</label>
-        <input id={id} />
-      </div>
-    );
-    const component = testMount(Form, { id: "a" });
-    const label = component.el.querySelector("label");
-    expect(label.getAttribute("for")).toBe("a");
-    expect(label.control).toBe(component.el.querySelector("input"));
-  });
 });
 
 describe("Other attributes with differently named properties", () => {
-  test("Static `className` sets class", () => {
-    const Foo = () => <div className="danger"></div>;
-    const component = testMount(Foo);
-    expect(component).toRender(`<div class="danger"></div>`);
-  });
-
-  test("Dynamic lowercase names set the property", () => {
+  test("Dynamic values set the property", () => {
     const Foo = ({ readonly, tabindex, maxlength }) => (
       <input readonly={readonly} tabindex={tabindex} maxlength={maxlength} />
     );
     const component = testMount(Foo, { readonly: true, tabindex: 3, maxlength: 5 });
-    const input = component.el;
-    expect(input.readOnly).toBe(true);
-    expect(input.tabIndex).toBe(3);
-    expect(input.maxLength).toBe(5);
-  });
-
-  test("Dynamic camelCase names set the property", () => {
-    const Foo = ({ readOnly, tabIndex, maxLength }) => (
-      <input readOnly={readOnly} tabIndex={tabIndex} maxLength={maxLength} />
-    );
-    const component = testMount(Foo, { readOnly: true, tabIndex: 3, maxLength: 5 });
     const input = component.el;
     expect(input.readOnly).toBe(true);
     expect(input.tabIndex).toBe(3);
@@ -109,9 +65,44 @@ describe("Other attributes with differently named properties", () => {
     expect(component.el.querySelector("td").colSpan).toBe(2);
   });
 
-  test("Static camelCase names render lowercase attributes", () => {
-    const Foo = () => <input readOnly tabIndex="2" maxLength="4" />;
+  test("Static values render as attributes", () => {
+    const Foo = () => <input readonly tabindex="2" maxlength="4" />;
     const component = testMount(Foo);
     expect(component).toRender(`<input readonly="" tabindex="2" maxlength="4">`);
+  });
+});
+
+describe("DOM property names are compile errors", () => {
+  test.each([
+    ["htmlFor", `"x"`, "for"],
+    ["htmlFor", `{x}`, "for"],
+    ["className", `"x"`, "class"],
+    ["className", `{x}`, "class"],
+    ["readOnly", `{x}`, "readonly"],
+    ["tabIndex", `"1"`, "tabindex"],
+    ["maxLength", `{x}`, "maxlength"],
+    ["colSpan", `{x}`, "colspan"],
+    ["Tabindex", `"1"`, "tabindex"]
+  ])("`%s=%s` is rejected", (name, value, htmlName) => {
+    const code = `
+      const Foo = (x) => (
+        <div ${name}=${value}></div>
+      );
+    `;
+    expect(code).toCompileWithError(
+      `Use the HTML attribute name \`${htmlName}\`, not \`${name}\`.`
+    );
+  });
+
+  test("HTML names compile", () => {
+    const code = `
+      const Foo = (x) => (
+        <div>
+          <label for={x}></label>
+          <input readonly tabindex="1" maxlength={x} />
+        </div>
+      );
+    `;
+    expect(code).toCompileWithoutError();
   });
 });
