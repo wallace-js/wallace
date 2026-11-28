@@ -11,6 +11,7 @@ export enum IMPORTABLES {
   savePart = "savePart",
   stashMisc = "stashMisc",
   onEvent = "onEvent",
+  setAttr = "setAttr",
   SequentialRepeater = "SequentialRepeater",
   KeyedRepeater = "KeyedRepeater",
   toDateString = "toDateString",

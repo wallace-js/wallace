@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import * as t from "@babel/types";
 import * as babel from "@babel/core";
 import type { Expression, Statement } from "@babel/types";
-import { WATCH_CALLBACK_ARGS } from "./constants";
+import { IMPORTABLES, WATCH_CALLBACK_ARGS } from "./constants";
 
 const document = new JSDOM("<!DOCTYPE html>").window.document;
 
@@ -71,11 +71,19 @@ export function getHtmlAttributeName(name: string): string | undefined {
   }
 }
 
+/**
+ * Returns the watch callback for a dynamic attribute, which calls `setAttr` from the
+ * runtime. It sets the DOM property if the name allows it, otherwise the attribute, and
+ * removes the attribute if the value is null or undefined.
+ */
 export function setAttributeCallback(attName: string): string {
-  attName = ATTRIBUTE_TO_PROPERTY[attName] || attName;
-  return isValidPropertyName(attName)
-    ? `${WATCH_CALLBACK_ARGS.element}.${attName} = ${WATCH_CALLBACK_ARGS.newValue}`
-    : `${WATCH_CALLBACK_ARGS.element}.setAttribute('${attName}', ${WATCH_CALLBACK_ARGS.newValue})`;
+  const { element, newValue } = WATCH_CALLBACK_ARGS;
+  const propName = ATTRIBUTE_TO_PROPERTY[attName] || attName;
+  const args = [element, `'${attName}'`, newValue];
+  if (isValidPropertyName(propName)) {
+    args.push(`'${propName}'`);
+  }
+  return `${IMPORTABLES.setAttr}(${args.join(", ")})`;
 }
 
 const REGEX_CAPITALIZED = new RegExp(/^[A-Z].*/);

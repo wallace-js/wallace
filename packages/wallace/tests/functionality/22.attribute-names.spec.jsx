@@ -106,3 +106,72 @@ describe("DOM property names are compile errors", () => {
     expect(code).toCompileWithoutError();
   });
 });
+
+describe("Dynamic values of null or undefined", () => {
+  test("remove the attribute and reset the property", () => {
+    const Foo = ({ maxlength, min, title, label, value }) => (
+      <input
+        maxlength={maxlength}
+        min={min}
+        title={title}
+        aria-label={label}
+        value={value}
+      />
+    );
+    const model = { maxlength: 5, min: "2", title: "t", label: "l", value: "v" };
+    const component = testMount(Foo, model);
+    const input = component.el;
+    expect(input.maxLength).toBe(5);
+    expect(input.getAttribute("min")).toBe("2");
+    expect(input.getAttribute("title")).toBe("t");
+    expect(input.getAttribute("aria-label")).toBe("l");
+    expect(input.value).toBe("v");
+
+    Object.assign(model, {
+      maxlength: undefined,
+      min: null,
+      title: undefined,
+      label: undefined,
+      value: undefined
+    });
+    component.update();
+    expect(input.hasAttribute("maxlength")).toBe(false);
+    expect(input.hasAttribute("min")).toBe(false);
+    expect(input.hasAttribute("title")).toBe(false);
+    expect(input.hasAttribute("aria-label")).toBe(false);
+    expect(input.value).toBe("");
+
+    Object.assign(model, { maxlength: 3, label: "m" });
+    component.update();
+    expect(input.maxLength).toBe(3);
+    expect(input.getAttribute("aria-label")).toBe("m");
+  });
+
+  test("leave the attribute unset on first render", () => {
+    const Foo = ({ maxlength, min, label }) => (
+      <input maxlength={maxlength} min={min} aria-label={label} />
+    );
+    const component = testMount(Foo, {});
+    const input = component.el;
+    expect(input.hasAttribute("maxlength")).toBe(false);
+    expect(input.hasAttribute("min")).toBe(false);
+    expect(input.hasAttribute("aria-label")).toBe(false);
+  });
+
+  test("clear a dynamic class", () => {
+    const Foo = ({ cls }) => <div class={cls}></div>;
+    const model = { cls: "a" };
+    const component = testMount(Foo, model);
+    expect(component).toRender(`<div class="a"></div>`);
+    model.cls = undefined;
+    component.update();
+    expect(component).toRender(`<div></div>`);
+  });
+
+  test("other falsy values are still set", () => {
+    const Foo = ({ maxlength, title }) => <input maxlength={maxlength} title={title} />;
+    const component = testMount(Foo, { maxlength: 0, title: "" });
+    expect(component.el.maxLength).toBe(0);
+    expect(component.el.getAttribute("title")).toBe("");
+  });
+});

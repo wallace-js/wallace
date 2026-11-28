@@ -12,6 +12,23 @@ export const onEvent = (element, eventName, callback) => {
 };
 
 /**
+ * Sets a dynamic attribute. If `prop` is given, sets that DOM property, otherwise sets
+ * the attribute. A value of null or undefined removes the attribute instead. The property
+ * is set to "" first, as removing the attribute doesn't reset a property such as `value`
+ * once it has changed.
+ */
+export const setAttr = (element, attr, value, prop) => {
+  if (value == null) {
+    if (prop) element[prop] = "";
+    element.removeAttribute(attr);
+  } else if (prop) {
+    element[prop] = value;
+  } else {
+    element.setAttribute(attr, value);
+  }
+};
+
+/**
  * Gets a component's name for development messages. The plugin only provides names in
  * development builds.
  */

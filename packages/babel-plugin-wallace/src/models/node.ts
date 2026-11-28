@@ -142,6 +142,7 @@ export class ExtractedNode {
     this.classToggleTargets.push({ name, value });
   }
   watchAttribute(attName: string, expression: Expression) {
+    this.requiredImport(IMPORTABLES.setAttr);
     this.addWatch(expression, setAttributeCallback(attName));
   }
   watchText(expression: Expression) {

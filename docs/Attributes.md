@@ -8,9 +8,25 @@ How the compiler handles plain attributes, i.e. ones which aren't directives (se
 - A **static** value (`for="x"`, or `readonly` with no value) is set with `setAttribute`
   on a JSDOM element (`TagNode.getElement` in `models/node.ts`), whose HTML becomes the
   component's template.
-- A **dynamic** value (`for={x}`) becomes a watch callback which sets the DOM property:
-  `element.htmlFor = n` (`setAttributeCallback` in `utils.ts`). Names which aren't valid
-  identifiers, like `aria-label` or `data-id`, use `setAttribute` instead.
+- A **dynamic** value (`for={x}`) becomes a watch callback which calls `setAttr` from
+  `lib/utils.js`: `setAttr(element, 'for', n, 'htmlFor')` (`setAttributeCallback` in
+  `utils.ts`). That sets the DOM property, `element.htmlFor = n`. Names which aren't
+  valid identifiers, like `aria-label` or `data-id`, get no property name, so `setAttr`
+  uses `setAttribute` instead.
+
+## Null and undefined
+
+If a dynamic value is `null` or `undefined`, `setAttr` removes the attribute. It also sets
+the property to `""` first, because removing the attribute doesn't reset a property
+such as `value` or `checked` once it has changed.
+
+Otherwise the value would be converted by the property's setter: `maxLength = undefined`
+becomes `0` (so the input accepts no typing), and `min = undefined` sets
+`min="undefined"`. These are easy to hit with optional settings. Other falsy values
+(`0`, `""`, `false`) are still set as they are.
+
+It's a function rather than inline code to keep the bundle small, as there's a call for
+every dynamic attribute. The watch only calls it when the value changes.
 
 ## Attribute and property names
 
