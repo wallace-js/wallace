@@ -306,7 +306,8 @@ function createEventsForBoundInputs(
       t.identifier(property)
     )
   );
-  node.addEventListener(event, callback);
+  // Added first so the model is updated before other listeners for this event run.
+  node.addEventListener(event, callback, true);
 }
 
 function ensureToggleTargetsHaveTriggers(node: ExtractedNode) {

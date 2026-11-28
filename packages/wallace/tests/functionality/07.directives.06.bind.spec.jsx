@@ -124,6 +124,23 @@ test("Change event updates data", () => {
   expect(model.text).toBe("bar");
 });
 
+test("Data is updated before other listeners for the same event run", () => {
+  const seen = [];
+  const MyComponent = model => (
+    <input
+      ref:tbx
+      type="text"
+      on:change={seen.push(model.text)}
+      bind={model.text}
+      on:change={seen.push(model.text)}
+    />
+  );
+  const model = { text: "foo" };
+  const component = testMount(MyComponent, model);
+  mimicUserInput(component.ref.tbx, "bar");
+  expect(seen).toEqual(["bar", "bar"]);
+});
+
 test("Value updates to match data", () => {
   const data = { text: "foo" };
   const MyComponent = (_, { self }) => (

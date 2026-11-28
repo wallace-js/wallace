@@ -111,8 +111,13 @@ export class ExtractedNode {
   getElement(): HTMLElement | Text {
     throw new Error("Not implemented");
   }
-  addEventListener(eventName: string, callback: Expression) {
-    this.eventListeners.push({ eventName, callback });
+  addEventListener(eventName: string, callback: Expression, first = false) {
+    const listener = { eventName, callback };
+    if (first) {
+      this.eventListeners.unshift(listener);
+    } else {
+      this.eventListeners.push(listener);
+    }
   }
   setBindInstruction(expression: Expression, property: string) {
     this.bindInstructions.property = property;

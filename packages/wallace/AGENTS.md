@@ -333,6 +333,8 @@ Others complement other directives, such as `bind-on` which changes the event wh
 <input bind-as:range={count} bind-on:input />
 ```
 
+`bind` updates the data before any `on` handler for the same event runs, so `<select bind={draft.type} on:change={draft.typeChanged()}>` sees the new `type`.
+
 Some control whether elements are shown:
 
 - `if` removes the element (or nested component) from the DOM.

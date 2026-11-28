@@ -1243,6 +1243,13 @@ interface DirectiveAttributes extends AllDomEvents {
    *```
    * <input type="number" bind:valueAsNumber={name} />
    * ```
+   *
+   * The data is updated before any `on` handlers for the same event run, so they see
+   * the new value:
+   *
+   * ```
+   * <select bind={draft.type} on:change={draft.typeChanged()}>
+   * ```
    */
   bind?: MustBeExpression;
 

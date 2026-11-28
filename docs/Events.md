@@ -22,6 +22,16 @@ those a compile error, as they would silently do nothing.
 <input bind={model.name} bind-on:keyup />
 ```
 
+The listener that `bind` adds always runs before any `on` listeners for the same event,
+wherever the attributes appear, so handlers see the new value:
+
+```tsx
+<select bind={draft.type} on:change={draft.typeChanged()}>
+```
+
+`createEventsForBoundInputs` in `processNodes.ts` adds it to the front of
+`node.eventListeners`. It used to come last, so `typeChanged()` read the old value.
+
 ## Why not `onClick`
 
 We used to use `onClick={...}`, like React. We moved to `on:click` because:
